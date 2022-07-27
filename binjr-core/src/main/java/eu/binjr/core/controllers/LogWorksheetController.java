@@ -35,10 +35,7 @@ import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.indexes.Indexes;
-import eu.binjr.core.data.indexes.SearchHit;
-import eu.binjr.core.data.indexes.SearchHitsProcessor;
-import eu.binjr.core.data.indexes.logs.LogFileIndex;
+import eu.binjr.core.data.indexes.*;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.FacetEntry;
@@ -207,6 +204,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button favoriteButton;
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
+    private LogFileIndex index = (LogFileIndex) Indexes.LOG_FILES.get();
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -587,7 +585,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(progressIndicator.progressProperty(), worksheet.progressProperty());
 
         getBindingManager().bind(cancelIndexButton.visibleProperty(), Bindings.createBooleanBinding(() -> (progressIndicator.getProgress() >= 0), progressIndicator.progressProperty()));
-        cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.cancellationRequestedProperty().setValue(true)));
+        cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.indexingStatusProperty().setValue(IndexingStatus.CANCELED)));
 
         // Init heatmap
         initHeatmap();
@@ -673,7 +671,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(timeline, Object::toString);
-        var crossHair = new XYChartCrosshair<>(map, heatmapArea,dateTime ->
+        var crossHair = new XYChartCrosshair<>(map, heatmapArea, dateTime ->
                 userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
         crossHair.setDisplayFullHeightMarker(false);
         crossHair.setVerticalMarkerVisible(true);
@@ -1081,24 +1079,42 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 t -> t.getTableView().getItems().get(
                         t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
         );
-        TableColumn<LogFileSeriesInfo, Boolean> incompleteLoad = new TableColumn<>();
+        TableColumn<LogFileSeriesInfo, IndexingStatus> incompleteLoad = new TableColumn<>();
         incompleteLoad.setEditable(false);
         incompleteLoad.setSortable(false);
         incompleteLoad.setResizable(false);
         incompleteLoad.setPrefWidth(40);
-        incompleteLoad.setCellValueFactory(p -> p.getValue().loadIncompleteProperty());
-        incompleteLoad.setCellFactory(param -> {
-                    var icon = new ToolButtonBuilder<Button>(getBindingManager())
-                            .setText("warning")
-                            .setTooltip("This series was not completely loaded. Click here to reload.")
-                            .setStyleClass("dialog-button")
-                            .setIconStyleClass("warning-icon", "medium-icon")
-                            .setFocusTraversable(false)
-                            .setIconColor(Color.ORANGE)
-                            .setAction(event -> invalidate(false, false, ReloadPolicy.INCOMPLETE, true))
-                            .build(Button::new);
-                    return new IconTableCell<>(icon);
-                }
+        incompleteLoad.setCellValueFactory(p -> p.getValue().indexingStatusProperty());
+        incompleteLoad.setCellFactory(param -> new StatusIconTableCell<>(Map.of(
+                        IndexingStatus.CANCELED,
+                        new ToolButtonBuilder<Button>(getBindingManager())
+                                .setText("warning")
+                                .setTooltip("This series was not completely loaded. Click here to reload.")
+                                .setStyleClass("dialog-button")
+                                .setIconStyleClass("warning-icon", "medium-icon")
+                                .setFocusTraversable(false)
+                                .setIconColor(Color.ORANGE)
+                                .setAction(event -> invalidate(false, false, ReloadPolicy.INCOMPLETE, true))
+                                .build(Button::new),
+                        IndexingStatus.NO_RESULTS,
+                        new ToolButtonBuilder<Button>(getBindingManager())
+                                .setText("error")
+                                .setTooltip("Parsing source yielded no results. Please check parsing rules")
+                                .setStyleClass("dialog-button")
+                                .setIconStyleClass("error-icon", "medium-icon")
+                                .setFocusTraversable(false)
+                                .setIconColor(Color.RED)
+                                .build(Button::new),
+                        IndexingStatus.ABORTED,
+                        new ToolButtonBuilder<Button>(getBindingManager())
+                                .setText("warning")
+                                .setTooltip("Indexing was aborted.")
+                                .setStyleClass("dialog-button")
+                                .setIconStyleClass("error-icon", "medium-icon")
+                                .setFocusTraversable(false)
+                                .setIconColor(Color.RED)
+                                .build(Button::new)
+                ))
         );
 
         TableColumn<LogFileSeriesInfo, String> eventNumColumn = new TableColumn<>("Nb events");
@@ -1278,7 +1294,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 .collect(Collectors.toList()),
                         forceUpdate,
                         worksheet.progressProperty(),
-                        worksheet.cancellationRequestedProperty());
+                        worksheet.indexingStatusProperty());
             }
         }
         if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
@@ -1299,8 +1315,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         facets.put(CaptureGroup.SEVERITY, params.getSeverities());
         try {
             return (facets.get(LogFileIndex.PATH).size() == 0) ? new SearchHitsProcessor() :
-                    Indexes.LOG_FILES.get().search(start.toEpochMilli(), end.toEpochMilli(),
+                    index.search(start.toEpochMilli(), end.toEpochMilli(),
                             facets,
+                            List.of(),
                             params.getFilterQuery(),
                             params.getPage(),
                             timeRangePicker.getZoneId(),

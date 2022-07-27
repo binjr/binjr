@@ -1146,14 +1146,8 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void addToNewChart(Collection<TreeItem<SourceBinding>> treeItems) {
         try {
             treeItemsAsChartList(treeItems, root).ifPresent(charts -> {
-                // Set the time range of the whole worksheet to accommodate the new bindings
-                // if there are no other series present.
-                if (worksheet.getTotalNumberOfSeries() == 0) {
-                    this.timeRangePicker.selectedRangeProperty().setValue(worksheet.getInitialTimeRange());
-                }
                 worksheet.getCharts().addAll(charts);
             });
-
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new chart", e, null);
         }
@@ -1295,10 +1289,10 @@ public class XYChartsWorksheetController extends WorksheetController {
             // Explicitly call the listener to initialize the proper status of the checkbox
             isVisibleListener.invalidated(null);
         }
-        // Set the time range of the whole worksheet to accommodate the new bindings
+        //Set the time range of the whole worksheet to accommodate the new bindings
         // if there are no other series present.
         if (worksheet.getTotalNumberOfSeries() == timeSeriesBindings.size()) {
-            this.timeRangePicker.selectedRangeProperty().setValue(targetChart.getInitialTimeRange());
+            worksheet.rearmResetTimeRangeRequest();
         }
         invalidate(false, false, false);
     }
@@ -1345,18 +1339,21 @@ public class XYChartsWorksheetController extends WorksheetController {
                 " [saveToHistory=" + saveToHistory + ", " +
                 "dontPlotChart=" + dontPlotChart + ", " +
                 "forceRefresh=" + forceRefresh + "]", logger::perf);
-        worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
-        logger.debug(() -> worksheet.getHistory().backward().dump());
         if (dontPlotChart) {
+            worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
+            logger.debug(() -> worksheet.getHistory().backward().dump());
             return CompletableFuture.completedFuture(null);
         }
         CompletableFuture<?>[] futurePlots = new CompletableFuture<?>[viewPorts.size()];
         for (int i = 0; i < viewPorts.size(); i++) {
             futurePlots[i] = plotChart(viewPorts.get(i), forceRefresh);
         }
-        var invalidatedFuture = CompletableFuture.allOf(futurePlots);
-        invalidatedFuture.whenCompleteAsync((unused, throwable) -> p.close());
-        return invalidatedFuture;
+        return CompletableFuture.allOf(futurePlots).whenComplete((o, throwable) -> {
+            worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
+            logger.debug(() -> worksheet.getHistory().backward().dump());
+            // Stop perf monitor
+            p.close();
+        });
     }
 
 
@@ -1364,13 +1361,18 @@ public class XYChartsWorksheetController extends WorksheetController {
         if (currentState.get(viewPort.getDataStore()).isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
-
-
-        XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).get().asSelection();
-        logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
         nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
         return AsyncTaskManager.getInstance().submit(() -> {
+                    XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).get().asSelection();
+                    logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
                     viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
+                    // Set the time range of the whole worksheet to accommodate the new bindings
+                    // if there are no other series present.
+                    if (worksheet.verifyResetTimeRangeRequest()) {
+                        logger.debug(() -> "Setting worksheet to source initial time range");
+                        var range = worksheet.getInitialTimeRange();
+                        currentState.setSelection(currentState.selectTimeRange(range.getBeginning(), range.getEnd()), false);
+                    }
                     return viewPort.getDataStore().getSeries()
                             .stream()
                             .filter(series -> {

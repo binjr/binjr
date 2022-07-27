@@ -40,8 +40,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,6 +61,7 @@ import java.util.Objects;
 public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     private static final Logger logger = Logger.create(LogsDataAdapterDialog.class);
     private final TextField extensionFiltersTextField;
+    private final TextField encodingField;
     private final LogsAdapterPreferences prefs;
     private final ChoiceBox<ParsingProfile> parsingChoiceBox = new ChoiceBox<>();
 
@@ -108,7 +111,14 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         GridPane.setConstraints(parsingLabel, 0, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(parsingHBox, 1, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
-        getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField, parsingLabel, parsingHBox);
+        this.encodingField = new TextField(prefs.mruEncoding.get());
+        TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
+        GridPane.setConstraints(encodingField, 1, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        Label encodingLabel = new Label("Encoding");
+        GridPane.setConstraints(encodingLabel, 0, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+
+
+        getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField, parsingLabel, parsingHBox, encodingLabel, encodingField);
     }
 
     @Override
@@ -159,8 +169,14 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         prefs.fileExtensionFilters.set(Arrays.stream(extensionFiltersTextField.getText().split("[,;\" ]+")).filter(e -> !e.isBlank()).toArray(String[]::new));
         prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileId());
 
+        String charsetName = encodingField.getText();
+        if (!Charset.isSupported(charsetName)) {
+            throw new CannotInitializeDataAdapterException("Invalid or unsupported encoding: " + charsetName);
+        }
+
         return List.of(new LogsDataAdapter(path,
                 ZoneId.of(getSourceTimezone()),
+                Charset.forName(charsetName),
                 prefs.folderFilters.get(),
                 prefs.fileExtensionFilters.get(),
                 parsingChoiceBox.getValue()));

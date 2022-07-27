@@ -346,6 +346,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<DateFormat> labelDateFormat =
             enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
 
+    public ObservablePreference<Number> numIdxMaxPageSize =
+            integerPreference("numIdxMaxPageSize", 2000000);
+
 
     public static class UserFavorites extends MruFactory {
 

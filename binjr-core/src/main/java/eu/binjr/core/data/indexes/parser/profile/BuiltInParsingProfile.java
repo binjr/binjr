@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package eu.binjr.core.data.indexes.parser.profile;
 
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.Map;
-
-import static eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup.*;
+import java.util.regex.Pattern;
 
 public enum BuiltInParsingProfile implements ParsingProfile {
     ALL("All non empty lines",
@@ -30,30 +30,30 @@ public enum BuiltInParsingProfile implements ParsingProfile {
             "$LINE"),
     ISO("ISO-like timestamps",
             "BUILTIN_ISO",
-            Map.of(YEAR, "\\d{4}",
-                    MONTH, "\\d{2}",
-                    DAY, "\\d{2}",
-                    HOUR, "\\d{2}",
-                    MINUTE, "\\d{2}",
-                    SECOND, "\\d{2}",
-                    FRACTION, "\\d{3}",
+            Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
+                    TemporalCaptureGroup.MONTH, "\\d{2}",
+                    TemporalCaptureGroup.DAY, "\\d{2}",
+                    TemporalCaptureGroup.HOUR, "\\d{2}",
+                    TemporalCaptureGroup.MINUTE, "\\d{2}",
+                    TemporalCaptureGroup.SECOND, "\\d{2}",
+                    TemporalCaptureGroup.FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
             "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*"),
     BINJR_STRICT("binjr logs",
             "BUILTIN_BJR",
-            Map.of(YEAR, "\\d{4}",
-                    MONTH, "\\d{2}",
-                    DAY, "\\d{2}",
-                    HOUR, "\\d{2}",
-                    MINUTE, "\\d{2}",
-                    SECOND, "\\d{2}",
-                    FRACTION, "\\d{3}",
+            Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
+                    TemporalCaptureGroup.MONTH, "\\d{2}",
+                    TemporalCaptureGroup.DAY, "\\d{2}",
+                    TemporalCaptureGroup.HOUR, "\\d{2}",
+                    TemporalCaptureGroup.MINUTE, "\\d{2}",
+                    TemporalCaptureGroup.SECOND, "\\d{2}",
+                    TemporalCaptureGroup.FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
             "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND\\.$FRACTION\\]\\s+\\[$SEVERITY\\s?\\].*"),
     GC("JVM Unified Logging",
             "BUILTIN_JVM",
-            Map.of(EPOCH, "\\d+",
-                    FRACTION, "\\d{3}",
+            Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
+                    TemporalCaptureGroup.FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL|STDOUT|STDERR",
                     CaptureGroup.of("TAGS"), ".*"),
             "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*");
@@ -62,6 +62,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     private final String lineTemplateExpression;
     private final Map<NamedCaptureGroup, String> captureGroups;
     private final String profileId;
+    private final Pattern regex;
 
     BuiltInParsingProfile(String profileName,
                           String id,
@@ -71,11 +72,17 @@ public enum BuiltInParsingProfile implements ParsingProfile {
         this.profileName = profileName;
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
+        this.regex = Pattern.compile(buildParsingRegexString());
     }
 
     @Override
     public String getLineTemplateExpression() {
         return lineTemplateExpression;
+    }
+
+    @Override
+    public Pattern getParsingRegex() {
+        return regex;
     }
 
     @Override
@@ -97,5 +104,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     public String toString() {
         return profileName;
     }
+
+
 
 }

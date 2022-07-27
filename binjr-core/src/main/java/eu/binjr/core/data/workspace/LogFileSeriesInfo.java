@@ -22,12 +22,12 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
+import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
@@ -43,7 +43,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     @IsDirtyable
     private final Property<ParsingProfile> parsingProfile;
 
-    private final Property<Boolean> loadIncomplete = new SimpleBooleanProperty(false);
+    private final Property<IndexingStatus> indexingStatus = new SimpleObjectProperty<>(IndexingStatus.OK);
 
     @XmlTransient
     private final ChangeWatcher status;
@@ -158,15 +158,15 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     }
 
     @XmlTransient
-    public Boolean isLoadComplete() {
-        return loadIncomplete.getValue();
+    public IndexingStatus isLoadComplete() {
+        return indexingStatus.getValue();
     }
 
-    public Property<Boolean> loadIncompleteProperty() {
-        return loadIncomplete;
+    public Property<IndexingStatus> indexingStatusProperty() {
+        return indexingStatus;
     }
 
-    public void setLoadIncomplete(Boolean loadComplete) {
-        this.loadIncomplete.setValue(loadComplete);
+    public void setIndexingStatus(IndexingStatus status) {
+        this.indexingStatus.setValue(status);
     }
 }

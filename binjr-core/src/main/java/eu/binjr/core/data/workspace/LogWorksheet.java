@@ -28,6 +28,7 @@ import eu.binjr.core.data.adapters.ProgressAdapter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.*;
@@ -35,7 +36,6 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.sql.Time;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     private transient final DoubleProperty progress = new SimpleDoubleProperty(-1);
 
-    private transient final BooleanProperty cancellationRequested = new SimpleBooleanProperty(false);
+    private transient final  Property<IndexingStatus> indexingStatus = new SimpleObjectProperty<>(IndexingStatus.OK);
 
     public LogWorksheet() {
         this("New File (" + globalCounter.getAndIncrement() + ")",
@@ -313,12 +313,12 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         return progress;
     }
 
-    public boolean isCancellationRequested() {
-        return cancellationRequested.get();
+    public IndexingStatus getIndexingStatus() {
+        return indexingStatus.getValue();
     }
 
-    public BooleanProperty cancellationRequestedProperty() {
-        return cancellationRequested;
+    public Property<IndexingStatus> indexingStatusProperty() {
+        return indexingStatus;
     }
 
 }

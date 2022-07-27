@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides the means to decode data retreived from a data source via a {@link SerializedDataAdapter}
+ * Provides the means to decode data retrieved from a data source via a {@link SerializedDataAdapter}
  *
  * @author Frederic Thevenet
  */

@@ -22,19 +22,18 @@ import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 import java.util.Map;
-
-import static eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup.*;
+import java.util.regex.Pattern;
 
 public enum BuiltInCsvTimestampParsingProfile implements ParsingProfile {
     ISO("ISO timestamps",
             "BUILTIN_ISO",
-            Map.of(YEAR, "\\d{4}",
-                    MONTH, "\\d{2}",
-                    DAY, "\\d{2}",
-                    HOUR, "\\d{2}",
-                    MINUTE, "\\d{2}",
-                    SECOND, "\\d{2}",
-                    MILLI, "\\d{3}",
+            Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
+                    TemporalCaptureGroup.MONTH, "\\d{2}",
+                    TemporalCaptureGroup.DAY, "\\d{2}",
+                    TemporalCaptureGroup.HOUR, "\\d{2}",
+                    TemporalCaptureGroup.MINUTE, "\\d{2}",
+                    TemporalCaptureGroup.SECOND, "\\d{2}",
+                    TemporalCaptureGroup.MILLI, "\\d{3}",
                     CaptureGroup.of("TIMEZONE"), "(Z|[+-]\\d{2}:?(\\d{2})?)"),
             "$YEAR[\\/-]?$MONTH[\\/-]?$DAY[-\\sT]$HOUR?:?$MINUTE?:?$SECOND?([\\.,]$MILLI)?$TIMEZONE?"),
     EPOCH("Seconds since 01/01/1970",
@@ -44,13 +43,14 @@ public enum BuiltInCsvTimestampParsingProfile implements ParsingProfile {
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
-                    MILLI, "\\d{3}"),
+                    TemporalCaptureGroup.MILLI, "\\d{3}"),
             "$EPOCH$MILLI");;
 
     private final String profileName;
     private final String lineTemplateExpression;
     private final Map<NamedCaptureGroup, String> captureGroups;
     private final String profileId;
+    private final Pattern regex;
 
     BuiltInCsvTimestampParsingProfile(String profileName,
                                       String id,
@@ -60,11 +60,17 @@ public enum BuiltInCsvTimestampParsingProfile implements ParsingProfile {
         this.profileName = profileName;
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
+        this.regex = Pattern.compile(buildParsingRegexString());
     }
 
     @Override
     public String getLineTemplateExpression() {
         return lineTemplateExpression;
+    }
+
+    @Override
+    public Pattern getParsingRegex() {
+        return regex;
     }
 
     @Override

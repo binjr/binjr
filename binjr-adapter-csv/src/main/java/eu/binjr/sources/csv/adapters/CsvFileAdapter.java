@@ -17,40 +17,49 @@
 package eu.binjr.sources.csv.adapters;
 
 import com.google.gson.Gson;
+import eu.binjr.common.function.CheckedLambdas;
+import eu.binjr.common.io.FileSystemBrowser;
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.common.logging.Profiler;
-import eu.binjr.core.data.adapters.BaseDataAdapter;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.SourceBinding;
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
-import eu.binjr.core.data.codec.csv.DataSample;
+import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
-import eu.binjr.core.data.indexes.parser.EventParser;
+import eu.binjr.core.data.indexes.Indexes;
+import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.indexes.NumSeriesIndex;
+import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TreeItem;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A {@link DataAdapter} implementation used to feed {@link XYChartsWorksheet} instances
@@ -61,14 +70,19 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = Logger.create(CsvFileAdapter.class);
     private static final Gson gson = new Gson();
-    private final EventParser timestampParser;
+    private static final Property<IndexingStatus> INDEXING_OK = new SimpleObjectProperty<>(IndexingStatus.OK);
+    private final EventFormat parser;
     private ParsingProfile dateTimePattern;
     private Path csvPath;
     private ZoneId zoneId;
     private Character delimiter;
     private String encoding;
     private CsvDecoder csvDecoder;
-    private ConcurrentNavigableMap<Long, DataSample> sortedDataStore;
+    private final Map<String, IndexingStatus> indexedFiles = new HashMap<>();
+    private NumSeriesIndex index;
+    private FileSystemBrowser fileBrowser;
+    private String[] folderFilters;
+    private String[] fileExtensionsFilters;
     private List<String> headers;
     private long sequence = 0;
 
@@ -89,7 +103,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String csvPath, ZoneId zoneId) throws DataAdapterException {
-        this(csvPath, zoneId, "utf-8",BuiltInCsvTimestampParsingProfile.ISO, ',');
+        this(csvPath, zoneId, "utf-8", BuiltInCsvTimestampParsingProfile.ISO, ',');
     }
 
     /**
@@ -102,13 +116,14 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @param delimiter       the character used by the csv file to separate cells in csv records.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
-    public CsvFileAdapter(String csvPath, ZoneId zoneId, String encoding, ParsingProfile dateTimePattern, char delimiter) throws DataAdapterException {
+    public CsvFileAdapter(String csvPath, ZoneId zoneId, String encoding, ParsingProfile dateTimePattern, char delimiter)
+            throws DataAdapterException {
         super();
         this.csvPath = Paths.get(csvPath);
         this.zoneId = zoneId;
         this.encoding = encoding;
         this.dateTimePattern = dateTimePattern;
-        this.timestampParser = new EventParser(dateTimePattern, zoneId);
+        this.parser = new CsvEventFormat(dateTimePattern, zoneId, Charset.forName(encoding), String.valueOf(delimiter));
         this.delimiter = delimiter;
         this.csvDecoder = decoderFactory(zoneId, encoding, dateTimePattern, delimiter);
     }
@@ -128,7 +143,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                 String header = headers.get(i).isBlank() ? "Column #" + columnIndex : headers.get(i);
                 var b = new TimeSeriesBinding.Builder()
                         .withLabel(columnIndex)
-                        .withPath(columnIndex)
+                        .withPath(getId() + "/" + csvPath.toString())
                         .withLegend(header)
                         .withParent(tree.getValue())
                         .withAdapter(this)
@@ -143,37 +158,37 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
-        if (this.isClosed()) {
-            throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
+        try {
+            return index.getTimeRangeBoundaries(seriesInfo.stream().map(ts -> ts.getBinding().getPath()).toList(), getTimeZoneId());
+        } catch (IOException e) {
+            throw new DataAdapterException("Error retrieving initial time range", e);
         }
-        return TimeRange.of(getDataStore().get(getDataStore().firstKey()).getTimeStamp(),
-                getDataStore().get(getDataStore().lastKey()).getTimeStamp());
     }
 
+
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
-        if (this.isClosed()) {
-            throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
-        }
-        Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
-        Map<String, List<TimeSeriesInfo<Double>>> rDict = new HashMap<>();
-        for (TimeSeriesInfo<Double> info : seriesInfo) {
-            rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
-            series.put(info, new DoubleTimeSeriesProcessor());
-        }
-        Long fromKey = Objects.requireNonNullElse(getDataStore().floorKey(begin.toEpochMilli()), begin.toEpochMilli());
-        Long toKey = Objects.requireNonNullElse(getDataStore().ceilingKey(end.toEpochMilli()), end.toEpochMilli());
-        for (DataSample sample : getDataStore().subMap(fromKey, true, toKey, true).values()) {
-            for (String n : sample.getCells().keySet()) {
-                List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
-                if (timeSeriesInfoList != null) {
-                    for (var tsInfo : timeSeriesInfoList) {
-                        series.get(tsInfo).addSample(sample.getTimeStamp(), sample.getCells().get(n));
-                    }
-                }
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path,
+                                                                              Instant begin,
+                                                                              Instant end,
+                                                                              List<TimeSeriesInfo<Double>> seriesInfo,
+                                                                              boolean bypassCache) throws DataAdapterException {
+        try {
+            ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED);
+            Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
+            for (TimeSeriesInfo<Double> info : seriesInfo) {
+                series.put(info, new DoubleTimeSeriesProcessor());
             }
+            var nbHits = index.search(
+                    begin.toEpochMilli(),
+                    end.toEpochMilli(),
+                    series,
+                    zoneId,
+                    bypassCache);
+            logger.debug(() -> "Retrieved " + nbHits + " hits");
+            return series;
+        } catch (Exception e) {
+            throw new DataAdapterException("Error fetching data from " + path, e);
         }
-        return series;
     }
 
     @Override
@@ -202,7 +217,6 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         params.put("zoneId", zoneId.toString());
         params.put("encoding", encoding);
         params.put("delimiter", Character.toString(delimiter));
-       // params.put("dateTimePattern", dateTimePattern);
         params.put("dateTimePattern", gson.toJson(CustomParsingProfile.of(dateTimePattern)));
         params.put("csvPath", csvPath.toString());
         return params;
@@ -234,22 +248,47 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public void close() {
-        if (sortedDataStore != null) {
-            sortedDataStore.clear();
+    public void onStart() throws DataAdapterException {
+        super.onStart();
+        try {
+            this.fileBrowser = FileSystemBrowser.of(csvPath.getParent());
+            this.index = (NumSeriesIndex) Indexes.NUM_SERIES.acquire();
+        } catch (IOException e) {
+            throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
         }
+    }
+
+    @Override
+    public void close() {
+        try {
+            Indexes.NUM_SERIES.release();
+        } catch (Exception e) {
+            logger.error("An error occurred while releasing index " + Indexes.NUM_SERIES.name() + ": " + e.getMessage());
+            logger.debug("Stack Trace:", e);
+        }
+        IOUtils.close(fileBrowser);
         super.close();
     }
 
-    private ConcurrentNavigableMap<Long, DataSample> getDataStore() throws DataAdapterException {
-        if (sortedDataStore == null) {
-            try (InputStream in = Files.newInputStream(csvPath)) {
-                this.sortedDataStore = buildSortedDataStore(in);
-            } catch (IOException e) {
-                throw new DataAdapterException(e);
-            }
+    private synchronized void ensureIndexed(Set<SourceBinding<Double>> bindings, ReloadPolicy reloadPolicy) throws IOException {
+        if (reloadPolicy == ReloadPolicy.ALL) {
+            bindings.stream().map(SourceBinding::getPath).forEach(indexedFiles::remove);
         }
-        return sortedDataStore;
+        final LongProperty charRead = new SimpleLongProperty(0);
+        int i = 0;
+        for (var binding : bindings) {
+            String path = binding.getPath();
+            boolean isLast = true;// FIXME: bindings.size() - 1 == i++;
+            indexedFiles.computeIfAbsent(path, CheckedLambdas.wrap(p -> {
+                index.add(p,
+                        fileBrowser.getData(path.replace(getId() + "/", "")),
+                        isLast,
+                        parser,
+                        charRead,
+                        INDEXING_OK);
+                return IndexingStatus.OK;
+            }));
+        }
     }
 
     private CsvDecoder decoderFactory(ZoneId zoneId, String encoding, ParsingProfile dateTimePattern, char delimiter) {
@@ -264,7 +303,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                     }
                 },
                 s -> {
-                    var p = timestampParser.parse(s);
+                    var p = parser.parse(s);
                     if (p.isPresent()) {
                         return p.get().getTimestamp();
                     }
@@ -272,12 +311,4 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                 });
     }
 
-    private ConcurrentNavigableMap<Long, DataSample> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
-        ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
-
-        try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::perf)) {
-            csvDecoder.decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toInstant().toEpochMilli(), sample));
-        }
-        return dataStore;
-    }
 }

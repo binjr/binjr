@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,38 +17,31 @@
 package eu.binjr.core.data.indexes;
 
 import eu.binjr.common.javafx.controls.TimeRange;
-import eu.binjr.core.data.indexes.parser.EventParser;
-import javafx.beans.property.BooleanProperty;
+import eu.binjr.core.data.indexes.parser.EventFormat;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.Property;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZoneId;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-public interface Searchable extends Closeable {
-    void add(String path,
-             InputStream ias,
-             EventParser parser,
-             LongProperty progress,
-             BooleanProperty cancellationRequested) throws IOException;
+public interface Indexable extends Closeable {
 
     void add(String path,
              InputStream ias,
              boolean commit,
-             EventParser parser,
+             EventFormat parser,
              LongProperty progress,
-             BooleanProperty cancellationRequested) throws IOException;
+             Property<IndexingStatus> indexingStatus) throws IOException;
+
+    void add(String path,
+             InputStream ias,
+             EventFormat parser,
+             LongProperty progress,
+             Property<IndexingStatus> indexingStatus) throws IOException;
 
     TimeRange getTimeRangeBoundaries(List<String> files, ZoneId zoneId) throws IOException;
 
-    SearchHitsProcessor search(long start, long end,
-                               Map<String, Collection<String>> params,
-                               String query,
-                               int page,
-                               ZoneId zoneId,
-                               boolean ignoreCache) throws Exception;
 }

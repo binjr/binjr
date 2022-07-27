@@ -23,16 +23,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class CustomParsingProfile implements ParsingProfile {
-    private Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
-    private String lineTemplateExpression;
-    private String profileName;
+    protected Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
+    protected String lineTemplateExpression;
+    protected String profileName;
+    protected final String profileId;
+    private transient final Pattern regex;
     private static final Gson GSON = new Gson();
-    private final String profileId;
 
-    private CustomParsingProfile() {
+    protected CustomParsingProfile() {
         profileId = "";
+        this.regex = Pattern.compile("");
     }
 
     public CustomParsingProfile(String profileName,
@@ -50,6 +53,7 @@ public class CustomParsingProfile implements ParsingProfile {
         this.profileId = profileId;
         this.captureGroups.putAll(captureGroups);
         this.lineTemplateExpression = lineTemplateExpression;
+        this.regex = Pattern.compile(buildParsingRegexString());
     }
 
     public static CustomParsingProfile empty() {
@@ -96,21 +100,14 @@ public class CustomParsingProfile implements ParsingProfile {
         return captureGroups;
     }
 
-    public void setCaptureGroups(Map<NamedCaptureGroup, String> captureGroups) {
-        this.captureGroups = captureGroups;
-    }
-
-    public void setProfileName(String profileName) {
-        this.profileName = profileName;
+    @Override
+    public Pattern getParsingRegex() {
+        return regex;
     }
 
     @Override
     public String getLineTemplateExpression() {
         return lineTemplateExpression;
-    }
-
-    public void setLineTemplateExpression(String lineTemplateExpression) {
-        this.lineTemplateExpression = lineTemplateExpression;
     }
 
     @Override

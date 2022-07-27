@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public interface NamedCaptureGroup {
 
     String name();
 
-    class JsonAdapter extends TypeAdapter<NamedCaptureGroup> {
+   public class JsonAdapter extends TypeAdapter<NamedCaptureGroup> {
         @Override
         public void write(JsonWriter out, NamedCaptureGroup value) throws IOException {
             out.value(value.name());

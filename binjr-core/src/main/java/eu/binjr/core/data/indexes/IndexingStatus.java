@@ -14,15 +14,11 @@
  *    limitations under the License.
  */
 
-package eu.binjr.common.javafx.controls;
+package eu.binjr.core.data.indexes;
 
-import javafx.scene.Node;
-import javafx.scene.image.WritableImage;
-
-@Deprecated
-public final class SnapshotUtils {
-    @Deprecated
-    public static WritableImage scaledSnapshot(Node node, double scaleX, double scaleY) {
-        return NodeUtils.scaledSnapshot(node, node.getScene().getFill(),  scaleX, scaleY);
-    }
+public enum IndexingStatus {
+    OK,
+    CANCELED,
+    NO_RESULTS,
+    ABORTED
 }

@@ -19,15 +19,17 @@ import com.google.gson.Gson;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.MutableParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
-
 import eu.binjr.core.preferences.UserHistory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -48,7 +50,10 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.ZoneId;
 import java.util.*;
@@ -110,7 +115,7 @@ public class ParsingProfilesController implements Initializable {
     private final AtomicInteger groupSequence = new AtomicInteger(0);
 
     private final ParsingProfile selectedProfile;
-    private final Set<ParsingProfile> userParsingProfiles;
+    private final Set<MutableParsingProfile> userParsingProfiles;
     private final boolean allowTemporalCaptureGroupsOnly;
 
 
@@ -118,7 +123,7 @@ public class ParsingProfilesController implements Initializable {
     private void handleOnCloneProfile(ActionEvent actionEvent) {
         try {
             if (this.profileComboBox.getValue() != null) {
-                var p = CustomParsingProfile.copyOf(this.profileComboBox.getValue());
+                var p = MutableParsingProfile.copyOf(this.profileComboBox.getValue());
                 this.profileComboBox.getItems().add(p);
                 this.profileComboBox.getSelectionModel().select(p);
             }
@@ -130,7 +135,7 @@ public class ParsingProfilesController implements Initializable {
     @FXML
     private void handleOnAddProfile(ActionEvent actionEvent) {
         try {
-            var p = CustomParsingProfile.empty();
+            var p = MutableParsingProfile.empty();
             this.profileComboBox.getItems().add(p);
             this.profileComboBox.getSelectionModel().select(p);
         } catch (Throwable e) {
@@ -140,7 +145,7 @@ public class ParsingProfilesController implements Initializable {
 
     @FXML
     void handleOnDeleteProfile(ActionEvent event) {
-        if (this.profileComboBox.getValue() instanceof CustomParsingProfile) {
+        if (this.profileComboBox.getValue() instanceof MutableParsingProfile) {
             this.profileComboBox.getItems().remove(this.profileComboBox.getValue());
         }
     }
@@ -158,7 +163,7 @@ public class ParsingProfilesController implements Initializable {
                 Files.deleteIfExists(exportPath.toPath());
                 UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
                 Files.writeString(exportPath.toPath(), gson.toJson(profileComboBox.getItems().stream()
-                        .filter(p -> p instanceof CustomParsingProfile)
+                        .filter(p -> p instanceof MutableParsingProfile)
                         .toList()
                         .toArray(ParsingProfile[]::new)));
                 logger.info("Parsing profiles successfully exported to " + exportPath);
@@ -178,7 +183,7 @@ public class ParsingProfilesController implements Initializable {
         File importPath = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (importPath != null) {
             try {
-                profileComboBox.getItems().addAll(gson.fromJson(Files.readString(importPath.toPath()), CustomParsingProfile[].class));
+                profileComboBox.getItems().addAll(gson.fromJson(Files.readString(importPath.toPath()), MutableParsingProfile[].class));
                 logger.info("Parsing profiles successfully imported to " + importPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while importing profiles: " + e.getMessage(), e, root);
@@ -191,19 +196,40 @@ public class ParsingProfilesController implements Initializable {
         try {
             resetTest();
             applyChanges();
-            var parser = new EventParser(this.profileComboBox.getValue(), ZoneId.systemDefault());
-            parser.parse(testArea.getText());
+            var format = new EventFormat() {
+                @Override
+                public ParsingProfile getProfile() {
+                    return profileComboBox.getValue();
+                }
+
+                @Override
+                public EventParser parse(InputStream ias) {
+                    throw new UnsupportedOperationException("EvenFormat does not support input stream parsing");
+                }
+
+                @Override
+                public Charset getEncoding() {
+                    return StandardCharsets.UTF_8;
+                }
+
+                @Override
+                public ZoneId getZoneId() {
+                    return ZoneId.systemDefault();
+                }
+            };
+            format.parse(testArea.getText());
             var events = new ArrayList<ParsedEvent>();
             Scanner scanner = new Scanner(testArea.getText());
             while (scanner.hasNextLine()) {
-                parser.parse(scanner.nextLine()).ifPresent(events::add);
+                format.parse(scanner.nextLine()).ifPresent(events::add);
             }
             if (events.size() == 0) {
                 notifyWarn("No event found.");
             } else {
                 notifyInfo(String.format("Found %d event(s).", events.size()));
             }
-            testArea.setStyleSpans(0, highlightTextArea(parser.getParsingRegex(), testArea.getText()));
+            var hilitePattern = format.getProfile().getParsingRegex();
+            testArea.setStyleSpans(0, highlightTextArea(hilitePattern, testArea.getText()));
         } catch (Exception e) {
             notifyError(e.getMessage());
             logger.error("Error testing parsing rules", e);
@@ -279,9 +305,11 @@ public class ParsingProfilesController implements Initializable {
         this.builtinParsingProfiles = builtinParsingProfiles;
         this.defaultProfile = defaultProfile;
         this.selectedProfile = selectedProfile;
-        this.userParsingProfiles = new HashSet<>(Arrays.asList(userParsingProfiles));
+        this.userParsingProfiles = new HashSet<>(Arrays.stream(userParsingProfiles).map(MutableParsingProfile::of).toList());
         this.allowTemporalCaptureGroupsOnly = allowTemporalCaptureGroupsOnly;
-        this.userParsingProfiles.add(selectedProfile);
+        if (selectedProfile instanceof CustomParsingProfile) {
+            this.userParsingProfiles.add(MutableParsingProfile.of(selectedProfile));
+        }
     }
 
     @FXML
@@ -319,8 +347,8 @@ public class ParsingProfilesController implements Initializable {
             @Override
             public ParsingProfile fromString(String string) {
                 var val = profileComboBox.getValue();
-                if (val instanceof CustomParsingProfile custom) {
-                    custom.setProfileName(string);
+                if (val instanceof MutableParsingProfile editable) {
+                    editable.setProfileName(string);
                 }
                 return val;
             }
@@ -398,7 +426,7 @@ public class ParsingProfilesController implements Initializable {
     }
 
     public ParsingProfile[] getCustomProfiles() {
-        return profileComboBox.getItems().stream().filter(p -> p instanceof CustomParsingProfile).toArray(ParsingProfile[]::new);
+        return profileComboBox.getItems().stream().filter(p -> p instanceof MutableParsingProfile).toArray(ParsingProfile[]::new);
     }
 
     private void colorLineTemplateField() {
@@ -446,7 +474,7 @@ public class ParsingProfilesController implements Initializable {
             this.lineTemplateExpression.clear();
             this.lineTemplateExpression.appendText(profile.getLineTemplateExpression());
 
-            var isEditable = (profile instanceof CustomParsingProfile);
+            var isEditable = (profile instanceof MutableParsingProfile);
             this.lineTemplateExpression.setDisable(!isEditable);
             this.addGroupButton.setDisable(!isEditable);
             this.deleteGroupButton.setDisable(!isEditable);
@@ -462,7 +490,7 @@ public class ParsingProfilesController implements Initializable {
         }
     }
 
-    private boolean saveProfile(CustomParsingProfile profile) {
+    private boolean saveProfile(MutableParsingProfile profile) {
         try {
             profile.setCaptureGroups(this.captureGroupTable.getItems().stream()
                     .collect(Collectors.toMap(NameExpressionPair::getName, NameExpressionPair::getExpression)));
@@ -477,7 +505,7 @@ public class ParsingProfilesController implements Initializable {
 
     public boolean applyChanges() {
         clearNotification();
-        if (this.profileComboBox.getValue() instanceof CustomParsingProfile editable) {
+        if (this.profileComboBox.getValue() instanceof MutableParsingProfile editable) {
             return saveProfile(editable);
         }
         return true;

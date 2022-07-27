@@ -18,31 +18,34 @@ package eu.binjr.core.data.indexes;
 
 import eu.binjr.common.concurrent.CloseableResourceManager;
 import eu.binjr.common.function.CheckedLambdas;
-import eu.binjr.core.data.indexes.logs.LogFileIndex;
+import eu.binjr.common.function.CheckedSupplier;
 
 
 import java.io.IOException;
 
 public enum Indexes {
-    LOG_FILES("log_file_index");
+    LOG_FILES("log_file_index", LogFileIndex::new),
+    NUM_SERIES("numerical_series_index", NumSeriesIndex::new);
 
-    private final CloseableResourceManager<Searchable> indexManager;
+    private final CloseableResourceManager<Indexable> indexManager;
     private final String key;
+    private final CheckedSupplier<Indexable, IOException> factory;
 
-    Indexes(String key) {
+    Indexes(String key, CheckedSupplier<Indexable, IOException> factory) {
         this.indexManager = new CloseableResourceManager<>();
         this.key = key;
+        this.factory = factory;
     }
 
-    public Searchable acquire() throws IOException {
-        return indexManager.acquire(key, CheckedLambdas.wrap(LogFileIndex::new));
+    public Indexable acquire() throws IOException {
+        return indexManager.acquire(key, CheckedLambdas.wrap(factory));
     }
 
     public int release() throws Exception {
         return indexManager.release(key);
     }
 
-    public Searchable get(){
+    public Indexable get() {
         return indexManager.get(key).orElseThrow();
     }
 

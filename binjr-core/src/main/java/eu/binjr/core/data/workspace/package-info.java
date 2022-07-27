@@ -37,8 +37,6 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.xml.adapters.*;
 import eu.binjr.common.version.Version;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfileXmlAdapter;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfileXmlAdapter;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

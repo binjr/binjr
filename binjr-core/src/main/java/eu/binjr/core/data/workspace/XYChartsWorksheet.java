@@ -27,7 +27,6 @@ import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
@@ -39,6 +38,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -53,6 +53,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
     private final transient Property<Integer> selectedChart;
+    private final transient AtomicBoolean resetTimeRangeRequested = new AtomicBoolean(true);
 
     private final transient Set<Integer> multiSelectedIndices = new HashSet<>();
     @IsDirtyable
@@ -432,7 +433,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
     }
 
     @Override
-    public TimeRange getInitialTimeRange(){
+    public TimeRange getInitialTimeRange() {
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;
         for (var c : this.getCharts()) {
@@ -551,6 +552,15 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
         }
         return allInfo;
     }
+
+    public boolean verifyResetTimeRangeRequest() {
+        return resetTimeRangeRequested.compareAndSet(true, false);
+    }
+
+    public void rearmResetTimeRangeRequest() {
+        resetTimeRangeRequested.set(true);
+    }
+
 }
 
 

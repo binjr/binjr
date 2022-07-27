@@ -58,7 +58,7 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
      * The most recently used {@link ParsingProfile}
      */
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
-            stringPreference("mostRecentlyCsvTimestampParsingProfile", BuiltInCsvTimestampParsingProfile.ISO.getProfileId());
+            stringPreference("mruCsvParsingProfile", BuiltInCsvTimestampParsingProfile.ISO.getProfileId());
 
     public ObservablePreference<ParsingProfile[]> csvTimestampParsingProfiles =
             objectPreference(ParsingProfile[].class,

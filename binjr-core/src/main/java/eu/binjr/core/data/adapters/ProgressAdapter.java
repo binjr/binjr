@@ -17,10 +17,11 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.Property;
 
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,6 @@ public interface ProgressAdapter<T> extends DataAdapter<T> {
                                                               List<TimeSeriesInfo<T>> seriesInfo,
                                                               ReloadPolicy reloadPolicy,
                                                               DoubleProperty progress,
-                                                              BooleanProperty cancellationRequested) throws DataAdapterException;
+                                                              Property<IndexingStatus> indexingStatus) throws DataAdapterException;
 
 }

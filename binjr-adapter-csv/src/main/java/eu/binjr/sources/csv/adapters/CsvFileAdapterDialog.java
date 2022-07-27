@@ -37,8 +37,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
+import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -70,7 +72,8 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
         this.prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
         this.setDialogHeaderText("Add a csv file");
         this.encodingField = new TextField(prefs.mruEncoding.get());
-        this.separatorField= new TextField(prefs.mruCsvSeparator.get());
+        TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
+        this.separatorField = new TextField(prefs.mruCsvSeparator.get());
         addParsingField(owner);
         addParamField(this.encodingField, "Encoding:");
         addParamField(this.separatorField, "Separator:");
@@ -134,12 +137,16 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("The provided path is not valid.");
         }
         getMostRecentList().push(csvPath);
-        prefs.mruEncoding.set(encodingField.getText());
+        String charsetName = encodingField.getText();
+        if (!Charset.isSupported(charsetName)) {
+            throw new CannotInitializeDataAdapterException("Invalid or unsupported encoding: " + charsetName);
+        }
+        prefs.mruEncoding.set(charsetName);
         prefs.mruCsvSeparator.set(separatorField.getText());
         return List.of(new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
-                encodingField.getText(),
+                charsetName,
                 parsingChoiceBox.getValue(),
                 separatorField.getText().charAt(0)));
     }

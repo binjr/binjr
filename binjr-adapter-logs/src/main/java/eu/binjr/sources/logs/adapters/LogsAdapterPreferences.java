@@ -24,6 +24,8 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Defines the preferences associated with the Log files adapter.
  *
@@ -59,6 +61,12 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
      */
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
             stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.ISO.getProfileId());
+
+    /**
+     * The most recently used encoding
+     */
+    public ObservablePreference<String> mruEncoding =
+            stringPreference("mruEncoding", StandardCharsets.UTF_8.name());
 
     /**
      * Initialize a new instance of the {@link LogsAdapterPreferences} class associated to

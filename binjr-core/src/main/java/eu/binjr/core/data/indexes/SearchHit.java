@@ -19,4 +19,8 @@ package eu.binjr.core.data.indexes;
 import eu.binjr.core.data.timeseries.FacetEntry;
 
 public record SearchHit(String getText, FacetEntry getSeverity, FacetEntry getPath) {
+    @Override
+    public String toString() {
+        return getText;
+    }
 }

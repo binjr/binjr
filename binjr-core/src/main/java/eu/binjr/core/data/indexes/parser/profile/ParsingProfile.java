@@ -16,11 +16,16 @@
 
 package eu.binjr.core.data.indexes.parser.profile;
 
+import eu.binjr.common.logging.Logger;
+import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public interface ParsingProfile {
+    Logger logger = Logger.create(ParsingProfile.class);
+    Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
 
     String getProfileId();
 
@@ -29,6 +34,22 @@ public interface ParsingProfile {
     Map<NamedCaptureGroup, String> getCaptureGroups();
 
     String getLineTemplateExpression();
+
+    Pattern getParsingRegex();
+
+    default String buildParsingRegexString() {
+        var regexString = new String[]{getLineTemplateExpression()};
+        var matcher = GROUP_TAG_PATTERN.matcher(regexString[0]);
+        while (matcher.find()) {
+            var value = matcher.group();
+            getCaptureGroups().entrySet().stream()
+                    .filter(e -> CaptureGroup.of(value).equals(e.getKey()))
+                    .map(e -> String.format("(?<%s>%s)", e.getKey().name(), e.getValue()))
+                    .findAny().ifPresent(r -> regexString[0] = regexString[0].replace(value, r));
+        }
+        logger.debug(()-> "Regex string for profile " + getProfileName() + ": " + regexString[0]);
+        return regexString[0];
+    }
 
 }
 
