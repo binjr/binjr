@@ -1418,7 +1418,10 @@ public class MainViewController implements Initializable {
                                     worksheetMaskerPane.setVisible(false);
                                 }
                             },
-                            event -> Dialogs.notifyException("Error adding bindings to new worksheet", event.getSource().getException(), root));
+                            event -> {
+                                worksheetMaskerPane.setVisible(false);
+                                Dialogs.notifyException("Error adding bindings to new worksheet", event.getSource().getException(), root);
+                            });
                 }
             }
         } catch (Exception e) {
