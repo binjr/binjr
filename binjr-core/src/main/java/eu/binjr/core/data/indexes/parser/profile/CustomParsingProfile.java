@@ -17,6 +17,8 @@
 package eu.binjr.core.data.indexes.parser.profile;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.JsonAdapter;
+import eu.binjr.common.json.adapters.PatternJsonAdapter;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.HashMap;
@@ -25,12 +27,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+
 public class CustomParsingProfile implements ParsingProfile {
     protected Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
     protected String lineTemplateExpression;
     protected String profileName;
     protected final String profileId;
-    private transient final Pattern regex;
+    @JsonAdapter(PatternJsonAdapter.class)
+    private final Pattern regex;
     private static final Gson GSON = new Gson();
 
     protected CustomParsingProfile() {
@@ -127,4 +131,5 @@ public class CustomParsingProfile implements ParsingProfile {
     public String toString() {
         return profileName;
     }
+
 }

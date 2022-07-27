@@ -36,6 +36,7 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
+import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
@@ -71,7 +72,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = Logger.create(CsvFileAdapter.class);
     private static final Gson gson = new Gson();
     private static final Property<IndexingStatus> INDEXING_OK = new SimpleObjectProperty<>(IndexingStatus.OK);
-    private final EventFormat parser;
+    private EventFormat parser;
     private ParsingProfile dateTimePattern;
     private Path csvPath;
     private ZoneId zoneId;
@@ -119,13 +120,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     public CsvFileAdapter(String csvPath, ZoneId zoneId, String encoding, ParsingProfile dateTimePattern, char delimiter)
             throws DataAdapterException {
         super();
-        this.csvPath = Paths.get(csvPath);
-        this.zoneId = zoneId;
-        this.encoding = encoding;
-        this.dateTimePattern = dateTimePattern;
-        this.parser = new CsvEventFormat(dateTimePattern, zoneId, Charset.forName(encoding), String.valueOf(delimiter));
-        this.delimiter = delimiter;
-        this.csvDecoder = decoderFactory(zoneId, encoding, dateTimePattern, delimiter);
+        initParams(zoneId, csvPath, delimiter, encoding, dateTimePattern);
     }
 
     @Override
@@ -228,24 +223,35 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
-        zoneId = validateParameter(params, "zoneId",
-                s -> {
-                    if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adapter " + getSourceName());
+        initParams(validateParameter(params, "zoneId",
+                        s -> {
+                            if (s == null) {
+                                throw new InvalidAdapterParameterException("Parameter zoneId is missing in adapter " + getSourceName());
+                            }
+                            return ZoneId.of(s);
+                        }),
+                validateParameterNullity(params, "csvPath"),
+                validateParameter(params, "delimiter", s -> {
+                    if (s == null || s.length() != 1) {
+                        throw new InvalidAdapterParameterException("Parameter 'delimiter' is missing for adapter " + this.getSourceName());
                     }
-                    return ZoneId.of(s);
-                });
-        String path = validateParameterNullity(params, "csvPath");
-        delimiter = validateParameter(params, "delimiter", s -> {
-            if (s == null || s.length() != 1) {
-                throw new InvalidAdapterParameterException("Parameter 'delimiter' is missing for adapter " + this.getSourceName());
-            }
-            return s.charAt(0);
-        });
-        encoding = validateParameterNullity(params, "encoding");
-        dateTimePattern = gson.fromJson(validateParameterNullity(params, "dateTimePattern"), CustomParsingProfile.class);
-        this.csvPath = Paths.get(path);
+                    return s.charAt(0);
+                }), validateParameterNullity(params, "encoding"),
+                gson.fromJson(validateParameterNullity(params, "dateTimePattern"), CustomParsingProfile.class));
+    }
+
+    private void initParams(ZoneId zoneId,
+                            String csvPath,
+                            Character delimiter,
+                            String encoding,
+                            ParsingProfile dateTimePattern) {
+        this.zoneId = zoneId;
+        this.csvPath = Path.of(csvPath);
+        this.delimiter = delimiter;
+        this.encoding = encoding;
+        this.dateTimePattern = dateTimePattern;
         this.csvDecoder = decoderFactory(zoneId, encoding, dateTimePattern, delimiter);
+        this.parser = new CsvEventFormat(dateTimePattern, zoneId, Charset.forName(encoding), String.valueOf(delimiter));
     }
 
     @Override
