@@ -135,10 +135,10 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         if (mode == Mode.URI) {
             browseButton.setPrefWidth(0);
             uriHBox.setSpacing(0);
-            uriLabel.setText("Address:");
+            uriLabel.setText("Address");
         } else {
             browseButton.setPrefWidth(-1);
-            uriLabel.setText("Path:");
+            uriLabel.setText("Path");
         }
         browseButton.setOnAction(event -> {
             File selectedFile = displayFileChooser((Node) event.getSource());

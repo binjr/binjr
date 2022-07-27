@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
+import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
@@ -29,14 +30,12 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
@@ -58,6 +57,7 @@ import java.util.Objects;
 public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
     private final TextField encodingField;
     private final TextField separatorField;
+    private final TextField timestampPositionField;
     private int pos = 2;
     private final CsvAdapterPreferences prefs;
     private final ChoiceBox<ParsingProfile> parsingChoiceBox = new ChoiceBox<>();
@@ -72,15 +72,36 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
         this.prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
         this.setDialogHeaderText("Add a csv file");
         this.encodingField = new TextField(prefs.mruEncoding.get());
+        this.timestampPositionField = new TextField();
+        this.timestampPositionField.setTextFormatter(new TextFormatter<Number>(new StringConverter<>() {
+            @Override
+            public String toString(Number object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.toString();
+            }
+
+            @Override
+            public Number fromString(String string) {
+                int gtz = Integer.parseInt(string);
+                if (gtz < 0) {
+                    TextFieldValidator.fail(timestampPositionField, "Timestamp column position cannot be less than 0", true);
+                }
+                return gtz;
+            }
+        }));
+        this.timestampPositionField.setText(prefs.mruDateColumnPosition.get().toString());
         TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
         this.separatorField = new TextField(prefs.mruCsvSeparator.get());
         addParsingField(owner);
-        addParamField(this.encodingField, "Encoding:");
-        addParamField(this.separatorField, "Separator:");
+        addParamField(this.encodingField, "Encoding");
+        addParamField(this.separatorField, "Separator");
+        addParamField(this.timestampPositionField, "Timestamp column #");
     }
 
     private void addParsingField(Node owner) {
-        var parsingLabel = new Label("Date Format:");
+        var parsingLabel = new Label("Date Format");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
         updateProfileList(prefs.csvTimestampParsingProfiles.get());
@@ -142,13 +163,16 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("Invalid or unsupported encoding: " + charsetName);
         }
         prefs.mruEncoding.set(charsetName);
+        var tsColumnNb = Integer.parseInt(timestampPositionField.getText());
+        prefs.mruDateColumnPosition.set(tsColumnNb);
         prefs.mruCsvSeparator.set(separatorField.getText());
         return List.of(new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
                 charsetName,
                 parsingChoiceBox.getValue(),
-                separatorField.getText().charAt(0)));
+                separatorField.getText().charAt(0),
+                tsColumnNb));
     }
 
     private void updateProfileList(ParsingProfile[] newValue) {

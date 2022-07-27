@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
+import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
@@ -70,6 +71,8 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String> mruEncoding = stringPreference("mruEncoding", "utf-8");
 
     public ObservablePreference<String> mruCsvSeparator = stringPreference("mruCsvSeparator", ";");
+
+    public ObservablePreference<Number> mruDateColumnPosition =  integerPreference("mruDateColumnPosition", 0);
 
     /**
      * Initialize a new instance of the {@link CsvAdapterPreferences} class associated to

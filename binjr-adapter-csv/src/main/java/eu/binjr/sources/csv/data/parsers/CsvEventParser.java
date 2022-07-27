@@ -16,9 +16,12 @@
 
 package eu.binjr.sources.csv.data.parsers;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
+import eu.binjr.core.data.indexes.parser.ParsingEventException;
+import eu.binjr.sources.csv.adapters.CsvFileAdapter;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import org.apache.commons.csv.CSVFormat;
@@ -37,9 +40,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CsvEventParser implements EventParser {
+    private static final Logger logger = Logger.create(CsvEventParser.class);
     private final BufferedReader reader;
     private final AtomicLong sequence;
-    private final EventFormat format;
+    private final CsvEventFormat format;
     private final CsvEventIterator eventIterator;
     private final CSVParser csvParser;
     private ParsedEvent buffered;
@@ -91,11 +95,11 @@ public class CsvEventParser implements EventParser {
             }
             ZonedDateTime timestamp;
 
-            var dateOpt = format.parse(csvRecord.get(0));
+            var dateOpt = format.parse(csvRecord.get(format.getTimestampPosition()));
             if (dateOpt.isPresent()) {
                 timestamp = dateOpt.get().getTimestamp();
             } else {
-                timestamp = ZonedDateTime.ofInstant(Instant.ofEpochSecond(sequence.get()), ZoneId.systemDefault());
+                throw new UnsupportedOperationException("Failed to parse time stamp in column #" + format.getTimestampPosition());
             }
             Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {
