@@ -60,10 +60,6 @@ public class CustomParsingProfile implements ParsingProfile {
         this.regex = Pattern.compile(buildParsingRegexString());
     }
 
-    public static CustomParsingProfile empty() {
-        return new CustomParsingProfile("New profile", new HashMap<>(), "");
-    }
-
     public static CustomParsingProfile of(ParsingProfile profile) {
         if (profile == null) {
             return null;

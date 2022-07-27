@@ -27,7 +27,6 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
-import eu.binjr.core.data.indexes.parser.profile.MutableParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
@@ -422,11 +421,14 @@ public class ParsingProfilesController implements Initializable {
     }
 
     public ParsingProfile getSelectedProfile() {
-        return profileComboBox.getValue();
+        return CustomParsingProfile.of(profileComboBox.getValue());
     }
 
     public ParsingProfile[] getCustomProfiles() {
-        return profileComboBox.getItems().stream().filter(p -> p instanceof MutableParsingProfile).toArray(ParsingProfile[]::new);
+        return profileComboBox.getItems().stream()
+                .filter(p -> p instanceof MutableParsingProfile)
+                .map(CustomParsingProfile::of)
+                .toArray(ParsingProfile[]::new);
     }
 
     private void colorLineTemplateField() {
@@ -652,5 +654,92 @@ public class ParsingProfilesController implements Initializable {
     }
 
 
+    private static class MutableParsingProfile  implements ParsingProfile {
+        private  String profileName;
+        private  String profileId;
+        private  String lineTemplateExpression;
+        private  Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
+
+        private MutableParsingProfile(String profileName,
+                                     Map<NamedCaptureGroup, String> captureGroups,
+                                     String lineTemplateExpression) {
+            this(profileName, UUID.randomUUID().toString(), captureGroups, lineTemplateExpression);
+        }
+
+        private MutableParsingProfile(String profileName,
+                                     String profileId,
+                                     Map<NamedCaptureGroup,
+                                            String> captureGroups,
+                                     String lineTemplateExpression) {
+                this.profileName = profileName;
+                this.profileId = profileId;
+                this.captureGroups.putAll(captureGroups);
+                this.lineTemplateExpression = lineTemplateExpression;
+
+        }
+
+        public static MutableParsingProfile empty() {
+            return new MutableParsingProfile("New profile", new HashMap<>(), "");
+        }
+
+        public static MutableParsingProfile of(ParsingProfile profile) {
+            if (profile == null) {
+                return null;
+            }
+            return new MutableParsingProfile(profile.getProfileName(),
+                    profile.getProfileId(),
+                    profile.getCaptureGroups(),
+                    profile.getLineTemplateExpression());
+        }
+
+        public static MutableParsingProfile copyOf(ParsingProfile profile) {
+            Objects.requireNonNull(profile);
+            return new MutableParsingProfile("Copy of " + profile.getProfileName(),
+                    profile.getCaptureGroups(),
+                    profile.getLineTemplateExpression());
+        }
+
+        public void setCaptureGroups(Map<NamedCaptureGroup, String> captureGroups) {
+            this.captureGroups = captureGroups;
+        }
+
+        public void setProfileName(String profileName) {
+            this.profileName = profileName;
+        }
+
+        public void setLineTemplateExpression(String lineTemplateExpression) {
+            this.lineTemplateExpression = lineTemplateExpression;
+        }
+
+        @Override
+        public String getProfileId() {
+            return this.profileId;
+        }
+
+        @Override
+        public String getProfileName() {
+            return this.profileName;
+        }
+
+        @Override
+        public Map<NamedCaptureGroup, String> getCaptureGroups() {
+            return this.captureGroups;
+        }
+
+        @Override
+        public String getLineTemplateExpression() {
+            return this.lineTemplateExpression;
+        }
+
+        @Override
+        public Pattern getParsingRegex() {
+            return Pattern.compile(buildParsingRegexString());
+        }
+
+        @Override
+        public String toString() {
+            return profileName;
+        }
+    }
 }
 
