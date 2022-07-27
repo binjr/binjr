@@ -18,6 +18,7 @@ package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
+import eu.binjr.core.controllers.CsvParsingProfilesController;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -36,12 +37,12 @@ public class TimestampParsingProfileDialog extends Dialog<ParsingProfile> {
     private final DialogPane root;
 
     public TimestampParsingProfileDialog(Window owner, ParsingProfile selectedProfile) throws NoAdapterFoundException {
-        FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesDialogView.fxml"));
+        FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/CsvParsingProfileDialogView.fxml"));
         final CsvAdapterPreferences prefs;
 
         prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
 
-        var controller = new ParsingProfilesController(
+        var controller = new CsvParsingProfilesController(
                 BuiltInCsvTimestampParsingProfile.values(),
                 prefs.csvTimestampParsingProfiles.get(),
                 BuiltInCsvTimestampParsingProfile.ISO,

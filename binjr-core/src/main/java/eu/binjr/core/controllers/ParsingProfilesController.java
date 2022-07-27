@@ -69,57 +69,54 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
  */
 public class ParsingProfilesController implements Initializable {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
-    private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
-    private static final Gson gson = new Gson();
-    private final ParsingProfile[] builtinParsingProfiles;
-    private final ParsingProfile defaultProfile;
+    protected static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
+    protected static final Gson gson = new Gson();
+    protected final ParsingProfile[] builtinParsingProfiles;
+    protected final ParsingProfile defaultProfile;
+
+    @FXML
+    protected TableColumn<NameExpressionPair, String> expressionColumn;
+    @FXML
+    protected TableColumn<NameExpressionPair, NamedCaptureGroup> nameColumn;
+    @FXML
+    protected Label notificationLabel;
+    @FXML
+    protected TableView<NameExpressionPair> captureGroupTable;
+    @FXML
+    protected Button deleteGroupButton;
+    @FXML
+    protected Button addGroupButton;
+    @FXML
+    protected AnchorPane root;
+    @FXML
+    protected VBox expressions;
+    @FXML
+    protected CodeArea lineTemplateExpression;
+    @FXML
+    protected Button testLineTemplate;
+    @FXML
+    protected CodeArea testArea;
+    @FXML
+    protected ComboBox<ParsingProfile> profileComboBox;
+    @FXML
+    protected Button addProfileButton;
+    @FXML
+    protected Button deleteProfileButton;
+    @FXML
+    protected Button cloneProfileButton;
+    @FXML
+    protected Button importProfileButton;
+    @FXML
+    protected Button exportProfileButton;
+    protected final AtomicInteger groupSequence = new AtomicInteger(0);
+
+    protected final ParsingProfile selectedProfile;
+    protected final Set<MutableParsingProfile> userParsingProfiles;
+    protected final boolean allowTemporalCaptureGroupsOnly;
 
 
     @FXML
-    private TableColumn<NameExpressionPair, String> expressionColumn;
-    @FXML
-    private TableColumn<NameExpressionPair, NamedCaptureGroup> nameColumn;
-    @FXML
-    private Label notificationLabel;
-    @FXML
-    private TableView<NameExpressionPair> captureGroupTable;
-    @FXML
-    private Button deleteGroupButton;
-    @FXML
-    private Button addGroupButton;
-    @FXML
-    private AnchorPane root;
-    @FXML
-    private VBox expressions;
-    @FXML
-    private HBox lineTemplate;
-    @FXML
-    private CodeArea lineTemplateExpression;
-    @FXML
-    private Button testLineTemplate;
-    @FXML
-    private CodeArea testArea;
-    @FXML
-    private ComboBox<ParsingProfile> profileComboBox;
-    @FXML
-    private Button addProfileButton;
-    @FXML
-    private Button deleteProfileButton;
-    @FXML
-    private Button cloneProfileButton;
-    @FXML
-    private Button importProfileButton;
-    @FXML
-    private Button exportProfileButton;
-    private final AtomicInteger groupSequence = new AtomicInteger(0);
-
-    private final ParsingProfile selectedProfile;
-    private final Set<MutableParsingProfile> userParsingProfiles;
-    private final boolean allowTemporalCaptureGroupsOnly;
-
-
-    @FXML
-    private void handleOnCloneProfile(ActionEvent actionEvent) {
+    protected void handleOnCloneProfile(ActionEvent actionEvent) {
         try {
             if (this.profileComboBox.getValue() != null) {
                 var p = MutableParsingProfile.copyOf(this.profileComboBox.getValue());
@@ -132,7 +129,7 @@ public class ParsingProfilesController implements Initializable {
     }
 
     @FXML
-    private void handleOnAddProfile(ActionEvent actionEvent) {
+    protected void handleOnAddProfile(ActionEvent actionEvent) {
         try {
             var p = MutableParsingProfile.empty();
             this.profileComboBox.getItems().add(p);
@@ -237,12 +234,12 @@ public class ParsingProfilesController implements Initializable {
     }
 
     @FXML
-    private void handleOnAddGroup(ActionEvent actionEvent) {
+    protected void handleOnAddGroup(ActionEvent actionEvent) {
         this.captureGroupTable.getItems().add(new NameExpressionPair(CaptureGroup.of("GROUP" + groupSequence.incrementAndGet()), ".*"));
     }
 
     @FXML
-    private void handleOnDeleteGroup(ActionEvent actionEvent) {
+    protected void handleOnDeleteGroup(ActionEvent actionEvent) {
         var idx = this.captureGroupTable.getSelectionModel().getSelectedIndex();
         if (idx >= 0) {
             this.captureGroupTable.getItems().remove(idx);
@@ -250,24 +247,24 @@ public class ParsingProfilesController implements Initializable {
     }
 
     @FXML
-    private void handleOnClearTestArea(ActionEvent actionEvent) {
+    protected void handleOnClearTestArea(ActionEvent actionEvent) {
         testArea.clear();
     }
 
     @FXML
-    private void handleOnCopyTestArea(ActionEvent actionEvent) {
+    protected void handleOnCopyTestArea(ActionEvent actionEvent) {
         testArea.selectAll();
         testArea.copy();
     }
 
     @FXML
-    private void handleOnPasteToTestArea(ActionEvent actionEvent) {
+    protected void handleOnPasteToTestArea(ActionEvent actionEvent) {
         testArea.selectAll();
         testArea.paste();
     }
 
     @FXML
-    private void handleOnClearField(ActionEvent actionEvent) {
+    protected void handleOnClearField(ActionEvent actionEvent) {
         var node = (Node) actionEvent.getSource();
         var parent = node.getParent();
         if (parent != null) {
@@ -279,7 +276,12 @@ public class ParsingProfilesController implements Initializable {
     }
 
     @FXML
-    private void handleOnCancel(ActionEvent actionEvent) {
+    protected void handleOnOk(ActionEvent actionEvent) {
+        NodeUtils.getStage(root).close();
+    }
+
+    @FXML
+    protected void handleOnCancel(ActionEvent actionEvent) {
         NodeUtils.getStage(root).close();
     }
 
@@ -316,7 +318,6 @@ public class ParsingProfilesController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id=\"root\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert expressions != null : "fx:id=\"expressions\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
-        assert lineTemplate != null : "fx:id=\"lineTemplate\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert lineTemplateExpression != null : "fx:id=\"lineTemplateExpression\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert testLineTemplate != null : "fx:id=\"testLineTemplate\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert testArea != null : "fx:id=\"testArea\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
@@ -431,22 +432,22 @@ public class ParsingProfilesController implements Initializable {
                 .toArray(ParsingProfile[]::new);
     }
 
-    private void colorLineTemplateField() {
+    protected void colorLineTemplateField() {
         colorLineTemplateField(lineTemplateExpression.getText());
     }
 
-    private void colorLineTemplateField(String text) {
+    protected void colorLineTemplateField(String text) {
         lineTemplateExpression.setStyleSpans(0, computeParsingProfileSyntaxHighlighting(text));
     }
 
-    private void resetTest() {
+    protected void resetTest() {
         clearNotification();
         var spans = new StyleSpansBuilder<Collection<String>>();
         spans.add(Collections.emptyList(), testArea.getText().length());
         testArea.setStyleSpans(0, spans.create());
     }
 
-    private class ColoredTableCell extends ComboBoxTableCell<NameExpressionPair, NamedCaptureGroup> {
+    protected class ColoredTableCell extends ComboBoxTableCell<NameExpressionPair, NamedCaptureGroup> {
         public ColoredTableCell(StringConverter<NamedCaptureGroup> converter, NamedCaptureGroup... items) {
             super(converter, items);
             setComboBoxEditable(true);
@@ -466,7 +467,7 @@ public class ParsingProfilesController implements Initializable {
         }
     }
 
-    private void loadParserParameters(ParsingProfile profile) {
+    protected void loadParserParameters(ParsingProfile profile) {
         try {
             resetTest();
             this.captureGroupTable.getItems().clear();
@@ -492,7 +493,7 @@ public class ParsingProfilesController implements Initializable {
         }
     }
 
-    private boolean saveProfile(MutableParsingProfile profile) {
+    protected boolean saveProfile(MutableParsingProfile profile) {
         try {
             profile.setCaptureGroups(this.captureGroupTable.getItems().stream()
                     .collect(Collectors.toMap(NameExpressionPair::getName, NameExpressionPair::getExpression)));
@@ -513,14 +514,14 @@ public class ParsingProfilesController implements Initializable {
         return true;
     }
 
-    private final AtomicInteger paletteEntriesSequence = new AtomicInteger(0);
-    private final Map<NamedCaptureGroup, Integer> paletteLookupTable = new HashMap<>();
+    protected final AtomicInteger paletteEntriesSequence = new AtomicInteger(0);
+    protected final Map<NamedCaptureGroup, Integer> paletteLookupTable = new HashMap<>();
 
-    private int getCaptureGroupPaletteIndex(NamedCaptureGroup cg) {
+    protected int getCaptureGroupPaletteIndex(NamedCaptureGroup cg) {
         return paletteLookupTable.computeIfAbsent(cg, key -> paletteEntriesSequence.getAndIncrement() % 12);
     }
 
-    private StyleSpans<Collection<String>> computeParsingProfileSyntaxHighlighting(String text) {
+    protected StyleSpans<Collection<String>> computeParsingProfileSyntaxHighlighting(String text) {
         Matcher matcher = GROUP_TAG_PATTERN.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
@@ -538,7 +539,7 @@ public class ParsingProfilesController implements Initializable {
         return spansBuilder.create();
     }
 
-    private StyleSpans<Collection<String>> highlightTextArea(Pattern parsingRegex, String text) {
+    protected StyleSpans<Collection<String>> highlightTextArea(Pattern parsingRegex, String text) {
         var matcher = parsingRegex.matcher(text);
         int lastMatchEnd = 0;
         StyleSpansBuilder<Collection<String>> groupSpansBuilder = new StyleSpansBuilder<>();
@@ -579,25 +580,25 @@ public class ParsingProfilesController implements Initializable {
                 strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new)));
     }
 
-    private void clearNotification() {
+    protected void clearNotification() {
         notificationLabel.setVisible(false);
         notificationLabel.setManaged(false);
         notificationLabel.setText("");
     }
 
-    private void notifyInfo(String message) {
+    protected void notifyInfo(String message) {
         notify(message, "notification-info");
     }
 
-    private void notifyWarn(String message) {
+    protected void notifyWarn(String message) {
         notify(message, "notification-warn");
     }
 
-    private void notifyError(String message) {
+    protected void notifyError(String message) {
         notify(message, "notification-error");
     }
 
-    private void notify(String message, String styleClass) {
+    protected void notify(String message, String styleClass) {
         notificationLabel.getStyleClass().setAll(styleClass);
         notificationLabel.setText(message);
         notificationLabel.setManaged(true);
@@ -654,7 +655,7 @@ public class ParsingProfilesController implements Initializable {
     }
 
 
-    private static class MutableParsingProfile  implements ParsingProfile {
+    protected static class MutableParsingProfile  implements ParsingProfile {
         private  String profileName;
         private  String profileId;
         private  String lineTemplateExpression;
