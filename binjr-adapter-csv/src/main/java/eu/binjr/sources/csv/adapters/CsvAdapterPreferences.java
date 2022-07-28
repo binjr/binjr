@@ -21,9 +21,9 @@ import com.google.gson.Gson;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
-import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 
 /**
  * Defines the preferences associated with the Log files adapter.
@@ -59,7 +59,7 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
      * The most recently used {@link ParsingProfile}
      */
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
-            stringPreference("mruCsvParsingProfile", BuiltInCsvTimestampParsingProfile.ISO.getProfileId());
+            stringPreference("mruCsvParsingProfile", BuiltInCsvParsingProfile.ISO.getProfileId());
 
     public ObservablePreference<ParsingProfile[]> csvTimestampParsingProfiles =
             objectPreference(ParsingProfile[].class,

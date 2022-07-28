@@ -26,6 +26,7 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -177,11 +178,11 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
 
     private void updateProfileList(ParsingProfile[] newValue) {
         parsingChoiceBox.getItems().clear();
-        parsingChoiceBox.getItems().setAll(BuiltInCsvTimestampParsingProfile.values());
+        parsingChoiceBox.getItems().setAll(BuiltInCsvParsingProfile.values());
         parsingChoiceBox.getItems().addAll(newValue);
         parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
                 .filter(p -> Objects.equals(p.getProfileId(), prefs.mostRecentlyUsedParsingProfile.get()))
-                .findAny().orElse(BuiltInCsvTimestampParsingProfile.ISO));
+                .findAny().orElse(BuiltInCsvParsingProfile.ISO));
     }
 
 }

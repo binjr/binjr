@@ -23,7 +23,6 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
-import eu.binjr.core.data.codec.csv.CsvDecoder;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
@@ -31,13 +30,13 @@ import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.NumSeriesIndex;
-import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
@@ -53,7 +52,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +96,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
      */
     public CsvFileAdapter() throws DataAdapterException {
-        this("", ZoneId.systemDefault(), "utf-8", BuiltInCsvTimestampParsingProfile.ISO, ',', 0);
+        this("", ZoneId.systemDefault(), "utf-8", BuiltInCsvParsingProfile.ISO, ',', 0);
     }
 
     /**
@@ -109,7 +107,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String csvPath, ZoneId zoneId) throws DataAdapterException {
-        this(csvPath, zoneId, "utf-8", BuiltInCsvTimestampParsingProfile.ISO, ',', 0);
+        this(csvPath, zoneId, "utf-8", BuiltInCsvParsingProfile.ISO, ',', 0);
     }
 
     /**

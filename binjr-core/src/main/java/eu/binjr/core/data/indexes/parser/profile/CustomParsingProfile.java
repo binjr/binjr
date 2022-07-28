@@ -42,17 +42,16 @@ public class CustomParsingProfile implements ParsingProfile {
         this.regex = Pattern.compile("");
     }
 
-    public CustomParsingProfile(String profileName,
-                                Map<NamedCaptureGroup, String> captureGroups,
-                                String lineTemplateExpression) {
+    protected CustomParsingProfile(String profileName,
+                                   Map<NamedCaptureGroup, String> captureGroups,
+                                   String lineTemplateExpression) {
         this(profileName, UUID.randomUUID().toString(), captureGroups, lineTemplateExpression);
     }
 
-    public CustomParsingProfile(String profileName,
-                                String profileId,
-                                Map<NamedCaptureGroup,
-                                        String> captureGroups,
-                                String lineTemplateExpression) {
+    protected CustomParsingProfile(String profileName,
+                                   String profileId,
+                                   Map<NamedCaptureGroup, String> captureGroups,
+                                   String lineTemplateExpression) {
         this.profileName = profileName;
         this.profileId = profileId;
         this.captureGroups.putAll(captureGroups);
