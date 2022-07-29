@@ -24,6 +24,8 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
+import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
+import eu.binjr.sources.csv.data.parsers.CustomCsvParsingProfile;
 
 /**
  * Defines the preferences associated with the Log files adapter.
@@ -61,12 +63,12 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
             stringPreference("mruCsvParsingProfile", BuiltInCsvParsingProfile.ISO.getProfileId());
 
-    public ObservablePreference<ParsingProfile[]> csvTimestampParsingProfiles =
-            objectPreference(ParsingProfile[].class,
+    public ObservablePreference<CsvParsingProfile[]> csvTimestampParsingProfiles =
+            objectPreference(CsvParsingProfile[].class,
                     "csvTimestampParsingProfiles",
-                    new ParsingProfile[0],
+                    new CsvParsingProfile[0],
                     s -> gson.toJson(s),
-                    s -> gson.fromJson(s, CustomParsingProfile[].class)
+                    s -> gson.fromJson(s, CustomCsvParsingProfile[].class)
             );
     public ObservablePreference<String> mruEncoding = stringPreference("mruEncoding", "utf-8");
 

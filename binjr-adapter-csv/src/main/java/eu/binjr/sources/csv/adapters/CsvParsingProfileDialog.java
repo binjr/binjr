@@ -18,10 +18,10 @@ package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.controllers.CsvParsingProfilesController;
+import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
+import eu.binjr.sources.csv.data.parsers.CsvParsingProfilesController;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -32,11 +32,11 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 
-public class TimestampParsingProfileDialog extends Dialog<ParsingProfile> {
+public class CsvParsingProfileDialog extends Dialog<CsvParsingProfile> {
 
     private final DialogPane root;
 
-    public TimestampParsingProfileDialog(Window owner, ParsingProfile selectedProfile) throws NoAdapterFoundException {
+    public CsvParsingProfileDialog(Window owner, CsvParsingProfile selectedProfile) throws NoAdapterFoundException {
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/CsvParsingProfileDialogView.fxml"));
         final CsvAdapterPreferences prefs;
 
@@ -55,7 +55,7 @@ public class TimestampParsingProfileDialog extends Dialog<ParsingProfile> {
             throw new IllegalArgumentException("Failed to load " + fXMLLoader.getLocation());
         }
 
-        this.setTitle("Edit Parsing Profile");
+        this.setTitle("Edit CSV Parsing Profile");
         this.setDialogPane(root);
         this.setResizable(true);
         this.initOwner(owner);
@@ -75,7 +75,7 @@ public class TimestampParsingProfileDialog extends Dialog<ParsingProfile> {
         this.setResultConverter(dialogButton -> {
                     ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                     if (data == ButtonBar.ButtonData.OK_DONE) {
-                        prefs.csvTimestampParsingProfiles.set(controller.getCustomProfiles());
+                        prefs.csvTimestampParsingProfiles.set(controller.getCustomProfiles().toArray(CsvParsingProfile[]::new));
                         return controller.getSelectedProfile();
                     }
                     return null;

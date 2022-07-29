@@ -27,6 +27,8 @@ public interface ParsingProfile {
     Logger logger = Logger.create(ParsingProfile.class);
     Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
 
+    boolean isBuiltIn();
+
     String getProfileId();
 
     String getProfileName();

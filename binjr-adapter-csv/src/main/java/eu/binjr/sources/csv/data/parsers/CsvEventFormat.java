@@ -26,10 +26,7 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -38,23 +35,18 @@ import java.util.Optional;
 
 public class CsvEventFormat implements EventFormat {
     private static final Logger logger = Logger.create(CsvEventFormat.class);
-    private final ParsingProfile profile;
+    private final CsvParsingProfile profile;
     private final ZoneId zoneId;
-    private final String delimiter;
     private final Charset encoding;
-    private final int timestampPosition;
 
-
-    public CsvEventFormat(ParsingProfile profile, ZoneId zoneId, Charset encoding, String delimiter, int timestampPosition) {
+    public CsvEventFormat(CsvParsingProfile profile, ZoneId zoneId, Charset encoding) {
         this.profile = profile;
         this.zoneId = zoneId;
         this.encoding = encoding;
-        this.delimiter = delimiter;
-        this.timestampPosition = timestampPosition;
     }
 
     @Override
-    public ParsingProfile getProfile() {
+    public CsvParsingProfile getProfile() {
         return profile;
     }
 
@@ -78,14 +70,6 @@ public class CsvEventFormat implements EventFormat {
         return zoneId;
     }
 
-    public String getDelimiter() {
-        return delimiter;
-    }
-
-    public int getTimestampPosition() {
-        return timestampPosition;
-    }
-
     /**
      * Returns the columns headers of the CSV file.
      *
@@ -98,7 +82,7 @@ public class CsvEventFormat implements EventFormat {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
             CSVFormat csvFormat = CSVFormat.Builder.create()
                     .setAllowMissingColumnNames(false)
-                    .setDelimiter(delimiter)
+                    .setDelimiter(getProfile().getDelimiter())
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(reader);
             CSVRecord record = records.iterator().next();
@@ -107,7 +91,7 @@ public class CsvEventFormat implements EventFormat {
             }
             List<String> headerNames = new ArrayList<>();
             for (int i = 0; i < record.size(); i++) {
-                if (i != getTimestampPosition()) { // skip timestamp column
+                if (i != getProfile().getTimestampColumn()) { // skip timestamp column
                     headerNames.add(record.get(i));
                 }
             }

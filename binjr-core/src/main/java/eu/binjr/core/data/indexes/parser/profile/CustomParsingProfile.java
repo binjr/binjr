@@ -27,7 +27,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-
 public class CustomParsingProfile implements ParsingProfile {
     protected Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
     protected String lineTemplateExpression;
@@ -37,21 +36,15 @@ public class CustomParsingProfile implements ParsingProfile {
     private final Pattern regex;
     private static final Gson GSON = new Gson();
 
-    protected CustomParsingProfile() {
+    public CustomParsingProfile() {
         profileId = "";
         this.regex = Pattern.compile("");
     }
 
-    protected CustomParsingProfile(String profileName,
-                                   Map<NamedCaptureGroup, String> captureGroups,
-                                   String lineTemplateExpression) {
-        this(profileName, UUID.randomUUID().toString(), captureGroups, lineTemplateExpression);
-    }
-
-    protected CustomParsingProfile(String profileName,
-                                   String profileId,
-                                   Map<NamedCaptureGroup, String> captureGroups,
-                                   String lineTemplateExpression) {
+    public CustomParsingProfile(String profileName,
+                                String profileId,
+                                Map<NamedCaptureGroup, String> captureGroups,
+                                String lineTemplateExpression) {
         this.profileName = profileName;
         this.profileId = profileId;
         this.captureGroups.putAll(captureGroups);
@@ -59,29 +52,16 @@ public class CustomParsingProfile implements ParsingProfile {
         this.regex = Pattern.compile(buildParsingRegexString());
     }
 
-    public static CustomParsingProfile of(ParsingProfile profile) {
-        if (profile == null) {
-            return null;
-        }
-        return new CustomParsingProfile(profile.getProfileName(),
-                profile.getProfileId(),
-                profile.getCaptureGroups(),
-                profile.getLineTemplateExpression());
+    public static ParsingProfile of(ParsingProfile parsingProfile) {
+        return new CustomParsingProfile(parsingProfile.getProfileName(),
+                parsingProfile.getProfileId(),
+                parsingProfile.getCaptureGroups(),
+                parsingProfile.getLineTemplateExpression());
     }
 
-    public static CustomParsingProfile copyOf(ParsingProfile profile) {
-        Objects.requireNonNull(profile);
-        return new CustomParsingProfile("Copy of " + profile.getProfileName(),
-                profile.getCaptureGroups(),
-                profile.getLineTemplateExpression());
-    }
-
-    public static CustomParsingProfile fromJson(String jsonString) {
-        return GSON.fromJson(jsonString, CustomParsingProfile.class);
-    }
-
-    public String toJson() {
-        return GSON.toJson(this);
+    @Override
+    public boolean isBuiltIn() {
+        return false;
     }
 
     @Override

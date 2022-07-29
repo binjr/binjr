@@ -20,6 +20,7 @@ import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
@@ -70,7 +71,7 @@ public class ParsingProfileDialog extends Dialog<ParsingProfile> {
         this.setResultConverter(dialogButton -> {
                     ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                     if (data == ButtonBar.ButtonData.OK_DONE) {
-                        UserPreferences.getInstance().userLogEventsParsingProfiles.set(controller.getCustomProfiles());
+                        UserPreferences.getInstance().userLogEventsParsingProfiles.set(controller.getCustomProfiles().toArray(ParsingProfile[]::new));
                         return controller.getSelectedProfile();
                     }
                     return null;

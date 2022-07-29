@@ -30,7 +30,6 @@ import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.NumSeriesIndex;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -38,6 +37,8 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
+import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
+import eu.binjr.sources.csv.data.parsers.CustomCsvParsingProfile;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleLongProperty;
@@ -71,17 +72,14 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private static final String ZONE_ID = "zoneId";
     private static final String ENCODING = "encoding";
     private static final String DELIMITER = "delimiter";
-    private static final String DATE_TIME_PATTERN = "dateTimePattern";
+    private static final String PARSING_PROFILE = "parsingProfile";
     private static final String PATH = "csvPath";
     private static final String TIMESTAMP_POSITION = "timestampPosition";
     private CsvEventFormat parser;
-    private ParsingProfile dateTimePattern;
+    private CsvParsingProfile csvParsingProfile;
     private Path csvPath;
     private ZoneId zoneId;
-    private Character delimiter;
     private String encoding;
-    //private CsvDecoder csvDecoder;
-    private int timestampPosition;
     private final Map<String, IndexingStatus> indexedFiles = new HashMap<>();
     private NumSeriesIndex index;
     private FileSystemBrowser fileBrowser;
@@ -90,13 +88,14 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private List<String> headers;
     private long sequence = 0;
 
+
     /**
      * Initializes a new instance of the {@link CsvFileAdapter} class with a set of default values.
      *
      * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
      */
     public CsvFileAdapter() throws DataAdapterException {
-        this("", ZoneId.systemDefault(), "utf-8", BuiltInCsvParsingProfile.ISO, ',', 0);
+        this("", ZoneId.systemDefault(), "utf-8", BuiltInCsvParsingProfile.ISO);
     }
 
     /**
@@ -107,7 +106,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String csvPath, ZoneId zoneId) throws DataAdapterException {
-        this(csvPath, zoneId, "utf-8", BuiltInCsvParsingProfile.ISO, ',', 0);
+        this(csvPath, zoneId, "utf-8", BuiltInCsvParsingProfile.ISO);
     }
 
     /**
@@ -116,19 +115,16 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @param csvPath         the path to the csv file.
      * @param zoneId          the time zone to used.
      * @param encoding        the encoding for the csv file.
-     * @param dateTimePattern a pattern to decode time stamps.
-     * @param delimiter       the character used by the csv file to separate cells in csv records.
+     * @param csvParsingProfile a pattern to decode time stamps.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String csvPath,
                           ZoneId zoneId,
                           String encoding,
-                          ParsingProfile dateTimePattern,
-                          char delimiter,
-                          int timestampPosition)
+                          CsvParsingProfile csvParsingProfile)
             throws DataAdapterException {
         super();
-        initParams(zoneId, csvPath, delimiter, encoding, dateTimePattern, timestampPosition);
+        initParams(zoneId, csvPath, encoding, csvParsingProfile);
     }
 
     @Override
@@ -219,8 +215,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         Map<String, String> params = new HashMap<>();
         params.put(ZONE_ID, zoneId.toString());
         params.put(ENCODING, encoding);
-        params.put(DELIMITER, Character.toString(delimiter));
-        params.put(DATE_TIME_PATTERN, gson.toJson(CustomParsingProfile.of(dateTimePattern)));
+        params.put(PARSING_PROFILE, gson.toJson(CustomCsvParsingProfile.of(csvParsingProfile)));
         params.put(PATH, csvPath.toString());
         return params;
     }
@@ -238,41 +233,19 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                             return ZoneId.of(s);
                         }),
                 validateParameterNullity(params, PATH),
-                validateParameter(params, DELIMITER, s -> {
-                    if (s == null || s.length() != 1) {
-                        throw new InvalidAdapterParameterException("Parameter '" + DELIMITER + "'  is missing for adapter " + this.getSourceName());
-                    }
-                    return s.charAt(0);
-                }), validateParameterNullity(params, ENCODING),
-                gson.fromJson(validateParameterNullity(params, DATE_TIME_PATTERN), CustomParsingProfile.class),
-                validateParameter(params, TIMESTAMP_POSITION,
-                        s -> {
-                            if (s == null) {
-                                throw new InvalidAdapterParameterException("Parameter '" + TIMESTAMP_POSITION + "' is missing in adapter " + getSourceName());
-                            }
-                            var i = Integer.parseInt(s);
-                            if (i < 0) {
-                                throw new InvalidAdapterParameterException(("Parameter '" + TIMESTAMP_POSITION + "' should be >= 0"));
-                            }
-                            return i;
-                        })
-        );
+                validateParameterNullity(params, ENCODING),
+                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE), CustomCsvParsingProfile.class)        );
     }
 
     private void initParams(ZoneId zoneId,
                             String csvPath,
-                            Character delimiter,
                             String encoding,
-                            ParsingProfile dateTimePattern,
-                            int timestampPosition) {
+                            CsvParsingProfile parsingProfile) {
         this.zoneId = zoneId;
         this.csvPath = Path.of(csvPath);
-        this.delimiter = delimiter;
         this.encoding = encoding;
-        this.dateTimePattern = dateTimePattern;
-        this.timestampPosition = timestampPosition;
-        //this.csvDecoder = decoderFactory(zoneId, encoding, dateTimePattern, delimiter);
-        this.parser = new CsvEventFormat(dateTimePattern, zoneId, Charset.forName(encoding), String.valueOf(delimiter), timestampPosition);
+        this.csvParsingProfile = parsingProfile;
+        this.parser = new CsvEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
     }
 
     @Override

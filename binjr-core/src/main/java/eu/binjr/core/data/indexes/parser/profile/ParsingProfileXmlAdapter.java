@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.indexes.parser.profile;
 
+import com.google.gson.Gson;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 
@@ -25,6 +26,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  * @author Frederic Thevenet
  */
 public class ParsingProfileXmlAdapter extends XmlAdapter<String, ParsingProfile> {
+    private static final Gson GSON = new Gson();
     /**
      * Initializes a new instance of the CustomParsingProfile class
      */
@@ -33,11 +35,11 @@ public class ParsingProfileXmlAdapter extends XmlAdapter<String, ParsingProfile>
 
     @Override
     public ParsingProfile unmarshal(String stringValue) {
-        return (stringValue != null && !stringValue.isBlank()) ? CustomParsingProfile.fromJson(stringValue) : null;
+        return (stringValue != null && !stringValue.isBlank()) ? GSON.fromJson(stringValue, CustomParsingProfile.class) : null;
     }
 
     @Override
     public String marshal(ParsingProfile value) {
-        return value != null ? CustomParsingProfile.of(value).toJson() : null;
+        return value != null ? GSON.toJson(CustomParsingProfile.of(value)) : null;
     }
 }

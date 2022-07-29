@@ -86,6 +86,11 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     }
 
     @Override
+    public boolean isBuiltIn() {
+        return true;
+    }
+
+    @Override
     public String getProfileId() {
         return this.profileId;
     }

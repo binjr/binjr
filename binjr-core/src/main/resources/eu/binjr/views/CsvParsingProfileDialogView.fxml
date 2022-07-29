@@ -38,6 +38,8 @@
 
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -116,14 +118,17 @@
                             <GridPane hgap="10.0" vgap="10.0">
                                 <columnConstraints>
                                     <ColumnConstraints hgrow="NEVER" maxWidth="162.00006103515625"
-                                                       minWidth="123.33335367838541" prefWidth="131.9999796549479"/>
-                                    <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308"
-                                                       minWidth="656.6666259765625" prefWidth="682.6666870117188"/>
+                                                       minWidth="123.33335367838541"
+                                                       prefWidth="131.9999796549479"/>
+                                    <ColumnConstraints hgrow="ALWAYS"
+                                                       maxWidth="1.7976931348623157E308"
+                                                       minWidth="300"
+                                                       prefWidth="600"/>
                                 </columnConstraints>
                                 <rowConstraints>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>
+                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>
+                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>
                                 </rowConstraints>
                                 <children>
                                     <Label text="Timestamp pattern">
@@ -142,18 +147,21 @@
                                         </font>
                                     </Label>
 
-                                        <CodeArea fx:id="lineTemplateExpression" styleClass="search-field-outer" maxHeight="-Infinity"
-                                                  maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                                                  prefHeight="24.0"
-                                                  GridPane.columnIndex="1">
-                                            <padding>
-                                                <Insets top="2.0"/>
-                                            </padding>
-                                        </CodeArea>
+                                    <CodeArea fx:id="lineTemplateExpression" styleClass="search-field-outer"
+                                              maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                              prefHeight="24.0"
+                                              GridPane.columnIndex="1">
+                                        <padding>
+                                            <Insets top="2.0"/>
+                                        </padding>
+                                    </CodeArea>
 
-                                    <TextField maxWidth="60.0" minHeight="-Infinity" prefHeight="24.0" prefWidth="60.0"
+                                    <TextField fx:id="timeColumnTextField" maxWidth="60.0" minHeight="-Infinity"
+                                               prefHeight="24.0" prefWidth="60.0"
                                                GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                                    <TextField maxWidth="-Infinity" minHeight="-Infinity" prefHeight="24.0"
+                                    <TextField fx:id="delimiterTextField" maxWidth="-Infinity" minHeight="-Infinity"
+                                               prefHeight="24.0"
                                                prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                                 </children>
                             </GridPane>
@@ -169,9 +177,16 @@
                     </Label>
                     <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
                         <children>
-                            <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
-                                      maxWidth="1.7976931348623157E308" prefHeight="201.0" prefWidth="795.0"
-                                      HBox.hgrow="SOMETIMES"/>
+                            <TabPane fx:id="testTabPane" side="BOTTOM"  maxWidth="Infinity" maxHeight="Infinity" HBox.hgrow="SOMETIMES">
+                                <Tab fx:id="inputTab" text="Input" closable="false">
+                                    <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
+                                              maxWidth="1.7976931348623157E308" prefHeight="201.0" prefWidth="795.0"
+                                              HBox.hgrow="SOMETIMES"/>
+                                </Tab>
+                                <Tab fx:id="resultTab" text="Results"  closable="false">
+                                    <TableView fx:id="testResultTable" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="SOMETIMES"/>
+                                </Tab>
+                            </TabPane>
                             <VBox>
                                 <children>
                                     <Button fx:id="clearTestAreaButton" cache="true" contentDisplay="GRAPHIC_ONLY"
@@ -230,7 +245,7 @@
                                     <Region maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS"/>
                                     <Button fx:id="testLineTemplate" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
                                             maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                            mnemonicParsing="false" onAction="#handleOnTestLineTemplate"
+                                            mnemonicParsing="false" onAction="#handleOnRunTest"
                                             prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Test">
                                         <graphic>
                                             <Region>
@@ -265,12 +280,7 @@
                             <Font name="Monospaced Regular" size="12.0"/>
                         </font>
                     </Label>
-                    <TableView prefHeight="200.0" prefWidth="200.0">
-                        <columns>
-                            <TableColumn prefWidth="75.0" text="C1"/>
-                            <TableColumn prefWidth="75.0" text="C2"/>
-                        </columns>
-                    </TableView>
+
                 </VBox>
                 <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="14.0" spacing="2.0" AnchorPane.leftAnchor="14.0"
                       AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
@@ -374,7 +384,4 @@
         <ButtonType fx:constant="CANCEL"/>
         <ButtonType fx:constant="OK"/>
     </buttonTypes>
-    <!--    <graphic>-->
-    <!--        <Region styleClass="source-icon,dialog-icon"/>-->
-    <!--    </graphic>-->
 </DialogPane>

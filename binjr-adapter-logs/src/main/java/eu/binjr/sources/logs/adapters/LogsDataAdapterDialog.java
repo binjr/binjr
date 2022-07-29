@@ -86,11 +86,11 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
         setDialogHeaderText("Add a Zip Archive or Folder");
         extensionFiltersTextField = new TextField(String.join(", ", prefs.fileExtensionFilters.get()));
-        var label = new Label("Extensions:");
+        var label = new Label("Extensions");
         GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
-        var parsingLabel = new Label("Parsing:");
+        var parsingLabel = new Label("Parsing profile");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
         updateProfileList(UserPreferences.getInstance().userLogEventsParsingProfiles.get());

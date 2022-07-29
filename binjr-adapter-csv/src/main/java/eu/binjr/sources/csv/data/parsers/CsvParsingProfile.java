@@ -19,7 +19,7 @@ package eu.binjr.sources.csv.data.parsers;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 public interface CsvParsingProfile extends ParsingProfile {
-    char getDelimiter();
+    String getDelimiter();
 
     int getTimestampColumn();
 

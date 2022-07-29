@@ -20,40 +20,35 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class CustomCsvParsingProfile extends CustomParsingProfile implements CsvParsingProfile {
-    private final char delimiter;
+    private final String delimiter;
     private final int timestampColumn;
     private final int[] excludedColumns;
 
-    private CustomCsvParsingProfile() {
+    public CustomCsvParsingProfile() {
         super();
-        delimiter = ',';
+        delimiter = ",";
         timestampColumn = 0;
         excludedColumns = new int[0];
     }
 
-    private CustomCsvParsingProfile(String profileName,
-                                    Map<NamedCaptureGroup, String> captureGroups,
-                                    String lineTemplateExpression,
-                                    char delimiter,
-                                    int timestampColumn,
-                                    int[] excludedColumns) {
-        this(profileName,
-                UUID.randomUUID().toString(),
-                captureGroups,
-                lineTemplateExpression,
-                delimiter,
-                timestampColumn,
-                excludedColumns);
+    public static CsvParsingProfile of(CsvParsingProfile parsingProfile) {
+        return new CustomCsvParsingProfile(parsingProfile.getProfileName(),
+                parsingProfile.getProfileId(),
+                parsingProfile.getCaptureGroups(),
+                parsingProfile.getLineTemplateExpression(),
+                parsingProfile.getDelimiter(),
+                parsingProfile.getTimestampColumn(),
+                parsingProfile.getExcludedColumns());
     }
 
-    private CustomCsvParsingProfile(String profileName,
+
+    public CustomCsvParsingProfile(String profileName,
                                     String profileId,
                                     Map<NamedCaptureGroup, String> captureGroups,
                                     String lineTemplateExpression,
-                                    char delimiter,
+                                    String delimiter,
                                     int timestampColumn,
                                     int[] excludedColumns) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
@@ -62,22 +57,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         this.excludedColumns = excludedColumns;
     }
 
-
-    public static CustomCsvParsingProfile of(CsvParsingProfile profile) {
-        if (profile == null) {
-            return null;
-        }
-        return new CustomCsvParsingProfile(profile.getProfileName(),
-                profile.getProfileId(),
-                profile.getCaptureGroups(),
-                profile.getLineTemplateExpression(),
-                profile.getDelimiter(),
-                profile.getTimestampColumn(),
-                profile.getExcludedColumns());
-    }
-
     @Override
-    public char getDelimiter() {
+    public String getDelimiter() {
         return this.delimiter;
     }
 
@@ -90,4 +71,5 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     public int[] getExcludedColumns() {
         return this.excludedColumns;
     }
+
 }

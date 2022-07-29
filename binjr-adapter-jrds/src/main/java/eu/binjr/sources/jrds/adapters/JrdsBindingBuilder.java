@@ -23,7 +23,7 @@ import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 
 /**
- * Builder used to build instances of {@link eu.binjr.core.data.adapters.SourceBinding} from values
+ * Factory used to build instances of {@link eu.binjr.core.data.adapters.SourceBinding} from values
  * configured by the setters, for use with {@link JrdsDataAdapter}
  */
 public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {

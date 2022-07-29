@@ -52,14 +52,14 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                     TemporalCaptureGroup.MILLI, "\\d{3}",
                     CaptureGroup.of("TIMEZONE"), "(Z|[+-]\\d{2}:?(\\d{2})?)"),
             "$YEAR[\\/-]?$MONTH[\\/-]?$DAY[-\\sT]$HOUR?:?$MINUTE?:?$SECOND?([\\.,]$MILLI)?$TIMEZONE?",
-            ',',
+            ",",
             0,
             new int[0]),
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
             "$EPOCH",
-            ',',
+            ",",
             0,
             new int[0]),
     EPOCH_MS("Milliseconds since 01/01/1970",
@@ -67,7 +67,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
                     TemporalCaptureGroup.MILLI, "\\d{3}"),
             "$EPOCH$MILLI",
-            ',',
+            ",",
             0,
             new int[0]);;
 
@@ -76,7 +76,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final Map<NamedCaptureGroup, String> captureGroups;
     private final String profileId;
     private final Pattern regex;
-    private final char delimiter;
+    private final String delimiter;
     private final int timestampColumn;
     private final int[] excludedColumns;
 
@@ -84,7 +84,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                              String id,
                              Map<NamedCaptureGroup, String> groups,
                              String lineTemplateExpression,
-                             char delimiter,
+                             String delimiter,
                              int timestampColumn,
                              int[] excludedColumns) {
         this.profileId = id;
@@ -108,6 +108,11 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     }
 
     @Override
+    public boolean isBuiltIn() {
+        return true;
+    }
+
+    @Override
     public String getProfileId() {
         return this.profileId;
     }
@@ -128,7 +133,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     }
 
     @Override
-    public char getDelimiter() {
+    public String getDelimiter() {
         return delimiter;
     }
 

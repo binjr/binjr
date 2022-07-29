@@ -46,11 +46,7 @@ public class CsvEventParser implements EventParser {
     private final CsvEventFormat format;
     private final CsvEventIterator eventIterator;
     private final CSVParser csvParser;
-    private ParsedEvent buffered;
-
-
     private final LongProperty progress = new SimpleLongProperty(0);
-    private long charRead = 0;
 
     CsvEventParser(CsvEventFormat format, InputStream ias) {
         this.reader = new BufferedReader(new InputStreamReader(ias, format.getEncoding()));
@@ -61,7 +57,7 @@ public class CsvEventParser implements EventParser {
                     .setAllowMissingColumnNames(false)
                     .setHeader()
                     .setSkipHeaderRecord(true)
-                    .setDelimiter(format.getDelimiter())
+                    .setDelimiter(format.getProfile().getDelimiter())
                     .build().parse(reader);
             this.eventIterator = new CsvEventIterator();
         } catch (IOException e) {
@@ -95,15 +91,17 @@ public class CsvEventParser implements EventParser {
             }
             ZonedDateTime timestamp;
 
-            var dateOpt = format.parse(csvRecord.get(format.getTimestampPosition()));
+            var dateOpt = format.parse(csvRecord.get(format.getProfile().getTimestampColumn()));
             if (dateOpt.isPresent()) {
                 timestamp = dateOpt.get().getTimestamp();
             } else {
-                throw new UnsupportedOperationException("Failed to parse time stamp in column #" + format.getTimestampPosition());
+                throw new UnsupportedOperationException("Failed to parse time stamp in column #" + format.getProfile().getTimestampColumn());
             }
             Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {
-                values.put(Integer.toString(i), csvRecord.get(i));
+                if (i != format.getProfile().getTimestampColumn()) { // don't add the timestamp column as an attribute
+                    values.put(Integer.toString(i), csvRecord.get(i));
+                }
             }
             return new ParsedEvent(sequence.incrementAndGet(), timestamp, " ", values);
         }
