@@ -20,9 +20,6 @@ import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.data.indexes.parser.EventFormat;
-import eu.binjr.core.data.indexes.parser.EventParser;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
@@ -32,8 +29,6 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -53,13 +48,9 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -97,7 +88,7 @@ public abstract class AbstractParsingProfilesController<T extends ParsingProfile
     @FXML
     protected CodeArea lineTemplateExpression;
     @FXML
-    protected Button testLineTemplate;
+    protected Button runTestButton;
     @FXML
     protected CodeArea testArea;
     @FXML
@@ -300,7 +291,7 @@ public abstract class AbstractParsingProfilesController<T extends ParsingProfile
         assert root != null : "fx:id=\"root\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert expressions != null : "fx:id=\"expressions\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert lineTemplateExpression != null : "fx:id=\"lineTemplateExpression\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
-        assert testLineTemplate != null : "fx:id=\"testLineTemplate\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
+        assert runTestButton != null : "fx:id=\"testLineTemplate\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert testArea != null : "fx:id=\"testArea\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert profileComboBox != null : "fx:id=\"profileComboBox\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert addProfileButton != null : "fx:id=\"importProfileButton2\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";

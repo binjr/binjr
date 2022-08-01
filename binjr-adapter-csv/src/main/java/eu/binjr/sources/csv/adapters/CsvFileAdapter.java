@@ -112,9 +112,9 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     /**
      * Initializes a new instance of the {@link CsvFileAdapter} class with the provided parameters.
      *
-     * @param csvPath         the path to the csv file.
-     * @param zoneId          the time zone to used.
-     * @param encoding        the encoding for the csv file.
+     * @param csvPath           the path to the csv file.
+     * @param zoneId            the time zone to used.
+     * @param encoding          the encoding for the csv file.
      * @param csvParsingProfile a pattern to decode time stamps.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
@@ -138,15 +138,17 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         try (InputStream in = Files.newInputStream(csvPath)) {
             this.headers = parser.getDataColumnHeaders(in);
             for (int i = 0; i < headers.size(); i++) {
-                String header = headers.get(i).isBlank() ? "Column #" + i : headers.get(i);
-                var b = new TimeSeriesBinding.Builder()
-                        .withLabel(Integer.toString(i))
-                        .withPath(getId() + "/" + csvPath.toString())
-                        .withLegend(header)
-                        .withParent(tree.getValue())
-                        .withAdapter(this)
-                        .build();
-                tree.getInternalChildren().add(new TreeItem<>(b));
+                if (i != csvParsingProfile.getTimestampColumn()) {
+                    String header = headers.get(i).isBlank() ? "Column #" + i : headers.get(i);
+                    var b = new TimeSeriesBinding.Builder()
+                            .withLabel(Integer.toString(i))
+                            .withPath(getId() + "/" + csvPath.toString())
+                            .withLegend(header)
+                            .withParent(tree.getValue())
+                            .withAdapter(this)
+                            .build();
+                    tree.getInternalChildren().add(new TreeItem<>(b));
+                }
             }
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException(e);
@@ -234,7 +236,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                         }),
                 validateParameterNullity(params, PATH),
                 validateParameterNullity(params, ENCODING),
-                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE), CustomCsvParsingProfile.class)        );
+                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE), CustomCsvParsingProfile.class));
     }
 
     private void initParams(ZoneId zoneId,

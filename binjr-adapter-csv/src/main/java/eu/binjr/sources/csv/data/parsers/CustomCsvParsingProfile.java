@@ -25,12 +25,14 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     private final String delimiter;
     private final int timestampColumn;
     private final int[] excludedColumns;
+    private final boolean readColumnNames;
 
     public CustomCsvParsingProfile() {
         super();
         delimiter = ",";
         timestampColumn = 0;
         excludedColumns = new int[0];
+        readColumnNames = true;
     }
 
     public static CsvParsingProfile of(CsvParsingProfile parsingProfile) {
@@ -40,21 +42,22 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.getLineTemplateExpression(),
                 parsingProfile.getDelimiter(),
                 parsingProfile.getTimestampColumn(),
-                parsingProfile.getExcludedColumns());
+                parsingProfile.getExcludedColumns(), true);
     }
 
 
     public CustomCsvParsingProfile(String profileName,
-                                    String profileId,
-                                    Map<NamedCaptureGroup, String> captureGroups,
-                                    String lineTemplateExpression,
-                                    String delimiter,
-                                    int timestampColumn,
-                                    int[] excludedColumns) {
+                                   String profileId,
+                                   Map<NamedCaptureGroup, String> captureGroups,
+                                   String lineTemplateExpression,
+                                   String delimiter,
+                                   int timestampColumn,
+                                   int[] excludedColumns, boolean readColumnNames) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
         this.delimiter = delimiter;
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
+        this.readColumnNames = readColumnNames;
     }
 
     @Override
@@ -72,4 +75,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         return this.excludedColumns;
     }
 
+    @Override
+    public boolean isReadColumnNames() {
+        return readColumnNames;
+    }
 }

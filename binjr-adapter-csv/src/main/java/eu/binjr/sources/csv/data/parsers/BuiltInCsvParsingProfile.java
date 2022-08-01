@@ -54,14 +54,16 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             "$YEAR[\\/-]?$MONTH[\\/-]?$DAY[-\\sT]$HOUR?:?$MINUTE?:?$SECOND?([\\.,]$MILLI)?$TIMEZONE?",
             ",",
             0,
-            new int[0]),
+            new int[0],
+            true),
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
             "$EPOCH",
             ",",
             0,
-            new int[0]),
+            new int[0],
+            true),
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
@@ -69,7 +71,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             "$EPOCH$MILLI",
             ",",
             0,
-            new int[0]);;
+            new int[0],
+            true);
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -79,6 +82,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final String delimiter;
     private final int timestampColumn;
     private final int[] excludedColumns;
+    private boolean readColumnNames;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
@@ -86,7 +90,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                              String lineTemplateExpression,
                              String delimiter,
                              int timestampColumn,
-                             int[] excludedColumns) {
+                             int[] excludedColumns,
+                             boolean readColumnNames) {
         this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
@@ -95,6 +100,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
         this.delimiter = delimiter;
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
+        this.readColumnNames = readColumnNames;
     }
 
     @Override
@@ -145,5 +151,10 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     @Override
     public int[] getExcludedColumns() {
         return excludedColumns;
+    }
+
+    @Override
+    public boolean isReadColumnNames() {
+        return readColumnNames;
     }
 }

@@ -25,4 +25,5 @@ public interface CsvParsingProfile extends ParsingProfile {
 
     int[] getExcludedColumns();
 
+    boolean isReadColumnNames();
 }

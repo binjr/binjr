@@ -62,29 +62,4 @@ public interface EventFormat {
         }
         return Optional.empty();
     }
-
-//    static Optional<ParsedEvent> parse(ParsingProfile profile, ZoneId zoneId, String text) {
-//        return parse(profile, zoneId, -1, text);
-//    }
-//
-//    static Optional<ParsedEvent> parse(ParsingProfile profile, ZoneId zoneId, long lineNumber, String text) {
-//        var m = profile.getParsingRegex().matcher(text);
-//        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, zoneId);
-//        final Map<String, String> sections = new HashMap<>();
-//        if (m.find()) {
-//            for (Map.Entry<NamedCaptureGroup, String> entry : profile.getCaptureGroups().entrySet()) {
-//                var captureGroup = entry.getKey();
-//                var parsed = m.group(captureGroup.name());
-//                if (parsed != null && !parsed.isBlank()) {
-//                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-//                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
-//                    } else {
-//                        sections.put(captureGroup.name(), parsed);
-//                    }
-//                }
-//            }
-//            return Optional.of(new ParsedEvent(lineNumber, timestamp, text, sections));
-//        }
-//        return Optional.empty();
-//    }
 }

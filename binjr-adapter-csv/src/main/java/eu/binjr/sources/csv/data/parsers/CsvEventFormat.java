@@ -91,9 +91,10 @@ public class CsvEventFormat implements EventFormat {
             }
             List<String> headerNames = new ArrayList<>();
             for (int i = 0; i < record.size(); i++) {
-                if (i != getProfile().getTimestampColumn()) { // skip timestamp column
-                    headerNames.add(record.get(i));
-                }
+             //   if (i != getProfile().getTimestampColumn()) { // skip timestamp column
+                    String name = getProfile().isReadColumnNames() ? record.get(i) : "Column " + (i + 1);
+                    headerNames.add(name);
+               // }
             }
             return headerNames;
         }

@@ -53,12 +53,15 @@ public class CsvEventParser implements EventParser {
         this.sequence = new AtomicLong(0);
         this.format = format;
         try {
-            this.csvParser = CSVFormat.Builder.create()
-                    .setAllowMissingColumnNames(false)
-                    .setHeader()
+            var builder = CSVFormat.Builder.create()
+                    .setAllowMissingColumnNames(true)
                     .setSkipHeaderRecord(true)
-                    .setDelimiter(format.getProfile().getDelimiter())
-                    .build().parse(reader);
+                    .setDelimiter(format.getProfile().getDelimiter());
+            if (format.getProfile().isReadColumnNames()) {
+                builder.setHeader();
+            }
+            this.csvParser = builder.build().parse(reader);
+
             this.eventIterator = new CsvEventIterator();
         } catch (IOException e) {
             throw new RuntimeException(e);

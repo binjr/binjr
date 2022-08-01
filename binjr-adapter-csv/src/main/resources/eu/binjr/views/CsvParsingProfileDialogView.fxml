@@ -42,6 +42,7 @@
 <?import javafx.scene.control.Tab?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.CheckBox?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -57,7 +58,7 @@
                                     <Region HBox.hgrow="ALWAYS"/>
                                 </children>
                             </HBox>
-                            <TableView fx:id="captureGroupTable" prefHeight="258.0" prefWidth="762.0"
+                            <TableView fx:id="captureGroupTable" prefHeight="220.0" prefWidth="762.0"
                                        styleClass="search-field-outer">
                                 <columns>
                                     <TableColumn fx:id="nameColumn" prefWidth="220.0" sortable="false"
@@ -134,21 +135,11 @@
                                 </rowConstraints>
                                 <children>
                                     <Label text="Timestamp pattern">
-                                        <font>
-                                            <Font name="System Bold" size="12.0"/>
-                                        </font>
                                     </Label>
                                     <Label text="Timestamp column #" GridPane.rowIndex="1">
-                                        <font>
-                                            <Font name="System Bold" size="12.0"/>
-                                        </font>
                                     </Label>
                                     <Label text="Delimiting character" GridPane.rowIndex="2">
-                                        <font>
-                                            <Font name="System Bold" size="12.0"/>
-                                        </font>
                                     </Label>
-
                                     <CodeArea fx:id="lineTemplateExpression" styleClass="search-field-outer"
                                               maxHeight="-Infinity"
                                               maxWidth="1.7976931348623157E308" minHeight="-Infinity"
@@ -166,36 +157,85 @@
                                              GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                                     <TextField fx:id="delimiterTextField" maxWidth="-Infinity" minHeight="-Infinity"
                                                prefHeight="24.0"
-                                               prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                                               prefWidth="35.0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                                 </children>
                             </GridPane>
+                            <CheckBox fx:id="readColumnNameCheckBox" text="Use values from first line as column names">
+                            </CheckBox>
                         </children>
                         <VBox.margin>
                             <Insets/>
                         </VBox.margin>
                     </VBox>
-                    <Label text="Test:">
-                        <font>
-                            <Font name="System Bold" size="12.0"/>
-                        </font>
+                    <Button fx:id="runTestButton"
+                            contentDisplay="LEFT"
+                            text="Test data extraction"
+                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                            minWidth="-Infinity"
+                            mnemonicParsing="false"
+                            onAction="#handleOnRunTest">
+                        <graphic>
+                            <Region>
+                                <styleClass>
+                                    <String fx:value="icon-container"/>
+                                    <String fx:value="test-icon"/>
+                                    <String fx:value="medium-icon"/>
+                                </styleClass>
+                                <padding>
+                                    <Insets right="25.0"/>
+                                </padding>
+                            </Region>
+                        </graphic>
+                        <padding>
+                            <Insets right="20" top="5" bottom="5"/>
+                        </padding>
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Test data extraction"/>
+                        </tooltip>
+                    </Button>
+                    <Label fx:id="notificationLabel" managed="false" maxHeight="1.7976931348623157E308"
+                           maxWidth="1.7976931348623157E308" minHeight="-Infinity" styleClass="notification-info"
+                           text="" visible="false" wrapText="true" VBox.vgrow="NEVER">
+                        <padding>
+                            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+                        </padding>
                     </Label>
                     <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
                         <children>
                             <TabPane fx:id="testTabPane" side="TOP" maxWidth="Infinity" maxHeight="Infinity"
-                                     HBox.hgrow="SOMETIMES">
-                                <Tab fx:id="inputTab" text="Input" closable="false">
+                                     HBox.hgrow="ALWAYS">
+                                <Tab fx:id="inputTab" text="Input"
+                                     closable="false">
+                                    <graphic>
+                                        <Region prefWidth="20">
+                                            <styleClass>
+                                                <String fx:value="icon-container"/>
+                                                <String fx:value="edit-icon"/>
+                                                <String fx:value="small-icon"/>
+                                            </styleClass>
+                                        </Region>
+                                    </graphic>
                                     <VirtualizedScrollPane>
                                         <content>
                                             <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
                                                       maxWidth="1.7976931348623157E308" prefHeight="201.0"
                                                       prefWidth="795.0"
-                                                      HBox.hgrow="SOMETIMES"/>
+                                                      HBox.hgrow="ALWAYS"/>
                                         </content>
                                     </VirtualizedScrollPane>
                                 </Tab>
                                 <Tab fx:id="resultTab" text="Results" closable="false">
+                                    <graphic>
+                                        <Region prefWidth="20">
+                                            <styleClass>
+                                                <String fx:value="icon-container"/>
+                                                <String fx:value="eye-icon"/>
+                                                <String fx:value="small-icon"/>
+                                            </styleClass>
+                                        </Region>
+                                    </graphic>
                                     <TableView fx:id="testResultTable" prefHeight="200.0" prefWidth="200.0"
-                                               HBox.hgrow="SOMETIMES"/>
+                                               HBox.hgrow="ALWAYS"/>
                                 </Tab>
                             </TabPane>
                             <VBox>
@@ -254,44 +294,10 @@
                                         </tooltip>
                                     </Button>
                                     <Region maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS"/>
-                                    <Button fx:id="testLineTemplate" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                            maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                            mnemonicParsing="false" onAction="#handleOnRunTest"
-                                            prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Test">
-                                        <graphic>
-                                            <Region>
-                                                <styleClass>
-                                                    <String fx:value="icon-container"/>
-                                                    <String fx:value="test-icon"/>
-                                                    <String fx:value="medium-icon"/>
-                                                </styleClass>
-                                                <padding>
-                                                    <Insets right="20.0"/>
-                                                </padding>
-                                            </Region>
-                                        </graphic>
-                                        <tooltip>
-                                            <Tooltip showDelay="500ms" text="Test line extraction"/>
-                                        </tooltip>
-                                    </Button>
                                 </children>
                             </VBox>
                         </children>
                     </HBox>
-                    <Label fx:id="notificationLabel" managed="false" maxHeight="1.7976931348623157E308"
-                           maxWidth="1.7976931348623157E308" minHeight="-Infinity" styleClass="notification-info"
-                           text="" visible="false" wrapText="true" VBox.vgrow="ALWAYS">
-                        <VBox.margin>
-                            <Insets/>
-                        </VBox.margin>
-                        <padding>
-                            <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
-                        </padding>
-                        <font>
-                            <Font name="Monospaced Regular" size="12.0"/>
-                        </font>
-                    </Label>
-
                 </VBox>
                 <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="14.0" spacing="2.0" AnchorPane.leftAnchor="14.0"
                       AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">

@@ -32,25 +32,24 @@
 
 package eu.binjr.sources.csv.data.parsers;
 
-import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.core.controllers.AbstractParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.preferences.DateFormat;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.util.StringConverter;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CsvParsingProfilesController extends AbstractParsingProfilesController<CsvParsingProfile> {
 
@@ -66,39 +65,15 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
     private Tab inputTab;
     @FXML
     private Tab resultTab;
+    @FXML
+    private CheckBox readColumnNameCheckBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
-        delimiterTextField.textProperty().addListener((obs, oldText, newText) -> {
-            resetTest();
-        });
-
-//        this.timeColumnTextField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999999999, 1));
-
-//        this.timeColumnTextField.setTextFormatter(new TextFormatter<Number>(new StringConverter<>() {
-//            @Override
-//            public String toString(Number object) {
-//                if (object == null) {
-//                    return "1";
-//                }
-//                return object.toString();
-//            }
-//
-//            @Override
-//            public Number fromString(String string) {
-//                try {
-//                    int gtz = Integer.parseInt(string);
-//                    if (gtz <= 0) {
-//                        TextFieldValidator.fail(timeColumnTextField, "Timestamp column position cannot be less than 1", true);
-//                    }
-//                    return gtz;
-//                } catch (Exception e) {
-//                    TextFieldValidator.fail(timeColumnTextField, "Invalid timestamp column value: " + e.getMessage(), true);
-//                    return 1;
-//                }
-//            }
-//        }));
+        delimiterTextField.textProperty().addListener((observable) -> resetTest());
+        timeColumnTextField.valueProperty().addListener(observable -> resetTest());
+        readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
     }
 
     @Override
@@ -106,7 +81,8 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
         super.loadParserParameters(profile);
         this.delimiterTextField.setText(profile.getDelimiter());
         this.timeColumnTextField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999999999, profile.getTimestampColumn() + 1));
-//        this.timeColumnTextField.(Integer.toString(profile.getTimestampColumn() + 1));
+        this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
+        this.readColumnNameCheckBox.setDisable(profile.isBuiltIn());
         this.delimiterTextField.setDisable(profile.isBuiltIn());
         this.timeColumnTextField.setDisable(profile.isBuiltIn());
     }
@@ -127,23 +103,6 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
     }
 
     @Override
-    protected void handleOnClearTestArea(ActionEvent actionEvent) {
-        testTabPane.getSelectionModel().select(inputTab);
-        super.handleOnClearTestArea(actionEvent);
-    }
-
-    @Override
-    protected void handleOnCopyTestArea(ActionEvent actionEvent) {
-        super.handleOnCopyTestArea(actionEvent);
-    }
-
-    @Override
-    protected void handleOnPasteToTestArea(ActionEvent actionEvent) {
-        testTabPane.getSelectionModel().select(inputTab);
-        super.handleOnPasteToTestArea(actionEvent);
-    }
-
-    @Override
     protected void handleOnRunTest(ActionEvent event) {
         super.handleOnRunTest(event);
         testTabPane.getSelectionModel().select(resultTab);
@@ -152,27 +111,33 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
     @Override
     protected void doTest() throws Exception {
         var format = new CsvEventFormat(profileComboBox.getValue(), ZoneId.systemDefault(), StandardCharsets.UTF_8);
-        var eventParser = format.parse(new ByteArrayInputStream(testArea.getText().getBytes(StandardCharsets.UTF_8)));
-        var events = new ArrayList<ParsedEvent>();
-        for (var parsed : eventParser) {
-            events.add(parsed);
+        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(StandardCharsets.UTF_8))) {
+            var headers = format.getDataColumnHeaders(in);
+            if (headers.size() == 0) {
+                notifyWarn("No record found.");
+            } else {
+                Map<TableColumn, String> colMap = new HashMap<>();
+                for (int i = 0; i < headers.size(); i++) {
+                    String name  = headers.get(i);
+                    var col = new TableColumn<ParsedEvent, String>(name);
+                    colMap.put(col, Integer.toString(i));
+                    if (i == format.getProfile().getTimestampColumn()){
+                        col.setCellValueFactory(param ->
+                                new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
+                    }else {
+                        col.setCellValueFactory(param ->
+                                new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
+                    }
+                    testResultTable.getColumns().add(col);
+                }
+            }
         }
-        if (events.size() == 0) {
-            notifyWarn("No record found.");
-        } else {
-            var timeCol = new TableColumn<ParsedEvent, String>("Timestamp");
-            timeCol.setCellValueFactory(param ->
-                    new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
-            testResultTable.getColumns().add(timeCol);
-            events.get(0).getFields().forEach((name, value) -> {
-                var col = new TableColumn<ParsedEvent, String>(name);
-                col.setCellValueFactory(param ->
-                        new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(param.getTableColumn().getText()))));
-                testResultTable.getColumns().add(col);
-            });
-
-            testResultTable.getItems().addAll(events);
-            notifyInfo(String.format("Found %d record(s).", events.size()));
+        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(StandardCharsets.UTF_8))) {
+            var eventParser = format.parse(in);
+            for (var parsed : eventParser) {
+                testResultTable.getItems().add(parsed);
+            }
+            notifyInfo(String.format("Found %d record(s).", testResultTable.getItems().size()));
         }
     }
 
@@ -181,6 +146,7 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
         super.resetTest();
         this.testResultTable.getItems().clear();
         this.testResultTable.getColumns().clear();
+        testTabPane.getSelectionModel().select(inputTab);
     }
 
     @Override
@@ -191,7 +157,8 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 lineExpression,
                 this.delimiterTextField.getText(),
                 this.timeColumnTextField.getValue() - 1,
-                new int[0]);
+                new int[0],
+                this.readColumnNameCheckBox.isSelected());
     }
 
     private String formatToDouble(String value) {
