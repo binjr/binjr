@@ -40,6 +40,8 @@
 <?import javafx.scene.control.ButtonType?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import javafx.scene.control.Spinner?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -157,9 +159,11 @@
                                         </padding>
                                     </CodeArea>
 
-                                    <TextField fx:id="timeColumnTextField" maxWidth="60.0" minHeight="-Infinity"
-                                               prefHeight="24.0" prefWidth="60.0"
-                                               GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                    <Spinner fx:id="timeColumnTextField"
+                                             editable="false"
+                                             maxWidth="60.0" minHeight="-Infinity"
+                                             prefHeight="24.0" prefWidth="60.0"
+                                             GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                                     <TextField fx:id="delimiterTextField" maxWidth="-Infinity" minHeight="-Infinity"
                                                prefHeight="24.0"
                                                prefWidth="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
@@ -177,14 +181,21 @@
                     </Label>
                     <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
                         <children>
-                            <TabPane fx:id="testTabPane" side="BOTTOM"  maxWidth="Infinity" maxHeight="Infinity" HBox.hgrow="SOMETIMES">
+                            <TabPane fx:id="testTabPane" side="TOP" maxWidth="Infinity" maxHeight="Infinity"
+                                     HBox.hgrow="SOMETIMES">
                                 <Tab fx:id="inputTab" text="Input" closable="false">
-                                    <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
-                                              maxWidth="1.7976931348623157E308" prefHeight="201.0" prefWidth="795.0"
-                                              HBox.hgrow="SOMETIMES"/>
+                                    <VirtualizedScrollPane>
+                                        <content>
+                                            <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
+                                                      maxWidth="1.7976931348623157E308" prefHeight="201.0"
+                                                      prefWidth="795.0"
+                                                      HBox.hgrow="SOMETIMES"/>
+                                        </content>
+                                    </VirtualizedScrollPane>
                                 </Tab>
-                                <Tab fx:id="resultTab" text="Results"  closable="false">
-                                    <TableView fx:id="testResultTable" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="SOMETIMES"/>
+                                <Tab fx:id="resultTab" text="Results" closable="false">
+                                    <TableView fx:id="testResultTable" prefHeight="200.0" prefWidth="200.0"
+                                               HBox.hgrow="SOMETIMES"/>
                                 </Tab>
                             </TabPane>
                             <VBox>
