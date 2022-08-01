@@ -90,12 +90,18 @@ public class CsvEventParser implements EventParser {
                 return null;
             }
             ZonedDateTime timestamp;
-
-            var dateOpt = format.parse(csvRecord.get(format.getProfile().getTimestampColumn()));
+            if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
+                throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
+                        (format.getProfile().getTimestampColumn() + 1) +
+                        ": CSV record only has " + csvRecord.size() + " fields.");
+            }
+            String dateString = csvRecord.get(format.getProfile().getTimestampColumn());
+            var dateOpt = format.parse(dateString);
             if (dateOpt.isPresent()) {
                 timestamp = dateOpt.get().getTimestamp();
             } else {
-                throw new UnsupportedOperationException("Failed to parse time stamp in column #" + format.getProfile().getTimestampColumn());
+                throw new UnsupportedOperationException("Failed to parse time stamp in column #" +
+                        (format.getProfile().getTimestampColumn() + 1));
             }
             Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {
