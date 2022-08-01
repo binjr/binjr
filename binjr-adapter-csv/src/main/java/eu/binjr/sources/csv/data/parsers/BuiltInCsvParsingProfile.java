@@ -37,6 +37,8 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -55,7 +57,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             ",",
             0,
             new int[0],
-            true),
+            true,
+            Locale.US),
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
@@ -63,7 +66,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             ",",
             0,
             new int[0],
-            true),
+            true,
+            Locale.US),
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
@@ -72,7 +76,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             ",",
             0,
             new int[0],
-            true);
+            true,
+            Locale.US);
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -82,7 +87,9 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final String delimiter;
     private final int timestampColumn;
     private final int[] excludedColumns;
-    private boolean readColumnNames;
+    private final NumberFormat numberFormat;
+    private final Locale numberFormattingLocale;
+    private final boolean readColumnNames;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
@@ -91,7 +98,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                              String delimiter,
                              int timestampColumn,
                              int[] excludedColumns,
-                             boolean readColumnNames) {
+                             boolean readColumnNames,
+                             Locale numberFormattingLocale) {
         this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
@@ -101,6 +109,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
         this.readColumnNames = readColumnNames;
+        this.numberFormattingLocale = numberFormattingLocale;
+        this.numberFormat =  NumberFormat.getNumberInstance(numberFormattingLocale);
     }
 
     @Override
@@ -156,5 +166,15 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     @Override
     public boolean isReadColumnNames() {
         return readColumnNames;
+    }
+
+    @Override
+    public Locale getNumberFormattingLocale() {
+        return numberFormattingLocale;
+    }
+
+    @Override
+    public NumberFormat getNumberFormat() {
+        return numberFormat;
     }
 }

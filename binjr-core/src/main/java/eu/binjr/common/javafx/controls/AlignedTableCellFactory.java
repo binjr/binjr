@@ -23,8 +23,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Callback;
 
-import java.text.DecimalFormat;
-
 /**
  * A table cell factory aiming to format cells containing decimal numbers.
  *
@@ -32,11 +30,10 @@ import java.text.DecimalFormat;
  * @param <T> The type of the item contained within the Cell
  * @author Frederic Thevenet
  */
-public class DecimalFormatTableCellFactory<S, T> implements Callback<TableColumn<S, T>, TableCell<S, T>> {
+public class AlignedTableCellFactory<S, T> implements Callback<TableColumn<S, T>, TableCell<S, T>> {
 
     private TextAlignment alignment;
-    private DecimalFormat formatter;
-    private String formatPattern;
+
 
     /**
      * Gets the alignment of text in the cell
@@ -56,24 +53,6 @@ public class DecimalFormatTableCellFactory<S, T> implements Callback<TableColumn
         this.alignment = alignment;
     }
 
-    /**
-     * Gets the pattern to use to format decimal numbers to text
-     *
-     * @return the pattern to use to format decimal numbers to text
-     */
-    public String getPattern() {
-        return formatPattern;
-    }
-
-    /**
-     * Sets the pattern to use to format decimal numbers to text
-     *
-     * @param format the pattern to use to format decimal numbers to text
-     */
-    public void setPattern(String format) {
-        formatPattern = format;
-        this.formatter = new DecimalFormat(formatPattern);
-    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -89,9 +68,7 @@ public class DecimalFormatTableCellFactory<S, T> implements Callback<TableColumn
                 if (item == null) {
                     super.setText(null);
                     super.setGraphic(null);
-                } else if (formatter != null) {
-                    super.setText(formatter.format(item));
-                } else if (item instanceof Node node) {
+                }  else if (item instanceof Node node) {
                     super.setText(null);
                     super.setGraphic(node);
                 } else {

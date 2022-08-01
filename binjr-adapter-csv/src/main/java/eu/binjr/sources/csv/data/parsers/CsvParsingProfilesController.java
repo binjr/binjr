@@ -32,6 +32,7 @@
 
 package eu.binjr.sources.csv.data.parsers;
 
+import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
 import eu.binjr.core.controllers.AbstractParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
@@ -39,17 +40,21 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.text.TextAlignment;
+import javafx.util.converter.NumberStringConverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class CsvParsingProfilesController extends AbstractParsingProfilesController<CsvParsingProfile> {
 
@@ -117,14 +122,19 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 notifyWarn("No record found.");
             } else {
                 Map<TableColumn, String> colMap = new HashMap<>();
+                var cellFactory = new AlignedTableCellFactory<ParsedEvent, String>();
+                cellFactory.setAlignment(TextAlignment.RIGHT);
                 for (int i = 0; i < headers.size(); i++) {
                     String name  = headers.get(i);
                     var col = new TableColumn<ParsedEvent, String>(name);
                     colMap.put(col, Integer.toString(i));
                     if (i == format.getProfile().getTimestampColumn()){
+                        col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
                     }else {
+
+                        col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
                     }
@@ -158,12 +168,14 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 this.delimiterTextField.getText(),
                 this.timeColumnTextField.getValue() - 1,
                 new int[0],
-                this.readColumnNameCheckBox.isSelected());
+                this.readColumnNameCheckBox.isSelected(),
+                Locale.getDefault());
     }
 
     private String formatToDouble(String value) {
+        var profile = profileComboBox.getValue();
         try {
-            return Double.toString(Double.parseDouble(value));
+           return profile.getNumberFormat().format(profile.getNumberFormat().parse(value));
         } catch (Exception e) {
             return "NaN";
         }

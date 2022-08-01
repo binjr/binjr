@@ -1029,7 +1029,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
 
     private void intiLogFileTable() {
-        DecimalFormatTableCellFactory<LogFileSeriesInfo, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+        AlignedTableCellFactory<LogFileSeriesInfo, String> alignRightCellFactory = new AlignedTableCellFactory<>();
         alignRightCellFactory.setAlignment(TextAlignment.LEFT);
         CheckBox showAllCheckBox = new CheckBox();
         TableColumn<LogFileSeriesInfo, Boolean> visibleColumn = new TableColumn<>();

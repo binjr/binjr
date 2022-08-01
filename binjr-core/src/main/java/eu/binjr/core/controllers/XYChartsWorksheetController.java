@@ -802,7 +802,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 currentViewPort.getDataStore().getSeries().forEach(s -> getBindingManager().attachListener(s.selectedProperty(), r));
             }));
 
-            DecimalFormatTableCellFactory<TimeSeriesInfo<Double>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+            AlignedTableCellFactory<TimeSeriesInfo<Double>, String> alignRightCellFactory = new AlignedTableCellFactory<>();
             alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
 
             TableColumn<TimeSeriesInfo<Double>, Color> colorColumn = new TableColumn<>();

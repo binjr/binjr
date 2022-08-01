@@ -14,25 +14,23 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.csv.data.parsers;
+package eu.binjr.common.json.adapters;
 
-import com.google.gson.annotations.JsonAdapter;
-import eu.binjr.common.json.adapters.PatternJsonAdapter;
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
-import java.text.NumberFormat;
+import java.io.IOException;
 import java.util.Locale;
 
-public interface CsvParsingProfile extends ParsingProfile {
-    String getDelimiter();
+public class LocaleJsonAdapter extends TypeAdapter<Locale> {
+    @Override
+    public void write(JsonWriter jsonWriter, Locale locale) throws IOException {
+        jsonWriter.value(locale.toLanguageTag());
+    }
 
-    int getTimestampColumn();
-
-    int[] getExcludedColumns();
-
-    boolean isReadColumnNames();
-
-    Locale getNumberFormattingLocale();
-
-    NumberFormat getNumberFormat();
+    @Override
+    public Locale read(JsonReader jsonReader) throws IOException {
+        return Locale.forLanguageTag(jsonReader.nextString());
+    }
 }

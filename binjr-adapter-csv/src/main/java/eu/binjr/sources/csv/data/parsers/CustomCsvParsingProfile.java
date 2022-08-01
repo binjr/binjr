@@ -16,9 +16,14 @@
 
 package eu.binjr.sources.csv.data.parsers;
 
+import com.google.gson.annotations.JsonAdapter;
+import eu.binjr.common.json.adapters.LocaleJsonAdapter;
+import eu.binjr.common.json.adapters.PatternJsonAdapter;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Map;
 
 public class CustomCsvParsingProfile extends CustomParsingProfile implements CsvParsingProfile {
@@ -26,6 +31,9 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     private final int timestampColumn;
     private final int[] excludedColumns;
     private final boolean readColumnNames;
+    @JsonAdapter(LocaleJsonAdapter.class)
+    private final Locale formattingLocale;
+    private transient final NumberFormat numberFormat;
 
     public CustomCsvParsingProfile() {
         super();
@@ -33,6 +41,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         timestampColumn = 0;
         excludedColumns = new int[0];
         readColumnNames = true;
+        formattingLocale = Locale.getDefault();
+        this.numberFormat = NumberFormat.getNumberInstance();
     }
 
     public static CsvParsingProfile of(CsvParsingProfile parsingProfile) {
@@ -42,7 +52,9 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.getLineTemplateExpression(),
                 parsingProfile.getDelimiter(),
                 parsingProfile.getTimestampColumn(),
-                parsingProfile.getExcludedColumns(), true);
+                parsingProfile.getExcludedColumns(),
+                parsingProfile.isReadColumnNames(),
+                parsingProfile.getNumberFormattingLocale());
     }
 
 
@@ -52,12 +64,15 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    String lineTemplateExpression,
                                    String delimiter,
                                    int timestampColumn,
-                                   int[] excludedColumns, boolean readColumnNames) {
+                                   int[] excludedColumns, boolean readColumnNames,
+                                   Locale formattingLocale) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
         this.delimiter = delimiter;
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
         this.readColumnNames = readColumnNames;
+        this.formattingLocale = formattingLocale;
+        this.numberFormat = NumberFormat.getNumberInstance(formattingLocale);
     }
 
     @Override
@@ -78,5 +93,14 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     @Override
     public boolean isReadColumnNames() {
         return readColumnNames;
+    }
+
+    @Override
+    public Locale getNumberFormattingLocale() {
+        return formattingLocale;
+    }
+
+    public NumberFormat getNumberFormat() {
+        return numberFormat;
     }
 }
