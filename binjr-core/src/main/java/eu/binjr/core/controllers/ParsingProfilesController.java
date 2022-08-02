@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class ParsingProfilesController extends AbstractParsingProfilesController<ParsingProfile> {
@@ -49,14 +50,14 @@ public class ParsingProfilesController extends AbstractParsingProfilesController
 
     @Override
     protected void doTest() throws Exception {
-        var format = new EventFormat() {
+        var format = new EventFormat<String>() {
             @Override
             public ParsingProfile getProfile() {
                 return profileComboBox.getValue();
             }
 
             @Override
-            public EventParser parse(InputStream ias) {
+            public EventParser<String> parse(InputStream ias) {
                 throw new UnsupportedOperationException("EvenFormat does not support input stream parsing");
             }
 
@@ -68,6 +69,11 @@ public class ParsingProfilesController extends AbstractParsingProfilesController
             @Override
             public ZoneId getZoneId() {
                 return ZoneId.systemDefault();
+            }
+
+            @Override
+            public Optional<ParsedEvent<String>> parse(long lineNumber, String text) {
+                return Optional.empty();
             }
         };
         format.parse(testArea.getText());

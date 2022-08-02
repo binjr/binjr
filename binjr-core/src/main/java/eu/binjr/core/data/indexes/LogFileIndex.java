@@ -42,7 +42,7 @@ import java.util.function.Function;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
-public class LogFileIndex extends Index {
+public class LogFileIndex extends Index<String> {
     private static final Logger logger = Logger.create(LogFileIndex.class);
 
     private final Cache<String, SearchHitsProcessor> facetResultCache;
@@ -213,7 +213,7 @@ public class LogFileIndex extends Index {
     }
 
     @Override
-    protected Document enrichDocument(Document doc, ParsedEvent event) throws IOException {
+    protected Document enrichDocument(Document doc, ParsedEvent<String> event) throws IOException {
         // add all other sections as prefixed search fields
         event.getFields().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e ->
                 doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO)));

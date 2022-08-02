@@ -125,18 +125,18 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 var cellFactory = new AlignedTableCellFactory<ParsedEvent, String>();
                 cellFactory.setAlignment(TextAlignment.RIGHT);
                 for (int i = 0; i < headers.size(); i++) {
-                    String name  = headers.get(i);
+                    String name = headers.get(i);
                     var col = new TableColumn<ParsedEvent, String>(name);
                     colMap.put(col, Integer.toString(i));
-                    if (i == format.getProfile().getTimestampColumn()){
+                    if (i == format.getProfile().getTimestampColumn()) {
                         col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
-                    }else {
+                    } else {
 
                         col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
-                                new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
+                                new SimpleStringProperty(format.getProfile().getNumberFormat().format(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
                     }
                     testResultTable.getColumns().add(col);
                 }
@@ -170,14 +170,5 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.getDefault());
-    }
-
-    private String formatToDouble(String value) {
-        var profile = profileComboBox.getValue();
-        try {
-           return profile.getNumberFormat().format(profile.getNumberFormat().parse(value));
-        } catch (Exception e) {
-            return "NaN";
-        }
     }
 }

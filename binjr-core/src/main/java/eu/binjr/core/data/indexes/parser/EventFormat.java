@@ -29,37 +29,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public interface EventFormat {
+public interface EventFormat<T> {
     ParsingProfile getProfile();
 
-    EventParser parse(InputStream ias);
+    EventParser<T> parse(InputStream ias);
 
     Charset getEncoding();
 
     ZoneId getZoneId();
 
-    default Optional<ParsedEvent> parse(String text) {
+    default Optional<ParsedEvent<T>> parse(String text) {
         return parse(-1, text);
     }
 
-    default Optional<ParsedEvent> parse(long lineNumber, String text) {
-        var m = getProfile().getParsingRegex().matcher(text);
-        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
-        final Map<String, String> sections = new HashMap<>();
-        if (m.find()) {
-            for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
-                var captureGroup = entry.getKey();
-                var parsed = m.group(captureGroup.name());
-                if (parsed != null && !parsed.isBlank()) {
-                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
-                    } else {
-                        sections.put(captureGroup.name(), parsed);
-                    }
-                }
-            }
-            return Optional.of(new ParsedEvent(lineNumber, timestamp, text, sections));
-        }
-        return Optional.empty();
-    }
+     Optional<ParsedEvent<T>> parse(long lineNumber, String text); // {
+//        var m = getProfile().getParsingRegex().matcher(text);
+//        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
+//        final Map<String, T> sections = new HashMap<>();
+//        if (m.find()) {
+//            for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
+//                var captureGroup = entry.getKey();
+//                var parsed = m.group(captureGroup.name());
+//                if (parsed != null && !parsed.isBlank()) {
+//                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+//                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
+//                    } else {
+//                        sections.put(captureGroup.name(), parsed);
+//                    }
+//                }
+//            }
+//            return Optional.of(new ParsedEvent<T>(lineNumber, timestamp, text, sections));
+//        }
+//        return Optional.empty();
+//    }
 }

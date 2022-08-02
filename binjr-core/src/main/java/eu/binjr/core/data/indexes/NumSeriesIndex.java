@@ -38,7 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NumSeriesIndex extends Index {
+public class NumSeriesIndex extends Index<Double> {
     private static final Logger logger = Logger.create(NumSeriesIndex.class);
 
     public NumSeriesIndex() throws IOException {
@@ -46,19 +46,10 @@ public class NumSeriesIndex extends Index {
     }
 
     @Override
-    protected Document enrichDocument(Document doc, ParsedEvent event) throws IOException {
+    protected Document enrichDocument(Document doc, ParsedEvent<Double> event) throws IOException {
         // add all other sections as stored double fields
-        event.getFields().forEach((key, value) -> doc.add(new StoredField(key, parseDouble(value))));
+        event.getFields().forEach((key, value) -> doc.add(new StoredField(key, value)));
         return super.enrichDocument(doc, event);
-    }
-
-    private double parseDouble(String value) {
-        try {
-            return Double.parseDouble(value);
-        } catch (NumberFormatException e) {
-            logger.trace(() -> "Cannot format value as a number", e);
-            return Double.NaN;
-        }
     }
 
     public long search(long start,
@@ -98,6 +89,4 @@ public class NumSeriesIndex extends Index {
             }
         });
     }
-
-
 }

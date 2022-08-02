@@ -27,18 +27,18 @@ import java.io.InputStream;
 import java.time.ZoneId;
 import java.util.List;
 
-public interface Indexable extends Closeable {
+public interface Indexable<T> extends Closeable {
 
     void add(String path,
              InputStream ias,
              boolean commit,
-             EventFormat parser,
+             EventFormat<T> parser,
              LongProperty progress,
              Property<IndexingStatus> indexingStatus) throws IOException;
 
     void add(String path,
              InputStream ias,
-             EventFormat parser,
+             EventFormat<T> parser,
              LongProperty progress,
              Property<IndexingStatus> indexingStatus) throws IOException;
 

@@ -19,14 +19,20 @@ package eu.binjr.sources.logs.data.parsers;
 import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-public class LogEventFormat implements EventFormat {
+public class LogEventFormat implements EventFormat<String> {
     private final ParsingProfile profile;
     private final ZoneId zoneId;
     private final Charset encoding;
@@ -48,7 +54,7 @@ public class LogEventFormat implements EventFormat {
     }
 
     @Override
-    public Optional<ParsedEvent> parse(String text) {
+    public Optional<ParsedEvent<String>> parse(String text) {
         return parse(-1, text);
     }
 
@@ -60,5 +66,27 @@ public class LogEventFormat implements EventFormat {
     @Override
     public ZoneId getZoneId() {
         return zoneId;
+    }
+
+    @Override
+    public Optional<ParsedEvent<String>> parse(long lineNumber, String text) {
+        var m = getProfile().getParsingRegex().matcher(text);
+        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
+        final Map<String, String> sections = new HashMap<>();
+        if (m.find()) {
+            for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
+                var captureGroup = entry.getKey();
+                var parsed = m.group(captureGroup.name());
+                if (parsed != null && !parsed.isBlank()) {
+                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
+                    } else {
+                        sections.put(captureGroup.name(), parsed);
+                    }
+                }
+            }
+            return Optional.of(new ParsedEvent<String>(lineNumber, timestamp, text, sections));
+        }
+        return Optional.empty();
     }
 }

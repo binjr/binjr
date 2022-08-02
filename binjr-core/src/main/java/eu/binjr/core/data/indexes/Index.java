@@ -23,6 +23,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.indexes.parser.EventFormat;
+import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
@@ -61,7 +62,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public abstract class Index implements Indexable {
+public abstract class Index<T> implements Indexable<T> {
     public static final String TIMESTAMP = "timestamp";
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
@@ -146,7 +147,7 @@ public abstract class Index implements Indexable {
     @Override
     public void add(String path,
                     InputStream ias,
-                    EventFormat parser,
+                    EventFormat<T> parser,
                     LongProperty progress,
                     Property<IndexingStatus> indexingStatus) throws IOException {
         add(path, ias, true, parser, progress, indexingStatus);
@@ -156,7 +157,7 @@ public abstract class Index implements Indexable {
     public void add(String path,
                     InputStream ias,
                     boolean commit,
-                    EventFormat parser,
+                    EventFormat<T> parser,
                     LongProperty progress,
                     Property<IndexingStatus> cancellationRequested) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
@@ -168,7 +169,7 @@ public abstract class Index implements Indexable {
 
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
                 final AtomicBoolean taskAborted = new AtomicBoolean(false);
-                final BlockingQueue<ParsedEvent> queue = new LinkedBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
+                final BlockingQueue<ParsedEvent<T>> queue = new LinkedBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                 final List<Future<Integer>> results = new ArrayList<>();
 
                 for (int i = 0; i < parsingThreadsNumber; i++) {
@@ -176,7 +177,7 @@ public abstract class Index implements Indexable {
                         logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
                         int nbEventProcessed = 0;
                         do {
-                            List<ParsedEvent> todo = new ArrayList<>();
+                            List<ParsedEvent<T>> todo = new ArrayList<>();
                             var drained = queue.drainTo(todo, prefs.parsingThreadDrainSize.get().intValue());
                             if (drained == 0 && queue.size() == 0) {
                                 // Park the thread for a while before polling again
@@ -358,7 +359,7 @@ public abstract class Index implements Indexable {
         return ranges;
     }
 
-    private Document createDocument(String path, ParsedEvent event) throws IOException {
+    private Document createDocument(String path, ParsedEvent<T> event) throws IOException {
         var doc = new Document();
         doc.add(new StringField(DOC_URI, path, Field.Store.NO));
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
@@ -372,7 +373,7 @@ public abstract class Index implements Indexable {
         return enrichDocument(doc, event);
     }
 
-    protected Document enrichDocument(Document doc, ParsedEvent event) throws IOException {
+    protected Document enrichDocument(Document doc, ParsedEvent<T> event) throws IOException {
         return doc;
     }
 

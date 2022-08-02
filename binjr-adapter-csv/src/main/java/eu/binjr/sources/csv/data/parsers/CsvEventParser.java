@@ -39,7 +39,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CsvEventParser implements EventParser {
+public class CsvEventParser implements EventParser<Double> {
     private static final Logger logger = Logger.create(CsvEventParser.class);
     private final BufferedReader reader;
     private final AtomicLong sequence;
@@ -80,14 +80,14 @@ public class CsvEventParser implements EventParser {
     }
 
     @Override
-    public Iterator<ParsedEvent> iterator() {
+    public Iterator<ParsedEvent<Double>> iterator() {
         return eventIterator;
     }
 
-    public class CsvEventIterator implements Iterator<ParsedEvent> {
+    public class CsvEventIterator implements Iterator<ParsedEvent<Double>> {
 
         @Override
-        public ParsedEvent next() {
+        public ParsedEvent<Double> next() {
             var csvRecord = csvParser.iterator().next();
             if (csvRecord == null) {
                 return null;
@@ -106,18 +106,26 @@ public class CsvEventParser implements EventParser {
                 throw new UnsupportedOperationException("Failed to parse time stamp in column #" +
                         (format.getProfile().getTimestampColumn() + 1));
             }
-            Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
+            Map<String, Double> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {
                 if (i != format.getProfile().getTimestampColumn()) { // don't add the timestamp column as an attribute
-                    values.put(Integer.toString(i), csvRecord.get(i));
+                    values.put(Integer.toString(i), parseDouble(csvRecord.get(i)));
                 }
             }
-            return new ParsedEvent(sequence.incrementAndGet(), timestamp, " ", values);
+            return new ParsedEvent<Double>(sequence.incrementAndGet(), timestamp, " ", values);
         }
 
         @Override
         public boolean hasNext() {
             return csvParser.iterator().hasNext();
+        }
+
+        private double parseDouble(String value){
+            try{
+                return format.getProfile().getNumberFormat().parse(value).doubleValue();
+            }catch (Exception e){
+                return Double.NaN;
+            }
         }
     }
 }

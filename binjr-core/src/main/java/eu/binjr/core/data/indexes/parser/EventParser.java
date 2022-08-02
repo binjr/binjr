@@ -22,13 +22,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.util.Iterator;
 
-public interface EventParser extends Closeable, Iterable<ParsedEvent> {
+public interface EventParser<T> extends Closeable, Iterable<ParsedEvent<T>> {
     @Override
     void close() throws IOException;
 
     LongProperty progressIndicator();
 
     @Override
-    Iterator<ParsedEvent> iterator();
+    Iterator<ParsedEvent<T>> iterator();
 
 }

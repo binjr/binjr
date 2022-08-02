@@ -22,18 +22,20 @@ import eu.binjr.core.data.exceptions.DecodingDataFromAdapterException;
 import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.time.Instant;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.ZonedDateTime;
+import java.util.*;
 
-public class CsvEventFormat implements EventFormat {
+public class CsvEventFormat implements EventFormat<Double> {
     private static final Logger logger = Logger.create(CsvEventFormat.class);
     private final CsvParsingProfile profile;
     private final ZoneId zoneId;
@@ -51,13 +53,43 @@ public class CsvEventFormat implements EventFormat {
     }
 
     @Override
-    public EventParser parse(InputStream ias) {
+    public EventParser<Double> parse(InputStream ias) {
         return new CsvEventParser(this, ias);
     }
 
     @Override
-    public Optional<ParsedEvent> parse(String text) {
+    public Optional<ParsedEvent<Double>> parse(String text) {
         return parse(-1, text);
+    }
+
+    @Override
+    public Optional<ParsedEvent<Double>> parse(long lineNumber, String text) {
+        var m = getProfile().getParsingRegex().matcher(text);
+        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
+        final Map<String, Double> sections = new HashMap<>();
+        if (m.find()) {
+            for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
+                var captureGroup = entry.getKey();
+                var parsed = m.group(captureGroup.name());
+                if (parsed != null && !parsed.isBlank()) {
+                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
+                    } else {
+                        sections.put(captureGroup.name(), parseDouble(parsed));
+                    }
+                }
+            }
+            return Optional.of(new ParsedEvent<>(lineNumber, timestamp, text, sections));
+        }
+        return Optional.empty();
+    }
+
+    private double parseDouble(String value) {
+        try {
+            return getProfile().getNumberFormat().parse(value).doubleValue();
+        } catch (Exception e) {
+            return Double.NaN;
+        }
     }
 
     @Override
@@ -91,10 +123,10 @@ public class CsvEventFormat implements EventFormat {
             }
             List<String> headerNames = new ArrayList<>();
             for (int i = 0; i < record.size(); i++) {
-             //   if (i != getProfile().getTimestampColumn()) { // skip timestamp column
-                    String name = getProfile().isReadColumnNames() ? record.get(i) : "Column " + (i + 1);
-                    headerNames.add(name);
-               // }
+                //   if (i != getProfile().getTimestampColumn()) { // skip timestamp column
+                String name = getProfile().isReadColumnNames() ? record.get(i) : "Column " + (i + 1);
+                headerNames.add(name);
+                // }
             }
             return headerNames;
         }

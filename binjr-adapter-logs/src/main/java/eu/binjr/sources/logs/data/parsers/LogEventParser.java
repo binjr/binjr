@@ -30,7 +30,7 @@ public class LogEventParser implements EventParser {
     private final AtomicLong sequence;
     private final LogEventFormat format;
     private final LogEventIterator logEventIterator;
-    private ParsedEvent buffered;
+    private ParsedEvent<String> buffered;
 
     private final LongProperty progress = new SimpleLongProperty(0);
     private long charRead = 0;
@@ -54,16 +54,16 @@ public class LogEventParser implements EventParser {
     }
 
     @Override
-    public Iterator<ParsedEvent> iterator() {
+    public Iterator<ParsedEvent<?>> iterator() {
         return logEventIterator;
     }
 
-    public class LogEventIterator implements Iterator<ParsedEvent> {
+    public class LogEventIterator implements Iterator<ParsedEvent<?>> {
         private boolean hasNext = true;
 
         @Override
 
-        public ParsedEvent next() {
+        public ParsedEvent<String> next() {
             var event = yieldNextEvent();
             while (event == null && hasNext) {
                 event = yieldNextEvent();
@@ -71,7 +71,7 @@ public class LogEventParser implements EventParser {
             return event;
         }
 
-        private ParsedEvent yieldNextEvent() {
+        private ParsedEvent<String> yieldNextEvent() {
             String line = null;
             try {
                 line = reader.readLine();
