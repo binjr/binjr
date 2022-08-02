@@ -55,8 +55,6 @@ import java.util.Objects;
  */
 public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
     private final TextField encodingField;
-    //    private final TextField separatorField;
-//    private final TextField timestampPositionField;
     private int pos = 2;
     private final CsvAdapterPreferences prefs;
     private final ChoiceBox<CsvParsingProfile> parsingChoiceBox = new ChoiceBox<>();

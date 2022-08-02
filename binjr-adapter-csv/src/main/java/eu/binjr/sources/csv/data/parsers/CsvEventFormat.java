@@ -57,14 +57,6 @@ public class CsvEventFormat implements EventFormat<Double> {
         return new CsvEventParser(this, ias);
     }
 
-    private double parseDouble(String value) {
-        try {
-            return getProfile().getNumberFormat().parse(value).doubleValue();
-        } catch (Exception e) {
-            return Double.NaN;
-        }
-    }
-
     @Override
     public Charset getEncoding() {
         return encoding;
@@ -96,10 +88,8 @@ public class CsvEventFormat implements EventFormat<Double> {
             }
             List<String> headerNames = new ArrayList<>();
             for (int i = 0; i < record.size(); i++) {
-                //   if (i != getProfile().getTimestampColumn()) { // skip timestamp column
                 String name = getProfile().isReadColumnNames() ? record.get(i) : "Column " + (i + 1);
                 headerNames.add(name);
-                // }
             }
             return headerNames;
         }

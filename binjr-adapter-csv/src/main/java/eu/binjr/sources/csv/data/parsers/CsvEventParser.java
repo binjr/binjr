@@ -33,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -47,6 +48,8 @@ public class CsvEventParser implements EventParser<Double> {
     private final CsvEventIterator eventIterator;
     private final CSVParser csvParser;
     private final LongProperty progress = new SimpleLongProperty(0);
+    private final NumberFormat numberFormat;
+
 
     CsvEventParser(CsvEventFormat format, InputStream ias) {
         this.reader = new BufferedReader(new InputStreamReader(ias, format.getEncoding()));
@@ -56,6 +59,7 @@ public class CsvEventParser implements EventParser<Double> {
             var builder = CSVFormat.Builder.create()
                     .setAllowMissingColumnNames(true)
                     .setSkipHeaderRecord(true)
+                    .setQuote(format.getProfile().getQuoteCharacter())
                     .setDelimiter(format.getProfile().getDelimiter());
             if (format.getProfile().isReadColumnNames()) {
                 builder.setHeader();
@@ -66,13 +70,13 @@ public class CsvEventParser implements EventParser<Double> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        numberFormat =NumberFormat.getNumberInstance(format.getProfile().getNumberFormattingLocale());
     }
 
     @Override
     public void close() throws IOException {
         reader.close();
     }
-
 
     @Override
     public LongProperty progressIndicator() {
@@ -82,6 +86,10 @@ public class CsvEventParser implements EventParser<Double> {
     @Override
     public Iterator<ParsedEvent<Double>> iterator() {
         return eventIterator;
+    }
+
+    private NumberFormat getNumberFormat() {
+        return numberFormat;
     }
 
     public class CsvEventIterator implements Iterator<ParsedEvent<Double>> {
@@ -138,12 +146,18 @@ public class CsvEventParser implements EventParser<Double> {
         }
 
         private double parseDouble(String value) {
-            try {
-                return format.getProfile().getNumberFormat().parse(value).doubleValue();
-            } catch (Exception e) {
-                return Double.NaN;
+            if (value != null) {
+                try {
+                    return getNumberFormat().parse(value.trim()).doubleValue();
+                } catch (Exception e) {
+                  logger.trace(()-> "Failed to convert to double", e);
+                }
             }
+            return Double.NaN;
+
         }
     }
+
+
 }
 

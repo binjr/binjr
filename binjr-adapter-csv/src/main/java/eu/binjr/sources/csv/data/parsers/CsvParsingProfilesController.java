@@ -33,6 +33,7 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
+import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
@@ -41,17 +42,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
+import org.controlsfx.control.textfield.TextFields;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.function.UnaryOperator;
 
 public class CsvParsingProfilesController extends ParsingProfilesController<CsvParsingProfile> {
 
@@ -59,6 +60,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private Spinner<Integer> timeColumnTextField;
     @FXML
     private TextField delimiterTextField;
+    @FXML
+    private TextField quoteCharacterTextField;
     @FXML
     private TableView<ParsedEvent<Double>> testResultTable;
     @FXML
@@ -69,6 +72,22 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private Tab resultTab;
     @FXML
     private CheckBox readColumnNameCheckBox;
+    @FXML
+    private TextField parsingLocaleTextField;
+
+    private final UnaryOperator<TextFormatter.Change> clampToSingleChar = c -> {
+        if (c.isContentChange()) {
+            int newLength = c.getControlNewText().length();
+            if (newLength > 1) {
+                String tail = c.getControlNewText().substring(newLength - 1, newLength);
+                c.setText(tail);
+                int oldLength = c.getControlText().length();
+                c.setRange(0, oldLength);
+            }
+        }
+        return c;
+    };
+    private NumberFormat numberFormat = NumberFormat.getNumberInstance();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,16 +95,24 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         delimiterTextField.textProperty().addListener((observable) -> resetTest());
         timeColumnTextField.valueProperty().addListener(observable -> resetTest());
         readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
+        TextFields.bindAutoCompletion(parsingLocaleTextField,
+                Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
+        delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
+        quoteCharacterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
     }
 
     @Override
     protected void loadParserParameters(CsvParsingProfile profile) {
         super.loadParserParameters(profile);
         this.delimiterTextField.setText(profile.getDelimiter());
+        this.quoteCharacterTextField.setText(String.valueOf(profile.getQuoteCharacter()));
         this.timeColumnTextField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999999999, profile.getTimestampColumn() + 1));
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
+        this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
+        this.parsingLocaleTextField.setDisable(profile.isBuiltIn());
         this.readColumnNameCheckBox.setDisable(profile.isBuiltIn());
         this.delimiterTextField.setDisable(profile.isBuiltIn());
+        this.quoteCharacterTextField.setDisable(profile.isBuiltIn());
         this.timeColumnTextField.setDisable(profile.isBuiltIn());
     }
 
@@ -130,7 +157,6 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
                     } else {
-
                         col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
@@ -157,22 +183,50 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     }
 
     @Override
-    protected CsvParsingProfile updateProfile(String profileName, String profileId, Map<NamedCaptureGroup, String> groups, String lineExpression) {
-        return new CustomCsvParsingProfile(profileName,
+    protected Optional<CsvParsingProfile> updateProfile(String profileName, String profileId, Map<NamedCaptureGroup, String> groups, String lineExpression) {
+        List<String> errors = new ArrayList<>();
+        if (this.lineTemplateExpression.getText().isBlank()) {
+            TextFieldValidator.fail(delimiterTextField, true);
+            errors.add("Timestamp pattern cannot be empty");
+        }
+        if (this.delimiterTextField.getText().isEmpty()) {
+            TextFieldValidator.fail(delimiterTextField, true);
+            errors.add("Delimiting character for CSV parsing cannot be empty");
+        }
+        if (this.quoteCharacterTextField.getText().isBlank()) {
+            TextFieldValidator.fail(quoteCharacterTextField, true);
+            errors.add("Quote character for CSV parsing cannot be empty");
+        }
+
+        try {
+            var bld = new Locale.Builder();
+            bld.setLanguageTag(parsingLocaleTextField.getText());
+            var parsingLocale = bld.build();
+            this.numberFormat = NumberFormat.getNumberInstance(parsingLocale);
+        } catch (IllformedLocaleException e) {
+            errors.add("The locale for number parsing is invalid: " + e.getMessage());
+        }
+        if (errors.size() > 0) {
+            notifyError(String.join("\n", errors));
+            return Optional.empty();
+        }
+
+        return Optional.of(new CustomCsvParsingProfile(profileName,
                 profileId,
                 groups,
                 lineExpression,
                 this.delimiterTextField.getText(),
+                this.quoteCharacterTextField.getText().charAt(0),
                 this.timeColumnTextField.getValue() - 1,
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
-                Locale.getDefault());
+                Locale.forLanguageTag(parsingLocaleTextField.getText())));
     }
 
     private String formatToDouble(Double value) {
         if (value != null) {
             try {
-                return profileComboBox.getValue().getNumberFormat().format(value);
+                return numberFormat.format(value);
             } catch (Exception e) {
                 // Do nothing
             }

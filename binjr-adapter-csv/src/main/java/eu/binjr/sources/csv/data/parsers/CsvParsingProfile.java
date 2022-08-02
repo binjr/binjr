@@ -34,5 +34,5 @@ public interface CsvParsingProfile extends ParsingProfile {
 
     Locale getNumberFormattingLocale();
 
-    NumberFormat getNumberFormat();
+    char getQuoteCharacter();
 }

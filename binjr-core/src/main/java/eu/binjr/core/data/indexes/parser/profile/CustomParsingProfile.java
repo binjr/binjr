@@ -28,17 +28,15 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class CustomParsingProfile implements ParsingProfile {
-    protected Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
+    protected Map<NamedCaptureGroup, String> captureGroups;
     protected String lineTemplateExpression;
     protected String profileName;
     protected final String profileId;
     @JsonAdapter(PatternJsonAdapter.class)
     private final Pattern regex;
-    private static final Gson GSON = new Gson();
 
     public CustomParsingProfile() {
-        profileId = "";
-        this.regex = Pattern.compile("");
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "");
     }
 
     public CustomParsingProfile(String profileName,
@@ -47,7 +45,7 @@ public class CustomParsingProfile implements ParsingProfile {
                                 String lineTemplateExpression) {
         this.profileName = profileName;
         this.profileId = profileId;
-        this.captureGroups.putAll(captureGroups);
+        this.captureGroups = captureGroups;
         this.lineTemplateExpression = lineTemplateExpression;
         this.regex = Pattern.compile(buildParsingRegexString());
     }

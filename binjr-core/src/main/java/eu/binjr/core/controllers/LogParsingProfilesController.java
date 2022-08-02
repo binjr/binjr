@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 public class LogParsingProfilesController extends ParsingProfilesController<ParsingProfile> {
 
@@ -66,9 +67,8 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
         testArea.setStyleSpans(0, highlightTextArea(hilitePattern, testArea.getText()));
     }
 
-
     @Override
-    protected ParsingProfile updateProfile(String profileName, String profileId, Map groups, String lineExpression) {
-        return new CustomParsingProfile(profileName, profileId, groups, lineExpression);
+    protected Optional<ParsingProfile> updateProfile(String profileName, String profileId, Map groups, String lineExpression) {
+        return Optional.of(new CustomParsingProfile(profileName, profileId, groups, lineExpression));
     }
 }

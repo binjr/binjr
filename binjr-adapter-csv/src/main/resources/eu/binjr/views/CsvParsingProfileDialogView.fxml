@@ -43,6 +43,8 @@
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Separator?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -118,50 +120,95 @@
                                     </TableColumn>
                                 </columns>
                             </TableView>
-                            <GridPane hgap="10.0" vgap="10.0">
-                                <columnConstraints>
-                                    <ColumnConstraints hgrow="NEVER" maxWidth="162.00006103515625"
-                                                       minWidth="123.33335367838541"
-                                                       prefWidth="131.9999796549479"/>
-                                    <ColumnConstraints hgrow="ALWAYS"
-                                                       maxWidth="1.7976931348623157E308"
-                                                       minWidth="300"
-                                                       prefWidth="600"/>
-                                </columnConstraints>
-                                <rowConstraints>
-                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>
-                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>
-                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>
-                                </rowConstraints>
+<!--                            <GridPane hgap="10.0" vgap="10.0">-->
+<!--                                <columnConstraints>-->
+<!--                                    <ColumnConstraints hgrow="NEVER" maxWidth="162.00006103515625"-->
+<!--                                                       minWidth="123.33335367838541"-->
+<!--                                                       prefWidth="131.9999796549479"/>-->
+<!--                                    <ColumnConstraints hgrow="ALWAYS"-->
+<!--                                                       maxWidth="1.7976931348623157E308"-->
+<!--                                                       minWidth="300"-->
+<!--                                                       prefWidth="600"/>-->
+<!--                                </columnConstraints>-->
+<!--                                <rowConstraints>-->
+<!--                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>-->
+<!--                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>-->
+<!--                                    <RowConstraints minHeight="20.0" prefHeight="20.0" vgrow="NEVER"/>-->
+<!--                                </rowConstraints>-->
+<!--                                <children>-->
+<!--                                    <Label text="Timestamp pattern">-->
+<!--                                    </Label>-->
+<!--                                    <Label text="Timestamp column #" GridPane.rowIndex="1">-->
+<!--                                    </Label>-->
+<!--                                    <Label text="Delimiting character" GridPane.rowIndex="2">-->
+<!--                                    </Label>-->
+<!--                                    <CodeArea fx:id="lineTemplateExpression" styleClass="search-field-outer"-->
+<!--                                              maxHeight="-Infinity"-->
+<!--                                              maxWidth="1.7976931348623157E308" minHeight="-Infinity"-->
+<!--                                              prefHeight="24.0"-->
+<!--                                              GridPane.columnIndex="1">-->
+<!--                                        <padding>-->
+<!--                                            <Insets top="2.0"/>-->
+<!--                                        </padding>-->
+<!--                                    </CodeArea>-->
+<!--                                    <Spinner fx:id="timeColumnTextField"-->
+<!--                                             editable="false"-->
+<!--                                             maxWidth="60.0" minHeight="-Infinity"-->
+<!--                                             prefHeight="24.0" prefWidth="60.0"-->
+<!--                                             GridPane.columnIndex="1"-->
+<!--                                             GridPane.rowIndex="1"/>-->
+<!--                                    <TextField fx:id="delimiterTextField" maxWidth="-Infinity" minHeight="-Infinity"-->
+<!--                                               prefHeight="24.0"-->
+<!--                                               prefWidth="35.0"-->
+<!--                                               GridPane.columnIndex="1"-->
+<!--                                               GridPane.rowIndex="2"/>-->
+<!--                                    <CheckBox fx:id="readColumnNameCheckBox"-->
+<!--                                              text="Use values from first line as column names"-->
+<!--                                              GridPane.columnIndex="2"-->
+<!--                                              GridPane.rowIndex="1"/>-->
+<!--                                    <Label text="Locale for parsing numbers"-->
+<!--                                           GridPane.columnIndex="2"-->
+<!--                                           GridPane.rowIndex="2"/>-->
+<!--                                    <TextField fx:id="parsingLocaleTextField"-->
+<!--                                               prefHeight="24.0"-->
+<!--                                               maxWidth="60.0"-->
+<!--                                               GridPane.columnIndex="3"-->
+<!--                                               GridPane.rowIndex="2"/>-->
+<!--                                </children>-->
+<!--                            </GridPane>-->
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <children>
                                     <Label text="Timestamp pattern">
                                     </Label>
-                                    <Label text="Timestamp column #" GridPane.rowIndex="1">
-                                    </Label>
-                                    <Label text="Delimiting character" GridPane.rowIndex="2">
-                                    </Label>
-                                    <CodeArea fx:id="lineTemplateExpression" styleClass="search-field-outer"
-                                              maxHeight="-Infinity"
-                                              maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                                              prefHeight="24.0"
-                                              GridPane.columnIndex="1">
+                                    <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="24.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
                                         <padding>
-                                            <Insets top="2.0"/>
+                                            <Insets top="2.0" />
                                         </padding>
                                     </CodeArea>
-
-                                    <Spinner fx:id="timeColumnTextField"
-                                             editable="false"
-                                             maxWidth="60.0" minHeight="-Infinity"
-                                             prefHeight="24.0" prefWidth="60.0"
-                                             GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                                    <TextField fx:id="delimiterTextField" maxWidth="-Infinity" minHeight="-Infinity"
-                                               prefHeight="24.0"
-                                               prefWidth="35.0" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                                 </children>
-                            </GridPane>
-                            <CheckBox fx:id="readColumnNameCheckBox" text="Use values from first line as column names">
-                            </CheckBox>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <Label text="Timestamp column #">
+                                    </Label>
+                                    <Spinner fx:id="timeColumnTextField" editable="false" maxWidth="60.0" minHeight="-Infinity" prefHeight="24.0" prefWidth="60.0" />
+                                    <Separator orientation="VERTICAL" prefHeight="20.0" />
+                                    <CheckBox fx:id="readColumnNameCheckBox" text="Use values from first line as column names" />
+                                </children>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <Label text="Delimiting character">
+                                    </Label>
+                                    <TextField fx:id="delimiterTextField" maxWidth="35" minHeight="-Infinity" prefHeight="24.0" prefWidth="35.0" />
+                                    <Separator orientation="VERTICAL" prefHeight="20.0" />
+                                    <Label text="Quote character" />
+                                    <TextField  fx:id="quoteCharacterTextField" maxWidth="35" minHeight="-Infinity" prefHeight="24.0" prefWidth="35.0" />
+                                    <Separator orientation="VERTICAL" prefHeight="20.0" />
+                                    <Label text="Locale for parsing numbers" />
+                                    <TextField fx:id="parsingLocaleTextField" maxWidth="120.0" prefHeight="24.0" />
+                                </children>
+                            </HBox>
                         </children>
                         <VBox.margin>
                             <Insets/>

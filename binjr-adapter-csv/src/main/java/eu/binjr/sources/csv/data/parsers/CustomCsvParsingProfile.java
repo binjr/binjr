@@ -18,32 +18,28 @@ package eu.binjr.sources.csv.data.parsers;
 
 import com.google.gson.annotations.JsonAdapter;
 import eu.binjr.common.json.adapters.LocaleJsonAdapter;
-import eu.binjr.common.json.adapters.PatternJsonAdapter;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 
-import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 public class CustomCsvParsingProfile extends CustomParsingProfile implements CsvParsingProfile {
     private final String delimiter;
+    private final char quoteCharacter;
     private final int timestampColumn;
     private final int[] excludedColumns;
     private final boolean readColumnNames;
     @JsonAdapter(LocaleJsonAdapter.class)
     private final Locale formattingLocale;
-    private transient final NumberFormat numberFormat;
 
     public CustomCsvParsingProfile() {
-        super();
-        delimiter = ",";
-        timestampColumn = 0;
-        excludedColumns = new int[0];
-        readColumnNames = true;
-        formattingLocale = Locale.getDefault();
-        this.numberFormat = NumberFormat.getNumberInstance();
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault());
     }
+
+
 
     public static CsvParsingProfile of(CsvParsingProfile parsingProfile) {
         return new CustomCsvParsingProfile(parsingProfile.getProfileName(),
@@ -51,6 +47,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.getCaptureGroups(),
                 parsingProfile.getLineTemplateExpression(),
                 parsingProfile.getDelimiter(),
+                parsingProfile.getQuoteCharacter(),
                 parsingProfile.getTimestampColumn(),
                 parsingProfile.getExcludedColumns(),
                 parsingProfile.isReadColumnNames(),
@@ -63,16 +60,16 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    Map<NamedCaptureGroup, String> captureGroups,
                                    String lineTemplateExpression,
                                    String delimiter,
-                                   int timestampColumn,
+                                   char quoteCharacter, int timestampColumn,
                                    int[] excludedColumns, boolean readColumnNames,
                                    Locale formattingLocale) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
         this.delimiter = delimiter;
+        this.quoteCharacter = quoteCharacter;
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
         this.readColumnNames = readColumnNames;
         this.formattingLocale = formattingLocale;
-        this.numberFormat = NumberFormat.getNumberInstance(formattingLocale);
     }
 
     @Override
@@ -100,7 +97,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         return formattingLocale;
     }
 
-    public NumberFormat getNumberFormat() {
-        return numberFormat;
+    @Override
+    public char getQuoteCharacter() {
+        return quoteCharacter;
     }
 }

@@ -55,6 +55,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                     CaptureGroup.of("TIMEZONE"), "(Z|[+-]\\d{2}:?(\\d{2})?)"),
             "$YEAR[\\/-]?$MONTH[\\/-]?$DAY[-\\sT]$HOUR?:?$MINUTE?:?$SECOND?([\\.,]$MILLI)?$TIMEZONE?",
             ",",
+            '"',
             0,
             new int[0],
             true,
@@ -64,6 +65,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
             "$EPOCH",
             ",",
+            '"',
             0,
             new int[0],
             true,
@@ -74,6 +76,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                     TemporalCaptureGroup.MILLI, "\\d{3}"),
             "$EPOCH$MILLI",
             ",",
+            '"',
             0,
             new int[0],
             true,
@@ -87,15 +90,16 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final String delimiter;
     private final int timestampColumn;
     private final int[] excludedColumns;
-    private final NumberFormat numberFormat;
     private final Locale numberFormattingLocale;
     private final boolean readColumnNames;
+    private final char quoteCharacter;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
                              Map<NamedCaptureGroup, String> groups,
                              String lineTemplateExpression,
                              String delimiter,
+                             char quoteChar,
                              int timestampColumn,
                              int[] excludedColumns,
                              boolean readColumnNames,
@@ -106,11 +110,11 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
         this.lineTemplateExpression = lineTemplateExpression;
         this.regex = Pattern.compile(buildParsingRegexString());
         this.delimiter = delimiter;
+        this.quoteCharacter = quoteChar;
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
         this.readColumnNames = readColumnNames;
         this.numberFormattingLocale = numberFormattingLocale;
-        this.numberFormat =  NumberFormat.getNumberInstance(numberFormattingLocale);
     }
 
     @Override
@@ -174,7 +178,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     }
 
     @Override
-    public NumberFormat getNumberFormat() {
-        return numberFormat;
+    public char getQuoteCharacter() {
+        return quoteCharacter;
     }
 }

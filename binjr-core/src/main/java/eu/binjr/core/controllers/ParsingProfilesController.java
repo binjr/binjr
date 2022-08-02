@@ -119,9 +119,10 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected void handleOnCloneProfile(ActionEvent actionEvent) {
         try {
             if (this.profileComboBox.getValue() != null) {
-                var p = duplicateProfile(this.profileComboBox.getValue());
-                this.profileComboBox.getItems().add(p);
-                this.profileComboBox.getSelectionModel().select(p);
+                duplicateProfile(this.profileComboBox.getValue()).ifPresent(p -> {
+                    this.profileComboBox.getItems().add(p);
+                    this.profileComboBox.getSelectionModel().select(p);
+                });
             }
         } catch (Throwable e) {
             Dialogs.notifyException("Error cloning profile", e, root);
@@ -131,9 +132,10 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     @FXML
     protected void handleOnAddProfile(ActionEvent actionEvent) {
         try {
-            var p = newProfile();
-            this.profileComboBox.getItems().add(p);
-            this.profileComboBox.getSelectionModel().select(p);
+            newProfile().ifPresent(p -> {
+                this.profileComboBox.getItems().add(p);
+                this.profileComboBox.getSelectionModel().select(p);
+            });
         } catch (Throwable e) {
             Dialogs.notifyException("Error creating profile", e, root);
         }
@@ -189,14 +191,15 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         }
     }
 
-    protected abstract void doTest() throws Exception ;
+    protected abstract void doTest() throws Exception;
 
     @FXML
     protected void handleOnRunTest(ActionEvent event) {
         try {
             resetTest();
-            applyChanges();
-            doTest();
+            if (applyChanges()) {
+                doTest();
+            }
         } catch (Exception e) {
             notifyError(e.getMessage());
             logger.error("Error testing parsing rules", e);
@@ -461,19 +464,19 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         }
     }
 
-    protected abstract T updateProfile(String profileName,
-                                       String profileId,
-                                       Map<NamedCaptureGroup, String> groups,
-                                       String lineExpression);
+    protected abstract Optional<T> updateProfile(String profileName,
+                                                 String profileId,
+                                                 Map<NamedCaptureGroup, String> groups,
+                                                 String lineExpression);
 
-    protected T duplicateProfile(T profile) {
+    protected Optional<T> duplicateProfile(T profile) {
         return updateProfile("Copy of " + profile.getProfileName(),
                 UUID.randomUUID().toString(),
                 profile.getCaptureGroups(),
                 profile.getLineTemplateExpression());
     }
 
-    protected T newProfile() {
+    protected Optional<T> newProfile() {
         return updateProfile("New profile",
                 UUID.randomUUID().toString(),
                 new HashMap<>(),
@@ -488,15 +491,19 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             var groups = this.captureGroupTable.getItems().stream()
                     .collect(Collectors.toMap(NameExpressionPair::getName, NameExpressionPair::getExpression));
             var updated = updateProfile(name, profile.getProfileId(), groups, this.lineTemplateExpression.getText());
-            // Suspend selection listener
-            this.profileComboBox.getSelectionModel().selectedItemProperty().removeListener(selectionListener);
-            try {
-                var idx = profileComboBox.getItems().indexOf(profile);
-                profileComboBox.getItems().remove(profile);
-                profileComboBox.getItems().add(idx, updated);
-                profileComboBox.getSelectionModel().select(updated);
-            } finally {
-                this.profileComboBox.getSelectionModel().selectedItemProperty().addListener(selectionListener);
+            if (updated.isPresent()) {
+                // Suspend selection listener
+                this.profileComboBox.getSelectionModel().selectedItemProperty().removeListener(selectionListener);
+                try {
+                    var idx = profileComboBox.getItems().indexOf(profile);
+                    profileComboBox.getItems().remove(profile);
+                    profileComboBox.getItems().add(idx, updated.get());
+                    profileComboBox.getSelectionModel().select(updated.get());
+                } finally {
+                    this.profileComboBox.getSelectionModel().selectedItemProperty().addListener(selectionListener);
+                }
+            } else {
+                return false;
             }
         }
         return true;
