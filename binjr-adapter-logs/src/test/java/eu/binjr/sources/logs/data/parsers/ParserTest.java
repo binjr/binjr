@@ -17,10 +17,12 @@
 package eu.binjr.sources.logs.data.parsers;
 
 
+import eu.binjr.core.data.indexes.parser.LogEventFormat;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 
@@ -95,9 +97,9 @@ public class ParserTest {
 
     private boolean parsingTest(ParsingProfile profile, String text) {
         var p = new LogEventFormat(profile, ZoneId.systemDefault(),  StandardCharsets.UTF_8);
-        var res = p.parse(text);
+        var res = p.parse(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)));
         System.out.println(res);
-        return res.isPresent();
+        return res.iterator().next() != null;
     }
 
 

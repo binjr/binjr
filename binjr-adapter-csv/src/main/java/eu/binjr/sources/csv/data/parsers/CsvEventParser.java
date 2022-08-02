@@ -21,6 +21,8 @@ import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.ParsingEventException;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.sources.csv.adapters.CsvFileAdapter;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -34,9 +36,7 @@ import java.io.InputStreamReader;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CsvEventParser implements EventParser<Double> {
@@ -92,17 +92,14 @@ public class CsvEventParser implements EventParser<Double> {
             if (csvRecord == null) {
                 return null;
             }
-            ZonedDateTime timestamp;
             if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
                 throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
                         (format.getProfile().getTimestampColumn() + 1) +
                         ": CSV record only has " + csvRecord.size() + " fields.");
             }
             String dateString = csvRecord.get(format.getProfile().getTimestampColumn());
-            var dateOpt = format.parse(dateString);
-            if (dateOpt.isPresent()) {
-                timestamp = dateOpt.get().getTimestamp();
-            } else {
+            ZonedDateTime timestamp = parseDateTime(dateString);
+            if (timestamp == null) {
                 throw new UnsupportedOperationException("Failed to parse time stamp in column #" +
                         (format.getProfile().getTimestampColumn() + 1));
             }
@@ -112,7 +109,7 @@ public class CsvEventParser implements EventParser<Double> {
                     values.put(Integer.toString(i), parseDouble(csvRecord.get(i)));
                 }
             }
-            return new ParsedEvent<Double>(sequence.incrementAndGet(), timestamp, " ", values);
+            return new ParsedEvent<>(sequence.incrementAndGet(), timestamp, " ", values);
         }
 
         @Override
@@ -120,10 +117,30 @@ public class CsvEventParser implements EventParser<Double> {
             return csvParser.iterator().hasNext();
         }
 
-        private double parseDouble(String value){
-            try{
+
+        private ZonedDateTime parseDateTime(String text) {
+            var m = format.getProfile().getParsingRegex().matcher(text);
+            var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, format.getZoneId());
+            final Map<String, Double> sections = new HashMap<>();
+            if (m.find()) {
+                for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
+                    var captureGroup = entry.getKey();
+                    var parsed = m.group(captureGroup.name());
+                    if (parsed != null && !parsed.isBlank()) {
+                        if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+                            timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
+                        }
+                    }
+                }
+                return timestamp;
+            }
+            return null;
+        }
+
+        private double parseDouble(String value) {
+            try {
                 return format.getProfile().getNumberFormat().parse(value).doubleValue();
-            }catch (Exception e){
+            } catch (Exception e) {
                 return Double.NaN;
             }
         }

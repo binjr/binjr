@@ -14,10 +14,8 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.data.parsers;
+package eu.binjr.core.data.indexes.parser;
 
-import eu.binjr.core.data.indexes.parser.EventParser;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 
@@ -25,7 +23,7 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class LogEventParser implements EventParser {
+public class LogEventParser implements EventParser<String> {
     private final BufferedReader reader;
     private final AtomicLong sequence;
     private final LogEventFormat format;
@@ -54,11 +52,11 @@ public class LogEventParser implements EventParser {
     }
 
     @Override
-    public Iterator<ParsedEvent<?>> iterator() {
+    public Iterator<ParsedEvent<String>> iterator() {
         return logEventIterator;
     }
 
-    public class LogEventIterator implements Iterator<ParsedEvent<?>> {
+    public class LogEventIterator implements Iterator<ParsedEvent<String>> {
         private boolean hasNext = true;
 
         @Override

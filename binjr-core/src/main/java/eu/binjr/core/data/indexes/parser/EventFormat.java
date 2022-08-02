@@ -38,28 +38,4 @@ public interface EventFormat<T> {
 
     ZoneId getZoneId();
 
-    default Optional<ParsedEvent<T>> parse(String text) {
-        return parse(-1, text);
-    }
-
-     Optional<ParsedEvent<T>> parse(long lineNumber, String text); // {
-//        var m = getProfile().getParsingRegex().matcher(text);
-//        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
-//        final Map<String, T> sections = new HashMap<>();
-//        if (m.find()) {
-//            for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
-//                var captureGroup = entry.getKey();
-//                var parsed = m.group(captureGroup.name());
-//                if (parsed != null && !parsed.isBlank()) {
-//                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-//                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
-//                    } else {
-//                        sections.put(captureGroup.name(), parsed);
-//                    }
-//                }
-//            }
-//            return Optional.of(new ParsedEvent<T>(lineNumber, timestamp, text, sections));
-//        }
-//        return Optional.empty();
-//    }
 }

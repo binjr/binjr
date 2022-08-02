@@ -14,11 +14,8 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.data.parsers;
+package eu.binjr.core.data.indexes.parser;
 
-import eu.binjr.core.data.indexes.parser.EventFormat;
-import eu.binjr.core.data.indexes.parser.EventParser;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
@@ -49,13 +46,8 @@ public class LogEventFormat implements EventFormat<String> {
     }
 
     @Override
-    public EventParser parse(InputStream ias) {
+    public EventParser<String> parse(InputStream ias) {
         return new LogEventParser(this, ias);
-    }
-
-    @Override
-    public Optional<ParsedEvent<String>> parse(String text) {
-        return parse(-1, text);
     }
 
     @Override
@@ -68,7 +60,6 @@ public class LogEventFormat implements EventFormat<String> {
         return zoneId;
     }
 
-    @Override
     public Optional<ParsedEvent<String>> parse(long lineNumber, String text) {
         var m = getProfile().getParsingRegex().matcher(text);
         var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
@@ -85,7 +76,7 @@ public class LogEventFormat implements EventFormat<String> {
                     }
                 }
             }
-            return Optional.of(new ParsedEvent<String>(lineNumber, timestamp, text, sections));
+            return Optional.of(new ParsedEvent<>(lineNumber, timestamp, text, sections));
         }
         return Optional.empty();
     }

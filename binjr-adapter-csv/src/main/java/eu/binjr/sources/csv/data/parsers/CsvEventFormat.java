@@ -57,33 +57,6 @@ public class CsvEventFormat implements EventFormat<Double> {
         return new CsvEventParser(this, ias);
     }
 
-    @Override
-    public Optional<ParsedEvent<Double>> parse(String text) {
-        return parse(-1, text);
-    }
-
-    @Override
-    public Optional<ParsedEvent<Double>> parse(long lineNumber, String text) {
-        var m = getProfile().getParsingRegex().matcher(text);
-        var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
-        final Map<String, Double> sections = new HashMap<>();
-        if (m.find()) {
-            for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
-                var captureGroup = entry.getKey();
-                var parsed = m.group(captureGroup.name());
-                if (parsed != null && !parsed.isBlank()) {
-                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
-                    } else {
-                        sections.put(captureGroup.name(), parseDouble(parsed));
-                    }
-                }
-            }
-            return Optional.of(new ParsedEvent<>(lineNumber, timestamp, text, sections));
-        }
-        return Optional.empty();
-    }
-
     private double parseDouble(String value) {
         try {
             return getProfile().getNumberFormat().parse(value).doubleValue();

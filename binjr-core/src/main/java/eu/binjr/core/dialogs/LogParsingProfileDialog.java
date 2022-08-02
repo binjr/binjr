@@ -18,9 +18,8 @@ package eu.binjr.core.dialogs;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.controllers.ParsingProfilesController;
+import eu.binjr.core.controllers.LogParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
@@ -32,13 +31,13 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 
-public class ParsingProfileDialog extends Dialog<ParsingProfile> {
+public class LogParsingProfileDialog extends Dialog<ParsingProfile> {
 
     private final DialogPane root;
 
-    public ParsingProfileDialog(Window owner, ParsingProfile selectedProfile) {
-        FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesDialogView.fxml"));
-        var controller = new ParsingProfilesController(
+    public LogParsingProfileDialog(Window owner, ParsingProfile selectedProfile) {
+        FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/LogParsingProfilesDialogView.fxml"));
+        var controller = new LogParsingProfilesController(
                 BuiltInParsingProfile.values(),
                 UserPreferences.getInstance().userLogEventsParsingProfiles.get(),
                 BuiltInParsingProfile.ALL,

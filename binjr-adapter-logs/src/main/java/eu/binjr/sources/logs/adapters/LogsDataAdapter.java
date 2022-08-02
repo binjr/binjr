@@ -33,7 +33,7 @@ import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.indexes.*;
 import eu.binjr.core.data.indexes.parser.EventFormat;
-import eu.binjr.sources.logs.data.parsers.LogEventFormat;
+import eu.binjr.core.data.indexes.parser.LogEventFormat;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;

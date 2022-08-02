@@ -27,7 +27,7 @@ import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.dialogs.ParsingProfileDialog;
+import eu.binjr.core.dialogs.LogParsingProfileDialog;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -98,7 +98,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
-                new ParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
+                new LogParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
                     prefs.mostRecentlyUsedParsingProfile.set(selection.getProfileId());
                     updateProfileList( UserPreferences.getInstance().userLogEventsParsingProfiles.get());
                 });

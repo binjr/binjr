@@ -34,6 +34,7 @@
 
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.ButtonType?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -127,9 +128,10 @@
                                                     <padding>
                                                         <Insets left="3.0" right="3.0"/>
                                                     </padding>
-
-                                                    <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity"
-                                                              maxWidth="1.7976931348623157E308" prefHeight="24.0"
+                                                    <CodeArea fx:id="lineTemplateExpression"
+                                                              maxHeight="-Infinity"
+                                                              maxWidth="1.7976931348623157E308"
+                                                              prefHeight="24.0"
                                                               HBox.hgrow="ALWAYS">
                                                         <HBox.margin>
                                                             <Insets/>
@@ -138,7 +140,6 @@
                                                             <Insets top="2.0"/>
                                                         </padding>
                                                     </CodeArea>
-
                                                 </HBox>
                                             </children>
                                         </HBox>
@@ -188,8 +189,13 @@
                         </Label>
                         <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
                             <children>
-                                <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
-                                          maxWidth="1.7976931348623157E308" prefHeight="301.0" HBox.hgrow="SOMETIMES"/>
+                                <VirtualizedScrollPane maxHeight="1.7976931348623157E308"
+                                                       maxWidth="1.7976931348623157E308" prefHeight="301.0"
+                                                       HBox.hgrow="SOMETIMES">
+                                    <content>
+                                        <CodeArea fx:id="testArea"/>
+                                    </content>
+                                </VirtualizedScrollPane>
                                 <VBox>
                                     <children>
                                         <Button fx:id="clearTestAreaButton" cache="true" contentDisplay="GRAPHIC_ONLY"
@@ -357,8 +363,5 @@
         <ButtonType fx:constant="CANCEL"/>
         <ButtonType fx:constant="OK"/>
     </buttonTypes>
-    <!--    <graphic>-->
-    <!--        <Region styleClass="source-icon,dialog-icon"/>-->
-    <!--    </graphic>-->
 </DialogPane>
 

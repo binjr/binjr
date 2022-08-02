@@ -33,7 +33,7 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
-import eu.binjr.core.controllers.AbstractParsingProfilesController;
+import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import javafx.beans.property.SimpleStringProperty;
@@ -41,14 +41,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
-import javafx.util.converter.NumberStringConverter;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -56,14 +53,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class CsvParsingProfilesController extends AbstractParsingProfilesController<CsvParsingProfile> {
+public class CsvParsingProfilesController extends ParsingProfilesController<CsvParsingProfile> {
 
     @FXML
     private Spinner<Integer> timeColumnTextField;
     @FXML
     private TextField delimiterTextField;
     @FXML
-    private TableView<ParsedEvent> testResultTable;
+    private TableView<ParsedEvent<Double>> testResultTable;
     @FXML
     private TabPane testTabPane;
     @FXML
@@ -122,11 +119,11 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 notifyWarn("No record found.");
             } else {
                 Map<TableColumn, String> colMap = new HashMap<>();
-                var cellFactory = new AlignedTableCellFactory<ParsedEvent, String>();
+                var cellFactory = new AlignedTableCellFactory<ParsedEvent<Double>, String>();
                 cellFactory.setAlignment(TextAlignment.RIGHT);
                 for (int i = 0; i < headers.size(); i++) {
                     String name = headers.get(i);
-                    var col = new TableColumn<ParsedEvent, String>(name);
+                    var col = new TableColumn<ParsedEvent<Double>, String>(name);
                     colMap.put(col, Integer.toString(i));
                     if (i == format.getProfile().getTimestampColumn()) {
                         col.setCellFactory(cellFactory);
@@ -136,7 +133,7 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
 
                         col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
-                                new SimpleStringProperty(format.getProfile().getNumberFormat().format(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
+                                new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
                     }
                     testResultTable.getColumns().add(col);
                 }
@@ -170,5 +167,16 @@ public class CsvParsingProfilesController extends AbstractParsingProfilesControl
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.getDefault());
+    }
+
+    private String formatToDouble(Double value) {
+        if (value != null) {
+            try {
+                return profileComboBox.getValue().getNumberFormat().format(value);
+            } catch (Exception e) {
+                // Do nothing
+            }
+        }
+        return "NaN";
     }
 }
