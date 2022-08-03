@@ -120,6 +120,7 @@
 }
 
 /**********************************************/
+
 .combo-box-base > .arrow-button,
 .choice-box,
 .button {
@@ -132,6 +133,19 @@
     -fx-alignment: center;
 }
 
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: -binjr-window-background-color;
+    -fx-border-width: 1;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: -binjr-button-background-color;
+    -fx-border-radius: 0;
+    -fx-alignment: center;
+}
+
+.spinner .increment-arrow-button:hover,
+.spinner .decrement-arrow-button:hover,
 .combo-box-base > .arrow-button:hover,
 .choice-box:hover,
 .button:hover {
@@ -175,6 +189,7 @@
 /*    -fx-background-color: red;*/
 /*}*/
 
+
 .combo-box-base > .arrow-button:hover,
 .dialog-button:hover,
 .toggle-button:hover,
@@ -182,6 +197,8 @@
     -fx-background-color: -binjr-control-hover-color;
 }
 
+.spinner .increment-arrow-button:hover:pressed,
+.spinner .decrement-arrow-button:hover:pressed,
 .combo-box-base > .arrow-button:hover:pressed,
 .choice-box:pressed:hover,
 .dialog-button:hover:pressed,
@@ -249,6 +266,11 @@
     -fx-border-color: -binjr-control-border-color;
 }
 
+.spinner {
+    -fx-border-width: 0.0;
+}
+
+.spinner,
 .search-field-outer,
 .text-input, .date-picker .text-input {
     -fx-background-radius: 0, 0;
@@ -267,6 +289,7 @@
 /*
 /*}*/
 
+.spinner:focused,
 .search-field-outer:focused,
 .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
     /*     -fx-background-color: #5c5c5c, -binjr-tool-button-background-color;*/
@@ -635,6 +658,8 @@
     -fx-background-color: #606060;
 }
 
+.spinner .increment-arrow-button .increment-arrow,
+.spinner .decrement-arrow-button .decrement-arrow,
 .scroll-bar > .decrement-button > .decrement-arrow,
 .scroll-bar > .increment-button > .increment-arrow {
     -fx-background-insets: 1 0 -1 0, 0;
@@ -642,6 +667,8 @@
     -fx-effect: null;
 }
 
+.spinner .increment-arrow-button:pressed .increment-arrow,
+.spinner .decrement-arrow-button:pressed .decrement-arrow,
 .scroll-bar > .decrement-button:pressed > .decrement-arrow,
 .scroll-bar > .increment-button:pressed > .increment-arrow {
     -fx-background-color: transparent, -fx-text-background-color;
@@ -675,10 +702,12 @@
     -fx-shape: "M7.626,12.876L4.251,8.751H7.14L11,12.876L7.14,17H4.251L7.626,12.876z";
 }
 
+.spinner .increment-arrow-button .increment-arrow,
 .scroll-bar:vertical > .decrement-button > .decrement-arrow {
     -fx-shape: "M4,17v-2.889l4.124-3.86l4.125,3.86V17l-4.125-3.375L4,17z";
 }
 
+.spinner .decrement-arrow-button .decrement-arrow,
 .scroll-bar:vertical > .increment-button > .increment-arrow {
     -fx-shape: "M8.124,13.625l4.125-3.375v2.889l-4.125,3.86L4,13.139V10.25L8.124,13.625z";
 }
@@ -1873,7 +1902,8 @@
 
 /**** TRACE ****/
 {
-    -trace-color:  #808080;
+    -trace-color: #808080
+;
 }
 
 .facet-pill-trace {
@@ -1898,7 +1928,8 @@
 
 /**** DEBUG ****/
 {
-    -debug-color:  #ADD8E6;
+    -debug-color: #ADD8E6
+;
 }
 
 .facet-pill-debug {
@@ -1923,7 +1954,8 @@
 
 /**** PERF ****/
 {
-    -perf-color:  #42eab3;
+    -perf-color: #42eab3
+;
 }
 
 .facet-pill-perf {
@@ -1948,7 +1980,8 @@
 
 /**** INFO ****/
 {
-    -info-color: white;
+    -info-color: white
+;
 }
 .facet-pill-info {
     -fx-background-color: #ffffff50;
@@ -1972,7 +2005,8 @@
 
 /**** UNKNOWN ****/
 {
-    -unknown-color: white;
+    -unknown-color: white
+;
 }
 .facet-pill-unknown {
     -fx-background-color: #ffffff50;
@@ -1996,7 +2030,8 @@
 
 /**** WARN ****/
 {
-    -warn-color: #fbca04;
+    -warn-color: #fbca04
+;
 }
 
 .facet-pill-warn {
@@ -2021,7 +2056,8 @@
 
 /**** ERROR ****/
 {
-    -error-color:  #FF6347;
+    -error-color: #FF6347
+;
 }
 
 .facet-pill-error {
@@ -2046,7 +2082,8 @@
 
 /**** FATAL ****/
 {
-    -fatal-color:  #FF0000;
+    -fatal-color: #FF0000
+;
 }
 
 .facet-pill-fatal {
