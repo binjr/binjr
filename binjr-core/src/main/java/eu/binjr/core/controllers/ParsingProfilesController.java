@@ -341,17 +341,10 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                 source.fireEvent(new ActionEvent(this, null));
                 event.consume();
             } else if (event.getCode() == KeyCode.TAB) {
-                Node parent = source.getParent();
-                if (parent != null) {
-                    var siblings = source.getParent().getChildrenUnmodifiable();
-                    var pos = siblings.indexOf(source);
-                    if (event.isShiftDown() && pos > 0) {
-                        siblings.get(pos - 1).requestFocus();
-                    } else if (!event.isShiftDown() && pos < siblings.size()) {
-                        siblings.get(pos + 1).requestFocus();
-                    } else {
-                        parent.requestFocus();
-                    }
+                if (event.isShiftDown()) {
+                    navigateToPreviousNode(source);
+                } else {
+                    navigateToNextNode(source);
                 }
                 event.consume();
             }
@@ -400,6 +393,36 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         );
 
         TableViewUtils.autoFillTableWidthWithColumn(captureGroupTable, 1);
+    }
+
+    private void navigateToNextNode(Node source) {
+        Node parent = source.getParent();
+        if (parent != null) {
+            var siblings = source.getParent().getChildrenUnmodifiable();
+            var pos = siblings.indexOf(source);
+            if (pos == siblings.size() - 1) {
+                // last node of the branch, go back to parent
+                navigateToNextNode(parent);
+            } else {
+                // Focus on next node in branch
+                siblings.get(pos + 1).requestFocus();
+            }
+        }
+    }
+
+    private void navigateToPreviousNode(Node source) {
+        Node parent = source.getParent();
+        if (parent != null) {
+            var siblings = source.getParent().getChildrenUnmodifiable();
+            var pos = siblings.indexOf(source);
+            if (pos == 0) {
+                // first node of the branch, go back to parent
+                navigateToPreviousNode(parent);
+            } else {
+                // Focus on previous node in branch
+                siblings.get(pos - 1).requestFocus();
+            }
+        }
     }
 
     public T getSelectedProfile() {
