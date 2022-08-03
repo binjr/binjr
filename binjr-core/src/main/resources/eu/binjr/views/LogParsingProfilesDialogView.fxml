@@ -35,6 +35,7 @@
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.ButtonType?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import javafx.scene.control.TitledPane?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -45,230 +46,239 @@
                       AnchorPane.bottomAnchor="4.0"
                       AnchorPane.leftAnchor="4.0"
                       AnchorPane.rightAnchor="4.0"
-                      AnchorPane.topAnchor="54.0">
-                    <children>
-                        <VBox spacing="10.0">
-                            <children>
-                                <HBox alignment="CENTER_LEFT">
-                                    <children>
-                                        <Region HBox.hgrow="ALWAYS"/>
-                                    </children>
-                                </HBox>
-                                <TableView fx:id="captureGroupTable" prefHeight="258.0" prefWidth="762.0"
-                                           styleClass="search-field-outer">
-                                    <columns>
-                                        <TableColumn fx:id="nameColumn" prefWidth="220.0" sortable="false"
-                                                     text="Group Name">
-                                            <cellValueFactory>
-                                                <PropertyValueFactory property="name"/>
-                                            </cellValueFactory>
-                                        </TableColumn>
-                                        <TableColumn fx:id="expressionColumn" minWidth="0.0" prefWidth="550.0"
-                                                     sortable="false" text="Capture Expression">
-                                            <cellValueFactory>
-                                                <PropertyValueFactory property="expression"/>
-                                            </cellValueFactory>
-                                        </TableColumn>
-                                        <TableColumn editable="false" maxWidth="56" minWidth="56" prefWidth="56.0"
-                                                     sortable="false" resizable="false">
-                                            <graphic>
-                                                <HBox>
-                                                    <Button fx:id="addGroupButton" cache="true"
-                                                            contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
-                                                            minWidth="-Infinity" mnemonicParsing="false"
-                                                            onAction="#handleOnAddGroup" prefHeight="25.0"
-                                                            prefWidth="25.0" styleClass="dialog-button" text="Add">
-                                                        <graphic>
-                                                            <Region>
-                                                                <styleClass>
-                                                                    <String fx:value="icon-container"/>
-                                                                    <String fx:value="plus-icon"/>
-                                                                    <String fx:value="medium-icon"/>
-                                                                </styleClass>
-                                                            </Region>
-                                                        </graphic>
-                                                        <tooltip>
-                                                            <Tooltip showDelay="500ms" text="Add new capture group"/>
-                                                        </tooltip>
-                                                    </Button>
-                                                    <Button fx:id="deleteGroupButton" contentDisplay="GRAPHIC_ONLY"
-                                                            maxHeight="-Infinity" maxWidth="-Infinity"
-                                                            minHeight="-Infinity" minWidth="-Infinity"
-                                                            mnemonicParsing="false" onAction="#handleOnDeleteGroup"
-                                                            prefHeight="25.0" prefWidth="25.0"
-                                                            styleClass="dialog-button" text="Delete">
-                                                        <graphic>
-                                                            <Region>
-                                                                <styleClass>
-                                                                    <String fx:value="icon-container"/>
-                                                                    <String fx:value="minus-icon"/>
-                                                                    <String fx:value="medium-icon"/>
-                                                                </styleClass>
-                                                            </Region>
-                                                        </graphic>
-                                                        <tooltip>
-                                                            <Tooltip showDelay="500ms" text="Delete capture group"/>
-                                                        </tooltip>
-                                                    </Button>
-                                                </HBox>
-                                            </graphic>
-                                        </TableColumn>
-                                    </columns>
-                                </TableView>
-                                <VBox maxHeight="1.7976931348623157E308" spacing="5.0" VBox.vgrow="SOMETIMES">
-                                    <children>
-                                        <Label text="Line Template:">
-                                        </Label>
-                                        <HBox alignment="CENTER_LEFT" maxHeight="1.7976931348623157E308"
-                                              maxWidth="1.7976931348623157E308" spacing="5.0" VBox.vgrow="ALWAYS">
-                                            <children>
-                                                <HBox fx:id="lineTemplate" alignment="CENTER_LEFT" maxHeight="-Infinity"
-                                                      maxWidth="1.7976931348623157E308" prefHeight="30.0" spacing="2.0"
-                                                      styleClass="search-field-outer" HBox.hgrow="SOMETIMES">
-                                                    <padding>
-                                                        <Insets left="3.0" right="3.0"/>
-                                                    </padding>
-                                                    <CodeArea fx:id="lineTemplateExpression"
-                                                              maxHeight="-Infinity"
-                                                              maxWidth="1.7976931348623157E308"
-                                                              prefHeight="24.0"
-                                                              HBox.hgrow="ALWAYS">
-                                                        <HBox.margin>
-                                                            <Insets/>
-                                                        </HBox.margin>
-                                                        <padding>
-                                                            <Insets top="2.0"/>
-                                                        </padding>
-                                                    </CodeArea>
-                                                </HBox>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                            </children>
+                      AnchorPane.topAnchor="40.0">
+                    <TitledPane text="Setup" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                                VBox.vgrow="SOMETIMES">
+                        <VBox fx:id="setupPane" spacing="10.0">
+                            <padding>
+                                <Insets top="0" right="0" bottom="0" left="0"/>
+                            </padding>
+                            <HBox alignment="CENTER_LEFT">
+                                <Region HBox.hgrow="ALWAYS"/>
+                            </HBox>
+                            <TableView fx:id="captureGroupTable" prefHeight="258.0" prefWidth="762.0"
+                                       styleClass="search-field-outer">
+                                <columns>
+                                    <TableColumn fx:id="nameColumn" prefWidth="220.0" sortable="false"
+                                                 text="Group Name">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="name"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn fx:id="expressionColumn" minWidth="0.0" prefWidth="550.0"
+                                                 sortable="false" text="Capture Expression">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="expression"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn editable="false" maxWidth="56" minWidth="56" prefWidth="56.0"
+                                                 sortable="false" resizable="false">
+                                        <graphic>
+                                            <HBox>
+                                                <Button fx:id="addGroupButton" cache="true"
+                                                        contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                                                        minWidth="-Infinity" mnemonicParsing="false"
+                                                        onAction="#handleOnAddGroup" prefHeight="25.0"
+                                                        prefWidth="25.0" styleClass="dialog-button" text="Add">
+                                                    <graphic>
+                                                        <Region>
+                                                            <styleClass>
+                                                                <String fx:value="icon-container"/>
+                                                                <String fx:value="plus-icon"/>
+                                                                <String fx:value="medium-icon"/>
+                                                            </styleClass>
+                                                        </Region>
+                                                    </graphic>
+                                                    <tooltip>
+                                                        <Tooltip showDelay="500ms" text="Add new capture group"/>
+                                                    </tooltip>
+                                                </Button>
+                                                <Button fx:id="deleteGroupButton" contentDisplay="GRAPHIC_ONLY"
+                                                        maxHeight="-Infinity" maxWidth="-Infinity"
+                                                        minHeight="-Infinity" minWidth="-Infinity"
+                                                        mnemonicParsing="false" onAction="#handleOnDeleteGroup"
+                                                        prefHeight="25.0" prefWidth="25.0"
+                                                        styleClass="dialog-button" text="Delete">
+                                                    <graphic>
+                                                        <Region>
+                                                            <styleClass>
+                                                                <String fx:value="icon-container"/>
+                                                                <String fx:value="minus-icon"/>
+                                                                <String fx:value="medium-icon"/>
+                                                            </styleClass>
+                                                        </Region>
+                                                    </graphic>
+                                                    <tooltip>
+                                                        <Tooltip showDelay="500ms" text="Delete capture group"/>
+                                                    </tooltip>
+                                                </Button>
+                                            </HBox>
+                                        </graphic>
+                                    </TableColumn>
+                                </columns>
+                            </TableView>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <Label minWidth="110.0" text="Timestamp pattern"/>
+                                    <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" minHeight="26.0"
+                                              prefHeight="26.0"
+                                              styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                                        <padding>
+                                            <Insets top="2.0" right="2.0" bottom="2.0" left="2.0"/>
+                                        </padding>
+                                    </CodeArea>
+                                </children>
+                            </HBox>
                         </VBox>
-                        <Button fx:id="runTestButton"
-                                contentDisplay="LEFT"
-                                text="Test data extraction"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity"
-                                mnemonicParsing="false"
-                                onAction="#handleOnRunTest">
-                            <graphic>
-                                <Region>
-                                    <styleClass>
-                                        <String fx:value="icon-container"/>
-                                        <String fx:value="test-icon"/>
-                                        <String fx:value="medium-icon"/>
-                                    </styleClass>
+                    </TitledPane>
+                    <TitledPane text="Test" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                                VBox.vgrow="ALWAYS">
+                        <VBox fx:id="testPane" spacing="10.0">
+                            <padding>
+                                <Insets top="0" right="0" bottom="0" left="0"/>
+                            </padding>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="runTestButton" contentDisplay="LEFT" maxHeight="-Infinity"
+                                        maxWidth="-Infinity"
+                                        minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                        onAction="#handleOnRunTest" text="Test data extraction">
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" top="6.0"/>
+                                    </HBox.margin>
+                                    <graphic>
+                                        <Region>
+                                            <styleClass>
+                                                <String fx:value="icon-container"/>
+                                                <String fx:value="test-icon"/>
+                                                <String fx:value="medium-icon"/>
+                                            </styleClass>
+                                            <padding>
+                                                <Insets right="25.0"/>
+                                            </padding>
+                                        </Region>
+                                    </graphic>
                                     <padding>
-                                        <Insets right="25.0"/>
+                                        <Insets bottom="5.0" left="40.0" right="45.0" top="5.0"/>
                                     </padding>
-                                </Region>
-                            </graphic>
-                            <padding>
-                                <Insets right="20" top="5" bottom="5"/>
-                            </padding>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Test data extraction"/>
-                            </tooltip>
-                        </Button>
-                        <Label fx:id="notificationLabel" managed="false" maxHeight="1.7976931348623157E308"
-                               maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                               styleClass="notification-info" text="" visible="false" wrapText="true"
-                               VBox.vgrow="NEVER">
-                            <VBox.margin>
-                                <Insets/>
-                            </VBox.margin>
-                            <padding>
-                                <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
-                            </padding>
-                            <font>
-                                <Font name="Monospaced Regular" size="12.0"/>
-                            </font>
-                        </Label>
-                        <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
-                            <children>
-                                <VirtualizedScrollPane maxHeight="1.7976931348623157E308"
-                                                       maxWidth="1.7976931348623157E308" prefHeight="301.0"
-                                                       HBox.hgrow="SOMETIMES">
-                                    <content>
-                                        <CodeArea fx:id="testArea"/>
-                                    </content>
-                                </VirtualizedScrollPane>
-                                <VBox>
-                                    <children>
-                                        <Button fx:id="clearTestAreaButton" cache="true" contentDisplay="GRAPHIC_ONLY"
-                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                                onAction="#handleOnClearTestArea" prefHeight="30.0" prefWidth="30.0"
-                                                styleClass="dialog-button" text="Clear">
-                                            <graphic>
-                                                <Region>
-                                                    <styleClass>
-                                                        <String fx:value="icon-container"/>
-                                                        <String fx:value="trash-icon"/>
-                                                        <String fx:value="medium-icon"/>
-                                                    </styleClass>
-                                                </Region>
-                                            </graphic>
-                                            <tooltip>
-                                                <Tooltip showDelay="500ms" text="Clear test area"/>
-                                            </tooltip>
-                                        </Button>
+                                    <tooltip>
+                                        <Tooltip showDelay="500ms" text="Test data extraction"/>
+                                    </tooltip>
+                                </Button>
+                            </HBox>
+                            <Label fx:id="notificationLabel" managed="false" maxHeight="1.7976931348623157E308"
+                                   maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                   styleClass="notification-info" text="" visible="false" wrapText="true"
+                                   VBox.vgrow="NEVER">
+                                <VBox.margin>
+                                    <Insets/>
+                                </VBox.margin>
+                                <padding>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+                                </padding>
+                                <font>
+                                    <Font name="Monospaced Regular" size="12.0"/>
+                                </font>
+                            </Label>
+                            <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
+                                <children>
+                                    <VirtualizedScrollPane maxHeight="1.7976931348623157E308"
+                                                           maxWidth="1.7976931348623157E308" prefHeight="301.0"
+                                                           HBox.hgrow="SOMETIMES">
+                                        <content>
+                                            <CodeArea fx:id="testArea"/>
+                                        </content>
+                                    </VirtualizedScrollPane>
+                                    <VBox>
+                                        <children>
+                                            <Button fx:id="clearTestAreaButton" cache="true"
+                                                    contentDisplay="GRAPHIC_ONLY"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnClearTestArea" prefHeight="30.0" prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Clear">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="trash-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear test area"/>
+                                                </tooltip>
+                                            </Button>
 
-                                        <Button fx:id="copyTestAreaButton" cache="true" contentDisplay="GRAPHIC_ONLY"
-                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                                onAction="#handleOnCopyTestArea" prefHeight="30.0" prefWidth="30.0"
-                                                styleClass="dialog-button" text="Copy">
-                                            <graphic>
-                                                <Region>
-                                                    <styleClass>
-                                                        <String fx:value="icon-container"/>
-                                                        <String fx:value="copy-icon"/>
-                                                        <String fx:value="medium-icon"/>
-                                                    </styleClass>
-                                                </Region>
-                                            </graphic>
-                                            <tooltip>
-                                                <Tooltip showDelay="500ms" text="Copy test area"/>
-                                            </tooltip>
-                                        </Button>
-                                        <Button fx:id="pasteTestAreaButton" contentDisplay="GRAPHIC_ONLY"
-                                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                                minWidth="-Infinity" mnemonicParsing="false"
-                                                onAction="#handleOnPasteToTestArea" prefHeight="30.0" prefWidth="30.0"
-                                                styleClass="dialog-button" text="Paste">
-                                            <graphic>
-                                                <Region>
-                                                    <styleClass>
-                                                        <String fx:value="icon-container"/>
-                                                        <String fx:value="clipboard-icon"/>
-                                                        <String fx:value="medium-icon"/>
-                                                    </styleClass>
-                                                </Region>
-                                            </graphic>
-                                            <tooltip>
-                                                <Tooltip showDelay="500ms" text="Paste to test area"/>
-                                            </tooltip>
-                                        </Button>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </HBox>
-
-                    </children>
+                                            <Button fx:id="copyTestAreaButton" cache="true"
+                                                    contentDisplay="GRAPHIC_ONLY"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnCopyTestArea" prefHeight="30.0" prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Copy">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="copy-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Copy test area"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="pasteTestAreaButton" contentDisplay="GRAPHIC_ONLY"
+                                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                                    minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnPasteToTestArea" prefHeight="30.0"
+                                                    prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Paste">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="clipboard-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Paste to test area"/>
+                                                </tooltip>
+                                            </Button>
+                                        </children>
+                                    </VBox>
+                                </children>
+                            </HBox>
+                        </VBox>
+                    </TitledPane>
                 </VBox>
                 <HBox alignment="CENTER_LEFT" spacing="2.0"
                       AnchorPane.leftAnchor="4.0"
                       AnchorPane.rightAnchor="4.0"
                       AnchorPane.topAnchor="4.0">
                     <children>
-                        <ComboBox fx:id="profileComboBox" editable="true" maxHeight="1.7976931348623157E308"
-                                  maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
-                            <HBox.margin>
-                                <Insets right="5.0"/>
-                            </HBox.margin>
-                        </ComboBox>
+                        <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                              styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                            <Region fx:id="builtinIcon" prefHeight="12" prefWidth="12" minWidth="12">
+                                <styleClass>
+                                    <String fx:value="icon-container"/>
+                                    <String fx:value="padlock-icon"/>
+                                    <String fx:value="medium-icon"/>
+                                </styleClass>
+                                <HBox.margin>
+                                    <Insets left="6.0" right="0.0"/>
+                                </HBox.margin>
+                            </Region>
+                            <ComboBox fx:id="profileComboBox" editable="true" maxHeight="1.7976931348623157E308"
+                                      maxWidth="1.7976931348623157E308" styleClass="search-field-inner"
+                                      HBox.hgrow="ALWAYS">
+                            </ComboBox>
+                            <padding>
+                                <Insets left="1.0" right="1.0"/>
+                            </padding>
+                        </HBox>
                         <Button fx:id="addProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY"
                                 minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
                                 onAction="#handleOnAddProfile" prefHeight="30.0" prefWidth="30.0"
@@ -334,7 +344,7 @@
                                 </Region>
                             </graphic>
                             <tooltip>
-                                <Tooltip showDelay="500ms" text="Import profile"/>
+                                <Tooltip showDelay="500ms" text="Import profiles"/>
                             </tooltip>
                         </Button>
                         <Button fx:id="exportProfileButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
@@ -350,7 +360,7 @@
                                 </Region>
                             </graphic>
                             <tooltip>
-                                <Tooltip showDelay="500ms" text="Export profile"/>
+                                <Tooltip showDelay="500ms" text="Export profiles"/>
                             </tooltip>
                         </Button>
                     </children>

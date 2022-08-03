@@ -253,7 +253,7 @@
 .text-input, .date-picker .text-input {
     -fx-background-radius: 0, 0;
     -fx-border-color: -binjr-control-border-color;
-    -fx-background-color: -binjr-button-background-color;
+    -fx-background-color: #8f8f8f, -binjr-button-background-color;
     -fx-background-insets: 0, 1;
     -fx-text-fill: -fx-text-background-color;
     /* -fx-prompt-text-fill: -binjr-blue-color;*/
@@ -262,10 +262,10 @@
     -fx-highlight-text-fill: -fx-text-background-color;
 }
 
-.search-field-outer:hover,
-.text-input:hover, .date-picker .text-input:hover {
-    -fx-background-color: #8f8f8f, -binjr-button-background-color;
-}
+/*.search-field-outer:hover,*/
+/*.text-input:hover, .date-picker .text-input:hover {*/
+/*
+/*}*/
 
 .search-field-outer:focused,
 .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
@@ -274,6 +274,11 @@
     -fx-border-color: -binjr-control-border-hilite-color;
     /*  -fx-text-fill: black;*/
 }
+
+.search-field-outer:disabled {
+    -fx-opacity: 0.4;
+}
+
 
 /*******************************************************************************
  *                                                                             *
@@ -2100,4 +2105,40 @@
 
 .caret {
     -fx-stroke: -fx-text-background-color;
+}
+
+/******* tool-dialog-window TitledPane ****/
+.tool-dialog-window .titled-pane {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.tool-dialog-window .titled-pane > .title {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-font-size: 10pt;
+}
+
+.tool-dialog-window .titled-pane > *.content {
+    -fx-background-color: transparent;
+
+}
+
+.tool-dialog-window .titled-pane:focused > .title > .arrow-button .arrow {
+    -fx-effect: null;
+}
+
+.tool-dialog-window .titled-pane > .title > .arrow-button .arrow {
+    -fx-background-color: -fx-text-base-color;
+    -fx-shape: "m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0;
+    -fx-snap-to-pixel: true;
+    -fx-scale-shape: true;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+}
+
+.tool-dialog-window .titled-pane:collapsed > .title > .arrow-button .arrow {
+    -fx-rotate: -90;
 }

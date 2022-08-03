@@ -388,7 +388,8 @@
             </SplitPane>
         </AnchorPane>
     </VBox>
-    <BinjrLoadingPane fx:id="loadingPane" targetFps="2" animationSize="LARGE" visible="false" AnchorPane.bottomAnchor="0.0"
+    <BinjrLoadingPane fx:id="loadingPane" targetFps="2" animationSize="LARGE" visible="false"
+                      AnchorPane.bottomAnchor="0.0"
                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
     <VBox fx:id="progressPane" visible="false" cache="true" alignment="CENTER" maxHeight="-Infinity"
           maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"

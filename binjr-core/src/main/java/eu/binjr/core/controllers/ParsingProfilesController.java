@@ -40,6 +40,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
@@ -103,6 +104,13 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected Button importProfileButton;
     @FXML
     protected Button exportProfileButton;
+    @FXML
+    protected Region builtinIcon;
+    @FXML
+    protected VBox setupPane;
+    @FXML
+    protected VBox testPane;
+
     protected final AtomicInteger groupSequence = new AtomicInteger(0);
 
     protected final T selectedProfile;
@@ -442,21 +450,16 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected void loadParserParameters(T profile) {
         try {
             resetTest();
+            this.builtinIcon.setVisible(profile.isBuiltIn());
+            this.builtinIcon.setManaged(profile.isBuiltIn());
             this.captureGroupTable.getItems().clear();
             profile.getCaptureGroups().forEach((k, v) -> {
                 this.captureGroupTable.getItems().add(new NameExpressionPair(k, v));
             });
             this.lineTemplateExpression.clear();
             this.lineTemplateExpression.appendText(profile.getLineTemplateExpression());
-
-            this.lineTemplateExpression.setDisable(profile.isBuiltIn());
-            this.addGroupButton.setDisable(profile.isBuiltIn());
-            this.deleteGroupButton.setDisable(profile.isBuiltIn());
+            this.setupPane.setDisable(profile.isBuiltIn());
             this.deleteProfileButton.setDisable(profile.isBuiltIn());
-            this.captureGroupTable.setDisable(profile.isBuiltIn());
-            this.captureGroupTable.setEditable(!profile.isBuiltIn());
-            this.nameColumn.setEditable(!profile.isBuiltIn());
-            this.expressionColumn.setEditable(!profile.isBuiltIn());
             this.profileComboBox.getEditor().setEditable(!profile.isBuiltIn());
         } catch (
                 Exception e) {

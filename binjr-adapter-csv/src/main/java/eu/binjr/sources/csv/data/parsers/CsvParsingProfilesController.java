@@ -109,11 +109,6 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.timeColumnTextField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999999999, profile.getTimestampColumn() + 1));
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
-        this.parsingLocaleTextField.setDisable(profile.isBuiltIn());
-        this.readColumnNameCheckBox.setDisable(profile.isBuiltIn());
-        this.delimiterTextField.setDisable(profile.isBuiltIn());
-        this.quoteCharacterTextField.setDisable(profile.isBuiltIn());
-        this.timeColumnTextField.setDisable(profile.isBuiltIn());
     }
 
     public CsvParsingProfilesController(CsvParsingProfile[] builtinParsingProfiles,

@@ -90,6 +90,12 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
+        this.encodingField = new TextField(prefs.mruEncoding.get());
+        TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
+        GridPane.setConstraints(encodingField, 1, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        Label encodingLabel = new Label("Encoding");
+        GridPane.setConstraints(encodingLabel, 0, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+
         var parsingLabel = new Label("Parsing profile");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
@@ -108,15 +114,8 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         });
         parsingHBox.getChildren().addAll(parsingChoiceBox, editParsingButton);
         HBox.setHgrow(parsingChoiceBox, Priority.ALWAYS);
-        GridPane.setConstraints(parsingLabel, 0, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        GridPane.setConstraints(parsingHBox, 1, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-
-        this.encodingField = new TextField(prefs.mruEncoding.get());
-        TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
-        GridPane.setConstraints(encodingField, 1, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        Label encodingLabel = new Label("Encoding");
-        GridPane.setConstraints(encodingLabel, 0, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-
+        GridPane.setConstraints(parsingLabel, 0, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        GridPane.setConstraints(parsingHBox, 1, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
         getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField, parsingLabel, parsingHBox, encodingLabel, encodingField);
     }
