@@ -125,7 +125,6 @@ public class CsvEventParser implements EventParser<Double> {
             return csvParser.iterator().hasNext();
         }
 
-
         private ZonedDateTime parseDateTime(String text) {
             var m = format.getProfile().getParsingRegex().matcher(text);
             var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, format.getZoneId());

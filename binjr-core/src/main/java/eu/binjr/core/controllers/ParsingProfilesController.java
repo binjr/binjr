@@ -483,6 +483,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             this.lineTemplateExpression.appendText(profile.getLineTemplateExpression());
             this.setupPane.setDisable(profile.isBuiltIn());
             this.deleteProfileButton.setDisable(profile.isBuiltIn());
+            this.captureGroupTable.setEditable(!profile.isBuiltIn());
             this.profileComboBox.getEditor().setEditable(!profile.isBuiltIn());
         } catch (
                 Exception e) {
