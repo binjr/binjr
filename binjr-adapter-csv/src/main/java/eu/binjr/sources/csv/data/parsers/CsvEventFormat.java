@@ -17,25 +17,18 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.DecodingDataFromAdapterException;
 import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
-import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
-public class CsvEventFormat implements EventFormat<Double> {
+public class CsvEventFormat implements EventFormat<String> {
     private static final Logger logger = Logger.create(CsvEventFormat.class);
     private final CsvParsingProfile profile;
     private final ZoneId zoneId;
@@ -53,7 +46,7 @@ public class CsvEventFormat implements EventFormat<Double> {
     }
 
     @Override
-    public EventParser<Double> parse(InputStream ias) {
+    public EventParser<String> parse(InputStream ias) {
         return new CsvEventParser(this, ias);
     }
 

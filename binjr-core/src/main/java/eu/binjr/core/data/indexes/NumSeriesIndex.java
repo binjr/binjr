@@ -18,6 +18,7 @@ package eu.binjr.core.data.indexes;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -26,31 +27,35 @@ import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.facet.DrillDownQuery;
 import org.apache.lucene.facet.DrillSideways;
+import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.SortedNumericSortField;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NumSeriesIndex extends Index<Double> {
+public class NumSeriesIndex extends Index<String> {
     private static final Logger logger = Logger.create(NumSeriesIndex.class);
 
     public NumSeriesIndex() throws IOException {
         super();
     }
-
-    @Override
-    protected Document enrichDocument(Document doc, ParsedEvent<Double> event) throws IOException {
-        // add all other sections as stored double fields
-        event.getFields().forEach((key, value) -> doc.add(new StoredField(key, value)));
-        return super.enrichDocument(doc, event);
-    }
+//
+//    @Override
+//    protected Document enrichDocument(Document doc, ParsedEvent<String> event) throws IOException {
+//        // add all other sections as stored double fields
+//        event.getFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value))));
+//        return super.enrichDocument(doc, event);
+//    }
 
     public long search(long start,
                        long end,
@@ -64,11 +69,14 @@ public class NumSeriesIndex extends Index<Double> {
             seriesToFill.keySet().stream().map(ts -> ts.getBinding().getPath()).forEach(path -> drillDownQuery.add(PATH, path));
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
-            int topN = prefs.numIdxMaxPageSize.get().intValue();
+            int pageNumber = 0;
+            int pageSize = prefs.numIdxMaxPageSize.get().intValue();
+            int skip = 0;
+
             logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
             DrillSideways.DrillSidewaysResult results;
             try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                results = drill.search(drillDownQuery, null, null, topN, sort, false);
+                results = drill.search(drillDownQuery, null, null, pageSize, sort, false);
             }
             var fieldsToLoad = seriesToFill.keySet().stream().map(k-> k.getBinding().getLabel()).collect(Collectors.toSet());
             fieldsToLoad.add(TIMESTAMP);
@@ -89,4 +97,6 @@ public class NumSeriesIndex extends Index<Double> {
             }
         });
     }
+
+
 }

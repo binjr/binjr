@@ -58,6 +58,4 @@ public class ParsedEvent<T> {
         return sb.toString();
     }
 
-
-
 }

@@ -33,12 +33,14 @@ public interface Indexable<T> extends Closeable {
              InputStream ias,
              boolean commit,
              EventFormat<T> parser,
+             EnrichDocumentFunction<T> enrichDocumentFunction,
              LongProperty progress,
              Property<IndexingStatus> indexingStatus) throws IOException;
 
     void add(String path,
              InputStream ias,
              EventFormat<T> parser,
+             EnrichDocumentFunction<T> enrichDocumentFunction,
              LongProperty progress,
              Property<IndexingStatus> indexingStatus) throws IOException;
 

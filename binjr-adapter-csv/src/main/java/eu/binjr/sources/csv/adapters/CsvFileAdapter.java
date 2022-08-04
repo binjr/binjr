@@ -44,6 +44,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TreeItem;
+import org.apache.lucene.document.StoredField;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
@@ -51,12 +52,10 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -273,6 +272,17 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         super.close();
     }
 
+    private double formatToDouble(String value, NumberFormat numberFormat) {
+        if (value != null) {
+            try {
+                return numberFormat.parse(value).doubleValue();
+            } catch (Exception e) {
+                logger.trace(() -> "Failed to convert '" + value + "' to double");
+            }
+        }
+        return Double.NaN;
+    }
+
     private synchronized void ensureIndexed(Set<SourceBinding<Double>> bindings, ReloadPolicy reloadPolicy) throws IOException {
         if (reloadPolicy == ReloadPolicy.ALL) {
             bindings.stream().map(SourceBinding::getPath).forEach(indexedFiles::remove);
@@ -283,14 +293,25 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
             String path = binding.getPath();
             boolean isLast = true;// FIXME: bindings.size() - 1 == i++;
             indexedFiles.computeIfAbsent(path, CheckedLambdas.wrap(p -> {
-                index.add(p,
-                        fileBrowser.getData(path.replace(getId() + "/", "")),
-                        isLast,
-                        parser,
-                        charRead,
-                        INDEXING_OK);
-                return IndexingStatus.OK;
+                ThreadLocal<NumberFormat> formatters =
+                        ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(csvParsingProfile.getNumberFormattingLocale()));
+                try {
+                    index.add(p,
+                            fileBrowser.getData(path.replace(getId() + "/", "")),
+                            isLast,
+                            parser,
+                            ((doc, event) -> {
+                                event.getFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value, formatters.get()))));
+                                return doc;
+                            }),
+                            charRead,
+                            INDEXING_OK);
+                    return IndexingStatus.OK;
+                } finally {
+                    formatters.remove();
+                }
             }));
         }
+
     }
 }

@@ -213,17 +213,6 @@ public class LogFileIndex extends Index<String> {
     }
 
     @Override
-    protected Document enrichDocument(Document doc, ParsedEvent<String> event) throws IOException {
-        // add all other sections as prefixed search fields
-        event.getFields().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e ->
-                doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO)));
-        String severity = event.getFields().get(SEVERITY) == null ? "unknown" : event.getFields().get(SEVERITY).toLowerCase();
-        doc.add(new FacetField(SEVERITY, severity));
-        doc.add(new StoredField(SEVERITY, severity));
-        return super.enrichDocument(doc, event);
-    }
-
-    @Override
     public void close() throws IOException {
         hitResultCache.invalidateAll();
         facetResultCache.invalidateAll();

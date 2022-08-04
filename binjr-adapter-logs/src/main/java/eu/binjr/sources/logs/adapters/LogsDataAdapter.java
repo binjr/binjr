@@ -43,6 +43,10 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.facet.FacetField;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.BufferedReader;
@@ -56,6 +60,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
 /**
  * A {@link DataAdapter} implementation to retrieve data from a text file.
@@ -83,12 +89,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
             UserHistory.getInstance().stringMostRecentlyUsedList("userParsingProfiles", 100);
     private final Charset encoding;
     private Path rootPath;
-    private Indexable index;
+    private Indexable<String> index;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
     private ParsingProfile parsingProfile;
-    private EventFormat parser;
+    private EventFormat<String> parser;
     private ZoneId zoneId;
 
     /**
@@ -392,6 +398,15 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                             fileBrowser.getData(path.replace(getId() + "/", "")),
                             (i == toDo.size() - 1), // commit if last file
                             parser,
+                            (doc, event) -> {
+                                // add all other sections as prefixed search fields
+                                event.getFields().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e ->
+                                        doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO)));
+                                String severity = event.getFields().get(SEVERITY) == null ? "unknown" : event.getFields().get(SEVERITY).toLowerCase();
+                                doc.add(new FacetField(SEVERITY, severity));
+                                doc.add(new StoredField(SEVERITY, severity));
+                                return doc;
+                            },
                             charRead,
                             indexingStatus);
                     indexedFiles.put(key, indexingStatus.getValue());

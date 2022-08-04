@@ -36,6 +36,7 @@ import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.controllers.ParsingProfilesController;
+import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import javafx.beans.property.SimpleStringProperty;
@@ -64,7 +65,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     @FXML
     private TextField quoteCharacterTextField;
     @FXML
-    private TableView<ParsedEvent<Double>> testResultTable;
+    private TableView<ParsedEvent<String>> testResultTable;
     @FXML
     private TabPane testTabPane;
     @FXML
@@ -201,11 +202,11 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 notifyWarn("No record found.");
             } else {
                 Map<TableColumn, String> colMap = new HashMap<>();
-                var cellFactory = new AlignedTableCellFactory<ParsedEvent<Double>, String>();
+                var cellFactory = new AlignedTableCellFactory<ParsedEvent<String>, String>();
                 cellFactory.setAlignment(TextAlignment.RIGHT);
                 for (int i = 0; i < headers.size(); i++) {
                     String name = headers.get(i);
-                    var col = new TableColumn<ParsedEvent<Double>, String>(name);
+                    var col = new TableColumn<ParsedEvent<String>, String>(name);
                     colMap.put(col, Integer.toString(i));
                     if (i == format.getProfile().getTimestampColumn()) {
                         col.setCellFactory(cellFactory);
@@ -221,8 +222,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
             }
         }
         try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(getDefaultCharset()))) {
-            var eventParser = format.parse(in);
-            for (var parsed : eventParser) {
+            EventParser<String> eventParser = format.parse(in);
+            for (ParsedEvent<String> parsed : eventParser) {
                 testResultTable.getItems().add(parsed);
             }
             notifyInfo(String.format("Found %d record(s).", testResultTable.getItems().size()));
@@ -278,10 +279,10 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 Locale.forLanguageTag(parsingLocaleTextField.getText())));
     }
 
-    private String formatToDouble(Double value) {
+    private String formatToDouble(String value) {
         if (value != null) {
             try {
-                return numberFormat.format(value);
+                return numberFormat.format(numberFormat.parse(value));
             } catch (Exception e) {
                 // Do nothing
             }

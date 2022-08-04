@@ -23,7 +23,6 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.indexes.parser.EventFormat;
-import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
@@ -148,9 +147,10 @@ public abstract class Index<T> implements Indexable<T> {
     public void add(String path,
                     InputStream ias,
                     EventFormat<T> parser,
+                    EnrichDocumentFunction<T> enrichDocumentFunction,
                     LongProperty progress,
                     Property<IndexingStatus> indexingStatus) throws IOException {
-        add(path, ias, true, parser, progress, indexingStatus);
+        add(path, ias, true, parser, enrichDocumentFunction, progress, indexingStatus);
     }
 
     @Override
@@ -158,6 +158,7 @@ public abstract class Index<T> implements Indexable<T> {
                     InputStream ias,
                     boolean commit,
                     EventFormat<T> parser,
+                    EnrichDocumentFunction<T> enrichDocumentFunction,
                     LongProperty progress,
                     Property<IndexingStatus> cancellationRequested) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
@@ -190,7 +191,17 @@ public abstract class Index<T> implements Indexable<T> {
                             }
                             try {
                                 for (var logEvent : todo) {
-                                    indexWriter.addDocument(facetsConfig.build(taxonomyWriter, createDocument(path, logEvent)));
+                                    var doc = new Document();
+                                    doc.add(new StringField(DOC_URI, path, Field.Store.NO));
+                                    doc.add(new TextField(FIELD_CONTENT, logEvent.getText(), Field.Store.YES));
+                                    doc.add(new SortedNumericDocValuesField(LINE_NUMBER, logEvent.getSequence()));
+                                    var millis = logEvent.getTimestamp().toInstant().toEpochMilli();
+                                    doc.add(new LongPoint(TIMESTAMP, millis));
+                                    doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
+                                    doc.add(new StoredField(TIMESTAMP, millis));
+                                    doc.add(new FacetField(PATH, path));
+                                    doc.add(new StoredField(PATH, path));
+                                    indexWriter.addDocument(facetsConfig.build(taxonomyWriter, enrichDocumentFunction.apply(doc, logEvent)));
                                     nbEventProcessed++;
                                 }
                             } catch (Throwable t) {
@@ -359,23 +370,6 @@ public abstract class Index<T> implements Indexable<T> {
         return ranges;
     }
 
-    private Document createDocument(String path, ParsedEvent<T> event) throws IOException {
-        var doc = new Document();
-        doc.add(new StringField(DOC_URI, path, Field.Store.NO));
-        doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
-        doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getSequence()));
-        var millis = event.getTimestamp().toInstant().toEpochMilli();
-        doc.add(new LongPoint(TIMESTAMP, millis));
-        doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
-        doc.add(new StoredField(TIMESTAMP, millis));
-        doc.add(new FacetField(PATH, path));
-        doc.add(new StoredField(PATH, path));
-        return enrichDocument(doc, event);
-    }
-
-    protected Document enrichDocument(Document doc, ParsedEvent<T> event) throws IOException {
-        return doc;
-    }
 
     private ZonedDateTime getTimeRangeBoundary(boolean getMax, List<String> files, ZoneId zoneId) throws IOException {
         return indexLock.read().lock(() -> {

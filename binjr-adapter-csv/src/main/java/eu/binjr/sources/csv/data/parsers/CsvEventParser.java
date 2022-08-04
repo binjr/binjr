@@ -17,13 +17,10 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
-import eu.binjr.core.data.indexes.parser.ParsingEventException;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
-import eu.binjr.sources.csv.adapters.CsvFileAdapter;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import org.apache.commons.csv.CSVFormat;
@@ -35,13 +32,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.NumberFormat;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CsvEventParser implements EventParser<Double> {
+public class CsvEventParser implements EventParser<String> {
     private static final Logger logger = Logger.create(CsvEventParser.class);
     private final BufferedReader reader;
     private final AtomicLong sequence;
@@ -85,7 +81,7 @@ public class CsvEventParser implements EventParser<Double> {
     }
 
     @Override
-    public Iterator<ParsedEvent<Double>> iterator() {
+    public Iterator<ParsedEvent<String>> iterator() {
         return eventIterator;
     }
 
@@ -93,10 +89,10 @@ public class CsvEventParser implements EventParser<Double> {
         return numberFormat;
     }
 
-    public class CsvEventIterator implements Iterator<ParsedEvent<Double>> {
+    public class CsvEventIterator implements Iterator<ParsedEvent<String>> {
 
         @Override
-        public ParsedEvent<Double> next() {
+        public ParsedEvent<String> next() {
             var csvRecord = csvParser.iterator().next();
             if (csvRecord == null) {
                 return null;
@@ -118,10 +114,10 @@ public class CsvEventParser implements EventParser<Double> {
                 throw new UnsupportedOperationException("Failed to parse time stamp in column #" +
                         (format.getProfile().getTimestampColumn() + 1));
             }
-            Map<String, Double> values = new LinkedHashMap<>(csvRecord.size());
+            Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {
                 if (i != format.getProfile().getTimestampColumn()) { // don't add the timestamp column as an attribute
-                    values.put(Integer.toString(i), parseDouble(csvRecord.get(i)));
+                    values.put(Integer.toString(i),csvRecord.get(i));// parseDouble(csvRecord.get(i)));
                 }
             }
             return new ParsedEvent<>(sequence.incrementAndGet(), timestamp, " ", values);
@@ -154,7 +150,8 @@ public class CsvEventParser implements EventParser<Double> {
         private double parseDouble(String value) {
             if (value != null) {
                 try {
-                    return getNumberFormat().parse(value.trim()).doubleValue();
+                    return Double.parseDouble(value);
+                    //return getNumberFormat().parse(value.trim()).doubleValue();
                 } catch (Exception e) {
                     logger.trace(() -> "Failed to convert to double", e);
                 }
