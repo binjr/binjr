@@ -30,6 +30,8 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 
 public class LogParsingProfileDialog extends Dialog<ParsingProfile> {
 
@@ -37,11 +39,12 @@ public class LogParsingProfileDialog extends Dialog<ParsingProfile> {
 
     public LogParsingProfileDialog(Window owner, ParsingProfile selectedProfile) {
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/LogParsingProfilesDialogView.fxml"));
-        var controller = new LogParsingProfilesController(
-                BuiltInParsingProfile.values(),
+        var controller = new LogParsingProfilesController(BuiltInParsingProfile.values(),
                 UserPreferences.getInstance().userLogEventsParsingProfiles.get(),
                 BuiltInParsingProfile.ALL,
-                selectedProfile);
+                selectedProfile,
+                StandardCharsets.UTF_8,
+                ZoneId.systemDefault());
         fXMLLoader.setController(controller);
 
         try {

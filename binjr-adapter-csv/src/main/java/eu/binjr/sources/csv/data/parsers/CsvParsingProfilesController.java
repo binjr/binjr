@@ -34,6 +34,7 @@ package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
+import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
@@ -47,7 +48,7 @@ import org.controlsfx.control.textfield.TextFields;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -57,7 +58,7 @@ import java.util.function.UnaryOperator;
 public class CsvParsingProfilesController extends ParsingProfilesController<CsvParsingProfile> {
 
     @FXML
-    private Spinner<Integer> timeColumnTextField;
+    private Spinner<ColumnPosition> timeColumnTextField;
     @FXML
     private TextField delimiterTextField;
     @FXML
@@ -106,24 +107,83 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         super.loadParserParameters(profile);
         this.delimiterTextField.setText(profile.getDelimiter());
         this.quoteCharacterTextField.setText(String.valueOf(profile.getQuoteCharacter()));
-        this.timeColumnTextField.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999999999, profile.getTimestampColumn() + 1));
+        this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, profile.getTimestampColumn()));
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
     }
 
-    public CsvParsingProfilesController(CsvParsingProfile[] builtinParsingProfiles,
-                                        CsvParsingProfile[] userParsingProfiles,
-                                        CsvParsingProfile defaultProfile,
-                                        CsvParsingProfile selectedProfile) {
-        super(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile);
+    public record ColumnPosition(int index) {
+        @Override
+        public String toString() {
+            return (index < 0) ? "Line number" : StringUtils.integerToOrdinal(index + 1);
+        }
+    }
+
+    public static class ColumnPositionFactory extends SpinnerValueFactory<ColumnPosition> {
+        private final int minValue;
+        private final int maxValue;
+        private int index = 0;
+
+        public ColumnPositionFactory(int minValue, int maxValue, int initialValue) {
+            if (initialValue > maxValue) {
+                throw new IllegalArgumentException("Initial value is above maximum value");
+            }
+            if (initialValue < minValue) {
+                throw new IllegalArgumentException("Initial value is below minimum value");
+            }
+            this.minValue = minValue;
+            this.maxValue = maxValue;
+            this.index = initialValue;
+            setValue(new ColumnPosition(index));
+        }
+
+        @Override
+        public void decrement(int steps) {
+            int newPos = index - steps;
+            if (newPos >= minValue) {
+                this.index = newPos;
+                setValue(new ColumnPosition(index));
+            }
+        }
+
+        @Override
+        public void increment(int steps) {
+            int newPos = index + steps;
+            if (newPos <= maxValue) {
+                this.index = newPos;
+                setValue(new ColumnPosition(index));
+            }
+        }
     }
 
     public CsvParsingProfilesController(CsvParsingProfile[] builtinParsingProfiles,
                                         CsvParsingProfile[] userParsingProfiles,
                                         CsvParsingProfile defaultProfile,
                                         CsvParsingProfile selectedProfile,
-                                        boolean allowTemporalCaptureGroupsOnly) {
-        super(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile, allowTemporalCaptureGroupsOnly);
+                                        Charset defaultCharset,
+                                        ZoneId defaultZoneId) {
+        super(builtinParsingProfiles,
+                userParsingProfiles,
+                defaultProfile,
+                selectedProfile,
+                defaultCharset,
+                defaultZoneId);
+    }
+
+    public CsvParsingProfilesController(CsvParsingProfile[] builtinParsingProfiles,
+                                        CsvParsingProfile[] userParsingProfiles,
+                                        CsvParsingProfile defaultProfile,
+                                        CsvParsingProfile selectedProfile,
+                                        boolean allowTemporalCaptureGroupsOnly,
+                                        Charset defaultCharset,
+                                        ZoneId defaultZoneId) {
+        super(builtinParsingProfiles,
+                userParsingProfiles,
+                defaultProfile,
+                selectedProfile,
+                allowTemporalCaptureGroupsOnly,
+                defaultCharset,
+                defaultZoneId);
     }
 
     @Override
@@ -134,8 +194,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
 
     @Override
     protected void doTest() throws Exception {
-        var format = new CsvEventFormat(profileComboBox.getValue(), ZoneId.systemDefault(), StandardCharsets.UTF_8);
-        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(StandardCharsets.UTF_8))) {
+        var format = new CsvEventFormat(profileComboBox.getValue(), getDefaultZoneId(), getDefaultCharset());
+        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(getDefaultCharset()))) {
             var headers = format.getDataColumnHeaders(in);
             if (headers.size() == 0) {
                 notifyWarn("No record found.");
@@ -160,7 +220,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 }
             }
         }
-        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(StandardCharsets.UTF_8))) {
+        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(getDefaultCharset()))) {
             var eventParser = format.parse(in);
             for (var parsed : eventParser) {
                 testResultTable.getItems().add(parsed);
@@ -212,7 +272,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 lineExpression,
                 this.delimiterTextField.getText(),
                 this.quoteCharacterTextField.getText().charAt(0),
-                this.timeColumnTextField.getValue() - 1,
+                this.timeColumnTextField.getValue().index(),
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.forLanguageTag(parsingLocaleTextField.getText())));

@@ -31,6 +31,8 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
 
 public class CsvParsingProfileDialog extends Dialog<CsvParsingProfile> {
 
@@ -46,7 +48,10 @@ public class CsvParsingProfileDialog extends Dialog<CsvParsingProfile> {
                 BuiltInCsvParsingProfile.values(),
                 prefs.csvTimestampParsingProfiles.get(),
                 BuiltInCsvParsingProfile.ISO,
-                selectedProfile, true);
+                selectedProfile,
+                true,
+                StandardCharsets.UTF_8,
+                ZoneId.systemDefault());
         fXMLLoader.setController(controller);
 
         try {

@@ -23,7 +23,7 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Map;
@@ -34,22 +34,37 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
     public LogParsingProfilesController(ParsingProfile[] builtinParsingProfiles,
                                         ParsingProfile[] userParsingProfiles,
                                         ParsingProfile defaultProfile,
-                                        ParsingProfile selectedProfile) {
-        super(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile);
+                                        ParsingProfile selectedProfile,
+                                        Charset defaultCharset,
+                                        ZoneId defaultZoneId) {
+        super(builtinParsingProfiles,
+                userParsingProfiles,
+                defaultProfile,
+                selectedProfile,
+                defaultCharset,
+                defaultZoneId);
     }
 
     public LogParsingProfilesController(ParsingProfile[] builtinParsingProfiles,
                                         ParsingProfile[] userParsingProfiles,
                                         ParsingProfile defaultProfile,
                                         ParsingProfile selectedProfile,
-                                        boolean allowTemporalCaptureGroupsOnly) {
-        super(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile, allowTemporalCaptureGroupsOnly);
+                                        boolean allowTemporalCaptureGroupsOnly,
+                                        Charset defaultCharset,
+                                        ZoneId defaultZoneId) {
+        super(builtinParsingProfiles,
+                userParsingProfiles,
+                defaultProfile,
+                selectedProfile,
+                allowTemporalCaptureGroupsOnly,
+                defaultCharset,
+                defaultZoneId);
     }
 
     @Override
     protected void doTest() throws Exception {
-        var format = new LogEventFormat(profileComboBox.getValue(), ZoneId.systemDefault(), StandardCharsets.UTF_8);
-        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(StandardCharsets.UTF_8))) {
+        var format = new LogEventFormat(profileComboBox.getValue(), getDefaultZoneId(),getDefaultCharset());
+        try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(getDefaultCharset()))) {
             var eventParser = format.parse(in);
             var events = new ArrayList<ParsedEvent<String>>();
             for (var parsed : eventParser) {

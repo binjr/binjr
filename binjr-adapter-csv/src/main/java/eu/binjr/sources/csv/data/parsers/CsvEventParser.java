@@ -37,6 +37,7 @@ import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -70,7 +71,7 @@ public class CsvEventParser implements EventParser<Double> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        numberFormat =NumberFormat.getNumberInstance(format.getProfile().getNumberFormattingLocale());
+        numberFormat = NumberFormat.getNumberInstance(format.getProfile().getNumberFormattingLocale());
     }
 
     @Override
@@ -100,13 +101,19 @@ public class CsvEventParser implements EventParser<Double> {
             if (csvRecord == null) {
                 return null;
             }
-            if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
-                throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
-                        (format.getProfile().getTimestampColumn() + 1) +
-                        ": CSV record only has " + csvRecord.size() + " fields.");
+            ZonedDateTime timestamp;
+            if (format.getProfile().getTimestampColumn() == -1) {
+                timestamp = ZonedDateTime.ofInstant(Instant.EPOCH.plus(sequence.get(), ChronoUnit.SECONDS), format.getZoneId());
+            } else {
+                if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
+                    throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
+                            (format.getProfile().getTimestampColumn() + 1) +
+                            ": CSV record only has " + csvRecord.size() + " fields.");
+                }
+                String dateString = csvRecord.get(format.getProfile().getTimestampColumn());
+                timestamp = parseDateTime(dateString);
             }
-            String dateString = csvRecord.get(format.getProfile().getTimestampColumn());
-            ZonedDateTime timestamp = parseDateTime(dateString);
+
             if (timestamp == null) {
                 throw new UnsupportedOperationException("Failed to parse time stamp in column #" +
                         (format.getProfile().getTimestampColumn() + 1));
@@ -149,7 +156,7 @@ public class CsvEventParser implements EventParser<Double> {
                 try {
                     return getNumberFormat().parse(value.trim()).doubleValue();
                 } catch (Exception e) {
-                  logger.trace(()-> "Failed to convert to double", e);
+                    logger.trace(() -> "Failed to convert to double", e);
                 }
             }
             return Double.NaN;

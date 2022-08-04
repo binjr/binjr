@@ -19,8 +19,6 @@ package eu.binjr.common.text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.regex.Pattern;
-
 public class StringUtils {
     private final static String NON_THIN = "[^iIl1\\.,']";
     private static final Logger logger = LogManager.getLogger(StringUtils.class);
@@ -70,5 +68,23 @@ public class StringUtils {
         }
         return false;
     }
+
+    public static String integerToOrdinal(int i) {
+        if (i < 0) {
+            throw new UnsupportedOperationException("Only positive integer are supported.");
+        }
+        int mod100 = i % 100;
+        int mod10 = i % 10;
+        if (mod10 == 1 && mod100 != 11) {
+            return i + "st";
+        } else if (mod10 == 2 && mod100 != 12) {
+            return i + "nd";
+        } else if (mod10 == 3 && mod100 != 13) {
+            return i + "rd";
+        } else {
+            return i + "th";
+        }
+    }
+
 
 }

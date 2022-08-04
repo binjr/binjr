@@ -124,8 +124,8 @@
                                 <children>
                                     <Label minWidth="110.0" text="Timestamp column ">
                                     </Label>
-                                    <Spinner fx:id="timeColumnTextField" editable="false" maxWidth="60.0"
-                                             minHeight="-Infinity" prefHeight="24.0" prefWidth="60.0"/>
+                                    <Spinner fx:id="timeColumnTextField" editable="false"
+                                             minHeight="-Infinity" prefHeight="24.0" prefWidth="120.0"/>
                                     <Separator orientation="VERTICAL" prefHeight="20.0"/>
                                     <CheckBox fx:id="readColumnNameCheckBox"
                                               text="Use values from first line as column names"/>

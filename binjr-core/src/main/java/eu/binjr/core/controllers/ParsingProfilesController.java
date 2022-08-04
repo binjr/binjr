@@ -51,7 +51,9 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -112,10 +114,12 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected VBox testPane;
 
     protected final AtomicInteger groupSequence = new AtomicInteger(0);
+    private final T selectedProfile;
+    private final Set<T> userParsingProfiles;
+    private final boolean allowTemporalCaptureGroupsOnly;
+    private final Charset defaultCharset;
+    private final ZoneId defaultZoneId;
 
-    protected final T selectedProfile;
-    protected final Set<T> userParsingProfiles;
-    protected final boolean allowTemporalCaptureGroupsOnly;
     private final ChangeListener<T> selectionListener = (observable, oldValue, newValue) -> {
         if (newValue != null) {
             loadParserParameters(newValue);
@@ -274,8 +278,10 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     public ParsingProfilesController(T[] builtinParsingProfiles,
                                      T[] userParsingProfiles,
                                      T defaultProfile,
-                                     T selectedProfile) {
-        this(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile, false);
+                                     T selectedProfile,
+                                     Charset defaultCharset,
+                                     ZoneId defaultZoneId) {
+        this(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile, false, defaultCharset, defaultZoneId);
     }
 
     /**
@@ -285,12 +291,16 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                                      T[] userParsingProfiles,
                                      T defaultProfile,
                                      T selectedProfile,
-                                     boolean allowTemporalCaptureGroupsOnly) {
+                                     boolean allowTemporalCaptureGroupsOnly,
+                                     Charset defaultCharset,
+                                     ZoneId defaultZoneId) {
         this.builtinParsingProfiles = builtinParsingProfiles;
         this.defaultProfile = defaultProfile;
         this.selectedProfile = selectedProfile;
         this.userParsingProfiles = new HashSet<>(Arrays.stream(userParsingProfiles).toList());
         this.allowTemporalCaptureGroupsOnly = allowTemporalCaptureGroupsOnly;
+        this.defaultCharset = defaultCharset;
+        this.defaultZoneId = defaultZoneId;
         if (selectedProfile instanceof CustomParsingProfile) {
             this.userParsingProfiles.add(selectedProfile);
         }
@@ -448,6 +458,14 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         var spans = new StyleSpansBuilder<Collection<String>>();
         spans.add(Collections.emptyList(), testArea.getText().length());
         testArea.setStyleSpans(0, spans.create());
+    }
+
+    public Charset getDefaultCharset() {
+        return defaultCharset;
+    }
+
+    public ZoneId getDefaultZoneId() {
+        return defaultZoneId;
     }
 
     protected class ColoredTableCell extends ComboBoxTableCell<NameExpressionPair, NamedCaptureGroup> {
