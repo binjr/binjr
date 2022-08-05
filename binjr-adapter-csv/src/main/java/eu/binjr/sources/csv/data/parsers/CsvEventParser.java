@@ -37,7 +37,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class CsvEventParser implements EventParser<String> {
+public class CsvEventParser implements EventParser {
     private static final Logger logger = Logger.create(CsvEventParser.class);
     private final BufferedReader reader;
     private final AtomicLong sequence;
@@ -45,8 +45,6 @@ public class CsvEventParser implements EventParser<String> {
     private final CsvEventIterator eventIterator;
     private final CSVParser csvParser;
     private final LongProperty progress = new SimpleLongProperty(0);
-    private final NumberFormat numberFormat;
-
 
     CsvEventParser(CsvEventFormat format, InputStream ias) {
         this.reader = new BufferedReader(new InputStreamReader(ias, format.getEncoding()));
@@ -67,7 +65,6 @@ public class CsvEventParser implements EventParser<String> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        numberFormat = NumberFormat.getNumberInstance(format.getProfile().getNumberFormattingLocale());
     }
 
     @Override
@@ -81,18 +78,14 @@ public class CsvEventParser implements EventParser<String> {
     }
 
     @Override
-    public Iterator<ParsedEvent<String>> iterator() {
+    public Iterator<ParsedEvent> iterator() {
         return eventIterator;
     }
 
-    private NumberFormat getNumberFormat() {
-        return numberFormat;
-    }
-
-    public class CsvEventIterator implements Iterator<ParsedEvent<String>> {
+    public class CsvEventIterator implements Iterator<ParsedEvent> {
 
         @Override
-        public ParsedEvent<String> next() {
+        public ParsedEvent next() {
             var csvRecord = csvParser.iterator().next();
             if (csvRecord == null) {
                 return null;
@@ -116,11 +109,12 @@ public class CsvEventParser implements EventParser<String> {
             }
             Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {
-                if (i != format.getProfile().getTimestampColumn()) { // don't add the timestamp column as an attribute
-                    values.put(Integer.toString(i),csvRecord.get(i));// parseDouble(csvRecord.get(i)));
+                if (i != format.getProfile().getTimestampColumn()) {
+                    // don't add the timestamp column as an attribute
+                    values.put(Integer.toString(i),csvRecord.get(i));
                 }
             }
-            return new ParsedEvent<>(sequence.incrementAndGet(), timestamp, " ", values);
+            return new ParsedEvent(sequence.incrementAndGet(), timestamp, " ", values);
         }
 
         @Override
@@ -146,21 +140,7 @@ public class CsvEventParser implements EventParser<String> {
             }
             return null;
         }
-
-        private double parseDouble(String value) {
-            if (value != null) {
-                try {
-                    return Double.parseDouble(value);
-                    //return getNumberFormat().parse(value.trim()).doubleValue();
-                } catch (Exception e) {
-                    logger.trace(() -> "Failed to convert to double", e);
-                }
-            }
-            return Double.NaN;
-
-        }
     }
-
 
 }
 

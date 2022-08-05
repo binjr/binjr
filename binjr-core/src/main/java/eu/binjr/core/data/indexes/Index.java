@@ -61,7 +61,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-public abstract class Index<T> implements Indexable<T> {
+public abstract class Index implements Indexable {
     public static final String TIMESTAMP = "timestamp";
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
@@ -146,8 +146,8 @@ public abstract class Index<T> implements Indexable<T> {
     @Override
     public void add(String path,
                     InputStream ias,
-                    EventFormat<T> parser,
-                    EnrichDocumentFunction<T> enrichDocumentFunction,
+                    EventFormat parser,
+                    EnrichDocumentFunction enrichDocumentFunction,
                     LongProperty progress,
                     Property<IndexingStatus> indexingStatus) throws IOException {
         add(path, ias, true, parser, enrichDocumentFunction, progress, indexingStatus);
@@ -157,8 +157,8 @@ public abstract class Index<T> implements Indexable<T> {
     public void add(String path,
                     InputStream ias,
                     boolean commit,
-                    EventFormat<T> parser,
-                    EnrichDocumentFunction<T> enrichDocumentFunction,
+                    EventFormat parser,
+                    EnrichDocumentFunction enrichDocumentFunction,
                     LongProperty progress,
                     Property<IndexingStatus> cancellationRequested) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
@@ -170,7 +170,7 @@ public abstract class Index<T> implements Indexable<T> {
 
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
                 final AtomicBoolean taskAborted = new AtomicBoolean(false);
-                final BlockingQueue<ParsedEvent<T>> queue = new LinkedBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
+                final BlockingQueue<ParsedEvent> queue = new LinkedBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                 final List<Future<Integer>> results = new ArrayList<>();
 
                 for (int i = 0; i < parsingThreadsNumber; i++) {
@@ -178,7 +178,7 @@ public abstract class Index<T> implements Indexable<T> {
                         logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
                         int nbEventProcessed = 0;
                         do {
-                            List<ParsedEvent<T>> todo = new ArrayList<>();
+                            List<ParsedEvent> todo = new ArrayList<>();
                             var drained = queue.drainTo(todo, prefs.parsingThreadDrainSize.get().intValue());
                             if (drained == 0 && queue.size() == 0) {
                                 // Park the thread for a while before polling again

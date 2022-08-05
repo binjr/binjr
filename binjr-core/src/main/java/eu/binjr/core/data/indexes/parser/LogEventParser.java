@@ -23,12 +23,12 @@ import java.io.*;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class LogEventParser implements EventParser<String> {
+public class LogEventParser implements EventParser {
     private final BufferedReader reader;
     private final AtomicLong sequence;
     private final LogEventFormat format;
     private final LogEventIterator logEventIterator;
-    private ParsedEvent<String> buffered;
+    private ParsedEvent buffered;
 
     private final LongProperty progress = new SimpleLongProperty(0);
     private long charRead = 0;
@@ -52,16 +52,16 @@ public class LogEventParser implements EventParser<String> {
     }
 
     @Override
-    public Iterator<ParsedEvent<String>> iterator() {
+    public Iterator<ParsedEvent> iterator() {
         return logEventIterator;
     }
 
-    public class LogEventIterator implements Iterator<ParsedEvent<String>> {
+    public class LogEventIterator implements Iterator<ParsedEvent> {
         private boolean hasNext = true;
 
         @Override
 
-        public ParsedEvent<String> next() {
+        public ParsedEvent next() {
             var event = yieldNextEvent();
             while (event == null && hasNext) {
                 event = yieldNextEvent();
@@ -69,7 +69,7 @@ public class LogEventParser implements EventParser<String> {
             return event;
         }
 
-        private ParsedEvent<String> yieldNextEvent() {
+        private ParsedEvent yieldNextEvent() {
             String line = null;
             try {
                 line = reader.readLine();

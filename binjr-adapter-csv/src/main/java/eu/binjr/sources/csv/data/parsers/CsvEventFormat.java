@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.*;
 
-public class CsvEventFormat implements EventFormat<String> {
+public class CsvEventFormat implements EventFormat {
     private static final Logger logger = Logger.create(CsvEventFormat.class);
     private final CsvParsingProfile profile;
     private final ZoneId zoneId;
@@ -46,7 +46,7 @@ public class CsvEventFormat implements EventFormat<String> {
     }
 
     @Override
-    public EventParser<String> parse(InputStream ias) {
+    public EventParser parse(InputStream ias) {
         return new CsvEventParser(this, ias);
     }
 

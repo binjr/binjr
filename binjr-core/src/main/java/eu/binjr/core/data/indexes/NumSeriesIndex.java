@@ -43,19 +43,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NumSeriesIndex extends Index<String> {
+public class NumSeriesIndex extends Index {
     private static final Logger logger = Logger.create(NumSeriesIndex.class);
 
     public NumSeriesIndex() throws IOException {
         super();
     }
-//
-//    @Override
-//    protected Document enrichDocument(Document doc, ParsedEvent<String> event) throws IOException {
-//        // add all other sections as stored double fields
-//        event.getFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value))));
-//        return super.enrichDocument(doc, event);
-//    }
 
     public long search(long start,
                        long end,

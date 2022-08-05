@@ -42,7 +42,7 @@ import java.util.function.Function;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
-public class LogFileIndex extends Index<String> {
+public class LogFileIndex extends Index {
     private static final Logger logger = Logger.create(LogFileIndex.class);
 
     private final Cache<String, SearchHitsProcessor> facetResultCache;

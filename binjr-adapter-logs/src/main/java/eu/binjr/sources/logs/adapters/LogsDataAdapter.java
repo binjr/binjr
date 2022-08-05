@@ -89,12 +89,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
             UserHistory.getInstance().stringMostRecentlyUsedList("userParsingProfiles", 100);
     private final Charset encoding;
     private Path rootPath;
-    private Indexable<String> index;
+    private Indexable index;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
     private ParsingProfile parsingProfile;
-    private EventFormat<String> parser;
+    private EventFormat parser;
     private ZoneId zoneId;
 
     /**

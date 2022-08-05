@@ -19,13 +19,13 @@ package eu.binjr.core.data.indexes.parser;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-public class ParsedEvent<T> {
+public class ParsedEvent {
     private final ZonedDateTime timestamp;
     private final long lineNumber;
-    private final Map<String, T> fields;
+    private final Map<String, String> fields;
     private final String text;
 
-    public ParsedEvent(long sequence, ZonedDateTime timestamp, String text, Map<String, T> fields) {
+    public ParsedEvent(long sequence, ZonedDateTime timestamp, String text, Map<String, String> fields) {
         this.lineNumber = sequence;
         this.text = text;
         this.timestamp = timestamp;
@@ -44,7 +44,7 @@ public class ParsedEvent<T> {
         return timestamp;
     }
 
-    public Map<String, T> getFields() {
+    public Map<String, String> getFields() {
         return fields;
     }
 

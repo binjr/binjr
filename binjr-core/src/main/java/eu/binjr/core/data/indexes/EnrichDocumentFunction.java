@@ -23,6 +23,6 @@ import org.apache.lucene.document.Document;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface EnrichDocumentFunction<T> {
-     Document apply(Document doc, ParsedEvent<T> event) throws IOException;
+public interface EnrichDocumentFunction {
+     Document apply(Document doc, ParsedEvent event) throws IOException;
 }

@@ -66,7 +66,7 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
         var format = new LogEventFormat(profileComboBox.getValue(), getDefaultZoneId(),getDefaultCharset());
         try (InputStream in = new ByteArrayInputStream(testArea.getText().getBytes(getDefaultCharset()))) {
             var eventParser = format.parse(in);
-            var events = new ArrayList<ParsedEvent<String>>();
+            var events = new ArrayList<ParsedEvent>();
             for (var parsed : eventParser) {
                 if (parsed != null) {
                     events.add(parsed);

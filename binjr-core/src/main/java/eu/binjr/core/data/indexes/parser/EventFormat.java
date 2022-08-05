@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public interface EventFormat<T> {
+public interface EventFormat {
     ParsingProfile getProfile();
 
-    EventParser<T> parse(InputStream ias);
+    EventParser parse(InputStream ias);
 
     Charset getEncoding();
 

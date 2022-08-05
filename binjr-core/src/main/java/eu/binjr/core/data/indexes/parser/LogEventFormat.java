@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class LogEventFormat implements EventFormat<String> {
+public class LogEventFormat implements EventFormat {
     private final ParsingProfile profile;
     private final ZoneId zoneId;
     private final Charset encoding;
@@ -46,7 +46,7 @@ public class LogEventFormat implements EventFormat<String> {
     }
 
     @Override
-    public EventParser<String> parse(InputStream ias) {
+    public EventParser parse(InputStream ias) {
         return new LogEventParser(this, ias);
     }
 
@@ -60,7 +60,7 @@ public class LogEventFormat implements EventFormat<String> {
         return zoneId;
     }
 
-    public Optional<ParsedEvent<String>> parse(long lineNumber, String text) {
+    public Optional<ParsedEvent> parse(long lineNumber, String text) {
         var m = getProfile().getParsingRegex().matcher(text);
         var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, getZoneId());
         final Map<String, String> sections = new HashMap<>();
@@ -76,7 +76,7 @@ public class LogEventFormat implements EventFormat<String> {
                     }
                 }
             }
-            return Optional.of(new ParsedEvent<>(lineNumber, timestamp, text, sections));
+            return Optional.of(new ParsedEvent(lineNumber, timestamp, text, sections));
         }
         return Optional.empty();
     }
