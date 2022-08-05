@@ -109,7 +109,7 @@
                             </TableView>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <children>
-                                    <Label minWidth="110.0" text="Timestamp pattern"/>
+                                    <Label minWidth="115.0" text="Timestamp pattern"/>
                                     <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity"
                                               maxWidth="1.7976931348623157E308" minHeight="26.0"
                                               prefHeight="26.0"
@@ -122,7 +122,7 @@
                             </HBox>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <children>
-                                    <Label minWidth="110.0" text="Timestamp column ">
+                                    <Label minWidth="115.0" text="Get timestamps from ">
                                     </Label>
                                     <Spinner fx:id="timeColumnTextField" editable="false"
                                              minHeight="-Infinity" prefHeight="24.0" prefWidth="120.0"/>
@@ -133,7 +133,7 @@
                             </HBox>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <children>
-                                    <Label minWidth="110.0" text="Delimiting character">
+                                    <Label minWidth="115.0" text="Delimiting character">
                                     </Label>
                                     <TextField fx:id="delimiterTextField" maxWidth="35" minHeight="-Infinity"
                                                prefHeight="24.0" prefWidth="35.0"/>

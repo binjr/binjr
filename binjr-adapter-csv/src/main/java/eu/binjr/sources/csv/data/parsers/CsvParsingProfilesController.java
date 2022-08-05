@@ -115,7 +115,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     public record ColumnPosition(int index) {
         @Override
         public String toString() {
-            return (index < 0) ? "Line number" : StringUtils.integerToOrdinal(index + 1);
+            return (index < 0) ? "line numbers" : StringUtils.integerToOrdinal(index + 1) + " column";
         }
     }
 
