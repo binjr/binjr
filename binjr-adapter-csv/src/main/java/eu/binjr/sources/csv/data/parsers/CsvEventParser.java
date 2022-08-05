@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
@@ -30,7 +31,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -55,7 +55,7 @@ public class CsvEventParser implements EventParser {
                     .setAllowMissingColumnNames(true)
                     .setSkipHeaderRecord(true)
                     .setQuote(format.getProfile().getQuoteCharacter())
-                    .setDelimiter(format.getProfile().getDelimiter());
+                    .setDelimiter(StringUtils.stringToEscapeSequence(format.getProfile().getDelimiter()));
             if (format.getProfile().isReadColumnNames()) {
                 builder.setHeader();
             }
@@ -111,7 +111,7 @@ public class CsvEventParser implements EventParser {
             for (int i = 0; i < csvRecord.size(); i++) {
                 if (i != format.getProfile().getTimestampColumn()) {
                     // don't add the timestamp column as an attribute
-                    values.put(Integer.toString(i),csvRecord.get(i));
+                    values.put(Integer.toString(i), csvRecord.get(i));
                 }
             }
             return new ParsedEvent(sequence.incrementAndGet(), timestamp, " ", values);

@@ -86,5 +86,46 @@ public class StringUtils {
         }
     }
 
+    public static String stringToEscapeSequence(String val) {
+        if (val == null){
+            return null;
+        }
+        switch (val.trim()) {
+            case "\\t" -> {
+                return "\t";
+            }
+            case "\'" -> {
+                return "'";
+            }
+            case "\\" -> {
+                return "\"";
+            }
+            case "\\n" -> {
+                return "\n";
+            }
+            case "\\r" -> {
+                return "\r";
+            }
+            case "\\f" -> {
+                return "\f";
+            }
+            case "\\b" -> {
+                return "\b";
+            }
+            case "\\\\" -> {
+                return "\\";
+            }
+            case "\\r\\n" -> {
+                return "\r\n";
+            }
+            case "\\n\\r" -> {
+                return "\n\r";
+            }
+            default -> {
+                return val;
+            }
+        }
+    }
+
 
 }

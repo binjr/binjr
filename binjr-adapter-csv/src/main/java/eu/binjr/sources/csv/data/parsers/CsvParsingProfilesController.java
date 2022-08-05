@@ -85,9 +85,10 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
 
     private final UnaryOperator<TextFormatter.Change> clampToSingleChar = c -> {
         if (c.isContentChange()) {
-            int newLength = c.getControlNewText().length();
-            if (newLength > 1) {
-                String tail = c.getControlNewText().substring(newLength - 1, newLength);
+            String newText = c.getControlNewText();
+            int newLength = newText.length();
+            if (newLength > 1 && (newText.charAt(0) != '\\' || !List.of('t', 'r', 'n').contains(newText.charAt(1)) || newLength > 2)) {
+                String tail = newText.substring(newLength - 1, newLength);
                 c.setText(tail);
                 int oldLength = c.getControlText().length();
                 c.setRange(0, oldLength);
@@ -250,7 +251,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                                 this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, pos.index()));
                                 handleOnRunTest(null);
                             }
-                        }else {
+                        } else {
                             this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, -1));
                             handleOnRunTest(null);
                         }
@@ -309,7 +310,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 groups,
                 lineExpression,
                 this.delimiterTextField.getText(),
-                this.quoteCharacterTextField.getText().charAt(0),
+                StringUtils.stringToEscapeSequence(this.quoteCharacterTextField.getText()).charAt(0),
                 this.timeColumnTextField.getValue().index(),
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),

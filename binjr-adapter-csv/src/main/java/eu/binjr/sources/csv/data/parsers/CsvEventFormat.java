@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.exceptions.DecodingDataFromAdapterException;
 import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
@@ -72,7 +73,7 @@ public class CsvEventFormat implements EventFormat {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
             CSVFormat csvFormat = CSVFormat.Builder.create()
                     .setAllowMissingColumnNames(false)
-                    .setDelimiter(getProfile().getDelimiter())
+                    .setDelimiter(StringUtils.stringToEscapeSequence(getProfile().getDelimiter()))
                     .build();
             Iterable<CSVRecord> records = csvFormat.parse(reader);
             CSVRecord record = records.iterator().next();
