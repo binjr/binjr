@@ -132,13 +132,12 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("The provided path is not valid.");
         }
         getMostRecentList().push(csvPath);
+        prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileId());
         String charsetName = encodingField.getText();
         if (!Charset.isSupported(charsetName)) {
             throw new CannotInitializeDataAdapterException("Invalid or unsupported encoding: " + charsetName);
         }
         prefs.mruEncoding.set(charsetName);
-
-
         return List.of(new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
