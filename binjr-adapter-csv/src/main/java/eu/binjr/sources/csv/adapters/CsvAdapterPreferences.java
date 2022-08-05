@@ -18,6 +18,7 @@ package eu.binjr.sources.csv.adapters;
 
 
 import com.google.gson.Gson;
+import eu.binjr.common.auth.JfxKrb5LoginModule;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
@@ -74,7 +75,7 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
 
     public ObservablePreference<String> mruCsvSeparator = stringPreference("mruCsvSeparator", ";");
 
-    public ObservablePreference<Number> mruDateColumnPosition =  integerPreference("mruDateColumnPosition", 0);
+    public ObservablePreference<Number> mruDateColumnPosition = integerPreference("mruDateColumnPosition", 0);
 
     /**
      * Initialize a new instance of the {@link CsvAdapterPreferences} class associated to

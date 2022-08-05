@@ -29,6 +29,7 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -49,6 +50,7 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -259,6 +261,47 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                 textField.setText("");
             }
         }
+    }
+
+    @FXML
+    protected void handleOnOpenFileToTestArea(ActionEvent event) {
+        File selectedFile = displayFileChooser((Node) event.getSource());
+        if (selectedFile != null) {
+            testArea.clear();
+            try (var reader = Files.newBufferedReader(selectedFile.toPath())) {
+                int lineRead = 0;
+                while (lineRead < UserPreferences.getInstance().maxLinesFileTestPreview.get().intValue()) {
+                    var line = reader.lines().findFirst();
+                    if (line.isPresent()) {
+                        testArea.appendText(line.get());
+                        testArea.appendText("\n");
+                        lineRead++;
+                    } else {
+                        lineRead = Integer.MAX_VALUE;
+                    }
+                }
+            } catch (Exception e) {
+                Dialogs.notifyException("Could not load data into test area", e, root);
+            }
+        }
+    }
+
+    private File displayFileChooser(Node owner) {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open file");
+            additionalExtensions().ifPresent(ext-> fileChooser.getExtensionFilters().addAll(ext));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+            Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
+            return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
+        } catch (Exception e) {
+            Dialogs.notifyException("Error while displaying file chooser: " + e.getMessage(), e, owner);
+        }
+        return null;
+    }
+
+    protected Optional<List<FileChooser.ExtensionFilter>> additionalExtensions(){
+        return Optional.empty();
     }
 
     @FXML

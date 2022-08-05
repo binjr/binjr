@@ -333,6 +333,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Path> temporaryFilesRoot = pathPreference("temporaryFilesRoot", Path.of(System.getProperty("java.io.tmpdir")));
 
+    public ObservablePreference<Number> maxLinesFileTestPreview = integerPreference("maxLinesFileTestPreview", 20);
+
     /**
      * A list of user defined {@link ParsingProfile} for parsing log events
      */

@@ -33,23 +33,36 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.controllers.ParsingProfilesController;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
+import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.sources.csv.adapters.CsvAdapterPreferences;
+import eu.binjr.sources.csv.adapters.CsvFileAdapter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
 
+import javax.swing.text.html.Option;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -90,6 +103,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         return c;
     };
     private NumberFormat numberFormat = NumberFormat.getNumberInstance();
+    private final CsvAdapterPreferences prefs;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -162,11 +176,12 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                                         CsvParsingProfile defaultProfile,
                                         CsvParsingProfile selectedProfile,
                                         Charset defaultCharset,
-                                        ZoneId defaultZoneId) {
-        super(builtinParsingProfiles,
+                                        ZoneId defaultZoneId) throws NoAdapterFoundException {
+        this(builtinParsingProfiles,
                 userParsingProfiles,
                 defaultProfile,
                 selectedProfile,
+                true,
                 defaultCharset,
                 defaultZoneId);
     }
@@ -177,7 +192,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                                         CsvParsingProfile selectedProfile,
                                         boolean allowTemporalCaptureGroupsOnly,
                                         Charset defaultCharset,
-                                        ZoneId defaultZoneId) {
+                                        ZoneId defaultZoneId) throws NoAdapterFoundException {
         super(builtinParsingProfiles,
                 userParsingProfiles,
                 defaultProfile,
@@ -185,12 +200,18 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 allowTemporalCaptureGroupsOnly,
                 defaultCharset,
                 defaultZoneId);
+        this.prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
     }
 
     @Override
     protected void handleOnRunTest(ActionEvent event) {
         super.handleOnRunTest(event);
         testTabPane.getSelectionModel().select(resultTab);
+    }
+
+    @Override
+    protected Optional<List<FileChooser.ExtensionFilter>> additionalExtensions() {
+        return Optional.of(List.of(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv")));
     }
 
     @Override
@@ -289,4 +310,5 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         }
         return "NaN";
     }
+
 }

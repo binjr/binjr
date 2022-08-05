@@ -284,6 +284,25 @@
                                                     <Tooltip showDelay="500ms" text="Paste to test area"/>
                                                 </tooltip>
                                             </Button>
+                                            <Button fx:id="openFileButton" contentDisplay="GRAPHIC_ONLY"
+                                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                                    minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnOpenFileToTestArea" prefHeight="30.0"
+                                                    prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Open File">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="fileOpen-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Preview the first few lines of a file into test area"/>
+                                                </tooltip>
+                                            </Button>
                                             <Region maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS"/>
                                         </children>
                                     </VBox>
