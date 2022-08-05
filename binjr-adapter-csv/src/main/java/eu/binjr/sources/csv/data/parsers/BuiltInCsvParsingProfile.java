@@ -53,7 +53,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                     TemporalCaptureGroup.SECOND, "\\d{2}",
                     TemporalCaptureGroup.MILLI, "\\d{3}",
                     CaptureGroup.of("TIMEZONE"), "(Z|[+-]\\d{2}:?(\\d{2})?)"),
-            "$YEAR[\\/-]?$MONTH[\\/-]?$DAY[-\\sT]$HOUR?:?$MINUTE?:?$SECOND?([\\.,]$MILLI)?$TIMEZONE?",
+            "$YEAR[\\s\\/-]$MONTH[\\s\\/-]$DAY([-\\sT]$HOUR:$MINUTE:$SECOND)?([\\.,]$MILLI)?$TIMEZONE?",
             ",",
             '"',
             0,

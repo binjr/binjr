@@ -33,8 +33,8 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
-import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
+import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -42,27 +42,20 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.sources.csv.adapters.CsvAdapterPreferences;
 import eu.binjr.sources.csv.adapters.CsvFileAdapter;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
 
-import javax.swing.text.html.Option;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -228,8 +221,20 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 for (int i = 0; i < headers.size(); i++) {
                     String name = headers.get(i);
                     var col = new TableColumn<ParsedEvent, String>(name);
+                    col.setStyle("-fx-font-weight: normal;");
+                    var isTimeColCtrl = new ToolButtonBuilder<ToggleButton>()
+                            .setText("")
+                            .setTooltip("Extract timestamp from this column")
+                            .setStyleClass("dialog-button")
+                            .setIconStyleClass("time-icon", "small-icon")
+                            .build(ToggleButton::new);
+                    isTimeColCtrl.setUserData(new ColumnPosition(i));
+                    col.setGraphic(isTimeColCtrl);
+                    col.setSortable(false);
+                    col.setReorderable(false);
                     colMap.put(col, Integer.toString(i));
                     if (i == format.getProfile().getTimestampColumn()) {
+                        isTimeColCtrl.setSelected(true);
                         col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
@@ -239,6 +244,17 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                                 new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
                     }
                     testResultTable.getColumns().add(col);
+                    isTimeColCtrl.selectedProperty().addListener((obs, oldVal, newVal) -> {
+                        if (newVal) {
+                            if (isTimeColCtrl.getUserData() instanceof ColumnPosition pos) {
+                                this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, pos.index()));
+                                handleOnRunTest(null);
+                            }
+                        }else {
+                            this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, -1));
+                            handleOnRunTest(null);
+                        }
+                    });
                 }
             }
         }

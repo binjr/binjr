@@ -215,8 +215,8 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                 doTest();
             }
         } catch (Exception e) {
-            notifyError(e.getMessage());
-            logger.error("Error testing parsing rules", e);
+            notifyError("Parsing failed: " + e.getMessage());
+            logger.error("Error testing parsing rules: " + e.getMessage());
             logger.debug(() -> "Stack Trace", e);
         }
     }
