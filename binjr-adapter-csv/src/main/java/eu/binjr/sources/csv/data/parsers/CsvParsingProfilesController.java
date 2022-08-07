@@ -44,12 +44,14 @@ import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.sources.csv.adapters.CsvAdapterPreferences;
 import eu.binjr.sources.csv.adapters.CsvFileAdapter;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
+import org.controlsfx.control.spreadsheet.SpreadsheetCellType;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.ByteArrayInputStream;
@@ -217,45 +219,24 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 notifyWarn("No record found.");
             } else {
                 Map<TableColumn, String> colMap = new HashMap<>();
-                var cellFactory = new AlignedTableCellFactory<ParsedEvent, String>();
-                cellFactory.setAlignment(TextAlignment.RIGHT);
+                var tsColNum = format.getProfile().getTimestampColumn();
+                // Add a column for line numbers
+                var lineNbColumn = makeColumn(colMap, TextAlignment.CENTER, -1, tsColNum, "#");
+                lineNbColumn.setCellValueFactory(param ->
+                        new SimpleStringProperty(Long.toString(param.getValue().getSequence())));
+                lineNbColumn.getStyleClass().add("line-number-column");
+                testResultTable.getColumns().add(lineNbColumn);
                 for (int i = 0; i < headers.size(); i++) {
                     String name = headers.get(i);
-                    var col = new TableColumn<ParsedEvent, String>(name);
-                    col.setStyle("-fx-font-weight: normal;");
-                    var isTimeColCtrl = new ToolButtonBuilder<ToggleButton>()
-                            .setText("")
-                            .setTooltip("Extract timestamp from this column")
-                            .setStyleClass("dialog-button")
-                            .setIconStyleClass("time-icon", "small-icon")
-                            .build(ToggleButton::new);
-                    isTimeColCtrl.setUserData(new ColumnPosition(i));
-                    col.setGraphic(isTimeColCtrl);
-                    col.setSortable(false);
-                    col.setReorderable(false);
-                    colMap.put(col, Integer.toString(i));
-                    if (i == format.getProfile().getTimestampColumn()) {
-                        isTimeColCtrl.setSelected(true);
-                        col.setCellFactory(cellFactory);
+                    TableColumn<ParsedEvent, String> col = makeColumn(colMap, TextAlignment.RIGHT, i, tsColNum, name);
+                    if (i == tsColNum) {
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
                     } else {
-                        col.setCellFactory(cellFactory);
                         col.setCellValueFactory(param ->
                                 new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
                     }
                     testResultTable.getColumns().add(col);
-                    isTimeColCtrl.selectedProperty().addListener((obs, oldVal, newVal) -> {
-                        if (newVal) {
-                            if (isTimeColCtrl.getUserData() instanceof ColumnPosition pos) {
-                                this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, pos.index()));
-                                handleOnRunTest(null);
-                            }
-                        } else {
-                            this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, -1));
-                            handleOnRunTest(null);
-                        }
-                    });
                 }
             }
         }
@@ -266,6 +247,38 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
             }
             notifyInfo(String.format("Found %d record(s).", testResultTable.getItems().size()));
         }
+    }
+
+    private TableColumn<ParsedEvent, String> makeColumn(Map<TableColumn, String> colMap,
+                                                        TextAlignment alignment,
+                                                        int i,
+                                                        int tsColumn,
+                                                        String name) {
+        var col = new TableColumn<ParsedEvent, String>(name);
+        col.setStyle("-fx-font-weight: normal;");
+        var isTimeColCtrl = new ToolButtonBuilder<ToggleButton>()
+                .setText("")
+                .setTooltip("Extract timestamp from this column")
+                .setStyleClass("dialog-button")
+                .setAction(event -> {
+                    var btn = (ToggleButton) event.getSource();
+                    if (btn.getUserData() instanceof ColumnPosition pos) {
+                        this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, pos.index()));
+                        handleOnRunTest(null);
+                    }
+                })
+                .setIconStyleClass("time-icon", "small-icon")
+                .build(ToggleButton::new);
+        isTimeColCtrl.setUserData(new ColumnPosition(i));
+        isTimeColCtrl.setSelected(i == tsColumn);
+        col.setGraphic(isTimeColCtrl);
+        col.setSortable(false);
+        col.setReorderable(false);
+        var cellFactory = new AlignedTableCellFactory<ParsedEvent, String>();
+        cellFactory.setAlignment(alignment);
+        col.setCellFactory(cellFactory);
+        colMap.put(col, Integer.toString(i));
+        return col;
     }
 
     @Override

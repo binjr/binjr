@@ -1937,3 +1937,6 @@
     -fx-rotate: -90;
 }
 
+.line-number-column {
+    -fx-background-color: -binjr-control-background-color;
+}

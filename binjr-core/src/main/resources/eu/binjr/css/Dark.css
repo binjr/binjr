@@ -2179,3 +2179,9 @@
 .tool-dialog-window .titled-pane:collapsed > .title > .arrow-button .arrow {
     -fx-rotate: -90;
 }
+
+.line-number-column {
+    -fx-background-color: -binjr-window-background-color;
+    -fx-border-color:  -binjr-window-background-color;
+    -fx-border-width: 1;
+}
