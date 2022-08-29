@@ -33,7 +33,7 @@ public class NanToZeroTransform extends BaseTimeSeriesTransform<Double> {
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
-        return data.stream()
+        return data.parallelStream()
                 .map(sample -> sample.getYValue().isNaN() ? new XYChart.Data<>(sample.getXValue(), 0.0) : sample)
                 .collect(Collectors.toList());
     }

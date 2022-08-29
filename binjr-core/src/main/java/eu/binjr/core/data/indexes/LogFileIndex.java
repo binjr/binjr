@@ -168,19 +168,17 @@ public class LogFileIndex extends Index {
                 facetResultCache.invalidate(facetCacheKey);
             }
             facetProc = facetResultCache.get(facetCacheKey, fillFacetResultCache);
-            //   if (hitProc instanceof SearchHitsProcessor searchHitProc && facetProc instanceof SearchHitsProcessor facetHitProc) {
             hitProc.mergeFacetResults(facetProc);
-            //  }
             return hitProc;
         });
     }
 
 
     private SearchHitsProcessor retrieveFacets(long start,
-                                                            long end,
-                                                            Map<String, Collection<String>> params,
-                                                            Query rangeQuery,
-                                                            Query filterQuery,
+                                               long end,
+                                               Map<String, Collection<String>> params,
+                                               Query rangeQuery,
+                                               Query filterQuery,
                                                SearchHitsProcessor hitProc) throws IOException {
         var proc = new SearchHitsProcessor();
         var ranges = computeRanges(start, end, prefs.logHeatmapNbBuckets.get().intValue());
@@ -189,7 +187,7 @@ public class LogFileIndex extends Index {
                 .flatMap(e -> e.getValue().stream())
                 .toList();
         if (severities.isEmpty()) {
-            severities =hitProc.getFacetResults().get(SEVERITY).stream().map(FacetEntry::getLabel).toList();
+            severities = hitProc.getFacetResults().get(SEVERITY).stream().map(FacetEntry::getLabel).toList();
         }
         for (var severityLabel : severities) {
             var q = new DrillDownQuery(facetsConfig, filterQuery);

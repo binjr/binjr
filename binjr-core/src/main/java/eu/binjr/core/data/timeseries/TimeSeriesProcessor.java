@@ -150,6 +150,17 @@ public abstract class TimeSeriesProcessor<T> {
     }
 
     /**
+     * Appends all samples from a {@link TimeSeriesProcessor} instance.
+     *
+     * @param processor the processor holding the samples to append.
+     */
+    public void appendData(TimeSeriesProcessor<T> processor) {
+        monitor.write().lock(() -> {
+            this.data.addAll(processor.getData());
+        });
+    }
+
+    /**
      * Adds a new sample to the processor's data store
      *
      * @param timestamp the timestamp of the sample
@@ -184,7 +195,7 @@ public abstract class TimeSeriesProcessor<T> {
     private T unsyncedGetNearestValue(ZonedDateTime xValue) {
         T value = null;
         if (xValue != null && data != null) {
-            var previous = new XYChart.Data<ZonedDateTime,T>(xValue,null);
+            var previous = new XYChart.Data<ZonedDateTime, T>(xValue, null);
             for (var sample : data) {
                 value = sample.getYValue();
                 if (xValue.isBefore(sample.getXValue())) {
