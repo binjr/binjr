@@ -173,7 +173,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                                                                               List<TimeSeriesInfo<Double>> seriesInfo,
                                                                               boolean bypassCache) throws DataAdapterException {
         try {
-            ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED);
+            ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
             Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
             for (TimeSeriesInfo<Double> info : seriesInfo) {
                 series.put(info, new DoubleTimeSeriesProcessor());
