@@ -81,6 +81,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -1393,36 +1394,31 @@ public class MainViewController implements Initializable {
     }
 
     private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<SourceBinding>> rootItems) {
-        worksheetMaskerPane.setVisible(true);
         try {
             var charts = treeItemsAsChartList(rootItems, root);
             var title = StringUtils.ellipsize(rootItems.stream()
                     .map(t -> t.getValue().getLegend())
                     .collect(Collectors.joining(", ")), 50);
             if (charts.isPresent()) {
-                for (var t : rootItems
-                        .stream()
-                        .map(s -> s.getValue().getWorksheetClass())
-                        .distinct()
-                        .toList()) {
+                worksheetMaskerPane.setVisible(true);
+                var worksheetTypes = rootItems.stream().map(s -> s.getValue().getWorksheetClass()).distinct().toList();
+                CompletableFuture<?>[] futures = new CompletableFuture<?>[worksheetTypes.size()];
+                for (int i = 0; i < worksheetTypes.size(); i++) {
+                    var t = worksheetTypes.get(i);
                     // Schedule call to createWorksheet for async  execution as  may invoke long-lived  operation
                     // such as initial time range computation.
-                    AsyncTaskManager.getInstance().submit(
+                    futures[i] = AsyncTaskManager.getInstance().submit(
                             () -> WorksheetFactory.getInstance().createWorksheet(t, title, charts.get()),
                             event -> {
                                 try {
                                     editWorksheet(tabPane, (Worksheet<?>) event.getSource().getValue());
                                 } catch (CannotLoadWorksheetException e) {
                                     throw new RuntimeException(e);
-                                } finally {
-                                    worksheetMaskerPane.setVisible(false);
                                 }
                             },
-                            event -> {
-                                worksheetMaskerPane.setVisible(false);
-                                Dialogs.notifyException("Error adding bindings to new worksheet", event.getSource().getException(), root);
-                            });
+                            event -> Dialogs.notifyException("Error adding bindings to new worksheet", event.getSource().getException(), root));
                 }
+                CompletableFuture.allOf(futures).whenComplete((o, throwable) -> worksheetMaskerPane.setVisible(false));
             }
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
