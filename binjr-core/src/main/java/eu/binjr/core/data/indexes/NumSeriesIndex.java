@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class NumSeriesIndex extends Index {
@@ -63,10 +64,10 @@ public class NumSeriesIndex extends Index {
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             var clean = new NanToZeroTransform();
             var reduce = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
-            long hitsCollected = 0;
+            AtomicLong hitsCollected = new AtomicLong(0);
             int pageSize = prefs.numIdxMaxPageSize.get().intValue();
             FieldDoc lastHit = null;
-            try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
+            try (Profiler p = Profiler.start(() -> "Retrieved " + hitsCollected.get() + " samples for " + seriesToFill.size() + " series", logger::perf)) {
                 for (int pageNumber = 0; true; pageNumber++) {
                     TopFieldCollector collector = (lastHit == null) ?
                             TopFieldCollector.create(sort, pageSize, Integer.MAX_VALUE) :
@@ -105,14 +106,14 @@ public class NumSeriesIndex extends Index {
                             fullQueryProc.appendData(pageProc);
                         }
                     });
-                    hitsCollected += topDocs.scoreDocs.length;
+                    hitsCollected.accumulateAndGet(topDocs.scoreDocs.length, Long::sum);
                     // End the loop once all hits have been collected
-                    if (hitsCollected >= collector.getTotalHits()) {
+                    if (hitsCollected.get() >= collector.getTotalHits()) {
                         break;
                     }
                 }
             }
-            return hitsCollected;
+            return hitsCollected.get();
         });
     }
 }
