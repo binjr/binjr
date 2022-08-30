@@ -55,43 +55,55 @@ public class NumSeriesIndex extends Index {
             Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
             var drillDownQuery = new DrillDownQuery(facetsConfig, rangeQuery);
-            seriesToFill.keySet().stream().map(ts -> ts.getBinding().getPath()).forEach(path -> drillDownQuery.add(PATH, path));
+            seriesToFill.keySet()
+                    .stream()
+                    .map(ts -> ts.getBinding().getPath())
+                    .forEach(path -> drillDownQuery.add(PATH, path));
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             var clean = new NanToZeroTransform();
             var reduce = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
             long hitsCollected = 0;
             int pageSize = prefs.numIdxMaxPageSize.get().intValue();
+            FieldDoc lastHit = null;
             try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
-                for (int pageNumber = 0; pageNumber < 100000; pageNumber++) {
-                    int skip = pageNumber * pageSize;
-                    TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
+                for (int pageNumber = 0; true; pageNumber++) {
+                    TopFieldCollector collector = (lastHit == null) ?
+                            TopFieldCollector.create(sort, pageSize, Integer.MAX_VALUE) :
+                            TopFieldCollector.create(sort, pageSize, lastHit, Integer.MAX_VALUE);
                     logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
                     try (Profiler ignored = Profiler.start("Executing query for page " + pageNumber, logger::debug)) {
                         drill.search(drillDownQuery, collector);
                     }
-                    var fieldsToLoad = seriesToFill.keySet().stream().map(k -> k.getBinding().getLabel()).collect(Collectors.toSet());
+                    var fieldsToLoad = seriesToFill.keySet()
+                            .stream()
+                            .map(k -> k.getBinding().getLabel())
+                            .collect(Collectors.toSet());
                     fieldsToLoad.add(TIMESTAMP);
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new HashMap<>();
-                    var topDocs = collector.topDocs(skip, pageSize);
+                    var topDocs = collector.topDocs(0, pageSize);
                     // fill the buffer with data for the current page
                     for (int i = 0; i < topDocs.scoreDocs.length; i++) {
-                        var hit = topDocs.scoreDocs[i];
-                        var doc = searcher.doc(hit.doc, fieldsToLoad);
+                        lastHit = (FieldDoc) topDocs.scoreDocs[i];
+                        var doc = searcher.doc(lastHit.doc, fieldsToLoad);
                         seriesToFill.forEach((info, proc) -> {
-                            var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId);
+                            var timestamp =
+                                    ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId);
                             var value = doc.getField(info.getBinding().getLabel()).numericValue();
                             if (value != null) {
-                                pageDataBuffer.computeIfAbsent(info, doubleTimeSeriesInfo -> new DoubleTimeSeriesProcessor()).addSample(timestamp, value.doubleValue());
+                                pageDataBuffer.computeIfAbsent(info, doubleTimeSeriesInfo -> new DoubleTimeSeriesProcessor())
+                                        .addSample(timestamp, value.doubleValue());
                             }
                         });
                     }
                     // Apply downsampling to buffered data and append reduced dataset to processor
                     seriesToFill.entrySet().parallelStream().forEach(entry -> {
                         var pageProc = pageDataBuffer.get(entry.getKey());
-                        var fullQueryProc = entry.getValue();
-                        pageProc.applyTransforms(clean, reduce);
-                        fullQueryProc.appendData(pageProc);
+                        if (pageProc != null) {
+                            var fullQueryProc = entry.getValue();
+                            pageProc.applyTransforms(clean, reduce);
+                            fullQueryProc.appendData(pageProc);
+                        }
                     });
                     hitsCollected += topDocs.scoreDocs.length;
                     // End the loop once all hits have been collected
