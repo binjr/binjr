@@ -194,16 +194,16 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         File importPath = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (importPath != null) {
             try {
-                Type profileListType = new TypeToken<ArrayList<T>>() {
-                }.getType();
-                List<T> foo = gson.fromJson(Files.readString(importPath.toPath()), profileListType);
-                profileComboBox.getItems().addAll(foo);
+                var profiles = deSerializeProfiles(Files.readString(importPath.toPath()));
+                profileComboBox.getItems().addAll(profiles);
                 logger.info("Parsing profiles successfully imported to " + importPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while importing profiles: " + e.getMessage(), e, root);
             }
         }
     }
+
+    protected abstract List<T> deSerializeProfiles(String profileString);
 
     protected abstract void doTest() throws Exception;
 
@@ -370,8 +370,6 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         }
 
         this.profileComboBox.getSelectionModel().selectedItemProperty().addListener(selectionListener);
-
-
         this.profileComboBox.setConverter(new StringConverter<T>() {
             @Override
             public String toString(T object) {
@@ -402,9 +400,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                 event.consume();
             }
         });
-        testArea.textProperty().addListener((obs, oldText, newText) -> {
-            resetTest();
-        });
+        testArea.textProperty().addListener((obs, oldText, newText) -> resetTest());
         lineTemplateExpression.textProperty().addListener((obs, oldText, newText) -> {
             resetTest();
             colorLineTemplateField(newText);

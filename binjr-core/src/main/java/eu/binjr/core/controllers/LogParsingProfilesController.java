@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import com.google.gson.reflect.TypeToken;
 import eu.binjr.core.data.indexes.parser.LogEventFormat;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
@@ -23,9 +24,11 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -59,6 +62,13 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
                 allowTemporalCaptureGroupsOnly,
                 defaultCharset,
                 defaultZoneId);
+    }
+
+    @Override
+    protected List<ParsingProfile> deSerializeProfiles(String profileString) {
+        Type profileListType = new TypeToken<ArrayList<CustomParsingProfile>>() {
+        }.getType();
+        return gson.fromJson(profileString, profileListType);
     }
 
     @Override

@@ -32,6 +32,7 @@
 
 package eu.binjr.sources.csv.data.parsers;
 
+import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
@@ -44,20 +45,20 @@ import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.sources.csv.adapters.CsvAdapterPreferences;
 import eu.binjr.sources.csv.adapters.CsvFileAdapter;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
-import org.controlsfx.control.spreadsheet.SpreadsheetCellType;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -208,6 +209,13 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     @Override
     protected Optional<List<FileChooser.ExtensionFilter>> additionalExtensions() {
         return Optional.of(List.of(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv")));
+    }
+
+    @Override
+    protected List<CsvParsingProfile> deSerializeProfiles(String profileString) {
+        Type profileListType = new TypeToken<ArrayList<CustomCsvParsingProfile>>() {
+        }.getType();
+        return gson.fromJson(profileString, profileListType);
     }
 
     @Override

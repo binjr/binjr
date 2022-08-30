@@ -20,7 +20,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.timeseries.transform.FirstPassLttbTransform;
 import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -68,7 +67,9 @@ public class NumSeriesIndex extends Index {
                     int skip = pageNumber * pageSize;
                     TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
                     logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
-                    drill.search(drillDownQuery, collector);
+                    try (Profiler ignored = Profiler.start("Executing query for page " + pageNumber, logger::debug)) {
+                        drill.search(drillDownQuery, collector);
+                    }
                     var fieldsToLoad = seriesToFill.keySet().stream().map(k -> k.getBinding().getLabel()).collect(Collectors.toSet());
                     fieldsToLoad.add(TIMESTAMP);
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new HashMap<>();
