@@ -21,10 +21,10 @@
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
+            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n" charset="UTF-8"/>
         </Console>
         <File name="File" fileName="${filename}">
-            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
+            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n" charset="UTF-8"/>
         </File>
     </Appenders>
     <Loggers>

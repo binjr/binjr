@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~    Copyright 2017-2020 Frederic Thevenet
+  ~    Copyright 2017-2022 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
+            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n" charset="UTF-8"/>
         </Console>
         <!--<TextFlowAppender name="InternalConsole">-->
-        <!--<PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>-->
+        <!--<PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n" charset="UTF-8"/>-->
         <!--</TextFlowAppender>-->
         <!--<File name="File" fileName="${filename}">-->
-        <!--<PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>-->
+        <!--<PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n" charset="UTF-8"/>-->
         <!--</File>-->
     </Appenders>
     <Loggers>

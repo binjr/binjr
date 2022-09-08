@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2021 Frederic Thevenet
+ *    Copyright 2016-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -74,6 +75,7 @@ public class Binjr extends Application {
                         "InternalConsole",
                         PatternLayout.newBuilder()
                                 .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
+                                .withCharset(StandardCharsets.UTF_8)
                                 .build(), null);
                 textFlowAppender.start();
 
@@ -95,6 +97,7 @@ public class Binjr extends Application {
                             .setName("FileAppender")
                             .setLayout(PatternLayout.newBuilder()
                                     .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
+                                    .withCharset(StandardCharsets.UTF_8)
                                     .build())
                             .withFileName(basePath.toString())
                             .build();
@@ -128,9 +131,14 @@ public class Binjr extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        logger.info(() -> "***********************************");
-        logger.info(() -> "*  Starting " + AppEnvironment.APP_NAME);
-        logger.info(() -> "***********************************");
+        logger.info(() -> String.format("""
+                Starting... 
+                 ╭─╮   ╭─╮       ╭─╮
+                 │ ╰──╮╰─┤╭────╮ ╰─┤╭──╮
+                 │ ╭╮ ││ ││ ╭╮ │ │ ││ ╭╯
+                 │ ╰╯ ││ ││ ││ │ │ ││ │
+                 ╰────╯└─┘└─┘└─┘╭╯ │└─┘  v%s
+                                ╰──╯ """, AppEnvironment.getInstance().getVersion()));
         AppEnvironment.getInstance().getSysInfoProperties().forEach(logger::info);
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
