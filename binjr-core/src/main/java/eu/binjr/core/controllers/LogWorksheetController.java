@@ -128,7 +128,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private AnchorPane root;
     @FXML
-    private CodeArea textOutput;
+    private CodeArea logsTextOutput;
     @FXML
     private ToggleButton wordWrapButton;
     @FXML
@@ -238,11 +238,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         //Disable undo feature on text output
-        textOutput.setUndoManager(UndoUtils.noOpUndoManager());
-        textOutput.setEditable(false);
+        logsTextOutput.setUndoManager(UndoUtils.noOpUndoManager());
+        logsTextOutput.setEditable(false);
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
-                (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
-        getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
+                (ChangeListener<Integer>) (obs, oldVal, newVal) -> logsTextOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
+        getBindingManager().bind(logsTextOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnMouseClicked(getBindingManager().registerHandler(event -> refresh(event.isControlDown())));
         // TimeRange Picker initialization
         timeRangePicker.setReferenceEndDateSupplier(() -> worksheet.getInitialTimeRange().getEnd());
@@ -568,13 +568,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         // Setup drag and drop
-        textOutput.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
-        textOutput.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
+        logsTextOutput.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
+        logsTextOutput.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
-        textOutput.setOnDragEntered(getBindingManager().registerHandler(event ->
-                textOutput.setStyle("-fx-background-color:  -fx-accent-translucide;")));
-        textOutput.setOnDragExited(getBindingManager().registerHandler(event ->
-                textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;")));
+        logsTextOutput.setOnDragEntered(getBindingManager().registerHandler(event ->
+                logsTextOutput.setStyle("-fx-background-color:  -fx-accent-translucide;")));
+        logsTextOutput.setOnDragExited(getBindingManager().registerHandler(event ->
+                logsTextOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;")));
 
         // Setup progress and cancel controls
         getBindingManager().bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
@@ -590,8 +590,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(cancelIndexButton.visibleProperty(), Bindings.createBooleanBinding(() -> (progressIndicator.getProgress() >= 0), progressIndicator.progressProperty()));
         cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.indexingStatusProperty().setValue(IndexingStatus.CANCELED)));
 
-        getBindingManager().bind(progressPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() >= 0),controllerBusy,  worksheet.progressProperty()));
-        getBindingManager().bind(loadingPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() < 0),controllerBusy,  worksheet.progressProperty()));
+        getBindingManager().bind(progressPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() >= 0), controllerBusy, worksheet.progressProperty()));
+        getBindingManager().bind(loadingPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() < 0), controllerBusy, worksheet.progressProperty()));
 
         // Init heatmap
         initHeatmap();
@@ -974,7 +974,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 }
                                 var doc = docBuilder.build();
                                 syntaxHighlightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
-                                textOutput.replace(doc);
+                                logsTextOutput.replace(doc);
                                 // Reset search highlight
                                 if (!searchTextField.getText().isEmpty()) {
                                     doSearchHighlight(searchTextField.getText(),
@@ -1233,11 +1233,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
         if (hit == null) {
-            textOutput.selectRange(0, 0);
+            logsTextOutput.selectRange(0, 0);
             searchResultsLabel.setText("No results");
         } else {
-            textOutput.selectRange(hit.getStart(), hit.getEnd());
-            textOutput.requestFollowCaret();
+            logsTextOutput.selectRange(hit.getStart(), hit.getEnd());
+            logsTextOutput.requestFollowCaret();
             searchResultsLabel.setText(String.format("%d/%d",
                     searchHitIterator.peekCurrentIndex() + 1,
                     searchHitIterator.peekLastIndex() + 1));
@@ -1247,17 +1247,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
         try (var p = Profiler.start("Applying search result highlights", logger::perf)) {
             var searchResults =
-                    CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+                    CodeAreaHighlighter.computeSearchHitsHighlighting(logsTextOutput.getText(), searchText, matchCase, regEx);
             prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
             nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
             searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
             searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
             if (syntaxHighlightStyleSpans != null) {
-                textOutput.setStyleSpans(0, syntaxHighlightStyleSpans.overlay(searchResults.getStyleSpans(),
+                logsTextOutput.setStyleSpans(0, syntaxHighlightStyleSpans.overlay(searchResults.getStyleSpans(),
                         (strings, strings2) -> Stream.concat(strings.stream(),
                                 strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
             } else {
-                textOutput.setStyleSpans(0, searchResults.getStyleSpans());
+                logsTextOutput.setStyleSpans(0, searchResults.getStyleSpans());
             }
             if (searchHitIterator.hasNext()) {
                 focusOnSearchHit(searchHitIterator.next());

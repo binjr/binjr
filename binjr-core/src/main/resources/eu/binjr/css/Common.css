@@ -224,7 +224,16 @@
 }
 
 .styled-text-area .paragraph-text {
-    -fx-padding: 0 4 2 2;
+    -fx-padding: 0 4 1 2;
+}
+
+#logsTextOutput .paragraph-box {
+    -fx-padding: 0 0 3 0;
+}
+
+#logsTextOutput .paragraph-text  {
+    -fx-line-spacing: -4;
+    -fx-padding: 0 0 5 0;
 }
 
 .para1 {

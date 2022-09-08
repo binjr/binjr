@@ -261,7 +261,7 @@
                     <VBox>
                         <VirtualizedScrollPane VBox.vgrow="SOMETIMES">
                             <content>
-                                <CodeArea fx:id="textOutput" styleClass="log-view"/>
+                                <CodeArea fx:id="logsTextOutput" styleClass="log-view"/>
                             </content>
                         </VirtualizedScrollPane>
                         <VBox styleClass="worksheet-tool-bar">
