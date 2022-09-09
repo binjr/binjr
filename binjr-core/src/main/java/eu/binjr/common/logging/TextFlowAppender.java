@@ -32,6 +32,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -126,7 +127,7 @@ public class TextFlowAppender extends AbstractAppender {
     public void append(LogEvent event) {
         renderTextLock.lock();
         try {
-            new String(getLayout().toByteArray(event)).lines().forEach(
+            new String(getLayout().toByteArray(event), StandardCharsets.UTF_8).lines().forEach(
                     message -> {
                         Log log = new Log(message, logColors.getOrDefault(event.getLevel(), defaultColor));
                         logBuffer.push(log);
