@@ -134,7 +134,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                    <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet."/>
+                                    <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet"/>
                                 </tooltip>
                             </Button>
                             <Button fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -158,7 +158,7 @@
                                     text="Snapshot">
                                 <tooltip>
                                     <Tooltip showDelay="500ms"
-                                             text="Save a screen capture of the current worksheet to disk"/>
+                                             text="Take a screen capture of the current worksheet"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
