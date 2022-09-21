@@ -14,10 +14,10 @@ variables:
   system.debug: false
   isTag: 'false'
   isSnapshot: 'false'
-  javaVersion: '18'
-  jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu18.32.11-ca-jdk18.0.2-linux_x64.tar.gz'
-  jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu18.32.11-ca-jdk18.0.2-macosx_x64.tar.gz'
-  jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu18.32.11-ca-jdk18.0.2-win_x64.zip'
+  javaVersion: '19'
+  jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu19.28.81-ca-jdk19.0.0-linux_x64.tar.gz'
+  jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu19.28.81-ca-jdk19.0.0-macosx_x64.tar.gz'
+  jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu19.28.81-ca-jdk19.0.0-win_x64.zip'
 
 stages:
   - stage: build
