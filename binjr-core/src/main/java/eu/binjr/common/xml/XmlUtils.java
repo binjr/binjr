@@ -46,26 +46,17 @@ import java.util.Objects;
 public class XmlUtils {
 
     public static String getFirstAttributeValue(File file, String attribute) throws IOException, XMLStreamException {
-        // Create stream reader
         XMLStreamReader xmlr = XMLInputFactoryHolder.instance.createXMLStreamReader(new FileInputStream(file));
-        // Main event loop
         while (xmlr.hasNext()) {
-            // Process single event
-            switch (xmlr.getEventType()) {
-                // Process start tags
-                case XMLStreamReader.START_ELEMENT:
-                    // Check attributes for first start tag
-                    for (int i = 0; i < xmlr.getAttributeCount(); i++) {
-                        // Get attribute name
-                        String localName = xmlr.getAttributeName(i).getLocalPart();
-                        if (localName.equals(attribute)) {
-                            // Return value
-                            return xmlr.getAttributeValue(i);
-                        }
+            if (xmlr.getEventType() == XMLStreamReader.START_ELEMENT) {
+                for (int i = 0; i < xmlr.getAttributeCount(); i++) {
+                    String localName = xmlr.getAttributeName(i).getLocalPart();
+                    if (localName.equals(attribute)) {
+                        return xmlr.getAttributeValue(i);
                     }
-                    return null;
+                }
+                return null;
             }
-            // Move to next event
             xmlr.next();
         }
         return null;
@@ -125,6 +116,7 @@ public class XmlUtils {
         return deSerialize(new StreamSource(new StringReader(xmlString)), classes);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> T deSerialize(StreamSource source, Class<?>... classes) throws JAXBException {
         JAXBContext jc = JAXBContext.newInstance(classes);
         Unmarshaller unmarshaller = jc.createUnmarshaller();
@@ -160,7 +152,7 @@ public class XmlUtils {
     public static <T> String serialize(T object, Class<?>... classes) throws IOException, JAXBException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             serialize(object, out, classes);
-            return new String(out.toByteArray(), StandardCharsets.UTF_8);
+            return out.toString(StandardCharsets.UTF_8);
         }
 
     }

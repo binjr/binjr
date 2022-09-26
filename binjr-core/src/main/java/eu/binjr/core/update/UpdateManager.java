@@ -91,23 +91,11 @@ public class UpdateManager {
                 userPrefs.githubUserName.get(),
                 userPrefs.githubAuthToken.get().toPlainText());
 
-        switch (appEnv.getPackaging()) {
-            case LINUX_TAR:
-                platformUpdater = new LinuxTarballUpdater();
-                break;
-            case WIN_MSI:
-                platformUpdater = new WindowsMsiUpdater();
-                break;
-            case MAC_DMG:
-            case MAC_TAR:
-            case WIN_ZIP:
-            case LINUX_DEB:
-            case LINUX_RPM:
-            case UNKNOWN:
-            default:
-                platformUpdater = new NotifyOnlyUpdater();
-                break;
-        }
+        platformUpdater = switch (appEnv.getPackaging()) {
+            case LINUX_TAR -> new LinuxTarballUpdater();
+            case WIN_MSI -> new WindowsMsiUpdater();
+            case MAC_DMG, MAC_TAR, WIN_ZIP, LINUX_DEB, LINUX_RPM, UNKNOWN -> new NotifyOnlyUpdater();
+        };
     }
 
     /**
