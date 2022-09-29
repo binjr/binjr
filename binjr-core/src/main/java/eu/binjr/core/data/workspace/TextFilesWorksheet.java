@@ -23,6 +23,7 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -40,7 +41,7 @@ public class TextFilesWorksheet extends Worksheet<String> {
     private final ObservableList<TimeSeriesInfo<String>> seriesInfo = FXCollections.observableList(new LinkedList<>());
 
     @IsDirtyable
-    private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
+    private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(UserPreferences.getInstance().defaultTextViewFontSize.get().intValue());
     private boolean syntaxHighlightEnabled = true;
 
 

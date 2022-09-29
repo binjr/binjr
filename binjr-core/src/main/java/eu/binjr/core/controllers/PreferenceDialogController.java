@@ -67,6 +67,12 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private TextField defaultTextSizeField;
+    //    @FXML
+//    private Slider defaultTextSizeSlider;
+//    @FXML
+//    private Label defaultTextSizeLabel;
+    @FXML
     private ToggleSwitch enableProxyToggle;
     @FXML
     private TextField proxyHostnameTextfield;
@@ -222,6 +228,28 @@ public class PreferenceDialogController implements Initializable {
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(userPrefs.downSamplingThreshold.property());
+
+        final TextFormatter<Number> fontSizeformatter = new TextFormatter<>(new StringConverter<>() {
+            @Override
+            public String toString(Number object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.toString();
+            }
+
+            @Override
+            public Number fromString(String string) {
+                int val = Integer.parseInt(string);
+                if (val < AppEnvironment.MIN_FONT_SIZE || val > AppEnvironment.MAX_FONT_SIZE) {
+                    TextFieldValidator.fail(proxyPortTextfield, "Font size must between " +
+                            AppEnvironment.MIN_FONT_SIZE + " and " + AppEnvironment.MAX_FONT_SIZE, true);
+                }
+                return val;
+            }
+        });
+        defaultTextSizeField.setTextFormatter(fontSizeformatter);
+        fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());

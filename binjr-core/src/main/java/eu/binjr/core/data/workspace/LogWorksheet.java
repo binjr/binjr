@@ -87,7 +87,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
         this.dividerPosition = new SimpleDoubleProperty(0.85);
-        this.textViewFontSize = new SimpleIntegerProperty(10);
+        this.textViewFontSize = new SimpleIntegerProperty(UserPreferences.getInstance().defaultTextViewFontSize.get().intValue());
         this.seriesInfo = FXCollections.observableList(new LinkedList<>());
         this.filterBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFilterBarVisible.get());
         this.findBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFindBarVisible.get());

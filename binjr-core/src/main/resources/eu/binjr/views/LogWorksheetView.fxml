@@ -115,7 +115,19 @@
                             </HBox>
                         </graphic>
                     </ToggleButton>
-
+                    <ToggleButton fx:id="textSizeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                            maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                            text="Adjust text size">
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Adjust text size"/>
+                        </tooltip>
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="text-size-icon"/>
+                            </HBox>
+                        </graphic>
+                    </ToggleButton>
                     <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
                                   maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                   mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
@@ -259,7 +271,7 @@
                        AnchorPane.topAnchor="0.0">
                 <items>
                     <VBox>
-                        <VirtualizedScrollPane VBox.vgrow="SOMETIMES">
+                        <VirtualizedScrollPane  fx:id="logsScrollPane" VBox.vgrow="SOMETIMES">
                             <content>
                                 <CodeArea fx:id="logsTextOutput" styleClass="log-view"/>
                             </content>

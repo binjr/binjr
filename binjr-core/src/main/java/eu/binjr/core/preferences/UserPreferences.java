@@ -345,11 +345,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
                     s -> gson.toJson(s),
                     s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
-    public ObservablePreference<DateFormat> labelDateFormat =
-            enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
 
-    public ObservablePreference<Number> numIdxMaxPageSize =
-            integerPreference("numIdxMaxPageSize", 200000);
+    public ObservablePreference<DateFormat> labelDateFormat = enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
+
+    public ObservablePreference<Number> numIdxMaxPageSize = integerPreference("numIdxMaxPageSize", 200000);
+
+    public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
 
     public static class UserFavorites extends MruFactory {
 

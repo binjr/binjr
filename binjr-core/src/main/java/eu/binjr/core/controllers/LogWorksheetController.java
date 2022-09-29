@@ -42,6 +42,7 @@ import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
@@ -79,6 +80,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
@@ -129,6 +131,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private AnchorPane root;
     @FXML
     private CodeArea logsTextOutput;
+    @FXML
+    private VirtualizedScrollPane<CodeArea> logsScrollPane;
     @FXML
     private ToggleButton wordWrapButton;
     @FXML
@@ -204,6 +208,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private Button favoriteButton;
     @FXML
+    private ToggleButton textSizeButton;
+
+    @FXML
     private BinjrLoadingPane loadingPane;
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
@@ -237,11 +244,65 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //Disable undo feature on text output
+        // Disable undo feature on text output
         logsTextOutput.setUndoManager(UndoUtils.noOpUndoManager());
         logsTextOutput.setEditable(false);
+        // Font size management
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
                 (ChangeListener<Integer>) (obs, oldVal, newVal) -> logsTextOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
+        logsTextOutput.setStyle("-fx-font-size: " + worksheet.textViewFontSizeProperty().intValue() + "pt;");
+        Button increaseTextSizeButton = new ToolButtonBuilder<Button>(getBindingManager())
+                .setTooltip("Increase text size")
+                .setStyleClass("dialog-button")
+                .setHeight(40)
+                .setWidth(40)
+                .setIconStyleClass("plus-icon", "medium-icon")
+                .setAction(event -> {
+                    worksheet.textViewFontSizeProperty().setValue(Math.min(AppEnvironment.MAX_FONT_SIZE,
+                            worksheet.textViewFontSizeProperty().intValue() + 1));
+                }).build(Button::new);
+        Button decreaseTextSizeButton = new ToolButtonBuilder<Button>(getBindingManager())
+                .setTooltip("Decrease text size")
+                .setStyleClass("dialog-button")
+                .setHeight(40)
+                .setWidth(40)
+                .setIconStyleClass("minus-icon", "medium-icon")
+                .setAction(event -> {
+                    worksheet.textViewFontSizeProperty().setValue(Math.max(AppEnvironment.MIN_FONT_SIZE,
+                            worksheet.textViewFontSizeProperty().intValue() - 1));
+                }).build(Button::new);
+        Button resetTextSizeButton = new ToolButtonBuilder<Button>(getBindingManager())
+                .setTooltip("Reset text size to default")
+                .setStyleClass("dialog-button")
+                .setHeight(40)
+                .setWidth(40)
+                .setIconStyleClass("recycle-icon", "medium-icon")
+                .setAction(event -> {
+                    worksheet.textViewFontSizeProperty().setValue(userPrefs.defaultTextViewFontSize.get().intValue());
+                }).build(Button::new);
+        var textSizeToolbar = new ToolBar();
+        textSizeToolbar.getItems().addAll(decreaseTextSizeButton, resetTextSizeButton, increaseTextSizeButton);
+        var pane = new StackPane(textSizeToolbar);
+        pane.getStyleClass().addAll("interval-picker-popup");
+        var textSizePopup = new PopupControl();
+        textSizePopup.setAutoHide(true);
+        textSizePopup.getScene().setRoot(pane);
+        getBindingManager().attachListener(textSizePopup.showingProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (!newValue && textSizeButton.isSelected()) {
+                        textSizeButton.setSelected(false);
+                    }
+                });
+        getBindingManager().attachListener(textSizeButton.selectedProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        Bounds bounds = textSizeButton.localToScreen(textSizeButton.getBoundsInLocal());
+                        textSizePopup.show(textSizeButton.getScene().getWindow(), bounds.getMinX(), bounds.getMaxY());
+                    } else {
+                        textSizePopup.hide();
+                    }
+                });
+        // Wrap text
         getBindingManager().bind(logsTextOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnMouseClicked(getBindingManager().registerHandler(event -> refresh(event.isControlDown())));
         // TimeRange Picker initialization

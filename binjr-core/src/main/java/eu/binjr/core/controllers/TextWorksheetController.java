@@ -20,6 +20,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.javafx.controls.BinjrLoadingPane;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.javafx.richtext.HighlightPatternException;
 import eu.binjr.common.logging.Logger;
@@ -33,6 +34,7 @@ import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -41,9 +43,11 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -89,6 +93,9 @@ public class TextWorksheetController extends WorksheetController {
 
     @FXML
     private CodeArea textOutput;
+
+    @FXML
+    private ToggleButton textSizeButton;
 
     @FXML
     private ToggleButton wordWrapButton;
@@ -199,6 +206,63 @@ public class TextWorksheetController extends WorksheetController {
         textOutput.setEditable(false);
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
+
+        // Font size management
+        getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
+                (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
+        textOutput.setStyle("-fx-font-size: " + worksheet.textViewFontSizeProperty().intValue() + "pt;");
+        Button increaseTextSizeButton = new ToolButtonBuilder<Button>(getBindingManager())
+                .setTooltip("Increase text size")
+                .setStyleClass("dialog-button")
+                .setHeight(40)
+                .setWidth(40)
+                .setIconStyleClass("plus-icon", "medium-icon")
+                .setAction(event -> {
+                    worksheet.textViewFontSizeProperty().setValue(Math.min(AppEnvironment.MAX_FONT_SIZE,
+                            worksheet.textViewFontSizeProperty().intValue() + 1));
+                }).build(Button::new);
+        Button decreaseTextSizeButton = new ToolButtonBuilder<Button>(getBindingManager())
+                .setTooltip("Decrease text size")
+                .setStyleClass("dialog-button")
+                .setHeight(40)
+                .setWidth(40)
+                .setIconStyleClass("minus-icon", "medium-icon")
+                .setAction(event -> {
+                    worksheet.textViewFontSizeProperty().setValue(Math.max(AppEnvironment.MIN_FONT_SIZE,
+                            worksheet.textViewFontSizeProperty().intValue() - 1));
+                }).build(Button::new);
+        Button resetTextSizeButton = new ToolButtonBuilder<Button>(getBindingManager())
+                .setTooltip("Reset text size to default")
+                .setStyleClass("dialog-button")
+                .setHeight(40)
+                .setWidth(40)
+                .setIconStyleClass("recycle-icon", "medium-icon")
+                .setAction(event -> {
+                    worksheet.textViewFontSizeProperty().setValue(UserPreferences.getInstance().defaultTextViewFontSize.get().intValue());
+                }).build(Button::new);
+        var textSizeToolbar = new ToolBar();
+        textSizeToolbar.getItems().addAll(decreaseTextSizeButton, resetTextSizeButton, increaseTextSizeButton);
+        var pane = new StackPane(textSizeToolbar);
+        pane.getStyleClass().addAll("interval-picker-popup");
+        var textSizePopup = new PopupControl();
+        textSizePopup.setAutoHide(true);
+        textSizePopup.getScene().setRoot(pane);
+        getBindingManager().attachListener(textSizePopup.showingProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (!newValue && textSizeButton.isSelected()) {
+                        textSizeButton.setSelected(false);
+                    }
+                });
+        getBindingManager().attachListener(textSizeButton.selectedProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        Bounds bounds = textSizeButton.localToScreen(textSizeButton.getBoundsInLocal());
+                        textSizePopup.show(textSizeButton.getScene().getWindow(), bounds.getMinX(), bounds.getMaxY());
+                    } else {
+                        textSizePopup.hide();
+                    }
+                });
+
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {

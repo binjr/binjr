@@ -157,6 +157,8 @@
                     <AnchorPane>
                         <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <Label text="Default text size"/>
+                            <TextField fx:id="defaultTextSizeField" prefHeight="25.0" prefWidth="-1.0" text="10" />
                             <Label text="Default color palette"/>
                             <ChoiceBox fx:id="logsPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
                             <Label text="Show filter bar" wrapText="true"/>

@@ -161,6 +161,19 @@
                     </Button>
                     <Pane HBox.hgrow="ALWAYS"/>
                     <ToolBar fx:id="chartsToolbar">
+                        <ToggleButton fx:id="textSizeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                                      maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                      prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                      text="Adjust text size">
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Adjust text size"/>
+                            </tooltip>
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="text-size-icon"/>
+                                </HBox>
+                            </graphic>
+                        </ToggleButton>
                         <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
                                       maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                       mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
