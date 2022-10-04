@@ -1,16 +1,28 @@
 {
-    -palette-color-0:  #D66300;
-    -palette-color-1:  #70a91d;
-    -palette-color-2:  #5555dd;
-    -palette-color-3:  #DD5555;
-    -palette-color-4:  #FF3737;
-    -palette-color-5:  #bb44cc;
-    -palette-color-6:  #22AA99;
-    -palette-color-7:  #F54882;
-    -palette-color-8:  #06800d;
-    -palette-color-9:  #ee9911;
-    -palette-color-10:  #4381bf;
-    -palette-color-11:  #dddd00;
+    -palette-color-0: #D66300
+;
+    -palette-color-1: #70a91d
+;
+    -palette-color-2: #5555dd
+;
+    -palette-color-3: #DD5555
+;
+    -palette-color-4: #FF3737
+;
+    -palette-color-5: #bb44cc
+;
+    -palette-color-6: #22AA99
+;
+    -palette-color-7: #F54882
+;
+    -palette-color-8: #06800d
+;
+    -palette-color-9: #ee9911
+;
+    -palette-color-10: #4381bf
+;
+    -palette-color-11: #dddd00
+;
 }
 
 .pagination > .pagination-control .right-arrow,
@@ -32,9 +44,9 @@
 }
 
 .suggest-popup .tree-cell:category {
-    -fx-font-weight: bold ;
+    -fx-font-weight: bold;
     -fx-font-size: 14;
-    -fx-padding: 0.5em 0.25em 0.5em 0.25em ;
+    -fx-padding: 0.5em 0.25em 0.5em 0.25em;
 }
 
 .suggest-popup .tree-cell:hover {
@@ -95,7 +107,8 @@
 
 .drop-zone:hover,
 .drop-zone:draggedover,
-.drop-target:draggedover {
+.drop-target:draggedover,
+.log-view:draggedover {
     -fx-background-color: -fx-accent-translucide;
 }
 
@@ -231,7 +244,7 @@
     -fx-padding: 0 0 3 0;
 }
 
-#logsTextOutput .paragraph-text  {
+#logsTextOutput .paragraph-text {
     -fx-line-spacing: -4;
     -fx-padding: 0 0 5 0;
 }
@@ -246,7 +259,7 @@
 
 .default-color0.chart-bar {
     -fx-bar-fill: #336F87;
-/*4babc5*/
+    /*4babc5*/
 
 }
 

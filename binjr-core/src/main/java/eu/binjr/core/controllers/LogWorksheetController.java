@@ -52,6 +52,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.SetChangeListener;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.WeakEventHandler;
@@ -110,6 +111,7 @@ import static javafx.scene.control.SelectionMode.MULTIPLE;
 public class LogWorksheetController extends WorksheetController implements Syncable {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
+    private static final PseudoClass DRAGGED_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("draggedover");
     private static final Gson gson = new Gson();
     public static final String PSEUDOCLASS_FAVORITES = "favorites";
     public static final String PSEUDOCLASS_HISTORY = "history";
@@ -633,9 +635,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         logsTextOutput.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
         logsTextOutput.setOnDragEntered(getBindingManager().registerHandler(event ->
-                logsTextOutput.setStyle("-fx-background-color:  -fx-accent-translucide;")));
+                logsTextOutput.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, true)));
         logsTextOutput.setOnDragExited(getBindingManager().registerHandler(event ->
-                logsTextOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;")));
+                logsTextOutput.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, false)));
 
         // Setup progress and cancel controls
         getBindingManager().bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
