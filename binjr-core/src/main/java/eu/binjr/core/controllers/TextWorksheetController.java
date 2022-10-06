@@ -46,6 +46,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
@@ -262,7 +263,16 @@ public class TextWorksheetController extends WorksheetController {
                         textSizePopup.hide();
                     }
                 });
-
+        textOutput.addEventFilter(ScrollEvent.ANY, e -> {
+            if (e.isControlDown()) {
+                if (e.getDeltaY() < 0) {
+                    decreaseTextSizeButton.fire();
+                } else if (e.getDeltaY() > 0) {
+                    increaseTextSizeButton.fire();
+                }
+                e.consume();
+            }
+        });
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {

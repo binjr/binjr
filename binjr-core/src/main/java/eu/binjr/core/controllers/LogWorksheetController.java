@@ -75,6 +75,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -304,6 +305,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         textSizePopup.hide();
                     }
                 });
+        logsTextOutput.addEventFilter(ScrollEvent.ANY, e -> {
+            if (e.isControlDown()) {
+                if (e.getDeltaY() < 0) {
+                    decreaseTextSizeButton.fire();
+                } else if (e.getDeltaY() > 0) {
+                    increaseTextSizeButton.fire();
+                }
+                e.consume();
+            }
+        });
         // Wrap text
         getBindingManager().bind(logsTextOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnMouseClicked(getBindingManager().registerHandler(event -> refresh(event.isControlDown())));
