@@ -279,7 +279,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setStyleClass("dialog-button")
                 .setHeight(40)
                 .setWidth(40)
-                .setIconStyleClass("recycle-icon", "medium-icon")
+                .setIconStyleClass("sync-icon", "medium-icon")
                 .setAction(event -> {
                     worksheet.textViewFontSizeProperty().setValue(userPrefs.defaultTextViewFontSize.get().intValue());
                 }).build(Button::new);

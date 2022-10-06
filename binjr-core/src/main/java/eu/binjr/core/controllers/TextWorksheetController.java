@@ -237,7 +237,7 @@ public class TextWorksheetController extends WorksheetController {
                 .setStyleClass("dialog-button")
                 .setHeight(40)
                 .setWidth(40)
-                .setIconStyleClass("recycle-icon", "medium-icon")
+                .setIconStyleClass("sync-icon", "medium-icon")
                 .setAction(event -> {
                     worksheet.textViewFontSizeProperty().setValue(UserPreferences.getInstance().defaultTextViewFontSize.get().intValue());
                 }).build(Button::new);
