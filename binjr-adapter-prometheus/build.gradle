@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2022 Frederic Thevenet
+ *    Copyright 2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,15 +14,22 @@
  *    limitations under the License.
  */
 
-rootProject.name = 'binjr'
-include 'binjr-adapter-csv'
-include 'binjr-adapter-jrds'
-include 'binjr-adapter-rrd4j'
-include 'binjr-adapter-netdata'
-include 'binjr-adapter-text'
-include 'binjr-adapter-logs'
-include 'binjr-adapter-prometheus'
-include 'binjr-app'
-include 'binjr-core'
+plugins {
+  //  id "org.openapi.generator" version "6.2.1"
+}
 
+dependencies {
+    compileOnly project(':binjr-core')
+}
 
+jar {
+    manifest {
+        attributes(
+                'Specification-Title': project.name,
+                'Specification-Version': project.version,
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Build-Number': BINJR_BUILD_NUMBER
+        )
+    }
+}
