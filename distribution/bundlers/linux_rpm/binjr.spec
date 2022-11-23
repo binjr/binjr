@@ -7,13 +7,13 @@ Vendor: binjr
 URL: https://binjr.eu
 Prefix: %{dirname:/opt/binjr}
 Provides: binjr
-%if "xUtility" != x
+%if "xUtility" != "x"
 Group: Utility
 %endif
 
 Autoprov: 0
 Autoreq: 0
-%if "xalsa-lib, at-spi2-atk, at-spi2-core, atk, bzip2-libs, cairo, cairo-gobject, dbus-libs, elfutils-libelf, elfutils-libs, expat, fontconfig, freetype, fribidi, gdk-pixbuf2, glib2, glibc, graphite2, gtk2, gtk3, harfbuzz, libX11, libXau, libXcomposite, libXcursor, libXdamage, libXext, libXfixes, libXi, libXinerama, libXrandr, libXrender, libXtst, libattr, libblkid, libcap, libepoxy, libffi, libgcc, libgcrypt, libglvnd, libglvnd-egl, libglvnd-glx, libgpg-error, libmount, libpng, libselinux, libthai, libuuid, libwayland-client, libwayland-cursor, libwayland-egl, libxcb, libxkbcommon, lz4, pango, pcre, pixman, systemd-libs, xdg-utils, xz-libs, zlib" != x || "x" != x
+%if "xalsa-lib, at-spi2-atk, at-spi2-core, atk, bzip2-libs, cairo, cairo-gobject, dbus-libs, elfutils-libelf, elfutils-libs, expat, fontconfig, freetype, fribidi, gdk-pixbuf2, glib2, glibc, graphite2, gtk2, gtk3, harfbuzz, libX11, libXau, libXcomposite, libXcursor, libXdamage, libXext, libXfixes, libXi, libXinerama, libXrandr, libXrender, libXtst, libattr, libblkid, libcap, libepoxy, libffi, libgcc, libgcrypt, libglvnd, libglvnd-egl, libglvnd-glx, libgpg-error, libmount, libpng, libselinux, libthai, libuuid, libwayland-client, libwayland-cursor, libwayland-egl, libxcb, libxkbcommon, lz4, pango, pcre, pixman, systemd-libs, xdg-utils, xz-libs, zlib" != "x" || "x" != "x"
 Requires: alsa-lib, at-spi2-atk, at-spi2-core, atk, bzip2-libs, cairo, cairo-gobject, dbus-libs, elfutils-libelf, elfutils-libs, expat, fontconfig, freetype, fribidi, gdk-pixbuf2, glib2, glibc, graphite2, gtk2, gtk3, harfbuzz, libX11, libXau, libXcomposite, libXcursor, libXdamage, libXext, libXfixes, libXi, libXinerama, libXrandr, libXrender, libXtst, libattr, libblkid, libcap, libepoxy, libffi, libgcc, libgcrypt, libglvnd, libglvnd-egl, libglvnd-glx, libgpg-error, libmount, libpng, libselinux, libthai, libuuid, libwayland-client, libwayland-cursor, libwayland-egl, libxcb, libxkbcommon, lz4, pango, pcre, pixman, systemd-libs, xdg-utils, xz-libs, zlib 
 %endif
 
@@ -37,14 +37,14 @@ the data smoothly and efficiently.
 rm -rf %{buildroot}
 install -d -m 755 %{buildroot}/opt/binjr
 cp -r %{_sourcedir}/opt/binjr/* %{buildroot}/opt/binjr
-%if "x%{buildroot}/../../../../../LICENSE.md" != x
+%if "x%{buildroot}/../../../../../LICENSE.md" != "x"
   %define license_install_file %{_defaultlicensedir}/%{name}-%{version}/%{basename:%{buildroot}/../../../../../LICENSE.md}
   install -d -m 755 %{buildroot}%{dirname:%{license_install_file}}
   install -m 644 %{buildroot}/../../../../../LICENSE.md %{buildroot}%{license_install_file}
 %endif
 
 %files
-%if "x%{buildroot}/../../../../../LICENSE.md" != x
+%if "x%{buildroot}/../../../../../LICENSE.md" != "x"
   %license %{license_install_file}
   %{dirname:%{license_install_file}}
 %endif
