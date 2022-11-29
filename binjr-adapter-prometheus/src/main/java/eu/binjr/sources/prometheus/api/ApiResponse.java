@@ -14,23 +14,36 @@
  *    limitations under the License.
  */
 
-plugins {
-  //  id "org.openapi.generator" version "6.2.1"
-}
+package eu.binjr.sources.prometheus.api;
 
-dependencies {
-    compileOnly project(':binjr-core')
-    testImplementation('com.google.code.gson:gson:2.10')
-}
+import com.google.gson.annotations.SerializedName;
 
-jar {
-    manifest {
-        attributes(
-                'Specification-Title': project.name,
-                'Specification-Version': project.version,
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Build-Number': BINJR_BUILD_NUMBER
-        )
+public abstract class ApiResponse {
+    @SerializedName("status")
+    private Status status;
+
+    @SerializedName("errorType")
+    private String errorType;
+
+    @SerializedName("error")
+    private String error;
+
+    @SerializedName("warnings")
+    private String[] warnings;
+
+    public String[] getWarnings() {
+        return warnings;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public String getErrorType() {
+        return errorType;
+    }
+
+    public Status getStatus() {
+        return status;
     }
 }

@@ -14,23 +14,24 @@
  *    limitations under the License.
  */
 
-plugins {
-  //  id "org.openapi.generator" version "6.2.1"
-}
+package eu.binjr.sources.prometheus.api;
 
-dependencies {
-    compileOnly project(':binjr-core')
-    testImplementation('com.google.code.gson:gson:2.10')
-}
+import com.google.gson.annotations.SerializedName;
 
-jar {
-    manifest {
-        attributes(
-                'Specification-Title': project.name,
-                'Specification-Version': project.version,
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Build-Number': BINJR_BUILD_NUMBER
-        )
+import java.util.Map;
+
+public class ResultVector {
+    @SerializedName("metric")
+    private Map<String, String> metric;
+
+    @SerializedName("values")
+    private ScalarSample[] values;
+
+    public Map<String, String> getMetric() {
+        return metric;
+    }
+
+    public ScalarSample[] getValues() {
+        return values;
     }
 }

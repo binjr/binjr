@@ -103,6 +103,7 @@ public class PrometheusAdapter extends HttpDataAdapter<Double> {
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+
         FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                 new TimeSeriesBinding.Builder()
                         .withAdapter(this)
