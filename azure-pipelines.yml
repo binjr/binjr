@@ -15,9 +15,6 @@ variables:
   isTag: 'false'
   isSnapshot: 'false'
   javaVersion: '19'
-  jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu19.30.11-ca-jdk19.0.1-linux_x64.tar.gz'
-  jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu19.30.11-ca-jdk19.0.1-macosx_x64.tar.gz'
-  jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu19.30.11-ca-jdk19.0.1-win_x64.zip'
 
 stages:
   - stage: build
@@ -27,7 +24,7 @@ stages:
         parameters:
           name: app_bundle_linux
           platform: linux
-          jdkDownloadUrl: $(jdkUrlLinux)
+          jdkDownloadUrl: https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           javaVersion: $(javaVersion)
           pool:
@@ -38,8 +35,8 @@ stages:
         parameters:
           name: app_bundle_mac
           platform: mac
-          jdkDownloadUrl: $(jdkUrlMacos)
-          jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
+          jdkDownloadUrl: https://api.adoptium.net/v3/installer/latest/$(javaVersion)/ga/mac/x64/jdk/hotspot/normal/eclipse
+          jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
           javaVersion: $(javaVersion)
           pool:
             vmImage: 'macOS-11'
@@ -49,7 +46,7 @@ stages:
         parameters:
           name: app_bundle_windows
           platform: win
-          jdkDownloadUrl: $(jdkUrlWin64)
+          jdkDownloadUrl: https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/windows/x64/jdk/hotspot/normal/eclipse
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           javaVersion: $(javaVersion)
           pool:
@@ -65,7 +62,7 @@ stages:
         vmImage: 'ubuntu-20.04'
       steps:
         - script: |
-            curl $(jdkUrlLinux) --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+            curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
 
         - task: JavaToolInstaller@0
           inputs:
@@ -133,7 +130,7 @@ stages:
           condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
         - script: |
-            curl $(jdkUrlLinux) --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+            curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
 
         - task: JavaToolInstaller@0
           inputs:

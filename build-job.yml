@@ -16,7 +16,7 @@ jobs:
         condition: and(succeeded(), endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
 
       - script: |
-          curl ${{ parameters.jdkDownloadUrl }} --output ${{ parameters.jdkFile }}
+          curl --output ${{ parameters.jdkFile }} -O -J -L ${{ parameters.jdkDownloadUrl }}
 
       - task: JavaToolInstaller@0
         inputs:
