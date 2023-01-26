@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -125,14 +125,13 @@ public class CsvEventParser implements EventParser {
         private ZonedDateTime parseDateTime(String text) {
             var m = format.getProfile().getParsingRegex().matcher(text);
             var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, format.getZoneId());
-            final Map<String, Double> sections = new HashMap<>();
             if (m.find()) {
                 for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
                     var captureGroup = entry.getKey();
                     var parsed = m.group(captureGroup.name());
                     if (parsed != null && !parsed.isBlank()) {
                         if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                            timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
+                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
                         }
                     }
                 }

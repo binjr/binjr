@@ -67,10 +67,10 @@ public class LogEventFormat implements EventFormat {
         if (m.find()) {
             for (Map.Entry<NamedCaptureGroup, String> entry : getProfile().getCaptureGroups().entrySet()) {
                 var captureGroup = entry.getKey();
-                var parsed = m.group(captureGroup.name());
+                var parsed =m.group(captureGroup.name());
                 if (parsed != null && !parsed.isBlank()) {
                     if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
+                        timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
                     } else {
                         sections.put(captureGroup.name(), parsed);
                     }
