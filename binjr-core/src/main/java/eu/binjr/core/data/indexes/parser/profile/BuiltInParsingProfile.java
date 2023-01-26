@@ -56,7 +56,17 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     TemporalCaptureGroup.FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL|STDOUT|STDERR",
                     CaptureGroup.of("TAGS"), ".*"),
-            "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*");
+            "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*"),
+    ITW("IcedTea-Web logs",
+            "BUILTIN_ITW",
+            Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
+                    TemporalCaptureGroup.MONTH, "(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)",
+                    TemporalCaptureGroup.DAY, "\\d{2}",
+                    TemporalCaptureGroup.HOUR, "\\d{2}",
+                    TemporalCaptureGroup.MINUTE, "\\d{2}",
+                    TemporalCaptureGroup.SECOND, "\\d{2}",
+                    CaptureGroup.of("SEVERITY"), "(MESSAGE|WARNING|ERROR)"),
+            ".*\\[$SEVERITY_(DEBUG|ALL)]\\[\\w{3}\\s$MONTH\\s$DAY\\s$HOUR:$MINUTE:$SECOND\\s.+\\s$YEAR\\].*");
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -109,7 +119,6 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     public String toString() {
         return profileName;
     }
-
 
 
 }
