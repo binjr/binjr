@@ -59,16 +59,16 @@ jobs:
           action: edit
           tag: $(Build.SourceBranchName)
           assets: |
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.dmg
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.dmg.asc
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.pkg
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.pkg.asc
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.msi
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.msi.asc
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.zip
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.zip.asc
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.tar.gz
-            $(System.DefaultWorkingDirectory)/build/artifacts/*.tar.gz.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/dmg/*.dmg
+            $(System.DefaultWorkingDirectory)/build/artifacts/dmg/*.dmg.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/pkg/*.pkg
+            $(System.DefaultWorkingDirectory)/build/artifacts/pkg/*.pkg.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/msi/*.msi
+            $(System.DefaultWorkingDirectory)/build/artifacts/msi/*.msi.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/zip/*.zip
+            $(System.DefaultWorkingDirectory)/build/artifacts/zip/*.zip.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/tgz/*.tar.gz
+            $(System.DefaultWorkingDirectory)/build/artifacts/tgz/*.tar.gz.asc
           assetUploadMode: 'replace'
           releaseNotesSource: 'file'
           releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
@@ -91,13 +91,13 @@ jobs:
           echo "* Generate apt repo"
           echo "**************************************"
           aptly --distribution="stable" --comment="binjr apt repository" repo create binjr
-          aptly repo add binjr  $(System.DefaultWorkingDirectory)/build/artifacts/binjr-*_linux-amd64.deb
+          aptly repo add binjr  $(System.DefaultWorkingDirectory)/build/artifacts/deb/binjr-*_linux-amd64.deb
           aptly -gpg-key="$(gpg.package.keyname)" publish repo binjr
           echo "**************************************"
           echo "* Signing rpm"
           echo "**************************************"
           echo "%_gpg_name $(gpg.package.keyname)" >> ~/.rpmmacros
-          rpm --addsign -v build/artifacts/binjr-*_linux-amd64.rpm
+          rpm --addsign -v build/artifacts/rpm/binjr-*_linux-amd64.rpm
           echo "**************************************"
           echo "* Cloning repos.binjr.eu"
           echo "**************************************"
@@ -113,7 +113,7 @@ jobs:
           cp -r ~/.aptly/public/pool apt/pool
           rm -rf rpm/stable
           mkdir rpm/stable
-          cp $(System.DefaultWorkingDirectory)/build/artifacts/binjr-*_linux-amd64.rpm rpm/stable
+          cp $(System.DefaultWorkingDirectory)/build/artifacts/rpm/binjr-*_linux-amd64.rpm rpm/stable
           echo "**************************************"
           echo "* Generate rpm repo"
           echo "**************************************"
