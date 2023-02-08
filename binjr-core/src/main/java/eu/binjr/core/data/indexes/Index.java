@@ -68,6 +68,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,7 @@ public abstract class Index implements Indexable {
     public static final String DOC_URI = "docUri";
     public static final float SEARCH_HIT_WEIGHT_FACTOR = 2.0f;
     private static final Logger logger = Logger.create(Index.class);
+    private static final long PARK_TIME_NANO = 100_000L;
     protected final UserPreferences prefs = UserPreferences.getInstance();
     protected final Directory indexDirectory;
     protected final Directory taxonomyDirectory;
@@ -212,11 +214,7 @@ public abstract class Index implements Indexable {
                             if (drained == 0 && queue.size() == 0) {
                                 // Park the thread for a while before polling again
                                 // as is it likely that producer is done.
-                                try {
-                                    Thread.sleep(10);
-                                } catch (InterruptedException e) {
-                                    Thread.currentThread().interrupt();
-                                }
+                                LockSupport.parkNanos(PARK_TIME_NANO);
                             }
                             try {
                                 for (var logEvent : todo) {
@@ -261,11 +259,7 @@ public abstract class Index implements Indexable {
                         queue.put(event);
                     }
                     while (!taskAborted.get() && queue.size() > 0) {
-                        try {
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
+                        LockSupport.parkNanos(PARK_TIME_NANO);
                     }
                 } catch (InterruptedException e) {
                     logger.error("Put to queue interrupted", e);
