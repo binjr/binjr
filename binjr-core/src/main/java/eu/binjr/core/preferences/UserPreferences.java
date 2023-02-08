@@ -352,6 +352,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
 
+    public ObservablePreference<Boolean> doNotTokenizeOnDots = booleanPreference("doNotTokenizeOnDots", false);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =

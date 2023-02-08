@@ -28,7 +28,13 @@ import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.charfilter.MappingCharFilter;
+import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRange;
@@ -40,7 +46,10 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.SortedNumericSortField;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
@@ -48,6 +57,7 @@ import org.apache.lucene.store.MMapDirectory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -115,7 +125,7 @@ public abstract class Index implements Indexable {
         logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                 " using " + parsingThreadsNumber + " parsing indexing threads");
 
-        IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
+        IndexWriterConfig iwc = new IndexWriterConfig(getAnalyzer());
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         this.indexWriter = new IndexWriter(indexDirectory, iwc);
         this.taxonomyWriter = new DirectoryTaxonomyWriter(taxonomyDirectory);
@@ -132,6 +142,29 @@ public abstract class Index implements Indexable {
         // initial commit
         commitIndexAndTaxonomy();
     }
+
+    protected Analyzer getAnalyzer() {
+        if (UserPreferences.getInstance().doNotTokenizeOnDots.get()) {
+            return new StandardAnalyzer();
+        }
+        return new Analyzer() {
+            @Override
+            protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                final StandardTokenizer src = new StandardTokenizer();
+                TokenStream tok = new LowerCaseFilter(src);
+                return new Analyzer.TokenStreamComponents(src::setReader, tok);
+            }
+
+            @Override
+            protected Reader initReader(String fieldName, Reader reader) {
+                NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
+                builder.add(".", " ");
+                NormalizeCharMap normMap = builder.build();
+                return new MappingCharFilter(normMap, reader);
+            }
+        };
+    }
+
 
     protected FacetsConfig initializeFacetsConfig(FacetsConfig facetsConfig) {
         facetsConfig.setRequireDimCount(PATH, true);
