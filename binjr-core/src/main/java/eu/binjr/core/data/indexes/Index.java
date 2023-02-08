@@ -105,16 +105,12 @@ public abstract class Index implements Indexable {
             default:
             case FILES_SYSTEM:
                 if (!MMapDirectory.UNMAP_SUPPORTED) {
-                    logger.debug(MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
+                    logger.debug("Unmap not supported: " + MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
                 }
                 indexDirectoryPath = Files.createTempDirectory(prefs.temporaryFilesRoot.get(), "binjr-index_");
                 indexDirectory = FSDirectory.open(indexDirectoryPath.resolve("index"));
                 taxonomyDirectory = FSDirectory.open(indexDirectoryPath.resolve("taxonomy"));
                 logger.debug("Lucene index directory stored at " + indexDirectoryPath);
-                if (indexDirectory instanceof MMapDirectory mmapDir) {
-                    logger.debug("Use unmap:" + mmapDir.getUseUnmap());
-                }
-
         }
         logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                 " using " + parsingThreadsNumber + " parsing indexing threads");
@@ -259,10 +255,9 @@ public abstract class Index implements Indexable {
                 }
             }
             if (commit) {
-               commitIndexAndTaxonomy();
+                commitIndexAndTaxonomy();
             }
         }
-
     }
 
     private void commitIndexAndTaxonomy() throws IOException {
