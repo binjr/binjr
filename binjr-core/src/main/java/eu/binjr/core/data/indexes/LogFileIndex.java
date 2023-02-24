@@ -86,7 +86,7 @@ public class LogFileIndex extends Index {
             final Query filterQuery;
             if (query != null && !query.isBlank()) {
                 logger.trace("Query text=" + query);
-                QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
+                QueryParser parser = new QueryParser(FIELD_CONTENT, getAnalyzer());
                 filterQuery = new BooleanQuery.Builder()
                         .add(rangeQuery, BooleanClause.Occur.FILTER)
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
