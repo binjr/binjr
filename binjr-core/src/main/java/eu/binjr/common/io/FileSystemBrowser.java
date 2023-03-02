@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -210,6 +210,27 @@ public class FileSystemBrowser implements Closeable {
     }
 
     /**
+     * Returns a collection of {@link FileSystemEntry} for all file system entries matching the provided
+     * folder and files glob patterns.
+     *
+     * @param folderFilters         a list of names of folders to inspect for content.
+     * @param fileExtensionsFilters a list of file extensions patterns to inspect for content.
+     * @return a collection of {@link FileSystemEntry} for all file system entries matching the provided path predicate.
+     * @throws IOException If an error occurs while listing file system entries.
+     */
+    public Collection<FileSystemEntry> listEntries(String[] folderFilters, String[] fileExtensionsFilters) throws IOException {
+        return listEntries(path -> path.getFileName() != null &&
+                Arrays.stream(folderFilters)
+                        .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(this.toInternalPath(folder)))
+                        .reduce(Boolean::logicalOr).orElse(false) &&
+                Arrays.stream(fileExtensionsFilters)
+                        .map(f -> f.equalsIgnoreCase("*") ||
+                                f.equalsIgnoreCase("*.*") ||
+                                path.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
+                        .reduce(Boolean::logicalOr).orElse(false));
+    }
+
+    /**
      * Returns the file system root directories for this {@link FileSystemBrowser} instance
      *
      * @return the file system root directories for this {@link FileSystemBrowser} instance
@@ -220,7 +241,7 @@ public class FileSystemBrowser implements Closeable {
 
     /**
      * Converts a path string, or a sequence of strings that when joined form a path string, to a {@link Path} valid
-     * inside of the browser's {@link FileSystem}
+     * inside the browser's {@link FileSystem}
      *
      * @param first the path string or initial part of the path string
      * @param more  additional strings to be joined to form the path string

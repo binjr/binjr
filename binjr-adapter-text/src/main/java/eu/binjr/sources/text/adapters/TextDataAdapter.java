@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -133,13 +133,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
         try (var p = Profiler.start("Building text binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
             nodeDict.put(fileBrowser.toInternalPath("/"), rootNode);
-            for (var fsEntry : fileBrowser.listEntries(path ->
-                    Arrays.stream(folderFilters)
-                            .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toInternalPath(folder)))
-                            .reduce(Boolean::logicalOr).orElse(false) &&
-                            Arrays.stream(fileExtensionsFilters)
-                                    .map(f -> path.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
-                                    .reduce(Boolean::logicalOr).orElse(false))) {
+            for (var fsEntry : fileBrowser.listEntries(folderFilters, fileExtensionsFilters)) {
                 String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = rootNode;
                 if (fsEntry.getPath().getParent() != null) {
