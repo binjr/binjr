@@ -129,7 +129,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Open Zip Archive");
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Zip archive", "*.zip"));
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
                 Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
                 File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
                 if (selectedFile != null) {

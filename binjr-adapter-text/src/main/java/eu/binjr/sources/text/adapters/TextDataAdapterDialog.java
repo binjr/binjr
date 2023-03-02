@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Open Zip Archive");
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Zip archive", "*.zip"));
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
                 Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
                 File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
                 if (selectedFile != null) {

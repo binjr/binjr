@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,16 +16,13 @@
 package eu.binjr.core.controllers;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
-
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
-
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
@@ -50,8 +47,6 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -291,7 +286,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open file");
             additionalExtensions().ifPresent(ext-> fileChooser.getExtensionFilters().addAll(ext));
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
             Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
             return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
         } catch (Exception e) {

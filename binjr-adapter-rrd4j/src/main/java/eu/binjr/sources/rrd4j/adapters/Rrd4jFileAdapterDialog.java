@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2021 Frederic Thevenet
+ *    Copyright 2018-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<Collection<DataAdapter>> {
             fileChooser.setTitle("Open Rrd4j File(s)");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD binary files", "*.rrd"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dumps", "*.xml"));
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
             Dialogs.getInitialDir(mostRecentRrdFiles).ifPresent(fileChooser::setInitialDirectory);
             List<File> rrdFiles = fileChooser.showOpenMultipleDialog(NodeUtils.getStage(owner));
             if (rrdFiles != null) {

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open CSV file");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
             Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
             return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
         } catch (Exception e) {
