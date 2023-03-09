@@ -84,7 +84,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     public LogsDataAdapterDialog(Node owner) throws NoAdapterFoundException {
         super(owner, Mode.PATH, "mostRecentLogsArchives", true);
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
-        setDialogHeaderText("Add a Zip Archive or Folder");
+        setDialogHeaderText("Add a Log File, Zip Archive or Folder");
         extensionFiltersTextField = new TextField(String.join(", ", prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions");
         GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
@@ -124,8 +124,21 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     protected File displayFileChooser(Node owner) {
         try {
             ContextMenu sourceMenu = new ContextMenu();
-            MenuItem menuItem = new MenuItem("Zip file");
-            menuItem.setOnAction(eventHandler -> {
+            MenuItem fileMenuItem = new MenuItem("Log file");
+            fileMenuItem.setOnAction(eventHandler -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Open Log File");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Log file", "*.log", "*.txt", "*.trace", "*.out", "*.err"));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
+                Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
+                File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
+                if (selectedFile != null) {
+                    setSourceUri(selectedFile.getPath());
+                }
+            });
+            sourceMenu.getItems().add(fileMenuItem);
+            MenuItem zipMenuItem = new MenuItem("Zip file");
+            zipMenuItem.setOnAction(eventHandler -> {
                 FileChooser fileChooser = new FileChooser();
                 fileChooser.setTitle("Open Zip Archive");
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Zip archive", "*.zip"));
@@ -136,7 +149,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
                     setSourceUri(selectedFile.getPath());
                 }
             });
-            sourceMenu.getItems().add(menuItem);
+            sourceMenu.getItems().add(zipMenuItem);
             MenuItem folderMenuItem = new MenuItem("Folder");
             folderMenuItem.setOnAction(eventHandler -> {
                 DirectoryChooser dirChooser = new DirectoryChooser();

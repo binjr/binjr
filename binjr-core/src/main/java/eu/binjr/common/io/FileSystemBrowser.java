@@ -45,8 +45,7 @@ public class FileSystemBrowser implements Closeable {
      * @throws IOException if an error occurs while initializing the browser.
      */
     private FileSystemBrowser(Path fsRoot) throws IOException {
-        this.fs = fsRoot.getFileSystem();
-        this.fsRoot = fsRoot;
+        this(Objects.requireNonNull(fsRoot).getFileSystem(), fsRoot);
     }
 
     /**
@@ -83,7 +82,13 @@ public class FileSystemBrowser implements Closeable {
                 return new FileSystemBrowser(fs, root);
             }
         } else {
-            return new FileSystemBrowser(path);
+            // Return an instance that only lists the single file that was passed as root.
+            return new FileSystemBrowser(path.getParent()){
+                @Override
+                public Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException {
+                    return List.of(new FileSystemEntry(Files.isDirectory(path), path.getFileName(), Files.size(path)));
+                }
+            };
         }
         throw new UnsupportedOperationException("Unsupported operation: path is not a folder nor a zip file");
     }
@@ -231,9 +236,9 @@ public class FileSystemBrowser implements Closeable {
     }
 
     /**
-     * Returns the file system root directories for this {@link FileSystemBrowser} instance
+     * Returns the file system root directory for this {@link FileSystemBrowser} instance
      *
-     * @return the file system root directories for this {@link FileSystemBrowser} instance
+     * @return the file system root directory for this {@link FileSystemBrowser} instance
      */
     public Path getRootDirectory() {
         return fsRoot;

@@ -67,7 +67,7 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
     public TextDataAdapterDialog(Node owner) throws NoAdapterFoundException {
         super(owner, Mode.PATH, "mostRecentTextArchives", false);
         this.prefs = (TextAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(TextDataAdapter.class.getName());
-        setDialogHeaderText("Add a Zip Archive or Folder");
+        setDialogHeaderText("Add a TExt File, Zip Archive or Folder");
         extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions:");
         GridPane.setConstraints(label, 0, 1, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
@@ -80,6 +80,19 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
     protected File displayFileChooser(Node owner) {
         try {
             ContextMenu sourceMenu = new ContextMenu();
+            MenuItem fileMenuItem = new MenuItem("Text file");
+            fileMenuItem.setOnAction(eventHandler -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Open Text File");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text files", "*.txt", "*.text"));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
+                Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
+                File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
+                if (selectedFile != null) {
+                    setSourceUri(selectedFile.getPath());
+                }
+            });
+            sourceMenu.getItems().add(fileMenuItem);
             MenuItem menuItem = new MenuItem("Zip file");
             menuItem.setOnAction(eventHandler -> {
                 FileChooser fileChooser = new FileChooser();
