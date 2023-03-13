@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@ package eu.binjr.core.data.indexes.parser.profile;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.preferences.UserPreferences;
 
+import java.time.*;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -49,8 +51,16 @@ public interface ParsingProfile {
                     .map(e -> String.format("(?<%s>%s)", e.getKey().name(), e.getValue()))
                     .findAny().ifPresent(r -> regexString[0] = regexString[0].replace(value, r));
         }
-        logger.debug(()-> "Regex string for profile " + getProfileName() + ": " + regexString[0]);
+        logger.debug(() -> "Regex string for profile " + getProfileName() + ": " + regexString[0]);
         return regexString[0];
+    }
+
+    default LocalDateTime getTemporalAnchor() {
+        return switch (UserPreferences.getInstance().defaultDateTimeAnchor.get()) {
+            case EPOCH -> LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
+            case TODAY -> LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
+            case NOW -> LocalDateTime.now();
+        };
     }
 
 }

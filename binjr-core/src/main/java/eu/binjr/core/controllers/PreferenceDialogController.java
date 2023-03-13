@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -67,11 +67,9 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private ChoiceBox<DateTimeAnchor> dateTimeAnchorChoiceBox;
+    @FXML
     private TextField defaultTextSizeField;
-    //    @FXML
-//    private Slider defaultTextSizeSlider;
-//    @FXML
-//    private Label defaultTextSizeLabel;
     @FXML
     private ToggleSwitch enableProxyToggle;
     @FXML
@@ -250,6 +248,7 @@ public class PreferenceDialogController implements Initializable {
         });
         defaultTextSizeField.setTextFormatter(fontSizeformatter);
         fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
+        bindEnumToChoiceBox(userPrefs.defaultDateTimeAnchor, dateTimeAnchorChoiceBox, DateTimeAnchor.values());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());

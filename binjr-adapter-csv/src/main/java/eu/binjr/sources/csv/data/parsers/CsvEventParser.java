@@ -31,10 +31,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class CsvEventParser implements EventParser {
@@ -92,7 +93,7 @@ public class CsvEventParser implements EventParser {
             }
             ZonedDateTime timestamp;
             if (format.getProfile().getTimestampColumn() == -1) {
-                timestamp = ZonedDateTime.ofInstant(Instant.EPOCH.plus(sequence.get(), ChronoUnit.SECONDS), format.getZoneId());
+                timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().plus(sequence.get(), ChronoUnit.SECONDS), format.getZoneId());
             } else {
                 if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
                     throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
@@ -124,7 +125,7 @@ public class CsvEventParser implements EventParser {
 
         private ZonedDateTime parseDateTime(String text) {
             var m = format.getProfile().getParsingRegex().matcher(text);
-            var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, format.getZoneId());
+            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor(), format.getZoneId());
             if (m.find()) {
                 for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
                     var captureGroup = entry.getKey();

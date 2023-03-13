@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2022 Frederic Thevenet
+  ~    Copyright 2017-2023 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -161,6 +161,8 @@
                             <TextField fx:id="defaultTextSizeField" prefHeight="25.0" prefWidth="-1.0" text="10" />
                             <Label text="Default color palette"/>
                             <ChoiceBox fx:id="logsPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
+                            <Label text="Timestamp reference point"/>
+                            <ChoiceBox fx:id="dateTimeAnchorChoiceBox"  maxWidth="1.7976931348623157E308" />
                             <Label text="Show filter bar" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="filterBarVisibleToggle" prefWidth="1.0" selected="true"/>

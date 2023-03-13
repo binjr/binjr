@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,20 @@
 
 package eu.binjr.core.data.indexes.parser;
 
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LogEventParser implements EventParser {
@@ -85,7 +94,7 @@ public class LogEventParser implements EventParser {
                 progress.set(progress.get() + charRead);
                 charRead = 0;
             }
-            var parsed = format.parse(sequence.incrementAndGet(), line);
+            var parsed = parse(sequence.incrementAndGet(), line);
             if (parsed.isPresent()) {
                 var yield = buffered;
                 buffered = parsed.get();
@@ -106,6 +115,27 @@ public class LogEventParser implements EventParser {
         public boolean hasNext() {
             return this.hasNext;
         }
+    }
+
+    private Optional<ParsedEvent> parse(long lineNumber, String text) {
+        var m = format.getProfile().getParsingRegex().matcher(text);
+        if (m.find()) {
+            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor(), format.getZoneId());
+            final Map<String, String> sections = new HashMap<>();
+            for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
+                var captureGroup = entry.getKey();
+                var parsed = m.group(captureGroup.name());
+                if (parsed != null && !parsed.isBlank()) {
+                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+                        timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                    } else {
+                        sections.put(captureGroup.name(), parsed);
+                    }
+                }
+            }
+            return Optional.of(new ParsedEvent(lineNumber, timestamp, text, sections));
+        }
+        return Optional.empty();
     }
 }
 

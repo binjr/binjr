@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2022 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -353,6 +353,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
 
     public ObservablePreference<Boolean> doNotTokenizeOnDots = booleanPreference("doNotTokenizeOnDots", false);
+
+    public ObservablePreference<DateTimeAnchor> defaultDateTimeAnchor = enumPreference(DateTimeAnchor.class, "defaultDateTimeAnchor", DateTimeAnchor.EPOCH);
 
     public static class UserFavorites extends MruFactory {
 
