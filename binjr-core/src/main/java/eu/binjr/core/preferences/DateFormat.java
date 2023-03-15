@@ -19,7 +19,7 @@ package eu.binjr.core.preferences;
 import java.time.format.DateTimeFormatter;
 
 /**
- * An enumeration of commonly used date & time representation formats.
+ * An enumeration of commonly used date and time representation formats.
  */
 public enum DateFormat {
     ISO(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS] Z")),
