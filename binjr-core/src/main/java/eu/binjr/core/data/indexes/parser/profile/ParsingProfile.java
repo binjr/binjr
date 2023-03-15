@@ -19,6 +19,7 @@ package eu.binjr.core.data.indexes.parser.profile;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.preferences.TemporalAnchor;
 import eu.binjr.core.preferences.UserPreferences;
 
 import java.time.*;
@@ -55,12 +56,8 @@ public interface ParsingProfile {
         return regexString[0];
     }
 
-    default LocalDateTime getTemporalAnchor() {
-        return switch (UserPreferences.getInstance().defaultDateTimeAnchor.get()) {
-            case EPOCH -> LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.of("UTC"));
-            case TODAY -> LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
-            case NOW -> LocalDateTime.now();
-        };
+    default TemporalAnchor getTemporalAnchor() {
+        return UserPreferences.getInstance().defaultDateTimeAnchor.get();
     }
 
 }

@@ -93,7 +93,7 @@ public class CsvEventParser implements EventParser {
             }
             ZonedDateTime timestamp;
             if (format.getProfile().getTimestampColumn() == -1) {
-                timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().plus(sequence.get(), ChronoUnit.SECONDS), format.getZoneId());
+                timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve().plus(sequence.get(), ChronoUnit.SECONDS), format.getZoneId());
             } else {
                 if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
                     throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
@@ -125,7 +125,7 @@ public class CsvEventParser implements EventParser {
 
         private ZonedDateTime parseDateTime(String text) {
             var m = format.getProfile().getParsingRegex().matcher(text);
-            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor(), format.getZoneId());
+            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve(), format.getZoneId());
             if (m.find()) {
                 for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
                     var captureGroup = entry.getKey();

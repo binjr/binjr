@@ -120,7 +120,7 @@ public class LogEventParser implements EventParser {
     private Optional<ParsedEvent> parse(long lineNumber, String text) {
         var m = format.getProfile().getParsingRegex().matcher(text);
         if (m.find()) {
-            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor(), format.getZoneId());
+            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve(), format.getZoneId());
             final Map<String, String> sections = new HashMap<>();
             for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
                 var captureGroup = entry.getKey();
