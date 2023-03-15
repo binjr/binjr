@@ -285,7 +285,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         try {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open file");
-            additionalExtensions().ifPresent(ext-> fileChooser.getExtensionFilters().addAll(ext));
+            additionalExtensions().ifPresent(ext -> fileChooser.getExtensionFilters().addAll(ext));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
             Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
             return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
@@ -295,7 +295,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         return null;
     }
 
-    protected Optional<List<FileChooser.ExtensionFilter>> additionalExtensions(){
+    protected Optional<List<FileChooser.ExtensionFilter>> additionalExtensions() {
         return Optional.empty();
     }
 
@@ -424,8 +424,16 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         }, knownGroups));
         this.nameColumn.setOnEditCommit(
                 t -> {
-                    t.getTableView().getItems().get(
-                            t.getTablePosition().getRow()).setName(t.getNewValue());
+                    NamedCaptureGroup newVal = t.getNewValue();
+                    if (!(newVal instanceof TemporalCaptureGroup)) {
+                        for (var group : TemporalCaptureGroup.values()) {
+                            if (group.name().equals(newVal.name())) {
+                                newVal = group;
+                                break;
+                            }
+                        }
+                    }
+                    t.getTableView().getItems().get(t.getTablePosition().getRow()).setName(newVal);
                     applyChanges();
                     colorLineTemplateField();
                 }
