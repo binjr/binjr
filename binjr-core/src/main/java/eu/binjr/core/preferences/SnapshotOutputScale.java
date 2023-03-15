@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package eu.binjr.core.preferences;
 
+/**
+ * An enumeration of commonly-used snapshot output scales.
+ */
 public enum SnapshotOutputScale {
     AUTO("Auto (Same as screen)", 0.0),
     ONE("100%", 1.0),
@@ -32,10 +35,20 @@ public enum SnapshotOutputScale {
         this.scaleFactor = scaleFactor;
     }
 
+    /**
+     * Return the label
+     *
+     * @return the label
+     */
     public String getLabel() {
         return label;
     }
 
+    /**
+     * Return the scale factor
+     *
+     * @return the scale factor
+     */
     public double getScaleFactor() {
         return scaleFactor;
     }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package eu.binjr.core.preferences;
 
+/**
+ * An enumeration of known JVM implementations.
+ */
 public enum JvmImplementation {
     HOTSPOT,
     OPENJ9,

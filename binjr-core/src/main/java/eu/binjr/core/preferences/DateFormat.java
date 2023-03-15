@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ package eu.binjr.core.preferences;
 
 import java.time.format.DateTimeFormatter;
 
+/**
+ * An enumeration of commonly used date & time representation formats.
+ */
 public enum DateFormat {
     ISO(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS] Z")),
     RFC_1123(DateTimeFormatter.ofPattern("eee, dd MMM yyyy HH:mm:ss[.SSS] Z"));
@@ -28,6 +31,11 @@ public enum DateFormat {
         this.dateTimeFormatter = dateTimeFormatter;
     }
 
+    /**
+     * Returns an instance of {@link DateTimeFormatter} for this {@link DateFormat}
+     *
+     * @return an instance of {@link DateTimeFormatter} for this {@link DateFormat}
+     */
     public DateTimeFormatter getDateTimeFormatter() {
         return dateTimeFormatter;
     }

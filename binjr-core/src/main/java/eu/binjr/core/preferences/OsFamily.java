@@ -27,7 +27,7 @@ public enum OsFamily {
     UNSUPPORTED("unsupported"),
     WINDOWS("windows-amd64");
 
-    private String platformClassifier;
+    private final String platformClassifier;
 
     OsFamily(String platformClassifier){
         this.platformClassifier = platformClassifier;

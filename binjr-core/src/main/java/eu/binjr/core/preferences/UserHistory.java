@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2021 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Manages user history metadata
+ */
 public class UserHistory extends MruFactory {
     private static final Logger logger = Logger.create(UserHistory.class);
 
