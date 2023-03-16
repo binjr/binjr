@@ -1,10 +1,27 @@
+@font-face {
+  src: url("../fonts/FiraCode-Regular.ttf");
+}
+
+@font-face {
+  src: url("../fonts/Lato-Bold.ttf");
+}
+
+@font-face {
+  src: url("../fonts/Lato-Light.ttf");
+}
+
+@font-face {
+  src: url("../fonts/Lato-Regular.ttf");
+}
+
+
 .root{
-    -fx-font-family: "?"
+    -fx-font-family: "Lato"
 }
 
 .date-picker-popup > * > .day-name-cell,
 .date-picker-popup > * > .week-number-cell {
-    -fx-font-family: "?";
+    -fx-font-family: "Lato Bold";
 }
 
 .worksheet-title-block,
@@ -12,7 +29,7 @@
 .toolPane .pane-title,
 .about-text,
 .about .titled-pane > .title {
-    -fx-font-family: "?";
+    -fx-font-family: "Lato Light";
 }
 
 .styled-text-area .text,
@@ -23,17 +40,17 @@
 .log-warn,
 .log-error,
 .log-fatal {
-    -fx-font-family: "?";
+    -fx-font-family: "Fira Code";
 }
 
 .styled-text-area .syntax-help-text {
-    -fx-font-family: "?";
+    -fx-font-family: "Lato Light";
 }
 
 .styled-text-area .syntax-help-title {
-    -fx-font-family: "?";
+    -fx-font-family: "Lato";
 }
 
 .styled-text-area .syntax-help-code {
-    -fx-font-family: "?";
+    -fx-font-family: "Fira Code";
 }

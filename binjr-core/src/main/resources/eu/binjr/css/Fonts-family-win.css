@@ -1,3 +1,7 @@
+@font-face {
+  src: url("../fonts/FiraCode-Regular.ttf");
+}
+
 .root{
     -fx-font-family: "Segoe UI"
 }
@@ -23,7 +27,7 @@
 .log-warn,
 .log-error,
 .log-fatal {
-    -fx-font-family: "Consolas";
+    -fx-font-family: "Fira Code";
 }
 
 .styled-text-area .syntax-help-text {
@@ -35,7 +39,7 @@
 }
 
 .styled-text-area .syntax-help-code {
-    -fx-font-family: "Consolas";
+    -fx-font-family: "Fira Code";
 }
 
 

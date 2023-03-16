@@ -34,6 +34,10 @@ Licensed under the Eclipse Distribution License v. 1.0 (https://www.eclipse.org/
 ^be(fx)clipse
 Licensed under the Eclipse Distribution License v. 1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
 
+^bFira Code Font
+Copyright (c) 2014, The Fira Code Project Authors (https://github.com/tonsky/FiraCode)
+This Font Software is licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL)
+
 ^bFont Awesome Free
 by @fontawesome - https://fontawesome.com
 License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
@@ -49,6 +53,10 @@ Licensed under the Apache License Version 2.0 (http://www.apache.org/licenses/LI
 ^bjfxutils
 Copyright 2013 Jason Winnebeck
 Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+^bLato Fonts
+Copyright (c) 2010-2014 by tyPoland Lukasz Dziedzic (team@latofonts.com) with Reserved Font Name "Lato"
+This Font Software is licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL)
 
 ^bRichTextFX
 Copyright (c) 2013-2017, Tomas Mikula and contributors

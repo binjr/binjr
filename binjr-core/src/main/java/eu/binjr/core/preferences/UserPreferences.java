@@ -350,7 +350,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> numIdxMaxPageSize = integerPreference("numIdxMaxPageSize", 200000);
 
-    public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
+    public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultFontSize", 9);
 
     public ObservablePreference<Boolean> doNotTokenizeOnDots = booleanPreference("doNotTokenizeOnDots", false);
 
