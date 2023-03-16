@@ -292,7 +292,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> logFindBarVisible = booleanPreference("logFindBarVisible", false);
 
-    public final ObservablePreference<Boolean> logHeatmapVisible = booleanPreference("logHeatmapVisible", false);
+    public final ObservablePreference<Boolean> logHeatmapVisible = booleanPreference("logHeatmapVisible", true);
 
     public final ObservablePreference<Boolean> doNotWarnOnChartClose = booleanPreference("doNotWarnOnChartClose", false);
 
