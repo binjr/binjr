@@ -1,5 +1,5 @@
 # binjr
-###### A Time Series Data Browser
+###### A Time Series Data Browser 
 
 ---
 
@@ -22,11 +22,12 @@ All source code for the project is available in the following source code reposi
 
 More info at:
 
-* [https://binjr.eu](https://binjr.eu)
+* [https://binjr.eu](https://binjr.eu)  
 
 ## Third-party
 
-This software uses material from several third party open source software projects, listed below:
+This software uses material from several third party open source software projects, listed below.  
+A copy of the licenses used by these projects is distributed as part of this software in `resources/licences/`
 
 **Apache Commons CSV**  
 Copyright 2005-2017 The Apache Software Foundation  
@@ -62,6 +63,10 @@ Licensed under the [Eclipse Distribution License v. 1.0](https://www.eclipse.org
 **e(fx)clipse**  
 Licensed under the [Eclipse Distribution License v. 1.0](https://www.eclipse.org/org/documents/edl-v10.html).
 
+**Fira Code Font**  
+Copyright (c) 2014, The Fira Code Project Authors (https://github.com/tonsky/FiraCode)  
+This Font Software is licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL)
+
 **Font Awesome Free**  
 by @fontawesome - https://fontawesome.com  
 License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
@@ -77,6 +82,10 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 **jfxutils**  
 Copyright 2013 Jason Winnebeck  
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+
+**Lato Fonts**  
+Copyright (c) 2010-2014 by tyPoland Lukasz Dziedzic (team@latofonts.com) with Reserved Font Name "Lato"  
+This Font Software is licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL)  
 
 **RichTextFX**  
 Copyright (c) 2013-2017, Tomas Mikula and contributors  
