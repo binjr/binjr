@@ -234,14 +234,15 @@ public class StageAppearanceManager {
     }
 
     public static String getFontFamilyCssPath() {
-        switch (AppEnvironment.getInstance().getOsFamily()) {
-            default:
-            case WINDOWS:
-                return "/eu/binjr/css/Fonts-family-win.css";
-            case LINUX:
-                return "/eu/binjr/css/Fonts-family-linux.css";
-            case OSX:
-                return "/eu/binjr/css/Fonts-family-mac.css";
+        if (UserPreferences.getInstance().alwaysUseEmbeddedFonts.get()) {
+            return "/eu/binjr/css/Fonts-family-embedded.css";
+        } else {
+            return switch (AppEnvironment.getInstance().getOsFamily()) {
+                case WINDOWS -> "/eu/binjr/css/Fonts-family-win.css";
+                case LINUX -> "/eu/binjr/css/Fonts-family-linux.css";
+                case OSX -> "/eu/binjr/css/Fonts-family-mac.css";
+                case UNSUPPORTED -> "/eu/binjr/css/Fonts-family-embedded.css";
+            };
         }
     }
 

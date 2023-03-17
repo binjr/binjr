@@ -17,6 +17,7 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
+import eu.binjr.common.auth.JfxKrb5LoginModule;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
@@ -355,6 +356,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Boolean> doNotTokenizeOnDots = booleanPreference("doNotTokenizeOnDots", false);
 
     public ObservablePreference<DateTimeAnchor> defaultDateTimeAnchor = enumPreference(DateTimeAnchor.class, "defaultDateTimeAnchor", DateTimeAnchor.EPOCH);
+
+    public ObservablePreference<Boolean> alwaysUseEmbeddedFonts = booleanPreference("alwaysUseEmbeddedFonts", false);
 
     public static class UserFavorites extends MruFactory {
 
