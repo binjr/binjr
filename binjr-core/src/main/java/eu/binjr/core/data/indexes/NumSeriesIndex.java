@@ -24,6 +24,8 @@ import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransf
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.UserPreferences;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.facet.DrillDownQuery;
 import org.apache.lucene.facet.DrillSideways;
@@ -45,6 +47,11 @@ public class NumSeriesIndex extends Index {
     public NumSeriesIndex() throws IOException {
         super();
         userPref = UserPreferences.getInstance();
+    }
+
+    @Override
+    Analyzer getAnalyzer() {
+        return new StandardAnalyzer();
     }
 
     public long search(long start,

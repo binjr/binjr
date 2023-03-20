@@ -175,6 +175,10 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="findBarVisibleToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
+                            <Label text="Index using N-Grams" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="useNGramsToggle" prefWidth="1.0" selected="false"/>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

@@ -22,15 +22,20 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.chart.XYChart;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.ngram.NGramTokenizer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.*;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRangeFacetCounts;
-import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.*;
 
 import java.io.IOException;
@@ -66,12 +71,76 @@ public class LogFileIndex extends Index {
     }
 
     @Override
+    Analyzer getAnalyzer() {
+        if (UserPreferences.getInstance().useNGramTokenization.get()) {
+//            return new Analyzer() {
+//                @Override
+//                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+//                    final StandardTokenizer src = new StandardTokenizer();
+//                    var ts = new NGramTokenFilter(new LowerCaseFilter(src), 3, 3, false);
+//                    return new Analyzer.TokenStreamComponents(src::setReader, ts);
+//                }
+//            };
+            return new Analyzer() {
+                @Override
+                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                    var tokenizer = new NGramTokenizer(3, 3);
+                    var ts = new LowerCaseFilter(tokenizer);
+                    return new Analyzer.TokenStreamComponents(tokenizer::setReader, ts);
+                }
+            };
+        }
+        return new StandardAnalyzer();
+    }
+
+    @Override
     protected FacetsConfig initializeFacetsConfig(FacetsConfig facetsConfig) {
         facetsConfig.setRequireDimCount(SEVERITY, true);
         facetsConfig.setDrillDownTermsIndexing(SEVERITY, FacetsConfig.DrillDownTermsIndexing.ALL);
         return super.initializeFacetsConfig(facetsConfig);
     }
 
+    private void rewriteQuery(Query query, BooleanQuery.Builder accQuery, BooleanClause.Occur occur) throws IOException {
+        if (query instanceof BooleanQuery booleanQuery) {
+            for (BooleanClause booleanClause : booleanQuery) {
+                rewriteQuery(booleanClause.getQuery(), accQuery, booleanClause.getOccur());
+            }
+
+        } else if (query instanceof TermQuery termQuery) {
+            accQuery.add(splitTermToNGrams(termQuery.getTerm()), occur);
+
+        } else if (query instanceof PrefixQuery prefixQuery && prefixQuery.getPrefix().text().length() > 3) {
+            accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
+        } else if (query instanceof WildcardQuery wildcardQuery && wildcardQuery.getTerm().text().length() > 3) {
+            for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
+                accQuery.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt)), occur);
+            }
+        } else {
+            accQuery.add(query, occur);
+        }
+        //TODO handle PhraseQuery? How?
+    }
+
+    private Query splitTermToNGrams(Term term) throws IOException {
+        var builder = new BooleanQuery.Builder();
+        if (term.text().length() < 3) {
+            // suffix term with a wildcard if shorter than ngram size
+            return new PrefixQuery(new Term(term.field(), term.text()));
+        } else {
+            try (var ts = getAnalyzer().tokenStream(FIELD_CONTENT, term.text().replace("*", " "))) {
+                ts.reset();
+                var termAttribute = ts.addAttribute(CharTermAttribute.class);
+                while (ts.incrementToken()) {
+                    var tokenText = termAttribute.toString();
+                    if (!tokenText.isEmpty()) {
+                        builder.add(new TermQuery(new Term(term.field(), tokenText)), BooleanClause.Occur.MUST);
+                    }
+                }
+                ts.end();
+                return builder.build();
+            }
+        }
+    }
 
     public TimeSeriesProcessor<SearchHit> search(long start,
                                                  long end,
@@ -86,10 +155,18 @@ public class LogFileIndex extends Index {
             final Query filterQuery;
             if (query != null && !query.isBlank()) {
                 logger.trace("Query text=" + query);
-                QueryParser parser = new QueryParser(FIELD_CONTENT, getAnalyzer());
+                StandardQueryParser parser = new StandardQueryParser(new StandardAnalyzer());
+                Query userQuery;
+                if (prefs.useNGramTokenization.get()) {
+                    var builder = new BooleanQuery.Builder();
+                    rewriteQuery(parser.parse(query, FIELD_CONTENT), builder, BooleanClause.Occur.FILTER);
+                    userQuery = builder.build();
+                } else {
+                    userQuery = parser.parse(query, FIELD_CONTENT);
+                }
                 filterQuery = new BooleanQuery.Builder()
                         .add(rangeQuery, BooleanClause.Occur.FILTER)
-                        .add(parser.parse(query), BooleanClause.Occur.FILTER)
+                        .add(userQuery, BooleanClause.Occur.FILTER)
                         .build();
             } else {
                 filterQuery = rangeQuery;

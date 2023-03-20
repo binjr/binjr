@@ -67,6 +67,8 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private ToggleSwitch useNGramsToggle;
+    @FXML
     private ChoiceBox<DateTimeAnchor> dateTimeAnchorChoiceBox;
     @FXML
     private TextField defaultTextSizeField;
@@ -254,24 +256,17 @@ public class PreferenceDialogController implements Initializable {
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
         bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
-        updateCheckBox.selectedProperty()
-                .bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
-        showOutlineAreaCharts.selectedProperty()
-                .bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
-        showOutlineStackedAreaCharts.selectedProperty()
-                .bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
-        filterBarVisibleToggle.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().logFilterBarVisible.property());
-        findBarVisibleToggle.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
-        heatmapVisibleToggle.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
-        updatePreferences.visibleProperty()
-                .bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
-        dontAskBeforeClosingTabCheckbox.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
-        dontAskBeforeRemovingChartCheckbox.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
+        updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
+        showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
+        showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
+        filterBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFilterBarVisible.property());
+        findBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
+        heatmapVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
+        updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
+        dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
+        dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
+
+        useNGramsToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().useNGramTokenization.property());
 
         proxyHostnameTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         proxyPortTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());

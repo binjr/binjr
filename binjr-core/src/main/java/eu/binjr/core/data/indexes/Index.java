@@ -33,6 +33,9 @@ import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.charfilter.MappingCharFilter;
 import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
+import org.apache.lucene.analysis.ngram.NGramTokenFilter;
+import org.apache.lucene.analysis.ngram.NGramTokenizer;
+import org.apache.lucene.analysis.ngram.NGramTokenizerFactory;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.*;
@@ -145,28 +148,7 @@ public abstract class Index implements Indexable {
         commitIndexAndTaxonomy();
     }
 
-    protected Analyzer getAnalyzer() {
-        if (UserPreferences.getInstance().doNotTokenizeOnDots.get()) {
-            return new StandardAnalyzer();
-        }
-        return new Analyzer() {
-            @Override
-            protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
-                final StandardTokenizer src = new StandardTokenizer();
-                TokenStream tok = new LowerCaseFilter(src);
-                return new Analyzer.TokenStreamComponents(src::setReader, tok);
-            }
-
-            @Override
-            protected Reader initReader(String fieldName, Reader reader) {
-                NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
-                builder.add(".", " ");
-                NormalizeCharMap normMap = builder.build();
-                return new MappingCharFilter(normMap, reader);
-            }
-        };
-    }
-
+    abstract Analyzer getAnalyzer();
 
     protected FacetsConfig initializeFacetsConfig(FacetsConfig facetsConfig) {
         facetsConfig.setRequireDimCount(PATH, true);
