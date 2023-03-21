@@ -358,6 +358,10 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Boolean> alwaysUseEmbeddedFonts = booleanPreference("alwaysUseEmbeddedFonts", false);
 
+    public ObservablePreference<Number> logIndexNGramSize = integerPreference("logIndexNGramSize", 2);
+
+    public  ObservablePreference<Boolean> logIndexAutoExpendShorterTerms = booleanPreference("logIndexAutoExpendShorterTerms", false);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =

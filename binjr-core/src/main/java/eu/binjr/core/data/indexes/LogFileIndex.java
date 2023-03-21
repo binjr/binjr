@@ -73,18 +73,23 @@ public class LogFileIndex extends Index {
     @Override
     Analyzer getAnalyzer() {
         if (UserPreferences.getInstance().useNGramTokenization.get()) {
-//            return new Analyzer() {
-//                @Override
-//                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
-//                    final StandardTokenizer src = new StandardTokenizer();
-//                    var ts = new NGramTokenFilter(new LowerCaseFilter(src), 3, 3, false);
-//                    return new Analyzer.TokenStreamComponents(src::setReader, ts);
-//                }
-//            };
+         /*   return new Analyzer() {
+                @Override
+                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                    final StandardTokenizer src = new StandardTokenizer();
+                    var tokenFilter = new NGramTokenFilter(
+                            new LowerCaseFilter(src),
+                            prefs.logIndexNGramSize.get().intValue(),
+                            prefs.logIndexNGramSize.get().intValue(),
+                            false);
+                    return new Analyzer.TokenStreamComponents(src::setReader, tokenFilter);
+                }
+            };*/
             return new Analyzer() {
                 @Override
                 protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
-                    var tokenizer = new NGramTokenizer(3, 3);
+                    var tokenizer = new NGramTokenizer(prefs.logIndexNGramSize.get().intValue(),
+                            prefs.logIndexNGramSize.get().intValue());
                     var ts = new LowerCaseFilter(tokenizer);
                     return new Analyzer.TokenStreamComponents(tokenizer::setReader, ts);
                 }
@@ -105,40 +110,56 @@ public class LogFileIndex extends Index {
             for (BooleanClause booleanClause : booleanQuery) {
                 rewriteQuery(booleanClause.getQuery(), accQuery, booleanClause.getOccur());
             }
-
         } else if (query instanceof TermQuery termQuery) {
             accQuery.add(splitTermToNGrams(termQuery.getTerm()), occur);
-
         } else if (query instanceof PrefixQuery prefixQuery && prefixQuery.getPrefix().text().length() > 3) {
             accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
         } else if (query instanceof WildcardQuery wildcardQuery && wildcardQuery.getTerm().text().length() > 3) {
+            var subBuilder = new BooleanQuery.Builder();
             for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
-                accQuery.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt)), occur);
+                subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt)), BooleanClause.Occur.FILTER);
             }
+            accQuery.add(subBuilder.build(), occur);
+        } else if (query instanceof PhraseQuery phraseQuery) {
+//             NB: Phrase queries no longer behave as exact search and term positions are lost.
+//             The only use of double quotes is now to imply escape of reserved chars and the use of the AND operator.
+            var subBuilder = new BooleanQuery.Builder();
+            for (var t : phraseQuery.getTerms()) {
+                subBuilder.add(splitTermToNGrams(new Term(t.field(), t.text())), BooleanClause.Occur.FILTER);
+            }
+            accQuery.add(subBuilder.build(), occur);
         } else {
             accQuery.add(query, occur);
         }
-        //TODO handle PhraseQuery? How?
+
     }
 
     private Query splitTermToNGrams(Term term) throws IOException {
-        var builder = new BooleanQuery.Builder();
-        if (term.text().length() < 3) {
+        final int nGramSize = prefs.logIndexNGramSize.get().intValue();
+        if (prefs.logIndexAutoExpendShorterTerms.get() && term.text().length() < nGramSize) {
             // suffix term with a wildcard if shorter than ngram size
             return new PrefixQuery(new Term(term.field(), term.text()));
         } else {
+            var queryBuilder = new PhraseQuery.Builder();
             try (var ts = getAnalyzer().tokenStream(FIELD_CONTENT, term.text().replace("*", " "))) {
                 ts.reset();
                 var termAttribute = ts.addAttribute(CharTermAttribute.class);
+                var terms = new ArrayList<Term>();
                 while (ts.incrementToken()) {
                     var tokenText = termAttribute.toString();
                     if (!tokenText.isEmpty()) {
-                        builder.add(new TermQuery(new Term(term.field(), tokenText)), BooleanClause.Occur.MUST);
+                        terms.add(new Term(term.field(), tokenText));
                     }
                 }
                 ts.end();
-                return builder.build();
+                // Built-in the optimisation made in NGramPhraseQuery to make logged query string easier to debug
+                for (int i = 0; i < terms.size(); ++i) {
+                    if (i % nGramSize == 0 || i == terms.size() - 1) {
+                        queryBuilder.add(terms.get(i), i);
+                    }
+                }
             }
+            return queryBuilder.build();
         }
     }
 
