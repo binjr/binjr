@@ -28,8 +28,12 @@ import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.charfilter.MappingCharFilter;
+import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.facet.*;
@@ -39,6 +43,7 @@ import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.*;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -73,18 +78,6 @@ public class LogFileIndex extends Index {
     @Override
     Analyzer getAnalyzer() {
         if (UserPreferences.getInstance().useNGramTokenization.get()) {
-         /*   return new Analyzer() {
-                @Override
-                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
-                    final StandardTokenizer src = new StandardTokenizer();
-                    var tokenFilter = new NGramTokenFilter(
-                            new LowerCaseFilter(src),
-                            prefs.logIndexNGramSize.get().intValue(),
-                            prefs.logIndexNGramSize.get().intValue(),
-                            false);
-                    return new Analyzer.TokenStreamComponents(src::setReader, tokenFilter);
-                }
-            };*/
             return new Analyzer() {
                 @Override
                 protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
@@ -95,7 +88,24 @@ public class LogFileIndex extends Index {
                 }
             };
         }
-        return new StandardAnalyzer();
+        return new Analyzer() {
+            @Override
+            protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                final StandardTokenizer src = new StandardTokenizer();
+                TokenStream tok = new LowerCaseFilter(src);
+                return new Analyzer.TokenStreamComponents(src::setReader, tok);
+            }
+
+            @Override
+            protected Reader initReader(String fieldName, Reader reader) {
+                NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
+                builder.add(".", " ");
+                NormalizeCharMap normMap = builder.build();
+                return new MappingCharFilter(normMap, reader);
+            }
+        }
+
+                ;
     }
 
     @Override
@@ -176,13 +186,14 @@ public class LogFileIndex extends Index {
             final Query filterQuery;
             if (query != null && !query.isBlank()) {
                 logger.trace("Query text=" + query);
-                StandardQueryParser parser = new StandardQueryParser(new StandardAnalyzer());
                 Query userQuery;
                 if (prefs.useNGramTokenization.get()) {
                     var builder = new BooleanQuery.Builder();
+                    StandardQueryParser parser = new StandardQueryParser(new WhitespaceAnalyzer());
                     rewriteQuery(parser.parse(query, FIELD_CONTENT), builder, BooleanClause.Occur.FILTER);
                     userQuery = builder.build();
                 } else {
+                    StandardQueryParser parser = new StandardQueryParser(getAnalyzer());
                     userQuery = parser.parse(query, FIELD_CONTENT);
                 }
                 filterQuery = new BooleanQuery.Builder()
