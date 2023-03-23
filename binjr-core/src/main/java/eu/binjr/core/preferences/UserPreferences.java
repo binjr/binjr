@@ -362,6 +362,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public  ObservablePreference<Boolean> logIndexAutoExpendShorterTerms = booleanPreference("logIndexAutoExpendShorterTerms", false);
 
+    public ObservablePreference<Boolean> optimizeNGramQueries= booleanPreference("optimizeNGramQueries", true);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =

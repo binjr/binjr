@@ -103,9 +103,7 @@ public class LogFileIndex extends Index {
                 NormalizeCharMap normMap = builder.build();
                 return new MappingCharFilter(normMap, reader);
             }
-        }
-
-                ;
+        };
     }
 
     @Override
@@ -154,22 +152,19 @@ public class LogFileIndex extends Index {
             try (var ts = getContentFieldAnalyzer().tokenStream(FIELD_CONTENT, term.text().replace("*", " "))) {
                 ts.reset();
                 var termAttribute = ts.addAttribute(CharTermAttribute.class);
-                var terms = new ArrayList<Term>();
                 while (ts.incrementToken()) {
                     var tokenText = termAttribute.toString();
                     if (!tokenText.isEmpty()) {
-                        terms.add(new Term(term.field(), tokenText));
+                        queryBuilder.add(new Term(term.field(), tokenText));
                     }
                 }
                 ts.end();
-                // Built-in the optimisation made in NGramPhraseQuery to make logged query string easier to debug
-                for (int i = 0; i < terms.size(); ++i) {
-                    if (i % nGramSize == 0 || i == terms.size() - 1) {
-                        queryBuilder.add(terms.get(i), i);
-                    }
-                }
             }
-            return queryBuilder.build();
+            if (prefs.optimizeNGramQueries.get()) {
+                return new NGramPhraseQuery(nGramSize, queryBuilder.build());
+            } else {
+                return queryBuilder.build();
+            }
         }
     }
 
@@ -208,6 +203,7 @@ public class LogFileIndex extends Index {
             var drillDownQuery = new DrillDownQuery(facetsConfig, new ConstantScoreQuery(filterQuery));
             for (var facet : facets.entrySet()) {
                 for (var label : facet.getValue()) {
+                    logger.debug(() -> "Add facet [" + facet.getKey() + "] = " + label);
                     drillDownQuery.add(facet.getKey(), label);
                 }
             }
