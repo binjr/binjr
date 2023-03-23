@@ -205,7 +205,7 @@ public class LogFileIndex extends Index {
             }
 
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
-            var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
+            var drillDownQuery = new DrillDownQuery(facetsConfig, new ConstantScoreQuery(filterQuery));
             for (var facet : facets.entrySet()) {
                 for (var label : facet.getValue()) {
                     drillDownQuery.add(facet.getKey(), label);
