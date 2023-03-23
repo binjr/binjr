@@ -76,7 +76,7 @@ public class LogFileIndex extends Index {
     }
 
     @Override
-    Analyzer getAnalyzer() {
+    Analyzer getContentFieldAnalyzer() {
         if (UserPreferences.getInstance().useNGramTokenization.get()) {
             return new Analyzer() {
                 @Override
@@ -151,7 +151,7 @@ public class LogFileIndex extends Index {
             return new PrefixQuery(new Term(term.field(), term.text()));
         } else {
             var queryBuilder = new PhraseQuery.Builder();
-            try (var ts = getAnalyzer().tokenStream(FIELD_CONTENT, term.text().replace("*", " "))) {
+            try (var ts = getContentFieldAnalyzer().tokenStream(FIELD_CONTENT, term.text().replace("*", " "))) {
                 ts.reset();
                 var termAttribute = ts.addAttribute(CharTermAttribute.class);
                 var terms = new ArrayList<Term>();
@@ -193,7 +193,7 @@ public class LogFileIndex extends Index {
                     rewriteQuery(parser.parse(query, FIELD_CONTENT), builder, BooleanClause.Occur.FILTER);
                     userQuery = builder.build();
                 } else {
-                    StandardQueryParser parser = new StandardQueryParser(getAnalyzer());
+                    var parser = new StandardQueryParser(getContentFieldAnalyzer());
                     userQuery = parser.parse(query, FIELD_CONTENT);
                 }
                 filterQuery = new BooleanQuery.Builder()

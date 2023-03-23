@@ -50,7 +50,7 @@ public class NumSeriesIndex extends Index {
     }
 
     @Override
-    Analyzer getAnalyzer() {
+    Analyzer getContentFieldAnalyzer() {
         return new StandardAnalyzer();
     }
 

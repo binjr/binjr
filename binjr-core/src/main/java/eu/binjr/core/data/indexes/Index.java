@@ -29,15 +29,8 @@ import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.LowerCaseFilter;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.charfilter.MappingCharFilter;
-import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
-import org.apache.lucene.analysis.ngram.NGramTokenFilter;
-import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.ngram.NGramTokenizerFactory;
+import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRange;
@@ -60,7 +53,6 @@ import org.apache.lucene.store.MMapDirectory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -129,8 +121,8 @@ public abstract class Index implements Indexable {
         }
         logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                 " using " + parsingThreadsNumber + " parsing indexing threads");
-
-        IndexWriterConfig iwc = new IndexWriterConfig(getAnalyzer());
+        IndexWriterConfig iwc = new IndexWriterConfig(new PerFieldAnalyzerWrapper(new StandardAnalyzer(),
+                Map.of(FIELD_CONTENT, getContentFieldAnalyzer())));
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
         this.indexWriter = new IndexWriter(indexDirectory, iwc);
         this.taxonomyWriter = new DirectoryTaxonomyWriter(taxonomyDirectory);
@@ -148,7 +140,7 @@ public abstract class Index implements Indexable {
         commitIndexAndTaxonomy();
     }
 
-    abstract Analyzer getAnalyzer();
+    abstract Analyzer getContentFieldAnalyzer();
 
     protected FacetsConfig initializeFacetsConfig(FacetsConfig facetsConfig) {
         facetsConfig.setRequireDimCount(PATH, true);
