@@ -18,7 +18,8 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<DialogPane  fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121"
+<?import eu.binjr.common.javafx.controls.LabelWithInlineHelp?>
+<DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <GridPane fx:id="paramsGridPane" hgap="10.0">
@@ -32,8 +33,8 @@
             </rowConstraints>
             <children>
                 <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Label fx:id="uriLabel" text="Address" GridPane.rowIndex="0"/>
-                <Label fx:id="timeZoneLabel" text="Timezone" GridPane.rowIndex="1"/>
+                <LabelWithInlineHelp fx:id="uriLabel" text="Address" GridPane.rowIndex="0" alignment="CENTER_RIGHT"/>
+                <LabelWithInlineHelp fx:id="timeZoneLabel" text="Timezone" GridPane.rowIndex="1" alignment="CENTER_RIGHT" />
                 <HBox fx:id="uriHBox" alignment="CENTER" spacing="5.0" GridPane.columnIndex="1">
                     <children>
                         <ComboBox fx:id="uriField" editable="true" prefHeight="25.0" prefWidth="500.0"/>

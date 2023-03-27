@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.logs.adapters;
 
+import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -29,10 +30,7 @@ import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.dialogs.LogParsingProfileDialog;
 import eu.binjr.core.preferences.UserPreferences;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Side;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -85,18 +83,45 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         super(owner, Mode.PATH, "mostRecentLogsArchives", true);
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
         setDialogHeaderText("Add a Log File, Zip Archive or Folder");
+        this.setUriLabelInlineHelp("""
+                A file system path to get log files from.
+                It can either be:
+                  - The path to a single text-based log file, which will then be the sole item available in the source tree.
+                  - The path to a folder, in which case all files in the folder and sub-folders that match the extension filter below will be available the the source tree.
+                  - The path to a Zip archive, in which case all files in the archive that match the extension filter below  will be available the the source tree.
+                """);
+        this.setTimezoneLabelInlineHelp("""
+                The default timezone for timestamps in the source files.
+                """);
         extensionFiltersTextField = new TextField(String.join(", ", prefs.fileExtensionFilters.get()));
-        var label = new Label("Extensions");
-        GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        var extensionlabel = new LabelWithInlineHelp();
+        extensionlabel.setText("Extensions");
+        extensionlabel.setInlineHelp("""
+                The set of extensions used to filter which files should be available in the source tree when pointing to a folder or a zip archive.
+                You can specify any number of glob patterns separated by spaces, commas or semi-colons. 
+                """);
+        extensionlabel.setAlignment(Pos.CENTER_RIGHT);
+        GridPane.setConstraints(extensionlabel, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
         this.encodingField = new TextField(prefs.mruEncoding.get());
         TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
         GridPane.setConstraints(encodingField, 1, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        Label encodingLabel = new Label("Encoding");
+        var encodingLabel = new LabelWithInlineHelp();
+        encodingLabel.setText("Encoding");
+        encodingLabel.setInlineHelp("""
+                The text encoding of files to extracts log events from.
+                """);
+        encodingLabel.setAlignment(Pos.CENTER_RIGHT);
         GridPane.setConstraints(encodingLabel, 0, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
-        var parsingLabel = new Label("Parsing profile");
+        var parsingLabel = new LabelWithInlineHelp();
+        parsingLabel.setText("Parsing profile");
+        parsingLabel.setInlineHelp("""
+                The default parsing profile used to process log files loaded from this source.
+                It is still possible to select a different profile on of file-by-file basis once the source is loaded.
+                """);
+        parsingLabel.setAlignment(Pos.CENTER_RIGHT);
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
         updateProfileList(UserPreferences.getInstance().userLogEventsParsingProfiles.get());
@@ -117,7 +142,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         GridPane.setConstraints(parsingLabel, 0, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(parsingHBox, 1, 4, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
-        getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField, parsingLabel, parsingHBox, encodingLabel, encodingField);
+        getParamsGridPane().getChildren().addAll(extensionlabel, extensionFiltersTextField, parsingLabel, parsingHBox, encodingLabel, encodingField);
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
@@ -26,6 +27,8 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -54,15 +57,17 @@ import java.util.stream.Collectors;
  */
 public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter>> {
     private static final Logger logger = Logger.create(DataAdapterDialog.class);
-
+    private final Mode mode;
     private Collection<DataAdapter> result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final ComboBox<String> uriField;
     private final TextField timezoneField;
-    private final Label timezoneLabel;
+    private final LabelWithInlineHelp timezoneLabel;
     private final DialogPane parent;
     private final GridPane paramsGridPane;
     private final MostRecentlyUsedList<T> mostRecentList;
+    private final StringProperty uriLabelInlineHelp = new SimpleStringProperty();
+    private final StringProperty timezoneLabelInlineHelp = new SimpleStringProperty();
 
     protected enum Mode {
         PATH(Path.class),
@@ -87,6 +92,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             this.initOwner(NodeUtils.getStage(owner));
         }
         this.setTitle("Source");
+        this.mode = mode;
 
         switch (mode) {
             case PATH:
@@ -107,7 +113,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         }
         this.setDialogPane(parent);
         Button browseButton = (Button) parent.lookup("#browseButton");
-        Label uriLabel = (Label) parent.lookup("#uriLabel");
+        LabelWithInlineHelp uriLabel = (LabelWithInlineHelp) parent.lookup("#uriLabel");
         uriField = (ComboBox<String>) parent.lookup("#uriField");
 
 
@@ -125,7 +131,9 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             }
         });
         timezoneField = (TextField) parent.lookup("#timezoneField");
-        timezoneLabel = (Label) parent.lookup("#timeZoneLabel");
+        timezoneLabel = (LabelWithInlineHelp) parent.lookup("#timeZoneLabel");
+        timezoneLabel.inlineHelpProperty().bind(timezoneLabelInlineHelp);
+        setTimezoneLabelInlineHelp("The timezone of the source.");
         timezoneField.setManaged(showTimezone);
         timezoneField.setVisible(showTimezone);
         timezoneLabel.setManaged(showTimezone);
@@ -136,10 +144,14 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             browseButton.setPrefWidth(0);
             uriHBox.setSpacing(0);
             uriLabel.setText("Address");
+            setUriLabelInlineHelp("The address to access the source.");
         } else {
             browseButton.setPrefWidth(-1);
             uriLabel.setText("Path");
+            setUriLabelInlineHelp("The path to access the source.");
+
         }
+        uriLabel.inlineHelpProperty().bind(uriLabelInlineHelp);
         browseButton.setOnAction(event -> {
             File selectedFile = displayFileChooser((Node) event.getSource());
             if (selectedFile != null) {
@@ -221,7 +233,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
     }
 
     public String getSourceUri() {
-         return this.uriField.getEditor().getText();
+        return this.uriField.getEditor().getText();
     }
 
     public void setSourceUri(String value) {
@@ -251,5 +263,30 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
     protected MostRecentlyUsedList<T> getMostRecentList() {
         return mostRecentList;
     }
+
+    public String getUriLabelInlineHelp() {
+        return uriLabelInlineHelp.get();
+    }
+
+    public StringProperty uriLabelInlineHelpProperty() {
+        return uriLabelInlineHelp;
+    }
+
+    public void setUriLabelInlineHelp(String uriLabelInlineHelp) {
+        this.uriLabelInlineHelp.set(uriLabelInlineHelp);
+    }
+
+    public String getTimezoneLabelInlineHelp() {
+        return timezoneLabelInlineHelp.get();
+    }
+
+    public StringProperty timezoneLabelInlineHelpProperty() {
+        return timezoneLabelInlineHelp;
+    }
+
+    public void setTimezoneLabelInlineHelp(String timezoneLabelInlineHelp) {
+        this.timezoneLabelInlineHelp.set(timezoneLabelInlineHelp);
+    }
+
 
 }
