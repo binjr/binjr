@@ -111,9 +111,12 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
     private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
+
     private BooleanBinding noWorksheetPresent;
     private BooleanBinding noSourcePresent;
 
+    @FXML
+    private CheckMenuItem inlineHelpMenuItem;
     @FXML
     private MenuItem restoreClosedWorksheetMenu;
     @FXML
@@ -330,6 +333,8 @@ public class MainViewController implements Initializable {
         newWorksheetDropTarget.visibleProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         this.restoreClosedWorksheetMenu.disableProperty().bind(workspace.closedWorksheetQueueEmptyProperty());
+        this.inlineHelpMenuItem.selectedProperty().bindBidirectional(UserPreferences.getInstance().showInlineHelpButtons.property());
+
         Platform.runLater(this::runAfterInitialize);
     }
 

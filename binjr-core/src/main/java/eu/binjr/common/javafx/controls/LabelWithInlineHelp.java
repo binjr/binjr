@@ -16,14 +16,16 @@
 
 package eu.binjr.common.javafx.controls;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -36,7 +38,6 @@ public class LabelWithInlineHelp extends HBox {
 
 
     public LabelWithInlineHelp() {
-
         var helpPopup = new Tooltip();
         helpPopup.textProperty().bind(inlineHelpProperty());
         helpPopup.setAutoHide(true);
@@ -58,16 +59,19 @@ public class LabelWithInlineHelp extends HBox {
                     event.consume();
                 }).build(Button::new);
         helpButton.setAlignment(Pos.TOP_RIGHT);
+        helpButton.visibleProperty().bind(UserPreferences.getInstance().showInlineHelpButtons.property());
+        helpButton.managedProperty().bind(UserPreferences.getInstance().showInlineHelpButtons.property());
         label = new Label();
-       // label.setPrefWidth(60);
+        // label.setPrefWidth(60);
         label.setAlignment(Pos.TOP_LEFT);
-       label.setWrapText(true);
+        label.setWrapText(true);
+       // label.setPrefHeight(USE_COMPUTED_SIZE);
+//        label.setMinWidth(USE_COMPUTED_SIZE);
         var spacer = new Pane();
-//        label.setMaxWidth(USE_COMPUTED_SIZE);
-//        HBox.setHgrow(label, Priority.SOMETIMES);
-       HBox.setHgrow(spacer, Priority.SOMETIMES);
-//        HBox.setHgrow(helpButton, Priority.ALWAYS);
-        this.getChildren().addAll(label,spacer, helpButton);
+       // HBox.setHgrow(label, Priority.ALWAYS);
+        HBox.setHgrow(spacer, Priority.SOMETIMES);
+       // HBox.setHgrow(helpButton, Priority.ALWAYS);
+        this.getChildren().addAll(label, spacer, helpButton);
     }
 
 

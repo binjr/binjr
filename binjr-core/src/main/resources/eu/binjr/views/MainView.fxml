@@ -323,6 +323,7 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
+                <CheckMenuItem fx:id="inlineHelpMenuItem" accelerator="Shift+F1" mnemonicParsing="false"  text="Inline Help"/>
                 <MenuItem mnemonicParsing="false" onAction="#handleShortcutsAction" text="Keyboard Shortcuts"/>
                 <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr Website">
                     <graphic>

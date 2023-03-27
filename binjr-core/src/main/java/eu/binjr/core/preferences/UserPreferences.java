@@ -360,9 +360,11 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> logIndexNGramSize = integerPreference("logIndexNGramSize", 2);
 
-    public  ObservablePreference<Boolean> logIndexAutoExpendShorterTerms = booleanPreference("logIndexAutoExpendShorterTerms", false);
+    public ObservablePreference<Boolean> logIndexAutoExpendShorterTerms = booleanPreference("logIndexAutoExpendShorterTerms", false);
 
-    public ObservablePreference<Boolean> optimizeNGramQueries= booleanPreference("optimizeNGramQueries", true);
+    public ObservablePreference<Boolean> optimizeNGramQueries = booleanPreference("optimizeNGramQueries", true);
+
+    public ObservablePreference<Boolean> showInlineHelpButtons = booleanPreference("showInlinSHow/eHelpButtons", true);
 
     public static class UserFavorites extends MruFactory {
 
