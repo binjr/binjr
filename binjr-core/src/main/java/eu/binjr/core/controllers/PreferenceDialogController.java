@@ -67,6 +67,10 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private Label ngramsSizeLabel;
+    @FXML
+    private TextField ngramsSizeTextField;
+    @FXML
     private ToggleSwitch useNGramsToggle;
     @FXML
     private ChoiceBox<DateTimeAnchor> dateTimeAnchorChoiceBox;
@@ -267,6 +271,28 @@ public class PreferenceDialogController implements Initializable {
         dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
 
         useNGramsToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().useNGramTokenization.property());
+        final TextFormatter<Number> ngramsSizeformatter = new TextFormatter<>(new StringConverter<>() {
+            @Override
+            public String toString(Number object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.toString();
+            }
+
+            @Override
+            public Number fromString(String string) {
+                int val = Integer.parseInt(string);
+                if (val < 2 ) {
+                    TextFieldValidator.fail(proxyPortTextfield, "N-Gram size must be greater than 1 ", true);
+                }
+                return val;
+            }
+        });
+        ngramsSizeTextField.setTextFormatter(ngramsSizeformatter);
+        ngramsSizeformatter.valueProperty().bindBidirectional(userPrefs.logIndexNGramSize.property());
+        ngramsSizeLabel.disableProperty().bind(useNGramsToggle.selectedProperty().not());
+        ngramsSizeTextField.disableProperty().bind(useNGramsToggle.selectedProperty().not());
 
         proxyHostnameTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         proxyPortTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());

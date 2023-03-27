@@ -179,6 +179,8 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="useNGramsToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
+                            <Label fx:id="ngramsSizeLabel" text="N-Grams size"/>
+                            <TextField fx:id="ngramsSizeTextField" prefHeight="25.0" prefWidth="-1.0" text="10" />
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
