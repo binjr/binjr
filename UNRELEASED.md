@@ -2,6 +2,7 @@ _[New]_ Added a new, alternative indexing method for log file that allows for fa
 > You can activate this alternative indexing mode via "Settings > Logs > Index using N-Grams"
 
 _[New]_ Added the ability to open a single log file instead of a whole folder or a zip archive.  
+_[New]_ Inline help is now directly accessible for many options throughout the application's User Interface by clicking the `?`next to it.  
 _[New]_ Let users choose the date & time that serves as an anchor to construct timestamps for partial data.  
 _[Fixed]_ Different outcome when typing the name of a capture group vs selecting it from the dropdown list in the  profile editor.  
 _[Fixed]_ Files selection on Linux do not show files with no extensions when "All files" filter is selected.  

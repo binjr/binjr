@@ -18,6 +18,7 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
+import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
 import eu.binjr.common.preferences.ObservablePreference;
@@ -67,7 +68,7 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
-    private Label ngramsSizeLabel;
+    private LabelWithInlineHelp ngramsSizeLabel;
     @FXML
     private TextField ngramsSizeTextField;
     @FXML
@@ -135,7 +136,7 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private ToggleSwitch enableDownSampling;
     @FXML
-    private Label maxSampleLabel;
+    private LabelWithInlineHelp maxSampleLabel;
     @FXML
     private Accordion accordionPane;
     @FXML

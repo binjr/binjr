@@ -21,6 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
+<?import eu.binjr.common.javafx.controls.LabelWithInlineHelp?>
 <AnchorPane fx:id="root" focusTraversable="true" prefWidth="200" styleClass="skinnable-pane-border"
             xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
     <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
@@ -50,12 +51,12 @@
                     <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
                 </children>
             </VBox>
-            <Label fx:id="showAreaOutlineLabel" text="Show outline" wrapText="true"/>
+            <LabelWithInlineHelp fx:id="showAreaOutlineLabel" text="Show outline" inlineHelp="Check this option if you want this chart to display a brighter coloured outline for each series."/>
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
                 </ToggleSwitch>
             </VBox>
-            <Label fx:id="strokeWidthLabel" text="Stroke width" wrapText="true"/>
+            <LabelWithInlineHelp fx:id="strokeWidthLabel" text="Stroke width" inlineHelp="The width for the outlines/scatter points on this chart."/>
             <VBox>
                 <HBox alignment="CENTER_LEFT">
                     <Slider fx:id="strokeWidthSlider" blockIncrement="0.5" majorTickUnit="10.0" max="10.0" min="0.0"
@@ -63,7 +64,7 @@
                     <Label fx:id="strokeWidthText" text="1.0"/>
                 </HBox>
             </VBox>
-            <Label fx:id="graphOpacityLabel" text="Area opacity" wrapText="true"/>
+            <LabelWithInlineHelp fx:id="graphOpacityLabel" text="Area opacity" inlineHelp="The opacity of the area of series plotted on this chart." />
             <VBox>
                 <HBox alignment="CENTER_LEFT">
                     <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
@@ -71,7 +72,7 @@
                 </HBox>
             </VBox>
             <Separator prefWidth="200.0"/>
-            <Label text="Auto scale Y axis" wrapText="true"/>
+            <LabelWithInlineHelp text="Auto scale Y axis" inlineHelp="Check this option if you want the scale of the Y axis to adjust automatically based on the minimum and maximum values currently plotted.&#xd;Uncheck it  if you want the Y axis to be fixed and adjust the scale manually using the fields below."/>
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
             </VBox>
@@ -110,7 +111,7 @@
                 </children>
             </HBox>
             <Separator prefWidth="200.0"/>
-            <Label text="Minimum chart height" wrapText="true"/>
+            <LabelWithInlineHelp text="Minimum chart height" inlineHelp="This is the minimum height charts in this worksheet will be sized down to before a vertical scroll bar appears."/>
             <VBox>
                 <HBox alignment="CENTER_LEFT">
                     <Slider fx:id="minChartHeightSlider" blockIncrement="1" max="500" min="80"/>

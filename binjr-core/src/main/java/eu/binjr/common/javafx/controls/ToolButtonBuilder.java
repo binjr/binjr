@@ -47,7 +47,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
     private double height = 20.0;
     private double width = 20.0;
     private String text = "";
-    private String tooltip = "";
+    private String tooltip = null;
     private List<String> styleClass = new ArrayList<>();
     private List<String> iconStyleClass = new ArrayList<>();
     private EventHandler<ActionEvent> action = null;
@@ -66,7 +66,9 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     private T buildButton(T btn) {
         btn.setText(text);
-        btn.setTooltip(makeTooltip(tooltip));
+        if (tooltip != null) {
+            btn.setTooltip(makeTooltip(tooltip));
+        }
         btn.setPrefHeight(height);
         btn.setMaxHeight(height);
         btn.setMinHeight(height);
@@ -80,7 +82,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         if (iconStyleClass != null && !iconStyleClass.isEmpty()) {
             Region icon = new Region();
             icon.getStyleClass().addAll(iconStyleClass);
-            if (iconColorString != null){
+            if (iconColorString != null) {
                 icon.setStyle("-fx-background-color:" + iconColorString + ";");
             }
             btn.setGraphic(icon);
@@ -107,7 +109,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         return this;
     }
 
-    public ToolButtonBuilder<T> setFocusTraversable(boolean focusTraversable){
+    public ToolButtonBuilder<T> setFocusTraversable(boolean focusTraversable) {
         this.focusTraversable = focusTraversable;
         return this;
     }
@@ -132,13 +134,13 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         return this;
     }
 
-    public ToolButtonBuilder<T> setIconColor(Color color){
+    public ToolButtonBuilder<T> setIconColor(Color color) {
         this.iconColorString = ColorUtils.toHex(color);
         return this;
     }
 
-    public ToolButtonBuilder<T> setContentDisplay(ContentDisplay contentDisplay){
-        this.contentDisplay =  contentDisplay;
+    public ToolButtonBuilder<T> setContentDisplay(ContentDisplay contentDisplay) {
+        this.contentDisplay = contentDisplay;
         return this;
     }
 

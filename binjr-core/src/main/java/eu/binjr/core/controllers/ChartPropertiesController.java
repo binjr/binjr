@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.ChartType;
@@ -56,15 +57,15 @@ public class ChartPropertiesController implements Initializable, Closeable {
     @FXML
     private Slider graphOpacitySlider;
     @FXML
-    private Label graphOpacityLabel;
+    private LabelWithInlineHelp graphOpacityLabel;
     @FXML
     private Slider strokeWidthSlider;
     @FXML
     private Label strokeWidthText;
     @FXML
-    private Label strokeWidthLabel;
+    private LabelWithInlineHelp strokeWidthLabel;
     @FXML
-    private Label showAreaOutlineLabel;
+    private LabelWithInlineHelp showAreaOutlineLabel;
     @FXML
     private Label opacityText;
     @FXML
