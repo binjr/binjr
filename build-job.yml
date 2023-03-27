@@ -79,7 +79,8 @@ jobs:
           echo "**************************************"
           echo "* Install dependencies"
           echo "**************************************"
-          sudo apt install gnupg1 gpgv1 aptly createrepo
+          sudo apt update
+          sudo apt -y install gnupg1 gpgv1 aptly createrepo
           echo "**************************************"
           echo "* GPG setup"
           echo "**************************************"

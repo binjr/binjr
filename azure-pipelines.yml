@@ -28,7 +28,7 @@ stages:
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           javaVersion: $(javaVersion)
           pool:
-            vmImage: 'ubuntu-18.04'
+            vmImage: 'ubuntu-22.04'
 
       # MacOS app bundle job
       - template: build-job.yml
@@ -39,7 +39,7 @@ stages:
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
           javaVersion: $(javaVersion)
           pool:
-            vmImage: 'macOS-11'
+            vmImage: 'macOS-12'
 
       # Windows app bundle job
       - template: build-job.yml
@@ -59,7 +59,7 @@ stages:
     jobs:
     - job: deploy_site
       pool:
-        vmImage: 'ubuntu-20.04'
+        vmImage: 'ubuntu-22.04'
       steps:
         - script: |
             curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
