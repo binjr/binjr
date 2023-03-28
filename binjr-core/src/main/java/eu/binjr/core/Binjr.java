@@ -16,6 +16,7 @@
 
 package eu.binjr.core;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
@@ -32,7 +33,6 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import eu.binjr.common.logging.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -125,12 +125,20 @@ public class Binjr extends Application {
             System.setProperty("sun.security.jgss.native", "true");
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
+        String jaasCfgPath = System.getProperty("java.security.auth.login.config");
+        if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
+            var defaultJaasConf = Binjr.class.getResource("/jaas_login.conf");
+            if (defaultJaasConf != null) {
+                System.setProperty("java.security.auth.login.config", defaultJaasConf.toExternalForm());
+            }
+        }
         AppEnvironment.getInstance().bindHeapDumpPreferences();
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        var env = AppEnvironment.getInstance();
         logger.info(() -> String.format("""
                 Starting... 
                  ╭─╮   ╭─╮       ╭─╮
@@ -138,13 +146,8 @@ public class Binjr extends Application {
                  │ ╭╮ ││ ││ ╭╮ │ │ ││ ╭╯
                  │ ╰╯ ││ ││ ││ │ │ ││ │
                  ╰────╯└─┘└─┘└─┘╭╯ │└─┘  v%s
-                                ╰──╯ """, AppEnvironment.getInstance().getVersion()));
-        AppEnvironment.getInstance().getSysInfoProperties().forEach(logger::info);
-        String jaasCfgPath = System.getProperty("java.security.auth.login.config");
-        if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
-            System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
-        }
-        var env = AppEnvironment.getInstance();
+                                ╰──╯ """, env.getVersion()));
+        env.getSysInfoProperties().forEach(logger::info);
         env.processCommandLineOptions(getParameters());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
         Parent root = loader.load();
@@ -153,20 +156,21 @@ public class Binjr extends Application {
         primaryStage.setTitle(AppEnvironment.APP_NAME);
 
         try (Profiler p = Profiler.start("Set scene", logger::perf)) {
+            var lastWindowPosition = UserPreferences.getInstance().windowLastPosition.get();
             if (Screen.getScreensForRectangle(
-                    UserPreferences.getInstance().windowLastPosition.get().getMinX(),
-                    UserPreferences.getInstance().windowLastPosition.get().getMinY(),
+                    lastWindowPosition.getMinX(),
+                    lastWindowPosition.getMinY(),
                     10, 10).size() > 0) {
-                primaryStage.setX(UserPreferences.getInstance().windowLastPosition.get().getMinX());
-                primaryStage.setY(UserPreferences.getInstance().windowLastPosition.get().getMinY());
-                primaryStage.setWidth(UserPreferences.getInstance().windowLastPosition.get().getWidth());
-                primaryStage.setHeight(UserPreferences.getInstance().windowLastPosition.get().getHeight());
+                primaryStage.setX(lastWindowPosition.getMinX());
+                primaryStage.setY(lastWindowPosition.getMinY());
+                primaryStage.setWidth(lastWindowPosition.getWidth());
+                primaryStage.setHeight(lastWindowPosition.getHeight());
             }
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);
         }
         try (Profiler p = Profiler.start("show", logger::perf)) {
-            primaryStage.initStyle(AppEnvironment.getInstance().getWindowsStyle());
+            primaryStage.initStyle(env.getWindowsStyle());
             primaryStage.show();
         }
         SplashScreen splash = SplashScreen.getSplashScreen();
