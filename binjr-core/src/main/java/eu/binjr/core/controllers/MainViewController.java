@@ -116,7 +116,7 @@ public class MainViewController implements Initializable {
     private BooleanBinding noSourcePresent;
 
     @FXML
-    private CheckMenuItem inlineHelpMenuItem;
+    private MenuItem inlineHelpMenuItem;
     @FXML
     private MenuItem restoreClosedWorksheetMenu;
     @FXML
@@ -333,7 +333,12 @@ public class MainViewController implements Initializable {
         newWorksheetDropTarget.visibleProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         this.restoreClosedWorksheetMenu.disableProperty().bind(workspace.closedWorksheetQueueEmptyProperty());
-        this.inlineHelpMenuItem.selectedProperty().bindBidirectional(UserPreferences.getInstance().showInlineHelpButtons.property());
+        this.inlineHelpMenuItem.textProperty().bind(Bindings.createStringBinding(
+                () -> UserPreferences.getInstance().showInlineHelpButtons.get() ? "Disable Inline Help" : "Enable Inline Help",
+                UserPreferences.getInstance().showInlineHelpButtons.property()));
+        this.inlineHelpMenuItem.setOnAction(event -> {
+            UserPreferences.getInstance().showInlineHelpButtons.set(!UserPreferences.getInstance().showInlineHelpButtons.get());
+        });
 
         Platform.runLater(this::runAfterInitialize);
     }

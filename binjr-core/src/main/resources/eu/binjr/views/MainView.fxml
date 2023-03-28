@@ -316,14 +316,20 @@
                 <Tooltip showDelay="500ms" text="Help"/>
             </tooltip>
             <items>
-                <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
+                <MenuItem fx:id="inlineHelpMenuItem" accelerator="F1" mnemonicParsing="false"  text="Inline Help">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="help-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <CheckMenuItem fx:id="inlineHelpMenuItem" accelerator="Shift+F1" mnemonicParsing="false"  text="Inline Help"/>
+                <MenuItem accelerator="Shift+F1" mnemonicParsing="false" onAction="#handleHelpAction" text="User Guide">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="help-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#handleShortcutsAction" text="Keyboard Shortcuts"/>
                 <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr Website">
                     <graphic>
