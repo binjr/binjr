@@ -17,6 +17,7 @@
 package eu.binjr.common.javafx.controls;
 
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Bounds;
@@ -29,6 +30,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.util.Duration;
 
 public class LabelWithInlineHelp extends HBox {
 
@@ -42,35 +44,39 @@ public class LabelWithInlineHelp extends HBox {
         helpPopup.textProperty().bind(inlineHelpProperty());
         helpPopup.setAutoHide(true);
         helpPopup.setHideOnEscape(true);
-
         ButtonBase helpButton = new ToolButtonBuilder<>()
                 .setStyleClass("dialog-button")
                 .setHeight(20.0)
                 .setWidth(20.0)
                 .setIconStyleClass("help-small-icon")
+                .setTooltip("")
                 .setAction(event -> {
                     if (helpPopup.isShowing()) {
                         helpPopup.hide();
                     } else {
                         Node owner = (Node) event.getSource();
                         Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
-                        helpPopup.show(this, bounds.getMaxX(), bounds.getMinY());
+                        helpPopup.show(owner, bounds.getMaxX(), bounds.getMinY());
+                        PauseTransition pt = new PauseTransition(Duration.millis(3000));
+                        pt.setOnFinished(e -> {
+                            helpPopup.hide();
+                        });
+                        pt.play();
                     }
                     event.consume();
-                }).build(Button::new);
+                })
+                .build(Button::new);
         helpButton.setAlignment(Pos.TOP_RIGHT);
+        helpButton.getTooltip().textProperty().bind(inlineHelpProperty());
         helpButton.visibleProperty().bind(UserPreferences.getInstance().showInlineHelpButtons.property());
         helpButton.managedProperty().bind(UserPreferences.getInstance().showInlineHelpButtons.property());
         label = new Label();
-        // label.setPrefWidth(60);
         label.setAlignment(Pos.TOP_LEFT);
         label.setWrapText(true);
-       // label.setPrefHeight(USE_COMPUTED_SIZE);
-//        label.setMinWidth(USE_COMPUTED_SIZE);
         var spacer = new Pane();
-       // HBox.setHgrow(label, Priority.ALWAYS);
+        // HBox.setHgrow(label, Priority.ALWAYS);
         HBox.setHgrow(spacer, Priority.SOMETIMES);
-       // HBox.setHgrow(helpButton, Priority.ALWAYS);
+        // HBox.setHgrow(helpButton, Priority.ALWAYS);
         this.getChildren().addAll(label, spacer, helpButton);
     }
 
