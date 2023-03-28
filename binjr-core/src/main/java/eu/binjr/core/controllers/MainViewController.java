@@ -96,7 +96,7 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  * @author Frederic Thevenet
  */
 public class MainViewController implements Initializable {
-    static final int SETTINGS_PANE_DISTANCE = 250;
+    static final double SETTINGS_PANE_WIDTH = 240;
     private static final Logger logger = Logger.create(MainViewController.class);
     private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
@@ -230,6 +230,13 @@ public class MainViewController implements Initializable {
         assert contentView != null : "fx:id\"contentView\" was not injected!";
         noWorksheetPresent = Bindings.size(tearableTabPane.getTabs()).isEqualTo(0);
         noSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
+
+        settingsPane.setMaxWidth(SETTINGS_PANE_WIDTH);
+        settingsPane.setPrefWidth(SETTINGS_PANE_WIDTH);
+        //settingsPane.setMinWidth(SETTINGS_PANE_WIDTH);
+        AnchorPane.setBottomAnchor(settingsPane, 0.0);
+        AnchorPane.setLeftAnchor(settingsPane, -1 * (SETTINGS_PANE_WIDTH + 2));
+        AnchorPane.setTopAnchor(settingsPane, 0.0);
 
         contentView.getDividers().stream().findFirst().ifPresent(divider -> {
             divider.setPosition(getWorkspace().getDividerPosition());
@@ -466,10 +473,10 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handlePreferencesAction(ActionEvent actionEvent) {
         try {
-            TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
-            openNav.setToX(SETTINGS_PANE_DISTANCE);
+            TranslateTransition openNav = new TranslateTransition(new Duration(250), settingsPane);
+            openNav.setToX(SETTINGS_PANE_WIDTH);
             openNav.play();
-            commandBar.expand();
+            //commandBar.expand();
         } catch (Exception ex) {
             Dialogs.notifyException("Failed to display preference dialog", ex, root);
         }

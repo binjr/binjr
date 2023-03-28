@@ -416,9 +416,9 @@ public class PreferenceDialogController implements Initializable {
 
     private void hide(Duration delay) {
         Node n = root.getParent();
-        TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+        TranslateTransition openNav = new TranslateTransition(new Duration(250), n);
         openNav.setDelay(delay);
-        openNav.setToX(-MainViewController.SETTINGS_PANE_DISTANCE);
+        openNav.setToX(-MainViewController.SETTINGS_PANE_WIDTH);
         openNav.play();
     }
 

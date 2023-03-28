@@ -280,7 +280,7 @@
                               AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0"
                               AnchorPane.topAnchor="0.0">
-                            <Button fx:id="resetPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                            <Button fx:id="resetPrefs" maxWidth="180" mnemonicParsing="false"
                                     onAction="#handleResetSettings" styleClass="border-button"
                                     text="Restore to default">
                                 <graphic>
@@ -291,7 +291,7 @@
                                              text="Restore all user settings to their default values"/>
                                 </tooltip>
                             </Button>
-                            <Button fx:id="exportPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                            <Button fx:id="exportPrefs" maxWidth="180" mnemonicParsing="false"
                                     onAction="#handleExportSettings" styleClass="border-button" text="Export settings">
                                 <graphic>
                                     <Region styleClass="icon-container, download-icon"/>
@@ -300,7 +300,7 @@
                                     <Tooltip showDelay="500ms" text="Export user settings to a file"/>
                                 </tooltip>
                             </Button>
-                            <Button fx:id="importPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                            <Button fx:id="importPrefs" maxWidth="180" mnemonicParsing="false"
                                     onAction="#handleImportSettings" styleClass="border-button" text="Import settings">
                                 <graphic>
                                     <Region styleClass="icon-container, upload-icon"/>
@@ -309,7 +309,7 @@
                                     <Tooltip showDelay="500ms" text="Import user settings from a file"/>
                                 </tooltip>
                             </Button>
-                            <Button fx:id="clearHistory" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                            <Button fx:id="clearHistory" maxWidth="180" mnemonicParsing="false"
                                     onAction="#handleClearHistory" styleClass="border-button" text="Clear history">
                                 <graphic>
                                     <Region styleClass="icon-container, trash-icon"/>
