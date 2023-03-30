@@ -93,7 +93,7 @@ public class NumSeriesIndex extends Index {
                     // fill the buffer with data for the current page
                     for (int i = 0; i < topDocs.scoreDocs.length; i++) {
                         lastHit = (FieldDoc) topDocs.scoreDocs[i];
-                        var doc = searcher.doc(lastHit.doc, fieldsToLoad);
+                        var doc = searcher.storedFields().document(lastHit.doc, fieldsToLoad);
                         seriesToFill.forEach((info, proc) -> {
                             var timestamp =
                                     ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId);

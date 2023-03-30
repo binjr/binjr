@@ -230,7 +230,7 @@ public class LogFileIndex extends Index {
                     logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
                     for (int i = 0; i < topDocs.scoreDocs.length; i++) {
                         var hit = topDocs.scoreDocs[i];
-                        var doc = searcher.doc(hit.doc, Set.of(TIMESTAMP, SEVERITY, PATH, FIELD_CONTENT));
+                        var doc = searcher.storedFields().document(hit.doc, Set.of(TIMESTAMP, SEVERITY, PATH, FIELD_CONTENT));
                         var severity = severityFacet.get(doc.get(SEVERITY));
                         var path = pathFacet.get(doc.get(PATH));
                         samples.add(new XYChart.Data<>(

@@ -383,7 +383,8 @@ public abstract class Index implements Indexable {
             if (top.hits.scoreDocs.length > 0) {
                 return ZonedDateTime.ofInstant(
                         Instant.ofEpochMilli(Long.parseLong(
-                                searcher.doc(top.hits.scoreDocs[0].doc).get(TIMESTAMP))).plusMillis(getMax ? 1 : -1), zoneId);
+                                searcher.storedFields().document(top.hits.scoreDocs[0].doc).get(TIMESTAMP))).plusMillis(getMax ? 1 : -1),
+                        zoneId);
             }
             return null;
         });

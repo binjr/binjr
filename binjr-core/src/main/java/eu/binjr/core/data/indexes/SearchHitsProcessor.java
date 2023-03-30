@@ -27,7 +27,7 @@ import java.util.Objects;
 public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
 
     private final Map<String, Collection<FacetEntry>> facetResults = new HashMap<>();
-    private int totalHits = 0;
+    private long totalHits = 0;
     private int hitsPerPage = 0;
 
     @Override
@@ -58,11 +58,11 @@ public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
         toMerge.getFacetResults().forEach(this::addFacetResults);
     }
 
-    public int getTotalHits() {
+    public long getTotalHits() {
         return totalHits;
     }
 
-    public void setTotalHits(int totalHits) {
+    public void setTotalHits(long totalHits) {
         this.totalHits = totalHits;
     }
 
