@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -79,9 +80,20 @@ public class NumSeriesIndex extends Index {
                     TopFieldCollector collector = (lastHit == null) ?
                             TopFieldCollector.create(sort, pageSize, Integer.MAX_VALUE) :
                             TopFieldCollector.create(sort, pageSize, lastHit, Integer.MAX_VALUE);
+                    var manager = new CollectorManager<TopFieldCollector, TopFieldDocs>(){
+                        @Override
+                        public TopFieldCollector newCollector() throws IOException {
+                            return collector;
+                        }
+
+                        @Override
+                        public TopFieldDocs reduce(Collection<TopFieldCollector> collectors) throws IOException {
+                            return null;
+                        }
+                    };
                     logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
                     try (Profiler ignored = Profiler.start("Executing query for page " + pageNumber, logger::debug)) {
-                        drill.search(drillDownQuery, collector);
+                        drill.search(drillDownQuery, manager);
                     }
                     var fieldsToLoad = seriesToFill.keySet()
                             .stream()

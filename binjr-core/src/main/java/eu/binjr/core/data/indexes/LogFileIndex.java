@@ -212,13 +212,25 @@ public class LogFileIndex extends Index {
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
+            var manager = new CollectorManager<TopFieldCollector, TopFieldDocs>(){
+
+                @Override
+                public TopFieldCollector newCollector() throws IOException {
+                    return collector;
+                }
+
+                @Override
+                public TopFieldDocs reduce(Collection<TopFieldCollector> collectors) throws IOException {
+                    return null;
+                }
+            };
             logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
             String facetCacheKey = drillDownQuery.toString(FIELD_CONTENT);
             String hitCacheKey = facetCacheKey + "_" + page;
             Function<String, SearchHitsProcessor> fillHitResultCache = CheckedLambdas.wrap(k -> {
                 DrillSideways.DrillSidewaysResult results;
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                    results = drill.search(drillDownQuery, collector);
+                    results = drill.search(drillDownQuery, manager);
                 }
                 try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
                     logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Hit cache was explicitly bypassed" : "Hit cache miss", k));
