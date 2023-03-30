@@ -153,6 +153,8 @@ configure(subprojects) {
         mavenCentral()
         maven {
             url 'https://oss.sonatype.org/content/repositories/snapshots'
+            url 'https://s01.oss.sonatype.org/content/repositories/snapshots'
+            url 'https://repository.apache.org/snapshots/'
         }
     }
 
