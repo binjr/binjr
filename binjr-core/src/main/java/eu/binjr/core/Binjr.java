@@ -140,13 +140,13 @@ public class Binjr extends Application {
     public void start(Stage primaryStage) throws Exception {
         var env = AppEnvironment.getInstance();
         logger.info(() -> String.format("""
-                Starting... 
+                Starting...
                  ╭─╮   ╭─╮       ╭─╮
                  │ ╰──╮╰─┤╭────╮ ╰─┤╭──╮
                  │ ╭╮ ││ ││ ╭╮ │ │ ││ ╭╯
                  │ ╰╯ ││ ││ ││ │ │ ││ │
                  ╰────╯└─┘└─┘└─┘╭╯ │└─┘  v%s
-                                ╰──╯ """, env.getVersion()));
+                                ╰──╯""", env.getVersion()));
         env.getSysInfoProperties().forEach(logger::info);
         env.processCommandLineOptions(getParameters());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));

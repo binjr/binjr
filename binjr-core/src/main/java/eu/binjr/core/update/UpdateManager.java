@@ -80,16 +80,13 @@ public class UpdateManager {
                         userPrefs.useHttpProxyAuth.get(),
                         userPrefs.httpProxyLogin.get(),
                         userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
-
         userPrefs.githubUserName.property().addListener((observable, oldValue, newValue) -> {
             github.setUserCredentials(newValue, userPrefs.githubAuthToken.get().toPlainText());
         });
         userPrefs.githubAuthToken.property().addListener((observable, oldValue, newValue) -> {
             github.setUserCredentials(userPrefs.githubUserName.get(), newValue.toPlainText());
         });
-        github.setUserCredentials(
-                userPrefs.githubUserName.get(),
-                userPrefs.githubAuthToken.get().toPlainText());
+        github.setUserCredentials(userPrefs.githubUserName.get(), userPrefs.githubAuthToken.get().toPlainText());
 
         platformUpdater = switch (appEnv.getPackaging()) {
             case LINUX_TAR -> new LinuxTarballUpdater();
@@ -114,7 +111,9 @@ public class UpdateManager {
      * @param upToDate            The delegate to run in the event that tha current version is up to date
      * @param onFailure           The delegate to run in the event of an error while checking for an update
      */
-    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure) {
+    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable,
+                                    Consumer<Version> upToDate,
+                                    Runnable onFailure) {
         asyncCheckForUpdate(newReleaseAvailable, upToDate, onFailure, false);
     }
 
@@ -125,11 +124,16 @@ public class UpdateManager {
      * @param upToDate            The delegate to run in the event that tha current version is up to date
      * @param onFailure           The delegate to run in the event of an error while checking for an update
      */
-    public void asyncForcedCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure) {
+    public void asyncForcedCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable,
+                                          Consumer<Version> upToDate,
+                                          Runnable onFailure) {
         asyncCheckForUpdate(newReleaseAvailable, upToDate, onFailure, true);
     }
 
-    private void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure, boolean forceCheck) {
+    private void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable,
+                                     Consumer<Version> upToDate,
+                                     Runnable onFailure,
+                                     boolean forceCheck) {
         if (appEnv.isDisableUpdateCheck()) {
             logger.trace(() -> "Update check is explicitly disabled.");
             if (onFailure != null) {
@@ -175,7 +179,9 @@ public class UpdateManager {
         AsyncTaskManager.getInstance().submit(getLatestTask);
     }
 
-    private void asyncDownloadUpdatePackage(GithubRelease release, Consumer<Path> onDownloadComplete, Consumer<Throwable> onFailure) {
+    private void asyncDownloadUpdatePackage(GithubRelease release,
+                                            Consumer<Path> onDownloadComplete,
+                                            Consumer<Throwable> onFailure) {
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
@@ -263,7 +269,9 @@ public class UpdateManager {
         n.showInformation();
     }
 
-    private Path downloadAsset(GithubRelease release, String assetName, Path targetDir) throws IOException, URISyntaxException {
+    private Path downloadAsset(GithubRelease release,
+                               String assetName,
+                               Path targetDir) throws IOException, URISyntaxException {
         var asset = release.getAssets()
                 .stream()
                 .filter(a -> a.getName().equalsIgnoreCase(assetName))
@@ -300,7 +308,7 @@ public class UpdateManager {
         }
     }
 
-    private void verifyUpdatePackage(Path updatePath, Path sigPath) throws IOException, PGPException {
+    public void verifyUpdatePackage(Path updatePath, Path sigPath) throws IOException, PGPException {
         URL publicKeyUrl = new URL(AppEnvironment.BINJR_PUBLIC_KEY_URL);
         try (var packageStream = Files.newInputStream(updatePath, StandardOpenOption.READ)) {
             try (var sigStream = Files.newInputStream(sigPath, StandardOpenOption.READ)) {
@@ -314,7 +322,9 @@ public class UpdateManager {
         }
     }
 
-    private boolean verifyOpenPGP(InputStream in, InputStream signature, InputStream keyIn) throws IOException, PGPException {
+    private boolean verifyOpenPGP(InputStream in,
+                                  InputStream signature,
+                                  InputStream keyIn) throws IOException, PGPException {
         Objects.requireNonNull(in, "File input stream cannot be null");
         Objects.requireNonNull(signature, "Signature input stream cannot be null");
         Objects.requireNonNull(keyIn, "Key input stream cannot be null");
@@ -324,7 +334,8 @@ public class UpdateManager {
         PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn),
                 new JcaKeyFingerprintCalculator());
         PGPPublicKey key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
-        if (Arrays.compare(AppEnvironment.BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0) {
+        if (Arrays.compare(AppEnvironment.BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0 &&
+                Arrays.compare(AppEnvironment.ALT_BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0) {
             throw new IllegalArgumentException("Cannot verify signature: Unexpected fingerprint for the key downloaded at " +
                     AppEnvironment.BINJR_PUBLIC_KEY_URL);
         }
