@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.csv.adapters;
 
+import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -28,6 +29,7 @@ import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -67,15 +69,26 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
     public CsvFileAdapterDialog(Node owner) throws NoAdapterFoundException {
         super(owner, Mode.PATH, "mostRecentCsvFiles", true);
         this.prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
+        this.setUriLabelInlineHelp("""
+              The path of the CSV file.
+                """);
+        this.setTimezoneLabelInlineHelp("""
+                The default timezone for timestamps in the CSV file.
+                """);
         this.setDialogHeaderText("Add a csv file");
         this.encodingField = new TextField(prefs.mruEncoding.get());
         TextFields.bindAutoCompletion(encodingField, Charset.availableCharsets().keySet());
-        addParamField(this.encodingField, "Encoding");
+        addParamField(this.encodingField, "Encoding", """
+                The text encoding of the CSV file. 
+                """);
         addParsingField(owner);
     }
 
     private void addParsingField(Node owner) {
-        var parsingLabel = new Label("Parsing profile");
+        var parsingLabel = new LabelWithInlineHelp("Parsing profile", """
+                    The parsing profile used to process timestamps in the CSV file.
+                """);
+        parsingLabel.setAlignment(Pos.CENTER_RIGHT);
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
         updateProfileList(prefs.csvTimestampParsingProfiles.get());
@@ -99,9 +112,10 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
         pos++;
     }
 
-    private void addParamField(TextField field, String label) {
+    private void addParamField(TextField field, String label, String inlineHelp) {
         GridPane.setConstraints(field, 1, pos, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        Label tabsLabel = new Label(label);
+        var tabsLabel = new LabelWithInlineHelp(label, inlineHelp);
+        tabsLabel.setAlignment(Pos.CENTER_RIGHT);
         GridPane.setConstraints(tabsLabel, 0, pos, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         getParamsGridPane().getChildren().addAll(field, tabsLabel);
         pos++;

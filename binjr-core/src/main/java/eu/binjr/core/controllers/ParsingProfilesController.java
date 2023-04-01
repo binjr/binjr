@@ -27,6 +27,7 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -107,6 +108,10 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected Region builtinIcon;
     @FXML
     protected VBox setupPane;
+    @FXML
+    protected TitledPane setupTitledPane;
+    @FXML
+    private TitledPane testTitledPane;
     @FXML
     protected VBox testPane;
 
@@ -358,6 +363,12 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         assert cloneProfileButton != null : "fx:id=\"importProfileButton1\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert importProfileButton != null : "fx:id=\"importProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert exportProfileButton != null : "fx:id=\"exportProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
+
+        var inlineHelpIconDisplayBinding = Bindings.createObjectBinding(
+                () -> UserPreferences.getInstance().showInlineHelpButtons.get() ? ContentDisplay.RIGHT : ContentDisplay.TEXT_ONLY,
+                UserPreferences.getInstance().showInlineHelpButtons.property());
+        this.setupTitledPane.contentDisplayProperty().bind(inlineHelpIconDisplayBinding);
+        this.testTitledPane.contentDisplayProperty().bind(inlineHelpIconDisplayBinding);
 
         this.profileComboBox.getItems().setAll(builtinParsingProfiles);
         if (userParsingProfiles != null) {

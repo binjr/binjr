@@ -16,8 +16,10 @@
 
 package eu.binjr.sources.csv.adapters;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
+import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfilesController;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -26,6 +28,8 @@ import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -66,6 +70,18 @@ public class CsvParsingProfileDialog extends Dialog<CsvParsingProfile> {
         this.initOwner(owner);
         this.initStyle(StageStyle.UTILITY);
         this.initModality(Modality.APPLICATION_MODAL);
+
+        BindingManager manager = new BindingManager();
+        var stage = NodeUtils.getStage(root);
+        stage.setUserData(manager);
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.F1) {
+                UserPreferences.getInstance().showInlineHelpButtons.set(!UserPreferences.getInstance().showInlineHelpButtons.get());
+            }
+            e.consume();
+        }));
+        this.setOnCloseRequest(event -> manager.registerHandler(e -> manager.close()));
+
         StageAppearanceManager.getInstance().register(NodeUtils.getStage(root),
                 StageAppearanceManager.AppearanceOptions.SET_ICON,
                 StageAppearanceManager.AppearanceOptions.SET_THEME);

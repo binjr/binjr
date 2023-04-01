@@ -35,8 +35,29 @@
                       AnchorPane.leftAnchor="4.0"
                       AnchorPane.rightAnchor="4.0"
                       AnchorPane.topAnchor="40.0">
-                    <TitledPane text="Setup" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                    <TitledPane fx:id="setupTitledPane" text="Setup" animated="false" maxWidth="Infinity"
+                                maxHeight="Infinity"
+                                contentDisplay="RIGHT"
                                 VBox.vgrow="SOMETIMES">
+                        <graphic>
+                            <Button cache="true"
+                                    contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false"
+                                    prefHeight="20.0"
+                                    prefWidth="20.0" styleClass="dialog-button">
+                                <tooltip>
+                                    <Tooltip showDelay="500ms" text="Setup parsing rules&#xD;&#xD;"/>
+                                </tooltip>
+                                <graphic>
+                                    <Region>
+                                        <styleClass>
+                                            <String fx:value="icon-container"/>
+                                            <String fx:value="help-small-icon"/>
+                                        </styleClass>
+                                    </Region>
+                                </graphic>
+                            </Button>
+                        </graphic>
                         <VBox fx:id="setupPane" spacing="10.0">
                             <padding>
                                 <Insets top="0" right="0" bottom="0" left="0"/>
@@ -148,8 +169,32 @@
                             </HBox>
                         </VBox>
                     </TitledPane>
-                    <TitledPane text="Test" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                    <TitledPane fx:id="testTitledPane" text="Test" animated="false" maxWidth="Infinity"
+                                maxHeight="Infinity"
                                 VBox.vgrow="ALWAYS">
+                        <graphic>
+                            <Button cache="true"
+                                    contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false"
+                                    prefHeight="20.0"
+                                    prefWidth="20.0" styleClass="dialog-button">
+                                <tooltip>
+                                    <Tooltip showDelay="500ms" text="Test data extraction&#xD;&#xD;
+You can enter text (or paste from clipboard/load it from a file) in the &quot;input&quot; tab below to&#xD;
+and see the results of your parsing rules in the &quot;result&quot; tab.&#xD;&#xD;
+TIP: Clicking on the clock shaped icon next to a column's header acts as a shortcut to indicate&#xD;
+that this column should used to extract timestamps from."/>
+                                </tooltip>
+                                <graphic>
+                                    <Region>
+                                        <styleClass>
+                                            <String fx:value="icon-container"/>
+                                            <String fx:value="help-small-icon"/>
+                                        </styleClass>
+                                    </Region>
+                                </graphic>
+                            </Button>
+                        </graphic>
                         <VBox fx:id="testPane" spacing="10.0">
                             <padding>
                                 <Insets top="0" right="0" bottom="0" left="0"/>
@@ -300,7 +345,8 @@
                                                     </Region>
                                                 </graphic>
                                                 <tooltip>
-                                                    <Tooltip showDelay="500ms" text="Preview the first few lines of a file into test area"/>
+                                                    <Tooltip showDelay="500ms"
+                                                             text="Preview the first few lines of a file into test area"/>
                                                 </tooltip>
                                             </Button>
                                             <Region maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS"/>

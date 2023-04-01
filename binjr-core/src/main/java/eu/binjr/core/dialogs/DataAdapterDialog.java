@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
@@ -26,6 +27,7 @@ import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -35,6 +37,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
@@ -112,6 +116,18 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             throw new IllegalArgumentException("Failed to load /views/DataAdapterView.fxml", e);
         }
         this.setDialogPane(parent);
+
+        BindingManager manager = new BindingManager();
+        var stage = NodeUtils.getStage(parent);
+        stage.setUserData(manager);
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.F1) {
+                UserPreferences.getInstance().showInlineHelpButtons.set(!UserPreferences.getInstance().showInlineHelpButtons.get());
+            }
+            e.consume();
+        }));
+        this.setOnCloseRequest(event -> manager.registerHandler(e -> manager.close()));
+
         Button browseButton = (Button) parent.lookup("#browseButton");
         LabelWithInlineHelp uriLabel = (LabelWithInlineHelp) parent.lookup("#uriLabel");
         uriField = (ComboBox<String>) parent.lookup("#uriField");

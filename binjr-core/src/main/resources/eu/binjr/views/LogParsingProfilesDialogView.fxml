@@ -36,6 +36,8 @@
 <?import javafx.scene.control.ButtonType?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import javafx.scene.control.TitledPane?>
+<?import eu.binjr.common.javafx.controls.LabelWithInlineHelp?>
+<?import javafx.scene.control.ToggleButton?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -47,8 +49,29 @@
                       AnchorPane.leftAnchor="4.0"
                       AnchorPane.rightAnchor="4.0"
                       AnchorPane.topAnchor="40.0">
-                    <TitledPane text="Setup" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                    <TitledPane fx:id="setupTitledPane" text="Setup" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                                contentDisplay="RIGHT"
                                 VBox.vgrow="SOMETIMES">
+                        <graphic>
+                            <Button cache="true"
+                                    contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false"
+                                    prefHeight="20.0"
+                                    prefWidth="20.0" styleClass="dialog-button" >
+                                <graphic>
+                                    <Region>
+                                        <styleClass>
+                                            <String fx:value="icon-container"/>
+                                            <String fx:value="help-small-icon"/>
+                                        </styleClass>
+                                    </Region>
+                                </graphic>
+                            </Button>
+                        </graphic>
+
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Add new capture group"/>
+                        </tooltip>
                         <VBox fx:id="setupPane" spacing="10.0">
                             <padding>
                                 <Insets top="0" right="0" bottom="0" left="0"/>
@@ -119,7 +142,10 @@
                             </TableView>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
                                 <children>
-                                    <Label minWidth="110.0" text="Timestamp pattern"/>
+                                    <LabelWithInlineHelp minWidth="110.0" text="Log event pattern" inlineHelp="The regular expression pattern be used to parse log events in the log files.
+&#xD;Use the capture groups defined in the table above to identify the individual components of a log event (e.g. day, hour, severity, etc...).
+&#xD;Use Java regular expression to model how these components can be recognized in the particular syntax of a log file."
+                                                         alignment="CENTER_RIGHT"/>
                                     <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity"
                                               maxWidth="1.7976931348623157E308" minHeight="26.0"
                                               prefHeight="26.0"
@@ -132,8 +158,24 @@
                             </HBox>
                         </VBox>
                     </TitledPane>
-                    <TitledPane text="Test" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                    <TitledPane fx:id="testTitledPane" text="Test" animated="false" maxWidth="Infinity" maxHeight="Infinity"
                                 VBox.vgrow="ALWAYS">
+                        <graphic>
+                            <Button cache="true"
+                                    contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false"
+                                    prefHeight="20.0"
+                                    prefWidth="20.0" styleClass="dialog-button" >
+                                <graphic>
+                                    <Region>
+                                        <styleClass>
+                                            <String fx:value="icon-container"/>
+                                            <String fx:value="help-small-icon"/>
+                                        </styleClass>
+                                    </Region>
+                                </graphic>
+                            </Button>
+                        </graphic>
                         <VBox fx:id="testPane" spacing="10.0">
                             <padding>
                                 <Insets top="0" right="0" bottom="0" left="0"/>
@@ -263,7 +305,8 @@
                                                     </Region>
                                                 </graphic>
                                                 <tooltip>
-                                                    <Tooltip showDelay="500ms" text="Preview the first few lines of a file into test area"/>
+                                                    <Tooltip showDelay="500ms"
+                                                             text="Preview the first few lines of a file into test area"/>
                                                 </tooltip>
                                             </Button>
                                         </children>

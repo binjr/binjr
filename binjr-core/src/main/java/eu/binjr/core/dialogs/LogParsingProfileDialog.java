@@ -16,15 +16,19 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.LogParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -52,8 +56,7 @@ public class LogParsingProfileDialog extends Dialog<ParsingProfile> {
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to load " + fXMLLoader.getLocation());
         }
-
-        this.setTitle("Edit Parsing Profile");
+              this.setTitle("Edit Parsing Profile");
         this.setDialogPane(root);
         this.setResizable(true);
         this.initOwner(owner);
@@ -65,10 +68,21 @@ public class LogParsingProfileDialog extends Dialog<ParsingProfile> {
 
         Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
-            if (!controller.applyChanges()){
+            if (!controller.applyChanges()) {
                 ae.consume();
             }
         });
+
+        BindingManager manager = new BindingManager();
+        var stage = NodeUtils.getStage(root);
+        stage.setUserData(manager);
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.F1) {
+                UserPreferences.getInstance().showInlineHelpButtons.set(!UserPreferences.getInstance().showInlineHelpButtons.get());
+            }
+            e.consume();
+        }));
+        this.setOnCloseRequest(event -> manager.registerHandler(e -> manager.close()));
 
         this.setResultConverter(dialogButton -> {
                     ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();

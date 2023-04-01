@@ -38,8 +38,15 @@ public class LabelWithInlineHelp extends HBox {
 
     private final StringProperty inlineHelp = new SimpleStringProperty();
 
-
     public LabelWithInlineHelp() {
+        this(null, null);
+    }
+
+    public LabelWithInlineHelp(String label) {
+        this(label, null);
+    }
+
+    public LabelWithInlineHelp(String labelText, String inlineHelpText) {
         var helpPopup = new Tooltip();
         helpPopup.textProperty().bind(inlineHelpProperty());
         helpPopup.setAutoHide(true);
@@ -78,6 +85,12 @@ public class LabelWithInlineHelp extends HBox {
         HBox.setHgrow(spacer, Priority.SOMETIMES);
         // HBox.setHgrow(helpButton, Priority.ALWAYS);
         this.getChildren().addAll(label, spacer, helpButton);
+        if (labelText != null) {
+            label.setText(labelText);
+        }
+        if (inlineHelpText != null) {
+            inlineHelp.set(inlineHelpText);
+        }
     }
 
 
@@ -92,7 +105,6 @@ public class LabelWithInlineHelp extends HBox {
     public void setInlineHelp(String inlineHelp) {
         this.inlineHelp.set(inlineHelp);
     }
-
 
     public String getText() {
         return label.getText();
