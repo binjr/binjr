@@ -57,6 +57,17 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL|STDOUT|STDERR",
                     CaptureGroup.of("TAGS"), ".*"),
             "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*"),
+    QUARKUS("Quarkus logs",
+            "BUILTIN_QRK",
+            Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
+                    TemporalCaptureGroup.MONTH, "\\d{2}",
+                    TemporalCaptureGroup.DAY, "\\d{2}",
+                    TemporalCaptureGroup.HOUR, "\\d{2}",
+                    TemporalCaptureGroup.MINUTE, "\\d{2}",
+                    TemporalCaptureGroup.SECOND, "\\d{2}",
+                    TemporalCaptureGroup.FRACTION, "\\d{3}",
+                    CaptureGroup.of("SEVERITY"), "TRACE|FINEST|FINER|FINE|DEBUG|PERF|CONFIG|NOTE|INFO|WARNING|WARN|ERROR|FATAL|SEVERE"),
+            "$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?.* $SEVERITY .*"),
     ITW("IcedTea-Web logs",
             "BUILTIN_ITW",
             Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
@@ -66,7 +77,15 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     TemporalCaptureGroup.MINUTE, "\\d{2}",
                     TemporalCaptureGroup.SECOND, "\\d{2}",
                     CaptureGroup.of("SEVERITY"), "(MESSAGE|WARNING|ERROR)"),
-            ".*\\[$SEVERITY_(DEBUG|ALL)]\\[\\w{3}\\s$MONTH\\s$DAY\\s$HOUR:$MINUTE:$SECOND\\s.+\\s$YEAR\\].*");
+            ".*\\[$SEVERITY_(DEBUG|ALL)]\\[\\w{3}\\s$MONTH\\s$DAY\\s$HOUR:$MINUTE:$SECOND\\s.+\\s$YEAR\\].*"),
+    SYSLOGS("Syslogs",
+            "BUILTIN_SYS",
+            Map.of(TemporalCaptureGroup.MONTH, "(?i)(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)",
+                    TemporalCaptureGroup.DAY, "\\d{2}",
+                    TemporalCaptureGroup.HOUR, "\\d{2}",
+                    TemporalCaptureGroup.MINUTE, "\\d{2}",
+                    TemporalCaptureGroup.SECOND, "\\d{2}"),
+            "$MONTH $DAY $HOUR:$MINUTE:$SECOND");
 
     private final String profileName;
     private final String lineTemplateExpression;
