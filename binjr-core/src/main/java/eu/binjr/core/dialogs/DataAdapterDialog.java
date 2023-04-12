@@ -123,8 +123,8 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> {
             if (e.getCode() == KeyCode.F1) {
                 UserPreferences.getInstance().showInlineHelpButtons.set(!UserPreferences.getInstance().showInlineHelpButtons.get());
+                e.consume();
             }
-            e.consume();
         }));
         this.setOnCloseRequest(event -> manager.registerHandler(e -> manager.close()));
 

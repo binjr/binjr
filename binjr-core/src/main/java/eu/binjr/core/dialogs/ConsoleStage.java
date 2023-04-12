@@ -65,10 +65,11 @@ public class ConsoleStage {
         stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
+                e.consume();
             }
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 controller.setSearchToolbarVisibility(true);
-
+                e.consume();
             }
         });
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {

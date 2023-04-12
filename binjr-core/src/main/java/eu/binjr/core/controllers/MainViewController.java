@@ -305,6 +305,7 @@ public class MainViewController implements Initializable {
         sourcesPane.addEventFilter(KeyEvent.KEY_PRESSED, (e -> {
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 handleShowSearchBar(null);
+                e.consume();
             }
         }));
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
@@ -397,33 +398,43 @@ public class MainViewController implements Initializable {
             logger.trace(() -> "KEY_PRESSED event trapped, keycode=" + e.getCode());
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
+                e.consume();
             }
             if (e.getCode() == KeyCode.R && e.isControlDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::refresh);
+                e.consume();
             }
             if (e.getCode() == KeyCode.F5) {
                 getSelectedWorksheetController().ifPresent(w -> w.refresh(e.isControlDown()));
+                e.consume();
             }
             if (e.getCode() == KeyCode.M && e.isControlDown()) {
                 handleTogglePresentationMode();
+                e.consume();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::saveSnapshot);
+                e.consume();
             }
             if (e.getCode() == KeyCode.T && e.isControlDown() && !e.isShiftDown()) {
                 editWorksheet(new XYChartsWorksheet());
+                e.consume();
             }
             if (e.isControlDown() && (e.getCode() == KeyCode.W || e.getCode() == KeyCode.F4)) {
                 closeWorksheetTab((EditableTab) tearableTabPane.getSelectedTab());
+                e.consume();
             }
             if (e.getCode() == KeyCode.LEFT && e.isAltDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::navigateBackward);
+                e.consume();
             }
             if (e.getCode() == KeyCode.RIGHT && e.isAltDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::navigateForward);
+                e.consume();
             }
             if (e.getCode() == KeyCode.T && e.isShiftDown() && e.isControlDown()) {
                 restoreLatestClosedWorksheet();
+                e.consume();
             }
         }));
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));

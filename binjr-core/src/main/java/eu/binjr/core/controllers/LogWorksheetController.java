@@ -422,6 +422,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             if (key == KeyCode.DOWN) {
                 suggestTree.requestFocus();
                 suggestRoot.getChildren().stream().findFirst().ifPresent(n -> suggestTree.getSelectionModel().select(n));
+                e.consume();
             }
         }));
 
@@ -429,9 +430,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
         suggestTree.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 treeSelectionCommit.run();
+                event.consume();
             }
             if (event.getCode() == KeyCode.ESCAPE) {
                 cancelSuggest.run();
+                event.consume();
             }
         }));
         suggestTree.setOnMouseClicked(getBindingManager().registerHandler(event -> treeSelectionCommit.run()));
@@ -566,9 +569,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
             logger.trace(() -> "KEY_PRESSED event trapped, keycode=" + e.getCode());
             if ((key == KeyCode.K && e.isControlDown()) || key == KeyCode.UP || key == KeyCode.DOWN) {
                 showSuggestButton.getOnAction().handle(new ActionEvent());
+                e.consume();
             }
             if (key == KeyCode.D && e.isControlDown()) {
                 favoriteButton.fire();
+                e.consume();
             }
         }));
 
@@ -627,17 +632,20 @@ public class LogWorksheetController extends WorksheetController implements Synca
         if (eventTarget == null) {
             eventTarget = root;
         }
-        eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, getBindingManager().registerHandler(e -> {
+        eventTarget.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(e -> {
             if (e.getCode() == KeyCode.K && e.isControlDown()) {
                 filterToggleButton.setSelected(true);
                 filterTextField.requestFocus();
+                e.consume();
             }
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 findToggleButton.setSelected(true);
                 searchTextField.requestFocus();
+                e.consume();
             }
             if (e.getCode() == KeyCode.H && e.isControlDown()) {
                 heatmapToggleButton.setSelected(!heatmapToggleButton.isSelected());
+                e.consume();
             }
         }));
 
