@@ -31,10 +31,12 @@ import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.charfilter.MappingCharFilter;
 import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
+import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.util.CharTokenizer;
 import org.apache.lucene.document.LongPoint;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRangeFacetCounts;
@@ -49,6 +51,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
@@ -133,13 +136,8 @@ public class LogFileIndex extends Index {
                 }
                 accQuery.add(subBuilder.build(), occur);
             } else if (query instanceof PhraseQuery phraseQuery) {
-    //             NB: Phrase queries no longer behave as exact search and term positions are lost.
-    //             The only use of double quotes is now to imply escape of reserved chars and the use of the AND operator.
-                var subBuilder = new BooleanQuery.Builder();
-                for (var t : phraseQuery.getTerms()) {
-                    subBuilder.add(splitTermToNGrams(new Term(t.field(), t.text())), BooleanClause.Occur.FILTER);
-                }
-                accQuery.add(subBuilder.build(), occur);
+                var text = Arrays.stream(phraseQuery.getTerms()).map(Term::text).collect(Collectors.joining(" "));
+                accQuery.add(splitTermToNGrams(new Term(phraseQuery.getField(), text)), occur);
             } else {
                 accQuery.add(query, occur);
             }
@@ -154,7 +152,7 @@ public class LogFileIndex extends Index {
             return new PrefixQuery(new Term(term.field(), term.text()));
         } else {
             var queryBuilder = new PhraseQuery.Builder();
-            try (var ts = getContentFieldAnalyzer().tokenStream(FIELD_CONTENT, term.text().replace("*", " "))) {
+            try (var ts = getContentFieldAnalyzer().tokenStream(FIELD_CONTENT, term.text())) {
                 ts.reset();
                 var termAttribute = ts.addAttribute(CharTermAttribute.class);
                 while (ts.incrementToken()) {
@@ -189,7 +187,22 @@ public class LogFileIndex extends Index {
                 Query userQuery;
                 if (prefs.useNGramTokenization.get()) {
                     var builder = new BooleanQuery.Builder();
-                    var parser = new StandardQueryParser( new StandardAnalyzer());
+                    var parser = new StandardQueryParser(new Analyzer() {
+                        @Override
+                        protected TokenStreamComponents createComponents(String fieldName) {
+                            return new Analyzer.TokenStreamComponents(new CharTokenizer() {
+                                @Override
+                                protected boolean isTokenChar(int c) {
+                                    return true;
+                                }
+                            });
+                        }
+
+                        @Override
+                        protected TokenStream normalize(String fieldName, TokenStream in) {
+                            return new LowerCaseFilter(in);
+                        }
+                    });
                     rewriteQuery(parser.parse(query, FIELD_CONTENT), builder, BooleanClause.Occur.FILTER);
                     userQuery = builder.build();
                 } else {
