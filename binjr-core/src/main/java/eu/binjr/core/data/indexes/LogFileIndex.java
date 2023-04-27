@@ -189,7 +189,7 @@ public class LogFileIndex extends Index {
                 Query userQuery;
                 if (prefs.useNGramTokenization.get()) {
                     var builder = new BooleanQuery.Builder();
-                    StandardQueryParser parser = new StandardQueryParser(new WhitespaceAnalyzer());
+                    var parser = new StandardQueryParser( new StandardAnalyzer());
                     rewriteQuery(parser.parse(query, FIELD_CONTENT), builder, BooleanClause.Occur.FILTER);
                     userQuery = builder.build();
                 } else {
