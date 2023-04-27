@@ -25,6 +25,7 @@
 <?import org.fxmisc.flowless.*?>
 <?import org.fxmisc.richtext.*?>
 
+<?import eu.binjr.common.javafx.controls.LabelWithInlineHelp?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
     <content>
@@ -35,28 +36,12 @@
                       AnchorPane.leftAnchor="4.0"
                       AnchorPane.rightAnchor="4.0"
                       AnchorPane.topAnchor="40.0">
-                    <TitledPane fx:id="setupTitledPane" text="Setup" animated="false" maxWidth="Infinity"
+                    <TitledPane fx:id="setupTitledPane" animated="false" maxWidth="Infinity"
                                 maxHeight="Infinity"
-                                contentDisplay="RIGHT"
+                                contentDisplay="GRAPHIC_ONLY"
                                 VBox.vgrow="SOMETIMES">
                         <graphic>
-                            <Button cache="true"
-                                    contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false"
-                                    prefHeight="20.0"
-                                    prefWidth="20.0" styleClass="dialog-button">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Setup parsing rules&#xD;&#xD;"/>
-                                </tooltip>
-                                <graphic>
-                                    <Region>
-                                        <styleClass>
-                                            <String fx:value="icon-container"/>
-                                            <String fx:value="help-small-icon"/>
-                                        </styleClass>
-                                    </Region>
-                                </graphic>
-                            </Button>
+                            <LabelWithInlineHelp text="Setup" inlineHelp="Setup parsing rules&#xD;&#xD;" alignment="CENTER_RIGHT" />
                         </graphic>
                         <VBox fx:id="setupPane" spacing="10.0">
                             <padding>
@@ -169,31 +154,18 @@
                             </HBox>
                         </VBox>
                     </TitledPane>
-                    <TitledPane fx:id="testTitledPane" text="Test" animated="false" maxWidth="Infinity"
+                    <TitledPane fx:id="testTitledPane" animated="false" maxWidth="Infinity"
                                 maxHeight="Infinity"
+                                contentDisplay="GRAPHIC_ONLY"
                                 VBox.vgrow="ALWAYS">
                         <graphic>
-                            <Button cache="true"
-                                    contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false"
-                                    prefHeight="20.0"
-                                    prefWidth="20.0" styleClass="dialog-button">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Test data extraction&#xD;&#xD;
+                            <LabelWithInlineHelp text="Test"
+                                                 inlineHelp="Test data extraction&#xD;&#xD;
 You can enter text (or paste from clipboard/load it from a file) in the &quot;input&quot; tab below to&#xD;
 and see the results of your parsing rules in the &quot;result&quot; tab.&#xD;&#xD;
 TIP: Clicking on the clock shaped icon next to a column's header acts as a shortcut to indicate&#xD;
-that this column should used to extract timestamps from."/>
-                                </tooltip>
-                                <graphic>
-                                    <Region>
-                                        <styleClass>
-                                            <String fx:value="icon-container"/>
-                                            <String fx:value="help-small-icon"/>
-                                        </styleClass>
-                                    </Region>
-                                </graphic>
-                            </Button>
+that this column should used to extract timestamps from."
+                                                 alignment="CENTER_RIGHT" />
                         </graphic>
                         <VBox fx:id="testPane" spacing="10.0">
                             <padding>

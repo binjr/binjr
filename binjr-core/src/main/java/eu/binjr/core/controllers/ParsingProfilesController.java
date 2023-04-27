@@ -109,10 +109,6 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     @FXML
     protected VBox setupPane;
     @FXML
-    protected TitledPane setupTitledPane;
-    @FXML
-    private TitledPane testTitledPane;
-    @FXML
     protected VBox testPane;
 
     protected final AtomicInteger groupSequence = new AtomicInteger(0);
@@ -367,9 +363,6 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         var inlineHelpIconDisplayBinding = Bindings.createObjectBinding(
                 () -> UserPreferences.getInstance().showInlineHelpButtons.get() ? ContentDisplay.RIGHT : ContentDisplay.TEXT_ONLY,
                 UserPreferences.getInstance().showInlineHelpButtons.property());
-        this.setupTitledPane.contentDisplayProperty().bind(inlineHelpIconDisplayBinding);
-        this.testTitledPane.contentDisplayProperty().bind(inlineHelpIconDisplayBinding);
-
         this.profileComboBox.getItems().setAll(builtinParsingProfiles);
         if (userParsingProfiles != null) {
             this.profileComboBox.getItems().addAll(userParsingProfiles);
