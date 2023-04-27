@@ -31,8 +31,8 @@ import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.charfilter.MappingCharFilter;
 import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.LongPoint;
@@ -120,24 +120,29 @@ public class LogFileIndex extends Index {
             }
         } else if (query instanceof TermQuery termQuery) {
             accQuery.add(splitTermToNGrams(termQuery.getTerm()), occur);
-        } else if (query instanceof PrefixQuery prefixQuery && prefixQuery.getPrefix().text().length() > 3) {
-            accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
-        } else if (query instanceof WildcardQuery wildcardQuery && wildcardQuery.getTerm().text().length() > 3) {
-            var subBuilder = new BooleanQuery.Builder();
-            for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
-                subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt)), BooleanClause.Occur.FILTER);
-            }
-            accQuery.add(subBuilder.build(), occur);
-        } else if (query instanceof PhraseQuery phraseQuery) {
-//             NB: Phrase queries no longer behave as exact search and term positions are lost.
-//             The only use of double quotes is now to imply escape of reserved chars and the use of the AND operator.
-            var subBuilder = new BooleanQuery.Builder();
-            for (var t : phraseQuery.getTerms()) {
-                subBuilder.add(splitTermToNGrams(new Term(t.field(), t.text())), BooleanClause.Occur.FILTER);
-            }
-            accQuery.add(subBuilder.build(), occur);
         } else {
-            accQuery.add(query, occur);
+            int ngramSize = prefs.logIndexNGramSize.get().intValue();
+            if (query instanceof PrefixQuery prefixQuery &&
+                    prefixQuery.getPrefix().text().length() > ngramSize) {
+                accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
+            } else if (query instanceof WildcardQuery wildcardQuery &&
+                    wildcardQuery.getTerm().text().replace("*", "").replace("?", "").length() > ngramSize) {
+                var subBuilder = new BooleanQuery.Builder();
+                for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
+                    subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt)), BooleanClause.Occur.FILTER);
+                }
+                accQuery.add(subBuilder.build(), occur);
+            } else if (query instanceof PhraseQuery phraseQuery) {
+    //             NB: Phrase queries no longer behave as exact search and term positions are lost.
+    //             The only use of double quotes is now to imply escape of reserved chars and the use of the AND operator.
+                var subBuilder = new BooleanQuery.Builder();
+                for (var t : phraseQuery.getTerms()) {
+                    subBuilder.add(splitTermToNGrams(new Term(t.field(), t.text())), BooleanClause.Occur.FILTER);
+                }
+                accQuery.add(subBuilder.build(), occur);
+            } else {
+                accQuery.add(query, occur);
+            }
         }
 
     }
