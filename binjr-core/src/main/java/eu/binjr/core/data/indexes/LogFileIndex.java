@@ -24,6 +24,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
+import eu.binjr.core.preferences.IndexingTokenizer;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.Analyzer;
@@ -31,9 +32,7 @@ import org.apache.lucene.analysis.LowerCaseFilter;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.charfilter.MappingCharFilter;
 import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
-import org.apache.lucene.analysis.core.WhitespaceTokenizer;
 import org.apache.lucene.analysis.ngram.NGramTokenizer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharTokenizer;
@@ -80,8 +79,8 @@ public class LogFileIndex extends Index {
 
     @Override
     Analyzer getContentFieldAnalyzer() {
-        if (UserPreferences.getInstance().useNGramTokenization.get()) {
-            return new Analyzer() {
+        return switch (prefs.indexingTokenizer.get()) {
+            case NGRAMS -> new Analyzer() {
                 @Override
                 protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
                     var tokenizer = new NGramTokenizer(prefs.logIndexNGramSize.get().intValue(),
@@ -90,22 +89,22 @@ public class LogFileIndex extends Index {
                     return new Analyzer.TokenStreamComponents(tokenizer::setReader, ts);
                 }
             };
-        }
-        return new Analyzer() {
-            @Override
-            protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
-                final StandardTokenizer src = new StandardTokenizer();
-                TokenStream tok = new LowerCaseFilter(src);
-                return new Analyzer.TokenStreamComponents(src::setReader, tok);
-            }
+            case STANDARD -> new Analyzer() {
+                @Override
+                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                    final StandardTokenizer src = new StandardTokenizer();
+                    TokenStream tok = new LowerCaseFilter(src);
+                    return new Analyzer.TokenStreamComponents(src::setReader, tok);
+                }
 
-            @Override
-            protected Reader initReader(String fieldName, Reader reader) {
-                NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
-                builder.add(".", " ");
-                NormalizeCharMap normMap = builder.build();
-                return new MappingCharFilter(normMap, reader);
-            }
+                @Override
+                protected Reader initReader(String fieldName, Reader reader) {
+                    NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
+                    builder.add(".", " ");
+                    NormalizeCharMap normMap = builder.build();
+                    return new MappingCharFilter(normMap, reader);
+                }
+            };
         };
     }
 
@@ -132,7 +131,7 @@ public class LogFileIndex extends Index {
                     wildcardQuery.getTerm().text().replace("*", "").replace("?", "").length() > ngramSize) {
                 var subBuilder = new BooleanQuery.Builder();
                 for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
-                    subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt)), BooleanClause.Occur.FILTER);
+                    subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt), true), BooleanClause.Occur.FILTER);
                 }
                 accQuery.add(subBuilder.build(), occur);
             } else if (query instanceof PhraseQuery phraseQuery) {
@@ -146,8 +145,12 @@ public class LogFileIndex extends Index {
     }
 
     private Query splitTermToNGrams(Term term) throws IOException {
+        return splitTermToNGrams(term, prefs.logIndexAutoExpendShorterTerms.get());
+    }
+
+    private Query splitTermToNGrams(Term term, boolean autoExpend) throws IOException {
         final int nGramSize = prefs.logIndexNGramSize.get().intValue();
-        if (prefs.logIndexAutoExpendShorterTerms.get() && term.text().length() < nGramSize) {
+        if (autoExpend && term.text().length() < nGramSize) {
             // suffix term with a wildcard if shorter than ngram size
             return new PrefixQuery(new Term(term.field(), term.text()));
         } else {
@@ -185,7 +188,7 @@ public class LogFileIndex extends Index {
             if (query != null && !query.isBlank()) {
                 logger.trace("Query text=" + query);
                 Query userQuery;
-                if (prefs.useNGramTokenization.get()) {
+                if (prefs.indexingTokenizer.get() == IndexingTokenizer.NGRAMS) {
                     var builder = new BooleanQuery.Builder();
                     var parser = new StandardQueryParser(new Analyzer() {
                         @Override

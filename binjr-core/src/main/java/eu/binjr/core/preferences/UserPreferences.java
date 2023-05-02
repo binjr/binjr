@@ -352,8 +352,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultFontSize", 9);
 
-    public ObservablePreference<Boolean> useNGramTokenization = booleanPreference("useNGramTokenization", false);
-
     public ObservablePreference<DateTimeAnchor> defaultDateTimeAnchor = enumPreference(DateTimeAnchor.class, "defaultDateTimeAnchor", DateTimeAnchor.EPOCH);
 
     public ObservablePreference<Boolean> alwaysUseEmbeddedFonts = booleanPreference("alwaysUseEmbeddedFonts", false);
@@ -365,6 +363,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Boolean> optimizeNGramQueries = booleanPreference("optimizeNGramQueries", true);
 
     public ObservablePreference<Boolean> showInlineHelpButtons = booleanPreference("showInlinSHow/eHelpButtons", true);
+
+    public ObservablePreference<IndexingTokenizer> indexingTokenizer =
+            enumPreference(IndexingTokenizer.class, "indexingTokenizer", IndexingTokenizer.NGRAMS);
 
     public static class UserFavorites extends MruFactory {
 

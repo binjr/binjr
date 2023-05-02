@@ -67,12 +67,7 @@ import java.util.prefs.BackingStoreException;
  */
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
-    @FXML
-    private LabelWithInlineHelp ngramsSizeLabel;
-    @FXML
-    private TextField ngramsSizeTextField;
-    @FXML
-    private ToggleSwitch useNGramsToggle;
+    public ChoiceBox<IndexingTokenizer> indexingModeChoiceBox;
     @FXML
     private ChoiceBox<DateTimeAnchor> dateTimeAnchorChoiceBox;
     @FXML
@@ -261,6 +256,7 @@ public class PreferenceDialogController implements Initializable {
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
         bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
+        bindEnumToChoiceBox(userPrefs.indexingTokenizer, indexingModeChoiceBox, IndexingTokenizer.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
         showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
@@ -270,30 +266,6 @@ public class PreferenceDialogController implements Initializable {
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
         dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
         dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
-
-        useNGramsToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().useNGramTokenization.property());
-        final TextFormatter<Number> ngramsSizeformatter = new TextFormatter<>(new StringConverter<>() {
-            @Override
-            public String toString(Number object) {
-                if (object == null) {
-                    return "";
-                }
-                return object.toString();
-            }
-
-            @Override
-            public Number fromString(String string) {
-                int val = Integer.parseInt(string);
-                if (val < 2 ) {
-                    TextFieldValidator.fail(proxyPortTextfield, "N-Gram size must be greater than 1 ", true);
-                }
-                return val;
-            }
-        });
-        ngramsSizeTextField.setTextFormatter(ngramsSizeformatter);
-        ngramsSizeformatter.valueProperty().bindBidirectional(userPrefs.logIndexNGramSize.property());
-        ngramsSizeLabel.disableProperty().bind(useNGramsToggle.selectedProperty().not());
-        ngramsSizeTextField.disableProperty().bind(useNGramsToggle.selectedProperty().not());
 
         proxyHostnameTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         proxyPortTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());

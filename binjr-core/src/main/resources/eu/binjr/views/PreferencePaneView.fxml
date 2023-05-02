@@ -57,10 +57,11 @@
                               AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0"
                               AnchorPane.topAnchor="0.0">
-                            <LabelWithInlineHelp text="Theme" inlineHelp="You can select binjr’s user interface theme from this list.&#xd;Changes will be applied right away."/>
-                            <ChoiceBox fx:id="uiThemeChoiceBox"  maxWidth="1.7976931348623157E308" />
+                            <LabelWithInlineHelp text="Theme"
+                                                 inlineHelp="You can select binjr’s user interface theme from this list.&#xd;Changes will be applied right away."/>
+                            <ChoiceBox fx:id="uiThemeChoiceBox" maxWidth="1.7976931348623157E308"/>
                             <LabelWithInlineHelp text="Span crosshair over all charts"
-                                                 inlineHelp="Check this option if you want the vertical crosshair to span over all stacked charts on a worksheet.&#xD;Uncheck it if you prefer it to only show over the focused chart." />
+                                                 inlineHelp="Check this option if you want the vertical crosshair to span over all stacked charts on a worksheet.&#xD;Uncheck it if you prefer it to only show over the focused chart."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="fullHeightCrosshair" prefWidth="1.0">
                                     <font>
@@ -68,7 +69,8 @@
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
-                            <LabelWithInlineHelp text="Reload last workspace on start-up" inlineHelp="Check this option if you want the last opened workspace to be reloaded next time the application if started.&#xD;Uncheck it if you prefer the application starts with a blank workspace."/>
+                            <LabelWithInlineHelp text="Reload last workspace on start-up"
+                                                 inlineHelp="Check this option if you want the last opened workspace to be reloaded next time the application if started.&#xD;Uncheck it if you prefer the application starts with a blank workspace."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="loadAtStartupCheckbox" prefWidth="1.0">
                                     <font>
@@ -76,16 +78,19 @@
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
-                            <LabelWithInlineHelp text="Discard notifications after" inlineHelp="The amount of time notifications popup should hover before being automatically dismissed."/>
-                            <ChoiceBox fx:id="notifcationDurationChoiceBox"  maxWidth="1.7976931348623157E308" />
-                            <LabelWithInlineHelp text="Snapshot output scale" inlineHelp="The pixel count ratio at which snapshot of a worksheet will be rendered."/>
-                            <ChoiceBox fx:id="snapshotScaleChoiceBox"  maxWidth="1.7976931348623157E308" >
+                            <LabelWithInlineHelp text="Discard notifications after"
+                                                 inlineHelp="The amount of time notifications popup should hover before being automatically dismissed."/>
+                            <ChoiceBox fx:id="notifcationDurationChoiceBox" maxWidth="1.7976931348623157E308"/>
+                            <LabelWithInlineHelp text="Snapshot output scale"
+                                                 inlineHelp="The pixel count ratio at which snapshot of a worksheet will be rendered."/>
+                            <ChoiceBox fx:id="snapshotScaleChoiceBox" maxWidth="1.7976931348623157E308">
                                 <tooltip>
                                     <Tooltip showDelay="500ms"
                                              text="The output scale factor to apply to the snapshot"/>
                                 </tooltip>
                             </ChoiceBox>
-                            <LabelWithInlineHelp text="Don't ask before closing tab" inlineHelp="Check this option if you do not want a warning popup to show before closing a worksheet tab."/>
+                            <LabelWithInlineHelp text="Don't ask before closing tab"
+                                                 inlineHelp="Check this option if you do not want a warning popup to show before closing a worksheet tab."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="dontAskBeforeClosingTabCheckbox" prefWidth="1.0">
                                     <font>
@@ -93,7 +98,8 @@
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
-                            <LabelWithInlineHelp text="Don't ask before removing chart" inlineHelp="Check this option if you do not want a warning popup to show before removing a chart from a worksheet."/>
+                            <LabelWithInlineHelp text="Don't ask before removing chart"
+                                                 inlineHelp="Check this option if you do not want a warning popup to show before removing a chart from a worksheet."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="dontAskBeforeRemovingChartCheckbox" prefWidth="1.0">
                                     <font>
@@ -101,8 +107,9 @@
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
-                            <LabelWithInlineHelp text="Anchor for incomplete timestamps" inlineHelp="This is the point it time that is used as a reference to automatically complete timestamps when some components are missing from the data sources."/>
-                            <ChoiceBox fx:id="dateTimeAnchorChoiceBox"  maxWidth="1.7976931348623157E308" />
+                            <LabelWithInlineHelp text="Anchor for incomplete timestamps"
+                                                 inlineHelp="This is the point it time that is used as a reference to automatically complete timestamps when some components are missing from the data sources."/>
+                            <ChoiceBox fx:id="dateTimeAnchorChoiceBox" maxWidth="1.7976931348623157E308"/>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
@@ -118,37 +125,46 @@
                               AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0"
                               AnchorPane.topAnchor="0.0">
-                            <LabelWithInlineHelp text="Default color palette" inlineHelp="Select the default color palette to use for series if their source does not specify it."/>
-                            <ChoiceBox fx:id="chartPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
-                            <LabelWithInlineHelp text="Show outline on area charts" inlineHelp="Check this option if you want newly created area charts to display a brighter coloured outline for each series."/>
+                            <LabelWithInlineHelp text="Default color palette"
+                                                 inlineHelp="Select the default color palette to use for series if their source does not specify it."/>
+                            <ChoiceBox fx:id="chartPaletteChoiceBox" maxWidth="1.7976931348623157E308"/>
+                            <LabelWithInlineHelp text="Show outline on area charts"
+                                                 inlineHelp="Check this option if you want newly created area charts to display a brighter coloured outline for each series."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="showOutlineAreaCharts" prefWidth="1.0"/>
                             </VBox>
-                            <LabelWithInlineHelp text="Default area charts opacity" inlineHelp="The default opacity value to apply to series on area charts."/>
+                            <LabelWithInlineHelp text="Default area charts opacity"
+                                                 inlineHelp="The default opacity value to apply to series on area charts."/>
                             <VBox>
                                 <HBox alignment="CENTER_LEFT">
                                     <Slider fx:id="areaChartOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
                                     <Label fx:id="areaChartsOpacityText" text="100%"/>
                                 </HBox>
                             </VBox>
-                            <LabelWithInlineHelp text="Show outline on stacked charts" inlineHelp="Check this option if you want newly created stacked area charts to display a brighter coloured outline for each series."/>
+                            <LabelWithInlineHelp text="Show outline on stacked charts"
+                                                 inlineHelp="Check this option if you want newly created stacked area charts to display a brighter coloured outline for each series."/>
                             <VBox fillWidth="false">
-                                <ToggleSwitch fx:id="showOutlineStackedAreaCharts"  prefWidth="1.0"/>
+                                <ToggleSwitch fx:id="showOutlineStackedAreaCharts" prefWidth="1.0"/>
                             </VBox>
-                            <LabelWithInlineHelp text="Default stacked charts opacity" inlineHelp="The default opacity value to apply to series on stacked area charts."/>
+                            <LabelWithInlineHelp text="Default stacked charts opacity"
+                                                 inlineHelp="The default opacity value to apply to series on stacked area charts."/>
                             <VBox>
                                 <HBox alignment="CENTER_LEFT">
-                                    <Slider fx:id="stackedAreaChartOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                                    <Slider fx:id="stackedAreaChartOpacitySlider" blockIncrement="0.1" max="1.0"
+                                            min="0"/>
                                     <Label fx:id="stackedAreaChartsOpacityText" text="100%"/>
                                 </HBox>
                             </VBox>
-                            <LabelWithInlineHelp text="Enable sample reduction" inlineHelp="Check this option to enable sample reduction.&#xD;Sample reduction limits the number of samples to plot to improve chart rendering performances while attempting to keep a good approximation of the original data."/>
+                            <LabelWithInlineHelp text="Enable sample reduction"
+                                                 inlineHelp="Check this option to enable sample reduction.&#xD;Sample reduction limits the number of samples to plot to improve chart rendering performances while attempting to keep a good approximation of the original data."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0" selected="true"/>
                             </VBox>
-                            <LabelWithInlineHelp fx:id="maxSampleLabel" text="Maximum number of samples" inlineHelp="The maximum number of samples per time series to keep when sample reduction is enabled."/>
+                            <LabelWithInlineHelp fx:id="maxSampleLabel" text="Maximum number of samples"
+                                                 inlineHelp="The maximum number of samples per time series to keep when sample reduction is enabled."/>
                             <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="-1.0" text="1000"/>
-                            <LabelWithInlineHelp text="Default min. chart height" inlineHelp="This is the default height a chart in a worksheet will be sized down to before a vertical scroll bar appears."/>
+                            <LabelWithInlineHelp text="Default min. chart height"
+                                                 inlineHelp="This is the default height a chart in a worksheet will be sized down to before a vertical scroll bar appears."/>
                             <VBox>
                                 <HBox alignment="CENTER_LEFT">
                                     <Slider fx:id="minChartHeightSlider" blockIncrement="1" max="500" min="80"/>
@@ -170,28 +186,30 @@
                               AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0"
                               AnchorPane.topAnchor="0.0">
-                            <LabelWithInlineHelp text="Default text size" inlineHelp="This is the default font size for the log file events display area."/>
-                            <TextField fx:id="defaultTextSizeField" prefHeight="25.0" prefWidth="-1.0" text="10" />
-                            <LabelWithInlineHelp text="Default color palette" inlineHelp="Select the default palette from which to draw a background color to apply to newly added log file events."/>
-                            <ChoiceBox fx:id="logsPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
-                            <LabelWithInlineHelp text="Show filter bar" inlineHelp="Check this option if you want the filtering tool bar to show on newly created log worksheet.&#xd;Unselect it if you prefer the filtering toolbar to be hidden on new worksheets."/>
+                            <LabelWithInlineHelp text="Default text size"
+                                                 inlineHelp="This is the default font size for the log file events display area."/>
+                            <TextField fx:id="defaultTextSizeField" prefHeight="25.0" prefWidth="-1.0" text="10"/>
+                            <LabelWithInlineHelp text="Default color palette"
+                                                 inlineHelp="Select the default palette from which to draw a background color to apply to newly added log file events."/>
+                            <ChoiceBox fx:id="logsPaletteChoiceBox" maxWidth="1.7976931348623157E308"/>
+                            <LabelWithInlineHelp text="Show filter bar"
+                                                 inlineHelp="Check this option if you want the filtering tool bar to show on newly created log worksheet.&#xd;Unselect it if you prefer the filtering toolbar to be hidden on new worksheets."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="filterBarVisibleToggle" prefWidth="1.0" selected="true"/>
                             </VBox>
-                            <LabelWithInlineHelp text="Show log timeline" inlineHelp="Check this option if you want the log event timeline histogram to show on newly created log worksheet.&#xd;Unselect it if you prefer the timeline to be hidden on new worksheets."/>
+                            <LabelWithInlineHelp text="Show log timeline"
+                                                 inlineHelp="Check this option if you want the log event timeline histogram to show on newly created log worksheet.&#xd;Unselect it if you prefer the timeline to be hidden on new worksheets."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="heatmapVisibleToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
-                            <LabelWithInlineHelp text="Show find bar" inlineHelp="Check this option if you want the &quot;find in page&quot; tool bar to show on newly created log worksheet.&#xd;Unselect it if you prefer it o be hidden on new worksheets." />
+                            <LabelWithInlineHelp text="Show find bar"
+                                                 inlineHelp="Check this option if you want the &quot;find in page&quot; tool bar to show on newly created log worksheet.&#xd;Unselect it if you prefer it o be hidden on new worksheets."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="findBarVisibleToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
-                            <LabelWithInlineHelp text="Index using N-Grams" inlineHelp="Check this to use an alternative indexing method for log file in which the content of each line is chunked into&#xd;contiguous sequences of n characters (n-grams) instead of whole words.&#xd;This allows for fast partial matching of terms, without the need to explicitly add wildcards or fuzzy operators,&#xd;but it is no longer possible to match an exact term (or series of terms) exclusively.&#xd;Changing this will only apply after you close and reload a log file source."/>
-                            <VBox fillWidth="false">
-                                <ToggleSwitch fx:id="useNGramsToggle" prefWidth="1.0" selected="false"/>
-                            </VBox>
-                            <LabelWithInlineHelp fx:id="ngramsSizeLabel" text="N-Grams size" inlineHelp="The size of the character chunks (n-grams) that is used to tokenize textual content."/>
-                            <TextField fx:id="ngramsSizeTextField" prefHeight="25.0" prefWidth="-1.0" text="10" />
+                            <LabelWithInlineHelp text="Optimize index for"
+                                                 inlineHelp="Choose  &quot;Optimize index for whole words search&quot; to make it easier to match whole words (or series of words) by default.&#xd;If you still need to match only part of a word or an approximation, you can use the &quot;?&quot; and &quot;*&quot; wildcards, or the &quot;~&quot; fuzzy operator.&#xd;&#xd;Choose &quot;Optimize index for partial terms search&quot; to allow for fast matching of arbitrary character sequences, without the need for explicit syntax like wildcards.&#xd;You can use double quotes to match exact portions of text, including special characters and whitespaces.&#xd;&#xd;Changing this will only apply after you close and reload a log file source."/>
+                            <ChoiceBox fx:id="indexingModeChoiceBox" maxWidth="1.7976931348623157E308"/>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
@@ -255,7 +273,8 @@
                                     </TableColumn>
                                 </columns>
                             </TableView>
-                            <LabelWithInlineHelp text="Load from external location" inlineHelp="Check this option if you want to be load plugins containing data adapters from a specific location, in addition to those loaded from the &quot;plugins&quot; folder.&#xd;If checked, please enter the location to load plugins from in the field below."/>
+                            <LabelWithInlineHelp text="Load from external location"
+                                                 inlineHelp="Check this option if you want to be load plugins containing data adapters from a specific location, in addition to those loaded from the &quot;plugins&quot; folder.&#xd;If checked, please enter the location to load plugins from in the field below."/>
                             <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT" contentDisplay="GRAPHIC_ONLY"
                                           graphicTextGap="0.0" prefHeight="18.0" prefWidth="0.0"/>
                             <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0"
@@ -337,15 +356,18 @@
                               AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0"
                               AnchorPane.topAnchor="0.0">
-                            <LabelWithInlineHelp text="Enable Proxy" inlineHelp="Check this if you need to configure a proxy to access the network using binjr."/>
+                            <LabelWithInlineHelp text="Enable Proxy"
+                                                 inlineHelp="Check this if you need to configure a proxy to access the network using binjr."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="enableProxyToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
                             <LabelWithInlineHelp text="Proxy Host" inlineHelp="The host name of the proxy server."/>
                             <TextField fx:id="proxyHostnameTextfield" prefHeight="25.0" prefWidth="-1.0" text=""/>
-                            <LabelWithInlineHelp text="Port" inlineHelp="The port onto which a connection to the proxy server should be established."/>
+                            <LabelWithInlineHelp text="Port"
+                                                 inlineHelp="The port onto which a connection to the proxy server should be established."/>
                             <TextField fx:id="proxyPortTextfield" prefHeight="25.0" prefWidth="-1.0" text="0"/>
-                            <LabelWithInlineHelp text="Use Proxy Authentication" inlineHelp="Check this if you need to supply credentials for authentication when connecting to the proxy server."/>
+                            <LabelWithInlineHelp text="Use Proxy Authentication"
+                                                 inlineHelp="Check this if you need to supply credentials for authentication when connecting to the proxy server."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="useProxyAuthToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
