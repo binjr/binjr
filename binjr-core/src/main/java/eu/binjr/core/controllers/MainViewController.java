@@ -342,7 +342,7 @@ public class MainViewController implements Initializable {
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         this.restoreClosedWorksheetMenu.disableProperty().bind(workspace.closedWorksheetQueueEmptyProperty());
         this.inlineHelpMenuItem.textProperty().bind(Bindings.createStringBinding(
-                () -> UserPreferences.getInstance().showInlineHelpButtons.get() ? "Disable Inline Help" : "Enable Inline Help",
+                () -> UserPreferences.getInstance().showInlineHelpButtons.get() ? "Dismiss Inline Help" : "Show Inline Help",
                 UserPreferences.getInstance().showInlineHelpButtons.property()));
         this.inlineHelpMenuItem.setOnAction(event -> {
             UserPreferences.getInstance().showInlineHelpButtons.set(!UserPreferences.getInstance().showInlineHelpButtons.get());
