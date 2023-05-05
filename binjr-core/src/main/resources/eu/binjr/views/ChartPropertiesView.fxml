@@ -76,6 +76,10 @@
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
             </VBox>
+            <LabelWithInlineHelp fx:id="keepZeroLabel" text="Always keep 0 in range" inlineHelp="Check this option if you want to always keep the origin within range on the Y axis when it is adjusted automatically."/>
+            <VBox fillWidth="false">
+                <ToggleSwitch fx:id="alwaysIncludeOriginInAutoScale" prefWidth="1.0"/>
+            </VBox>
             <HBox fx:id="yAxisScaleSettings" alignment="CENTER_LEFT">
                 <children>
                     <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"

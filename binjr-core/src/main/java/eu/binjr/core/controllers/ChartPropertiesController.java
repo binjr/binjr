@@ -79,6 +79,10 @@ public class ChartPropertiesController implements Initializable, Closeable {
     @FXML
     private ToggleSwitch autoScaleYAxis;
     @FXML
+    private ToggleSwitch alwaysIncludeOriginInAutoScale;
+    @FXML
+    private LabelWithInlineHelp keepZeroLabel;
+    @FXML
     private HBox yAxisScaleSettings;
     @FXML
     private Slider minChartHeightSlider;
@@ -113,6 +117,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
+        bindingManager.bindBidirectional(alwaysIncludeOriginInAutoScale.selectedProperty(), chart.alwaysIncludeOriginInAutoScaleProperty());
         NumberStringConverter numberStringConverter = new NumberStringConverter(new DecimalFormat("###,###.####"));
         TextFormatter<Number> yMinFormatter = new TextFormatter<>(numberStringConverter);
         bindingManager.attachListener(yMinFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
@@ -153,6 +158,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.attachListener(autoScaleYAxis.selectedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             chart.armSaveHistory();
         });
+
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         bindingManager.bind(chart.chartTypeProperty(), chartTypeChoice.getSelectionModel().selectedItemProperty());
@@ -168,6 +174,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.bindBidirectional(root.visibleProperty(), chart.showPropertiesProperty());
         closeButton.setOnAction(e -> root.visibleProperty().setValue(false));
         bindingManager.bind(yAxisScaleSettings.disableProperty(), autoScaleYAxis.selectedProperty());
+        bindingManager.bind(alwaysIncludeOriginInAutoScale.disableProperty(), autoScaleYAxis.selectedProperty().not());
     }
 
     private void adaptToChartType(boolean disable) {

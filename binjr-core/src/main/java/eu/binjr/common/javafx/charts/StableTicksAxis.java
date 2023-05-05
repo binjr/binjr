@@ -27,6 +27,7 @@ import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Side;
+import javafx.scene.chart.Axis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;

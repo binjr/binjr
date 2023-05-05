@@ -171,6 +171,11 @@
                                     <Label fx:id="minChartHeightText" text="150"/>
                                 </HBox>
                             </VBox>
+                            <LabelWithInlineHelp text="Always keep 0 in range"
+                                                 inlineHelp="Check this option if you want newly created charts to always keep the origin within range on the Y axis when it is adjusted automatically."/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="alwaysIncludeOriginInAutoScale" prefWidth="1.0"/>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

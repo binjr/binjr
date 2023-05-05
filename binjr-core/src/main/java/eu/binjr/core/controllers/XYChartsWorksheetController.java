@@ -253,6 +253,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 if (userPrefs.downSamplingEnabled.get())
                     refresh();
             }));
+            getBindingManager().attachListener(getSelectedViewPort().getDataStore().alwaysIncludeOriginInAutoScaleProperty(), observable -> refresh());
 
             newChartDropTarget.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverNewChartTarget));
             newChartDropTarget.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedONewChartTarget));
@@ -307,10 +308,10 @@ public class XYChartsWorksheetController extends WorksheetController {
                 case METRIC -> new MetricStableTicksAxis<>();
                 case NONE -> new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
             };
-            yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
+            getBindingManager().bindBidirectional(yAxis.autoRangingProperty(), currentChart.autoScaleYAxisProperty());
+            getBindingManager().bindBidirectional(yAxis.forceZeroInRangeProperty(), currentChart.alwaysIncludeOriginInAutoScaleProperty());
             yAxis.setAnimated(false);
             yAxis.setTickSpacing(30);
-
             getBindingManager().bind(yAxis.labelProperty(),
                     Bindings.createStringBinding(
                             () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),

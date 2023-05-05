@@ -67,7 +67,10 @@ import java.util.prefs.BackingStoreException;
  */
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
-    public ChoiceBox<IndexingTokenizer> indexingModeChoiceBox;
+    @FXML
+    private ChoiceBox<IndexingTokenizer> indexingModeChoiceBox;
+    @FXML
+    private ToggleSwitch alwaysIncludeOriginInAutoScale;
     @FXML
     private ChoiceBox<DateTimeAnchor> dateTimeAnchorChoiceBox;
     @FXML
@@ -186,6 +189,8 @@ public class PreferenceDialogController implements Initializable {
         });
         enableDownSampling.selectedProperty()
                 .bindBidirectional(UserPreferences.getInstance().downSamplingEnabled.property());
+        alwaysIncludeOriginInAutoScale.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.property());
         fullHeightCrosshair.selectedProperty()
                 .bindBidirectional(userPrefs.fullHeightCrosshairMarker.property());
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {

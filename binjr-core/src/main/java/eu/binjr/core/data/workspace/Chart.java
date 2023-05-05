@@ -76,6 +76,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     @IsDirtyable
     private final BooleanProperty autoScaleYAxis;
     @IsDirtyable
+    private final BooleanProperty alwaysIncludeOriginInAutoScale;
+    @IsDirtyable
     private final DoubleProperty yAxisMinValue;
     @IsDirtyable
     private final DoubleProperty yAxisMaxValue;
@@ -97,6 +99,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 UserPreferences.getInstance().showOutlineOnStackedAreaCharts.get(),
                 1.0,
                 true,
+                UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
                 0.0,
                 100.0);
     }
@@ -123,6 +126,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                         UserPreferences.getInstance().showOutlineOnAreaCharts.get(),
                 1.0,
                 true,
+                UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
                 0.0,
                 100.0);
     }
@@ -144,6 +148,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 initChart.isShowAreaOutline(),
                 initChart.getStrokeWidth(),
                 initChart.isAutoScaleYAxis(),
+                initChart.isAlwaysIncludeOriginInAutoScale(),
                 initChart.getyAxisMinValue(),
                 initChart.getyAxisMaxValue()
         );
@@ -158,6 +163,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                   boolean showAreaOutline,
                   double strokeWidth,
                   boolean autoScaleYAxis,
+                  boolean alwaysIncludeOriginInAutoScale,
                   double yAxisMinValue,
                   double yAxisMaxValue) {
         this.name = new SimpleStringProperty(name);
@@ -169,6 +175,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
         this.autoScaleYAxis = new SimpleBooleanProperty(autoScaleYAxis);
+        this.alwaysIncludeOriginInAutoScale = new SimpleBooleanProperty(alwaysIncludeOriginInAutoScale);
         this.yAxisMinValue = new SimpleDoubleProperty(yAxisMinValue);
         this.yAxisMaxValue = new SimpleDoubleProperty(yAxisMaxValue);
         this.showProperties = new SimpleBooleanProperty(false);
@@ -573,6 +580,19 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
 
     public BooleanProperty autoScaleYAxisProperty() {
         return autoScaleYAxis;
+    }
+
+    @XmlAttribute
+    public boolean isAlwaysIncludeOriginInAutoScale() {
+        return alwaysIncludeOriginInAutoScale.get();
+    }
+
+    public void setAlwaysIncludeOriginInAutoScale(boolean autoScaleYAxis) {
+        this.alwaysIncludeOriginInAutoScale.set(autoScaleYAxis);
+    }
+
+    public BooleanProperty alwaysIncludeOriginInAutoScaleProperty() {
+        return alwaysIncludeOriginInAutoScale;
     }
 
     @XmlAttribute

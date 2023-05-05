@@ -367,6 +367,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<IndexingTokenizer> indexingTokenizer =
             enumPreference(IndexingTokenizer.class, "indexingTokenizer", IndexingTokenizer.NGRAMS);
 
+    public ObservablePreference<Boolean> defaultForceZeroInYAxisAutoRange = booleanPreference("defaultForceZeroInYAxisAutoRange", true);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
