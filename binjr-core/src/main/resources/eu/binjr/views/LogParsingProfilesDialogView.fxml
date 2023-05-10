@@ -53,7 +53,7 @@
                                 contentDisplay="GRAPHIC_ONLY"
                                 VBox.vgrow="SOMETIMES">
                         <graphic>
-                            <LabelWithInlineHelp text="Setup" inlineHelp="Setup parsing rules&#xD;&#xD;" alignment="CENTER_RIGHT" />
+                            <LabelWithInlineHelp text="Setup" inlineHelp="Setup parsing rules&#xD;&#xD;Note: The settings below are greyed out when a built-in profile is selected. If you need to customize a built-in profile, click on &quot;Duplicate profile&quot; to create a copy that you can modify." alignment="CENTER_RIGHT" />
                         </graphic>
                         <VBox fx:id="setupPane" spacing="10.0">
                             <padding>
