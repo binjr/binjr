@@ -288,22 +288,20 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
             bindings.stream().map(SourceBinding::getPath).forEach(indexedFiles::remove);
         }
         final LongProperty charRead = new SimpleLongProperty(0);
-        int i = 0;
         for (var binding : bindings) {
             String path = binding.getPath();
-            boolean isLast = true;// FIXME: bindings.size() - 1 == i++;
             indexedFiles.computeIfAbsent(path, CheckedLambdas.wrap(p -> {
                 ThreadLocal<NumberFormat> formatters =
                         ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(csvParsingProfile.getNumberFormattingLocale()));
                 try {
                     index.add(p,
                             fileBrowser.getData(path.replace(getId() + "/", "")),
-                            isLast,
+                            true,
                             parser,
-                            ((doc, event) -> {
+                            (doc, event) -> {
                                 event.getFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value, formatters.get()))));
                                 return doc;
-                            }),
+                            },
                             charRead,
                             INDEXING_OK);
                     return IndexingStatus.OK;
