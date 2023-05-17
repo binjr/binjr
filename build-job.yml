@@ -33,6 +33,12 @@ jobs:
         inputs:
           secureFile: 'keyring.gpg'
 
+      - task:  DownloadSecureFile@1
+        name: gpgSignKeys
+        displayName: 'Download GPG Signing keys'
+        inputs:
+          secureFile: 'binjr.package.signing.keys.asc'
+
       - task: Gradle@2
         condition: succeeded()
         env:
@@ -79,15 +85,16 @@ jobs:
           echo "**************************************"
           echo "* Install dependencies"
           echo "**************************************"
+          wget -qO - https://www.aptly.info/pubkey.txt | sudo apt-key add -
+          echo -e '\ndeb http://repo.aptly.info/ squeeze main ' | sudo tee -a /etc/apt/sources.list
           sudo apt update
-          sudo apt -y install gnupg1 gpgv1 aptly createrepo
+          sudo apt -y install aptly createrepo-c
           echo "**************************************"
           echo "* GPG setup"
           echo "**************************************"
-          sudo cp /usr/bin/gpg /usr/bin/gpg_
-          echo -e '#!/bin/bash\ngpg1 --batch --no-tty --passphrase "$(gpg.package.passphrase)" "$@"' | sudo tee /usr/bin/gpg > /dev/null
-          sudo chmod +x /usr/bin/gpg
-          gpg --import $(gpgKeyring.secureFilePath)
+          export GPG_TTY=$(tty)
+          gpg -v --batch --no-tty --pinentry-mode loopback --passphrase "$(gpg.package.passphrase)" --import $(gpgSignKeys.secureFilePath)
+          echo "Init GPG" | gpg -v  --pinentry-mode loopback --passphrase "$(gpg.package.passphrase)" --batch --no-tty -u $(gpg.package.keyname) --sign --armor
           echo "**************************************"
           echo "* Generate apt repo"
           echo "**************************************"
@@ -118,14 +125,13 @@ jobs:
           echo "**************************************"
           echo "* Generate rpm repo"
           echo "**************************************"
-          sudo createrepo -v rpm/stable
-          sudo gpg -u $(gpg.package.keyname) --detach-sign --armor rpm/stable/repodata/repomd.xml
-          sudo shred -z /usr/bin/gpg
-          sudo mv /usr/bin/gpg_ /usr/bin/gpg
+          createrepo_c -v rpm/stable
+          gpg -v --batch --no-tty  --pinentry-mode loopback --passphrase "$(gpg.package.passphrase)" -u $(gpg.package.keyname) --detach-sign --armor rpm/stable/repodata/repomd.xml
           cp $(System.DefaultWorkingDirectory)/distribution/bundlers/linux_rpm/binjr.repo rpm/binjr.repo
           echo "**************************************"
           echo "* Upload to repos.binjr.eu"
           echo "**************************************"
+          ls -lsa
           git add .
           git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
           git push -f
