@@ -33,12 +33,12 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 
 Installable bundles integrate with the host OS to provide menu shortcuts, file associations and per user settings.
 
-|Version     | Operating System       |  Architecture        |  Download  | |
-|----------|----------|----------|------|----|
-| binjr ${tagName} | **Debian** (9, 10), **Ubuntu** (18.04, 20.04)| x84 64-bit | [APT Repo](https://repos.binjr.eu/apt) |   |
-| binjr ${tagName} | **RHEL** (7, 8), **Fedora**| x84 64-bit | [RPM Repo](https://repos.binjr.eu/rpm) |   |
-| binjr ${tagName} | **macOS** (10.10 or later)| x84 64-bit |  [<button ><img alt="" src="../../assets/images/download.svg"> .pkg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.pkg) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.pkg.asc)[^1] |
-| binjr ${tagName} | **Windows** (7 or later)| x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1] |
+|Version     | Operating System                        |  Architecture        |  Download  | |
+|----------|-----------------------------------------|----------|------|----|
+| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+) | x84 64-bit | [APT Repo](https://repos.binjr.eu/apt) |   |
+| binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)        | x84 64-bit | [RPM Repo](https://repos.binjr.eu/rpm) |   |
+| binjr ${tagName} | **macOS** (10.10 or later)              | x84 64-bit |  [<button ><img alt="" src="../../assets/images/download.svg"> .pkg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.pkg) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.pkg.asc)[^1] |
+| binjr ${tagName} | **Windows** (7 or later)                | x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1] |
 
 ## Portable bundles
 
