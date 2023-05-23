@@ -131,7 +131,6 @@ jobs:
           echo "**************************************"
           echo "* Upload to repos.binjr.eu"
           echo "**************************************"
-          ls -lsa
           git add .
           git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
           git push -f
