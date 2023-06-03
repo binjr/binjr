@@ -156,35 +156,21 @@ The documentation can be found [here](https://binjr.eu/documentation/getting-sta
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
-## Contributing
-
-At the moment, sources that ***binjr*** can use are limited both in types and numbers, which is to be expected given 
-that it is a fully community-driven effort with a tiny number of contributors.  
-
-The great thing about it being an open source, community driven project, though, is that should you believe that there is 
- is a use case where ***binjr*** could be a good fit but lacks supports for a specific time-series DB or some other feature,
- there are always ways to make it happen.
- 
-So, please, do not hesitate to suggest a new  feature or source support request by opening a [issue](https://github.com/binjr/binjr/issues). 
- 
-Source code contributions are also welcome; if you wish to make one, please fork this repository and submit a pull request
-with your changes. 
-
 ## How is it licensed?
 
 ***binjr*** is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE.md).
 
-## Special Thanks
+## Contributing
 
-![yourkit_logo](https://www.yourkit.com/images/yklogo.png)
+This project accepts contributions via [GitHub pull requests](https://github.com/binjr/binjr/pulls).
 
-Special thanks to [YourKit](https://www.yourkit.com) for providing us with access to their Java profiler.
+### Certificate of Origin
 
-YourKit supports open source projects with innovative and intelligent tools
-for monitoring and profiling Java and .NET applications.
-YourKit is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>,
-<a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
-and <a href="https://www.yourkit.com/youmonitor/">YourKit YouMonitor</a>.
+By contributing to this project you agree to the Developer Certificate of
+Origin (DCO). This document was created by the Linux Kernel community and is a
+simple statement that you, as a contributor, have the legal right to make the
+contribution. See the [DCO](DCO) file for details.
+
 
 
 

@@ -87,21 +87,6 @@ The documentation can be found [here](https://binjr.eu/documentation/user_guide/
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
-## Contributing
-
-At the moment, sources that ***binjr*** can use are limited both in types and numbers, which is to be expected given 
-that it is a fully community driven effort with a tiny number of contributors.  
-
-The great thing about it being an open source, community driven project, though, is that should you believe that there is 
- is a use case where ***binjr*** could be a good fit but lacks supports for a specific time-series DB or some other feature,
- there are always ways to make it happen.
- 
-So, please, do not hesitate to suggest a new  feature or source support request by opening a [issue](https://github.com/binjr/binjr/issues). 
- 
-Source code contributions are also welcome; if you wish to make one, please fork this repository and submit a pull request
-with your changes. 
-
-
 ## How is it licensed?
 
 ***binjr*** is released under the [Apache License version 2.0](https://apache.org/licenses/LICENSE-2.0).
