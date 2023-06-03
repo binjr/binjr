@@ -99,14 +99,15 @@ setup nor maintenance to speak of.
 
 ***binjr*** can consume time series data provided by the following data sources:
 
-|Name   | Description | Built-in[1]          | Source type  |
-|-------|-------------|-----------------------|--------------|
-| CSV Files | Comma Separated Values files. |    ✓    | Local files | 
-| [Demo Adapter](https://github.com/binjr/binjr-adapter-demo) |A plugin for binjr that provides data sources for demonstration purposes.|         |Local files |
-| [JRDS](https://github.com/fbacchella/jrds)      | A performance monitoring application written in Java. |    ✓    | Remote |
-| Log Files | Text based, semi-structured log files. |    ✓    | Local files | 
-| [Netdata](https://www.netdata.cloud)   | Distributed, real-time performance and health monitoring for systems and applications. |    ✓    | Remote |
-| RRD Files | Round-Robin Database files produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j). |    ✓    | Local files | 
+| Name                                                        | Description                                                                                                                    | Built-in[1]          | Source type |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|-----------------------|-------------|
+| CSV Files                                                   | Comma Separated Values files.                                                                                                  |    ✓    | Local files | 
+| [Demo Adapter](https://github.com/binjr/binjr-adapter-demo) | A plugin for binjr that provides data sources for demonstration purposes.                                                      |         | Local files |
+| [JFR](https://openjdk.org/jeps/328)                   | JDK Flight Recorder (JFR) is an event recorder built into the Java virtual machine.                                            |    ✓    | Local files |
+| [JRDS](https://github.com/fbacchella/jrds)                  | A performance monitoring application written in Java.                                                                          |    ✓    | Remote      |
+| Log Files                                                   | Text based, semi-structured log files.                                                                                         |    ✓    | Local files | 
+| [Netdata](https://www.netdata.cloud)                        | Distributed, real-time performance and health monitoring for systems and applications.                                         |    ✓    | Remote      |
+| RRD Files                                                   | Round-Robin Database files produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j). |    ✓    | Local files | 
 
 
 [1]: Support for data sources not marked as *'Built-in'* requires additional plugins.
