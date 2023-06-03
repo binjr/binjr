@@ -108,7 +108,8 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
         return new LogFileSeriesInfo(binding.getLegend(),
                 true,
                 binding.getColor(),
-                CustomParsingProfile.of(binding.getParsingProfile()),
+            //   CustomParsingProfile.of(binding.getParsingProfile()),
+                binding.getParsingProfile(),
                 binding);
     }
 

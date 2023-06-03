@@ -51,6 +51,7 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -94,7 +95,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
     private ParsingProfile parsingProfile;
-    private EventFormat parser;
+    private EventFormat<InputStream> defaultEventFormat;
     private ZoneId zoneId;
 
     /**
@@ -230,7 +231,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         this.folderFilters = folderFilters;
         this.fileExtensionsFilters = fileExtensionsFilters;
         this.parsingProfile = parsingProfile;
-        this.parser = new LogEventFormat(parsingProfile, getTimeZoneId(), encoding);
+        this.defaultEventFormat = new LogEventFormat(parsingProfile, getTimeZoneId(), encoding);
     }
 
     @Override
@@ -385,17 +386,18 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 for (int i = 0; i < toDo.size(); i++) {
                     var tsInfo = toDo.get(i);
                     String path = tsInfo.getBinding().getPath();
-                    var parser = getEventParser(tsInfo);
                     var key = getPathFacetValue(tsInfo);
                     index.add(key,
                             fileBrowser.getData(path.replace(getId() + "/", "")),
                             (i == toDo.size() - 1), // commit if last file
-                            parser,
+                            getEventFormat(tsInfo),
                             (doc, event) -> {
                                 // add all other sections as prefixed search fields
-                                event.getFields().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e ->
-                                        doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO)));
-                                String severity = event.getFields().get(SEVERITY) == null ? "unknown" : event.getFields().get(SEVERITY).toLowerCase();
+                                event.getTextFields().entrySet().stream()
+                                        .filter(e -> !e.getKey().equals(SEVERITY))
+                                        .forEach(e -> doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO)));
+                                // Add severity
+                                String severity = event.getTextField(SEVERITY) == null ? "unknown" : event.getTextField(SEVERITY).toLowerCase();
                                 doc.add(new FacetField(SEVERITY, severity));
                                 doc.add(new StoredField(SEVERITY, severity));
                                 return doc;
@@ -435,11 +437,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         return LogFileSeriesInfo.makePathFacetValue(parsingProfile, p);
     }
 
-    private EventFormat getEventParser(TimeSeriesInfo<?> p) {
+    private EventFormat<InputStream> getEventFormat(TimeSeriesInfo<?> p) {
         if (p instanceof LogFileSeriesInfo lfsi && lfsi.getParsingProfile() != null) {
             return new LogEventFormat(lfsi.getParsingProfile(), getTimeZoneId(), encoding);
         }
-        return parser;
+        return defaultEventFormat;
     }
 
     @Override

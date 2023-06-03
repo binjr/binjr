@@ -115,7 +115,7 @@ public class CsvEventParser implements EventParser {
                     values.put(Integer.toString(i), csvRecord.get(i));
                 }
             }
-            return new ParsedEvent(sequence.incrementAndGet(), timestamp, " ", values);
+            return ParsedEvent.withTextFields(sequence.incrementAndGet(), timestamp, " ", values);
         }
 
         @Override

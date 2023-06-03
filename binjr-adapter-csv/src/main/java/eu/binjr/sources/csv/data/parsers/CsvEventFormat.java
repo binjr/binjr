@@ -29,7 +29,7 @@ import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.*;
 
-public class CsvEventFormat implements EventFormat {
+public class CsvEventFormat implements EventFormat<InputStream> {
     private static final Logger logger = Logger.create(CsvEventFormat.class);
     private final CsvParsingProfile profile;
     private final ZoneId zoneId;

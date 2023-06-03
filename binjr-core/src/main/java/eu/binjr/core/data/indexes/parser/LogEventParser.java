@@ -101,11 +101,11 @@ public class LogEventParser implements EventParser {
                 return yield;
             } else {
                 if (buffered != null) {
-                    buffered = new ParsedEvent(
+                    buffered = ParsedEvent.withTextFields(
                             buffered.getSequence(),
                             buffered.getTimestamp(),
                             buffered.getText() + "\n" + line,
-                            buffered.getFields());
+                            buffered.getTextFields());
                 }
                 return null;
             }
@@ -133,7 +133,7 @@ public class LogEventParser implements EventParser {
                     }
                 }
             }
-            return Optional.of(new ParsedEvent(lineNumber, timestamp, text, sections));
+            return Optional.of(ParsedEvent.withTextFields(lineNumber, timestamp, text, sections));
         }
         return Optional.empty();
     }

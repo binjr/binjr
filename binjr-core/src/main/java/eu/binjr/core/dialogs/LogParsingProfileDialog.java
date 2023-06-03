@@ -43,7 +43,7 @@ public class LogParsingProfileDialog extends Dialog<ParsingProfile> {
 
     public LogParsingProfileDialog(Window owner, ParsingProfile selectedProfile) {
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/LogParsingProfilesDialogView.fxml"));
-        var controller = new LogParsingProfilesController(BuiltInParsingProfile.values(),
+        var controller = new LogParsingProfilesController(BuiltInParsingProfile.editableProfiles(),
                 UserPreferences.getInstance().userLogEventsParsingProfiles.get(),
                 BuiltInParsingProfile.ALL,
                 selectedProfile,

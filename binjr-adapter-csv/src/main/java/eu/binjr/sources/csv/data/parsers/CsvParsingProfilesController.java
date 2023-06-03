@@ -58,7 +58,6 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -242,7 +241,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                                 new SimpleStringProperty(param.getValue().getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS]"))));
                     } else {
                         col.setCellValueFactory(param ->
-                                new SimpleStringProperty(formatToDouble(param.getValue().getFields().get(colMap.get(param.getTableColumn())))));
+                                new SimpleStringProperty(formatToDouble(param.getValue().getTextFields().get(colMap.get(param.getTableColumn())))));
                     }
                     testResultTable.getColumns().add(col);
                 }

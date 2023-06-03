@@ -18,14 +18,14 @@ package eu.binjr.core.data.timeseries;
 
 import java.util.Objects;
 
-public record FacetEntry(String getFacetName, String getLabel, int getNbOccurrences) {
+public record FacetEntry(String name, String label, int occurrences) {
     public FacetEntry {
-        Objects.requireNonNull(getFacetName, "Facet name cannot be null");
-        Objects.requireNonNull(getLabel, "Facet name cannot be null");
+        Objects.requireNonNull(name, "Facet name cannot be null");
+        Objects.requireNonNull(label, "Facet name cannot be null");
     }
 
     @Override
     public String toString() {
-        return String.format("%s (%d)", getLabel, getNbOccurrences);
+        return String.format("%s (%d)", label, occurrences);
     }
 }

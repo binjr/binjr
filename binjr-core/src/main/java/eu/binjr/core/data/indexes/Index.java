@@ -16,24 +16,43 @@
 
 package eu.binjr.core.data.indexes;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
+import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
-import eu.binjr.core.data.indexes.parser.EventFormat;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
+import eu.binjr.core.data.indexes.parser.*;
+import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.FacetEntry;
+import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
+import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
+import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
+import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.core.preferences.IndexingTokenizer;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
+import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.LowerCaseFilter;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.charfilter.MappingCharFilter;
+import org.apache.lucene.analysis.charfilter.NormalizeCharMap;
 import org.apache.lucene.analysis.miscellaneous.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.ngram.NGramTokenizer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.standard.StandardTokenizer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.util.CharTokenizer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRange;
+import org.apache.lucene.facet.range.LongRangeFacetCounts;
+import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
@@ -42,17 +61,15 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
-import org.apache.lucene.search.SortedNumericSortField;
+import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
+import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.MMapDirectory;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -65,9 +82,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class Index implements Indexable {
+import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
+
+public class Index implements Indexable {
     public static final String TIMESTAMP = "timestamp";
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
@@ -75,7 +96,7 @@ public abstract class Index implements Indexable {
     public static final String DOC_URI = "docUri";
     public static final float SEARCH_HIT_WEIGHT_FACTOR = 2.0f;
     private static final Logger logger = Logger.create(Index.class);
-    private static final long PARK_TIME_NANO = 100_000L;
+    private static final long PARK_TIME_NANO = 1_000_000L;
     protected final UserPreferences prefs = UserPreferences.getInstance();
     protected final Directory indexDirectory;
     protected final Directory taxonomyDirectory;
@@ -85,16 +106,36 @@ public abstract class Index implements Indexable {
     protected final Path indexDirectoryPath;
     protected final ExecutorService parsingThreadPool;
     protected final int parsingThreadsNumber;
+    private final UserPreferences userPref = UserPreferences.getInstance();
+    private final Map<String, IndexingStatus> indexedFiles = new ConcurrentHashMap<>();
 
     private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
     protected DirectoryReader indexReader;
     protected IndexSearcher searcher;
     protected TaxonomyReader taxonomyReader;
 
+
+    private final Cache<String, SearchHitsProcessor> facetResultCache;
+    private final Cache<String, SearchHitsProcessor> hitResultCache;
+
     public Index() throws IOException {
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
+
+        this.facetResultCache = Caffeine.newBuilder()
+                .recordStats()
+                .maximumSize(prefs.facetResultCacheEntries.get().intValue())
+                .build();
+
+        this.hitResultCache = Caffeine.newBuilder()
+                .recordStats()
+                .maximumWeight(prefs.hitResultCacheMaxSizeMiB.get().longValue() * 1082768)
+                .weigher((String key, TimeSeriesProcessor<SearchHit> value) -> Math.round(value.getData().stream()
+                        .map(e -> e.getYValue().getText().length())
+                        .reduce(Integer::sum)
+                        .orElse(100) * SEARCH_HIT_WEIGHT_FACTOR))
+                .build();
 
         AtomicInteger threadNum = new AtomicInteger(0);
         this.parsingThreadPool = Executors.newFixedThreadPool(parsingThreadsNumber, r -> {
@@ -140,32 +181,286 @@ public abstract class Index implements Indexable {
         commitIndexAndTaxonomy();
     }
 
-    abstract Analyzer getContentFieldAnalyzer();
 
-    protected FacetsConfig initializeFacetsConfig(FacetsConfig facetsConfig) {
+    Analyzer getContentFieldAnalyzer() {
+        return switch (prefs.indexingTokenizer.get()) {
+            case NGRAMS -> new Analyzer() {
+                @Override
+                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                    var tokenizer = new NGramTokenizer(prefs.logIndexNGramSize.get().intValue(),
+                            prefs.logIndexNGramSize.get().intValue());
+                    var ts = new LowerCaseFilter(tokenizer);
+                    return new Analyzer.TokenStreamComponents(tokenizer::setReader, ts);
+                }
+            };
+            case STANDARD -> new Analyzer() {
+                @Override
+                protected Analyzer.TokenStreamComponents createComponents(final String fieldName) {
+                    final StandardTokenizer src = new StandardTokenizer();
+                    TokenStream tok = new LowerCaseFilter(src);
+                    return new Analyzer.TokenStreamComponents(src::setReader, tok);
+                }
+
+                @Override
+                protected Reader initReader(String fieldName, Reader reader) {
+                    NormalizeCharMap.Builder builder = new NormalizeCharMap.Builder();
+                    builder.add(".", " ");
+                    NormalizeCharMap normMap = builder.build();
+                    return new MappingCharFilter(normMap, reader);
+                }
+            };
+        };
+    }
+
+
+    private void rewriteQuery(Query query, BooleanQuery.Builder accQuery, BooleanClause.Occur occur) throws IOException {
+        if (query instanceof BooleanQuery booleanQuery) {
+            for (BooleanClause booleanClause : booleanQuery) {
+                rewriteQuery(booleanClause.getQuery(), accQuery, booleanClause.getOccur());
+            }
+        } else if (query instanceof TermQuery termQuery) {
+            accQuery.add(splitTermToNGrams(termQuery.getTerm()), occur);
+        } else {
+            int ngramSize = prefs.logIndexNGramSize.get().intValue();
+            if (query instanceof PrefixQuery prefixQuery &&
+                    prefixQuery.getPrefix().text().length() > ngramSize) {
+                accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
+            } else if (query instanceof WildcardQuery wildcardQuery &&
+                    wildcardQuery.getTerm().text().replace("*", "").replace("?", "").length() > ngramSize) {
+                var subBuilder = new BooleanQuery.Builder();
+                for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
+                    subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt), true), BooleanClause.Occur.FILTER);
+                }
+                accQuery.add(subBuilder.build(), occur);
+            } else if (query instanceof PhraseQuery phraseQuery) {
+                var text = Arrays.stream(phraseQuery.getTerms()).map(Term::text).collect(Collectors.joining(" "));
+                accQuery.add(splitTermToNGrams(new Term(phraseQuery.getField(), text)), occur);
+            } else {
+                accQuery.add(query, occur);
+            }
+        }
+
+    }
+
+    private Query splitTermToNGrams(Term term) throws IOException {
+        return splitTermToNGrams(term, prefs.logIndexAutoExpendShorterTerms.get());
+    }
+
+    private Query splitTermToNGrams(Term term, boolean autoExpend) throws IOException {
+        final int nGramSize = prefs.logIndexNGramSize.get().intValue();
+        if (autoExpend && term.text().length() < nGramSize) {
+            // suffix term with a wildcard if shorter than ngram size
+            return new PrefixQuery(new Term(term.field(), term.text()));
+        } else {
+            var queryBuilder = new PhraseQuery.Builder();
+            try (var ts = getContentFieldAnalyzer().tokenStream(FIELD_CONTENT, term.text())) {
+                ts.reset();
+                var termAttribute = ts.addAttribute(CharTermAttribute.class);
+                while (ts.incrementToken()) {
+                    var tokenText = termAttribute.toString();
+                    if (!tokenText.isEmpty()) {
+                        queryBuilder.add(new Term(term.field(), tokenText));
+                    }
+                }
+                ts.end();
+            }
+            if (prefs.optimizeNGramQueries.get()) {
+                return new NGramPhraseQuery(nGramSize, queryBuilder.build());
+            } else {
+                return queryBuilder.build();
+            }
+        }
+    }
+
+    public TimeSeriesProcessor<SearchHit> search(long start,
+                                                 long end,
+                                                 Map<String, Collection<String>> facets,
+                                                 String query,
+                                                 int page,
+                                                 ZoneId zoneId,
+                                                 boolean ignoreCache) throws Exception {
+        return getIndexMonitor().read().lock(() -> {
+            Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
+            final Query filterQuery;
+            if (query != null && !query.isBlank()) {
+                logger.trace("Query text=" + query);
+                Query userQuery;
+                if (prefs.indexingTokenizer.get() == IndexingTokenizer.NGRAMS) {
+                    var builder = new BooleanQuery.Builder();
+                    var parser = new StandardQueryParser(new Analyzer() {
+                        @Override
+                        protected TokenStreamComponents createComponents(String fieldName) {
+                            return new Analyzer.TokenStreamComponents(new CharTokenizer() {
+                                @Override
+                                protected boolean isTokenChar(int c) {
+                                    return true;
+                                }
+                            });
+                        }
+
+                        @Override
+                        protected TokenStream normalize(String fieldName, TokenStream in) {
+                            return new LowerCaseFilter(in);
+                        }
+                    });
+                    rewriteQuery(parser.parse(query, FIELD_CONTENT), builder, BooleanClause.Occur.FILTER);
+                    userQuery = builder.build();
+                } else {
+                    var parser = new StandardQueryParser(getContentFieldAnalyzer());
+                    userQuery = parser.parse(query, FIELD_CONTENT);
+                }
+                filterQuery = new BooleanQuery.Builder()
+                        .add(rangeQuery, BooleanClause.Occur.FILTER)
+                        .add(userQuery, BooleanClause.Occur.FILTER)
+                        .build();
+            } else {
+                filterQuery = rangeQuery;
+            }
+
+            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
+            var drillDownQuery = new DrillDownQuery(facetsConfig, new ConstantScoreQuery(filterQuery));
+            for (var facet : facets.entrySet()) {
+                for (var label : facet.getValue()) {
+                    logger.debug(() -> "Add facet [" + facet.getKey() + "] = " + label);
+                    drillDownQuery.add(facet.getKey(), label);
+                }
+            }
+            var pageSize = prefs.hitsPerPage.get().intValue();
+            var skip = page * pageSize;
+            var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
+                    new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
+            TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
+            logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
+            String facetCacheKey = drillDownQuery.toString(FIELD_CONTENT);
+            String hitCacheKey = facetCacheKey + "_" + page;
+            Function<String, SearchHitsProcessor> fillHitResultCache = CheckedLambdas.wrap(k -> {
+                DrillSideways.DrillSidewaysResult results;
+                try (Profiler p = Profiler.start("Executing query", logger::perf)) {
+                    results = drill.search(drillDownQuery, collector);
+                }
+                try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
+                    logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Hit cache was explicitly bypassed" : "Hit cache miss", k));
+                    var proc = new SearchHitsProcessor();
+                    var samples = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
+                    var severityFacet = makeFacetResult(SEVERITY, results.facets, facets);
+                    var pathFacet = makeFacetResult(PATH, results.facets, facets);
+                    var topDocs = collector.topDocs(skip, pageSize);
+                    logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
+                    for (int i = 0; i < topDocs.scoreDocs.length; i++) {
+                        var hit = topDocs.scoreDocs[i];
+                        var doc = searcher.storedFields().document(hit.doc, Set.of(TIMESTAMP, SEVERITY, PATH, FIELD_CONTENT));
+                        var severity = severityFacet.get(doc.get(SEVERITY));
+                        var path = pathFacet.get(doc.get(PATH));
+                        samples.add(new XYChart.Data<>(
+                                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId),
+                                new SearchHit(doc.get(FIELD_CONTENT) + "\n",
+                                        severity != null ? severity : new FacetEntry(SEVERITY, "Unknown", 0),
+                                        path != null ? path : new FacetEntry(PATH, "Unknown", 0))));
+                    }
+                    proc.addFacetResults(PATH,
+                            pathFacet.values()
+                                    .stream()
+                                    .sorted(Comparator.comparingInt(FacetEntry::occurrences).reversed())
+                                    .toList());
+                    proc.addFacetResults(SEVERITY,
+                            severityFacet.values()
+                                    .stream()
+                                    .sorted(Comparator.comparingInt(FacetEntry::occurrences).reversed())
+                                    .toList());
+                    proc.setTotalHits(collector.getTotalHits());
+                    proc.setHitsPerPage(pageSize);
+                    proc.setData(samples);
+                    return proc;
+                }
+            });
+            SearchHitsProcessor hitProc;
+            if (ignoreCache) {
+                hitResultCache.invalidate(hitCacheKey);
+            }
+            hitProc = hitResultCache.get(hitCacheKey, fillHitResultCache);
+            logger.perf(() -> printCacheStats("Hit result cache stats", hitResultCache.stats()));
+            Function<String, SearchHitsProcessor> fillFacetResultCache = CheckedLambdas.wrap(k -> {
+
+                try (Profiler p = Profiler.start("Retrieving facets", logger::perf)) {
+                    logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Facet cache was explicitly bypassed" : "Facet cache miss", k));
+                    return retrieveFacets(start, end, facets, rangeQuery, filterQuery, hitProc);
+                }
+            });
+            SearchHitsProcessor facetProc;
+            if (ignoreCache) {
+                facetResultCache.invalidate(facetCacheKey);
+            }
+            facetProc = facetResultCache.get(facetCacheKey, fillFacetResultCache);
+            hitProc.mergeFacetResults(facetProc);
+            return hitProc;
+        });
+    }
+
+
+    private SearchHitsProcessor retrieveFacets(long start,
+                                               long end,
+                                               Map<String, Collection<String>> params,
+                                               Query rangeQuery,
+                                               Query filterQuery,
+                                               SearchHitsProcessor hitProc) throws IOException {
+        var proc = new SearchHitsProcessor();
+        var ranges = computeRanges(start, end, prefs.logHeatmapNbBuckets.get().intValue());
+        var severities = params.entrySet().stream()
+                .filter(e -> e.getKey().equals(SEVERITY))
+                .flatMap(e -> e.getValue().stream())
+                .toList();
+        if (severities.isEmpty()) {
+            severities = hitProc.getFacetResults().get(SEVERITY).stream().map(FacetEntry::label).toList();
+        }
+
+        for (var severityLabel : severities) {
+            var q = new DrillDownQuery(facetsConfig, filterQuery);
+            q.add(TIMESTAMP, rangeQuery);
+            for (var facet : params.entrySet()) {
+                if (facet.getKey().equals(SEVERITY)) {
+                    q.add(facet.getKey(), severityLabel);
+                } else {
+                    for (var label : facet.getValue()) {
+                        q.add(facet.getKey(), label);
+                    }
+                }
+            }
+            FacetsCollector fc = new FacetsCollector();
+            FacetsCollector.search(searcher, q, 0, fc);
+            Facets facets = new LongRangeFacetCounts(TIMESTAMP, fc, ranges);
+            proc.addFacetResults(TIMESTAMP + "_" + severityLabel,
+                    makeFacetResult(TIMESTAMP, facets, params).values());
+        }
+        return proc;
+    }
+
+
+    private FacetsConfig initializeFacetsConfig(FacetsConfig facetsConfig) {
+        facetsConfig.setRequireDimCount(SEVERITY, true);
+        facetsConfig.setDrillDownTermsIndexing(SEVERITY, FacetsConfig.DrillDownTermsIndexing.ALL);
         facetsConfig.setRequireDimCount(PATH, true);
         facetsConfig.setDrillDownTermsIndexing(PATH, FacetsConfig.DrillDownTermsIndexing.ALL);
         return facetsConfig;
     }
 
-    @Override
-    public void add(String path,
-                    InputStream ias,
-                    EventFormat parser,
-                    EnrichDocumentFunction enrichDocumentFunction,
-                    LongProperty progress,
-                    Property<IndexingStatus> indexingStatus) throws IOException {
-        add(path, ias, true, parser, enrichDocumentFunction, progress, indexingStatus);
+    public <T> void add(String path,
+                        T source,
+                        boolean commit,
+                        EventFormat<T> eventFormat,
+                        EnrichDocumentFunction enrichDocumentFunction,
+                        LongProperty progress,
+                        Property<IndexingStatus> cancellationRequested) throws IOException {
+        add(path, source, commit, eventFormat, enrichDocumentFunction, progress, cancellationRequested, (root, event) -> path);
     }
 
-    @Override
-    public void add(String path,
-                    InputStream ias,
-                    boolean commit,
-                    EventFormat parser,
-                    EnrichDocumentFunction enrichDocumentFunction,
-                    LongProperty progress,
-                    Property<IndexingStatus> cancellationRequested) throws IOException {
+    public <T> void add(String path,
+                        T source,
+                        boolean commit,
+                        EventFormat<T> eventFormat,
+                        EnrichDocumentFunction enrichDocumentFunction,
+                        LongProperty progress,
+                        Property<IndexingStatus> cancellationRequested,
+                        BiFunction<String, ParsedEvent, String> computePathFacetValue) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
             indexWriter.deleteDocuments(new Term(DOC_URI, path));
         }
@@ -192,16 +487,17 @@ public abstract class Index implements Indexable {
                             }
                             try {
                                 for (var logEvent : todo) {
+                                    String pathFacetValue = computePathFacetValue.apply(path, logEvent);
                                     var doc = new Document();
-                                    doc.add(new StringField(DOC_URI, path, Field.Store.NO));
+                                    doc.add(new StringField(DOC_URI, pathFacetValue, Field.Store.NO));
                                     doc.add(new TextField(FIELD_CONTENT, logEvent.getText(), Field.Store.YES));
                                     doc.add(new SortedNumericDocValuesField(LINE_NUMBER, logEvent.getSequence()));
                                     var millis = logEvent.getTimestamp().toInstant().toEpochMilli();
                                     doc.add(new LongPoint(TIMESTAMP, millis));
                                     doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                                     doc.add(new StoredField(TIMESTAMP, millis));
-                                    doc.add(new FacetField(PATH, path));
-                                    doc.add(new StoredField(PATH, path));
+                                    doc.add(new FacetField(PATH, pathFacetValue));
+                                    doc.add(new StoredField(PATH, pathFacetValue));
                                     indexWriter.addDocument(facetsConfig.build(taxonomyWriter, enrichDocumentFunction.apply(doc, logEvent)));
                                     nbEventProcessed++;
                                 }
@@ -216,7 +512,7 @@ public abstract class Index implements Indexable {
                         return nbEventProcessed;
                     }));
                 }
-                try (var aggregator = parser.parse(ias)) {
+                try (var aggregator = eventFormat.parse(source)) {
                     progress.bind(aggregator.progressIndicator());
                     for (var event : aggregator) {
                         if (taskAborted.get()) {
@@ -304,6 +600,8 @@ public abstract class Index implements Indexable {
 
     @Override
     public void close() throws IOException {
+        hitResultCache.invalidateAll();
+        facetResultCache.invalidateAll();
         IOUtils.close(taxonomyReader);
         IOUtils.close(indexReader);
         IOUtils.close(taxonomyWriter);
@@ -322,21 +620,30 @@ public abstract class Index implements Indexable {
         }
     }
 
-    public static Map<String, FacetEntry> makeFacetResult(String facetName, Facets facets, Map<String, Collection<String>> params)
-            throws IOException {
+    public static Map<String, FacetEntry> makeFacetResult(String facetName,
+                                                          Facets facets,
+                                                          Map<String, Collection<String>> params) throws IOException {
+        return makeFacetResult(facetName, facets, params, 0);
+    }
+
+    public static Map<String, FacetEntry> makeFacetResult(String facetName,
+                                                          Facets facets,
+                                                          Map<String, Collection<String>> params,
+                                                          int minOccurrence) throws IOException {
         var facetEntryMap = new TreeMap<String, FacetEntry>();
-        var synthesis = facets.getTopChildren(100, facetName);
+        var synthesis = facets.getAllChildren(facetName); //facets.getTopChildren(100, facetName);
         var labels = new ArrayList<String>();
         if (synthesis != null) {
             for (var f : synthesis.labelValues) {
-                facetEntryMap.put(f.label, new FacetEntry(facetName, f.label, f.value.intValue()));
+                if (f.value.intValue() >= minOccurrence)
+                    facetEntryMap.put(f.label, new FacetEntry(facetName, f.label, f.value.intValue()));
                 labels.add(f.label);
             }
             // Add facets labels used in query if not present in the result
             params.getOrDefault(facetName, List.of()).stream()
                     .filter(l -> !labels.contains(l))
                     .map(l -> new FacetEntry(facetName, l, 0))
-                    .forEach(f -> facetEntryMap.put(f.getLabel(), f));
+                    .forEach(f -> facetEntryMap.put(f.label(), f));
         }
         return facetEntryMap;
     }
@@ -366,6 +673,104 @@ public abstract class Index implements Indexable {
         return ranges;
     }
 
+    public Map<String, FacetEntry> getAllPaths() throws IOException {
+        return getPaths(0, new MatchAllDocsQuery());
+    }
+
+    public Map<String, FacetEntry> getPaths(int min, String query) throws Exception {
+        return getIndexMonitor().read().lock(() -> {
+            var parser = new StandardQueryParser();
+            try (Profiler p = Profiler.start(() -> "Retrieved all paths", logger::perf)) {
+                FacetsCollector fc = new FacetsCollector();
+                FacetsCollector.search(searcher, parser.parse(query, FIELD_CONTENT), 0, fc);
+                Facets facets = new FastTaxonomyFacetCounts(taxonomyReader, facetsConfig, fc);
+                return makeFacetResult(PATH, facets, Map.of(), min);
+            }
+        });
+    }
+
+    public Map<String, FacetEntry> getPaths(int min, Query query) throws IOException {
+        return getIndexMonitor().read().lock(() -> {
+            try (Profiler p = Profiler.start(() -> "Retrieved all paths", logger::perf)) {
+                FacetsCollector fc = new FacetsCollector();
+                FacetsCollector.search(searcher, query, 0, fc);
+                Facets facets = new FastTaxonomyFacetCounts(taxonomyReader, facetsConfig, fc);
+                return makeFacetResult(PATH, facets, Map.of(), min);
+            }
+        });
+    }
+
+    public long search(long start,
+                       long end,
+                       Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> seriesToFill,
+                       ZoneId zoneId,
+                       boolean ignoreCache) throws Exception {
+        return getIndexMonitor().read().lock(() -> {
+            Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
+            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
+            var drillDownQuery = new DrillDownQuery(facetsConfig, rangeQuery);
+            seriesToFill.keySet()
+                    .stream()
+                    .map(ts -> ts.getBinding().getPath())
+                    .forEach(path -> drillDownQuery.add(PATH, path));
+            var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
+                    new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
+            var clean = new NanToZeroTransform();
+            var reduce = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
+            AtomicLong hitsCollected = new AtomicLong(0);
+            int pageSize = prefs.numIdxMaxPageSize.get().intValue();
+            FieldDoc lastHit = null;
+            try (Profiler p = Profiler.start(() -> "Retrieved " + hitsCollected.get() + " samples for " + seriesToFill.size() + " series", logger::perf)) {
+                for (int pageNumber = 0; true; pageNumber++) {
+                    TopFieldCollector collector = (lastHit == null) ?
+                            TopFieldCollector.create(sort, pageSize, Integer.MAX_VALUE) :
+                            TopFieldCollector.create(sort, pageSize, lastHit, Integer.MAX_VALUE);
+                    logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
+                    try (Profiler ignored = Profiler.start("Executing query for page " + pageNumber, logger::debug)) {
+                        drill.search(drillDownQuery, collector);
+                    }
+                    var fieldsToLoad = seriesToFill.keySet()
+                            .stream()
+                            .map(k -> k.getBinding().getLabel())
+                            .collect(Collectors.toSet());
+                    fieldsToLoad.add(TIMESTAMP);
+                    Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new HashMap<>();
+                    var topDocs = collector.topDocs(0, pageSize);
+                    // fill the buffer with data for the current page
+                    for (int i = 0; i < topDocs.scoreDocs.length; i++) {
+                        lastHit = (FieldDoc) topDocs.scoreDocs[i];
+                        var doc = searcher.storedFields().document(lastHit.doc, fieldsToLoad);
+                        seriesToFill.forEach((info, proc) -> {
+                            var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId);
+                            var field = doc.getField(info.getBinding().getLabel());
+                            if (field != null) {
+                                var value = field.numericValue();
+                                if (value != null) {
+                                    pageDataBuffer.computeIfAbsent(info, doubleTimeSeriesInfo -> new DoubleTimeSeriesProcessor())
+                                            .addSample(timestamp, value.doubleValue());
+                                }
+                            }
+                        });
+                    }
+                    // Apply downsampling to buffered data and append reduced dataset to processor
+                    seriesToFill.entrySet().parallelStream().forEach(entry -> {
+                        var pageProc = pageDataBuffer.get(entry.getKey());
+                        if (pageProc != null) {
+                            var fullQueryProc = entry.getValue();
+                            pageProc.applyTransforms(clean, reduce);
+                            fullQueryProc.appendData(pageProc);
+                        }
+                    });
+                    hitsCollected.accumulateAndGet(topDocs.scoreDocs.length, Long::sum);
+                    // End the loop once all hits have been collected
+                    if (hitsCollected.get() >= collector.getTotalHits()) {
+                        break;
+                    }
+                }
+            }
+            return hitsCollected.get();
+        });
+    }
 
     private ZonedDateTime getTimeRangeBoundary(boolean getMax, List<String> files, ZoneId zoneId) throws IOException {
         return indexLock.read().lock(() -> {
@@ -391,4 +796,8 @@ public abstract class Index implements Indexable {
     }
 
 
+    @Override
+    public Map<String, IndexingStatus> getIndexedFiles() {
+        return indexedFiles;
+    }
 }

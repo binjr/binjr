@@ -17,6 +17,7 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
@@ -92,7 +93,7 @@ public class LogFilesBinding extends SourceBinding<SearchHit> {
     }
 
     public static class Builder extends SourceBinding.Builder<SearchHit, LogFilesBinding, Builder> {
-        private ParsingProfile parsingProfile;
+        private ParsingProfile parsingProfile = BuiltInParsingProfile.NONE;
 
         @Override
         protected Builder self() {

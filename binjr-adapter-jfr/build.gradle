@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,21 +14,18 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.indexes.parser;
+dependencies {
+    compileOnly project(':binjr-core')
+}
 
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
-
-import java.nio.charset.Charset;
-import java.time.ZoneId;
-import java.util.function.Supplier;
-
-public interface EventFormat<T> {
-    ParsingProfile getProfile();
-
-    EventParser parse(T source);
-
-    Charset getEncoding();
-
-    ZoneId getZoneId();
-
+jar {
+    manifest {
+        attributes(
+                'Specification-Title': project.name,
+                'Specification-Version': project.version,
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Build-Number': BINJR_BUILD_NUMBER
+        )
+    }
 }

@@ -66,7 +66,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
 
     private void updateProfileList(ParsingProfile[] newValue) {
         parsingChoiceBox.getItems().clear();
-        parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.values());
+        parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.editableProfiles());
         parsingChoiceBox.getItems().addAll(newValue);
         parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
                 .filter(p -> Objects.equals(p.getProfileId(), prefs.mostRecentlyUsedParsingProfile.get()))

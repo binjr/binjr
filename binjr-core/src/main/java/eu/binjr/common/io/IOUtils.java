@@ -19,15 +19,16 @@ package eu.binjr.common.io;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Logger;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -213,5 +214,11 @@ public class IOUtils {
     }
 
     public record byteArrayTuple(byte[] first, byte[] second) {
+    }
+
+    public static String sha256(String input) throws NoSuchAlgorithmException {
+        MessageDigest msdDigest = MessageDigest.getInstance("SHA-256");
+        msdDigest.update(input.getBytes(StandardCharsets.UTF_8));
+        return Base64.getEncoder().encodeToString(msdDigest.digest());
     }
 }

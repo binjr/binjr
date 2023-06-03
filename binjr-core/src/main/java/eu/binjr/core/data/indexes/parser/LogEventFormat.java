@@ -22,7 +22,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.time.ZoneId;
 
-public class LogEventFormat implements EventFormat {
+public class LogEventFormat implements EventFormat<InputStream> {
     private final ParsingProfile profile;
     private final ZoneId zoneId;
     private final Charset encoding;

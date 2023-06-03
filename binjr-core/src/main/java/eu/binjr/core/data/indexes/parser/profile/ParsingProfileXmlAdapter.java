@@ -27,6 +27,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class ParsingProfileXmlAdapter extends XmlAdapter<String, ParsingProfile> {
     private static final Gson GSON = new Gson();
+
     /**
      * Initializes a new instance of the CustomParsingProfile class
      */
@@ -35,11 +36,21 @@ public class ParsingProfileXmlAdapter extends XmlAdapter<String, ParsingProfile>
 
     @Override
     public ParsingProfile unmarshal(String stringValue) {
-        return (stringValue != null && !stringValue.isBlank()) ? GSON.fromJson(stringValue, CustomParsingProfile.class) : null;
+        if (stringValue == null || stringValue.isBlank()){
+            return  BuiltInParsingProfile.ALL;
+        }
+        if (stringValue.startsWith(BuiltInParsingProfile.class.getTypeName())){
+            return BuiltInParsingProfile.valueOf(stringValue.replace(BuiltInParsingProfile.class.getTypeName() + ":", ""));
+        }
+        return  GSON.fromJson(stringValue, CustomParsingProfile.class);
     }
 
     @Override
     public String marshal(ParsingProfile value) {
+        if (value instanceof BuiltInParsingProfile builtIn) {
+            return builtIn.getClass().getTypeName() + ":" + builtIn.name();
+        }
+
         return value != null ? GSON.toJson(CustomParsingProfile.of(value)) : null;
     }
 }

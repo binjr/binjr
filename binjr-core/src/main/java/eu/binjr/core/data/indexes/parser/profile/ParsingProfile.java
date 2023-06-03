@@ -52,7 +52,7 @@ public interface ParsingProfile {
                     .map(e -> String.format("(?<%s>%s)", e.getKey().name(), e.getValue()))
                     .findAny().ifPresent(r -> regexString[0] = regexString[0].replace(value, r));
         }
-        logger.debug(() -> "Regex string for profile " + getProfileName() + ": " + regexString[0]);
+        logger.trace(() -> "Regex string for profile " + getProfileName() + ": " + regexString[0]);
         return regexString[0];
     }
 

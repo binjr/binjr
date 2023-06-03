@@ -27,10 +27,9 @@ import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
+import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.IndexingStatus;
-import eu.binjr.core.data.indexes.NumSeriesIndex;
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -55,7 +54,10 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -80,7 +82,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private ZoneId zoneId;
     private String encoding;
     private final Map<String, IndexingStatus> indexedFiles = new HashMap<>();
-    private NumSeriesIndex index;
+    private Index index;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
@@ -254,7 +256,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         super.onStart();
         try {
             this.fileBrowser = FileSystemBrowser.of(csvPath.getParent());
-            this.index = (NumSeriesIndex) Indexes.NUM_SERIES.acquire();
+            this.index = Indexes.NUM_SERIES.acquire();
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
         }
@@ -299,7 +301,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                             true,
                             parser,
                             (doc, event) -> {
-                                event.getFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value, formatters.get()))));
+                                event.getTextFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value, formatters.get()))));
                                 return doc;
                             },
                             charRead,

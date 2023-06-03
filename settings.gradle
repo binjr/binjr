@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2020 Frederic Thevenet
+ *    Copyright 2018-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 rootProject.name = 'binjr'
 include 'binjr-adapter-csv'
+include 'binjr-adapter-jfr'
 include 'binjr-adapter-jrds'
 include 'binjr-adapter-rrd4j'
 include 'binjr-adapter-netdata'

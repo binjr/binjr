@@ -24,20 +24,20 @@ import eu.binjr.common.function.CheckedSupplier;
 import java.io.IOException;
 
 public enum Indexes {
-    LOG_FILES("log_file_index", LogFileIndex::new),
-    NUM_SERIES("numerical_series_index", NumSeriesIndex::new);
+    LOG_FILES("log_file_index", Index::new),
+    NUM_SERIES("numerical_series_index", Index::new);
 
-    private final CloseableResourceManager<Indexable> indexManager;
+    private final CloseableResourceManager<Index> indexManager;
     private final String key;
-    private final CheckedSupplier<Indexable, IOException> factory;
+    private final CheckedSupplier<Index, IOException> factory;
 
-    Indexes(String key, CheckedSupplier<Indexable, IOException> factory) {
+    Indexes(String key, CheckedSupplier<Index, IOException> factory) {
         this.indexManager = new CloseableResourceManager<>();
         this.key = key;
         this.factory = factory;
     }
 
-    public Indexable acquire() throws IOException {
+    public Index acquire() throws IOException {
         return indexManager.acquire(key, CheckedLambdas.wrap(factory));
     }
 
@@ -45,7 +45,7 @@ public enum Indexes {
         return indexManager.release(key);
     }
 
-    public Indexable get() {
+    public Index get() {
         return indexManager.get(key).orElseThrow();
     }
 

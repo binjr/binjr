@@ -75,7 +75,6 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -217,7 +216,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private BinjrLoadingPane loadingPane;
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
-    private LogFileIndex index = (LogFileIndex) Indexes.LOG_FILES.get();
+    private Index index = (Index) Indexes.LOG_FILES.get();
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -1005,11 +1004,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             severityListView.setAllEntries(severityFacetEntries);
                             severityListView.getFacetPills()
                                     .forEach(f -> {
-                                        f.getStyleClass().add("facet-pill-" + userPrefs.mapSeverityStyle(f.getFacet().getLabel()));
-                                        f.setSelected(worksheet.getQueryParameters().getSeverities().contains(f.getFacet().getLabel()));
+                                        f.getStyleClass().add("facet-pill-" + userPrefs.mapSeverityStyle(f.getFacet().label()));
+                                        f.setSelected(worksheet.getQueryParameters().getSeverities().contains(f.getFacet().label()));
                                     });
                             // Update filePath facet view
-                            var fileFacetEntries = res.getFacetResults().get(LogFileIndex.PATH);
+                            var fileFacetEntries = res.getFacetResults().get(Index.PATH);
                             this.pathFacetEntries.setValue(Objects.requireNonNullElse(fileFacetEntries, Collections.emptyList()));
                             ZonedDateTime lowerBound = worksheet.getQueryParameters().getTimeRange().getBeginning();
                             ZonedDateTime upperBound = worksheet.getQueryParameters().getTimeRange().getEnd();
@@ -1017,13 +1016,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             heatmap.setVisible(true);
                             for (var s : severityFacetEntries) {
                                 // Update timestamp Range facet view
-                                var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP + "_" + s.getLabel());
+                                var timestampFacetEntries = res.getFacetResults().get(Index.TIMESTAMP + "_" + s.label());
                                 if (timestampFacetEntries != null) {
                                     logger.trace(() -> timestampFacetEntries.stream()
-                                            .map(e -> String.format("%s: (%d)", e.getLabel(), e.getNbOccurrences()))
+                                            .map(e -> String.format("%s: (%d)", e.label(), e.occurrences()))
                                             .collect(Collectors.joining("\n")));
                                     List<XYChart.Data<String, Integer>> heatmapData = timestampFacetEntries.stream()
-                                            .map(e -> createDataPoint(s.getLabel(), e.getLabel(), e.getNbOccurrences()))
+                                            .map(e -> createDataPoint(s.label(), e.label(), e.occurrences()))
                                             .toList();
                                     XYChart.Series<String, Integer> heatmapSeries = new XYChart.Series<>();
                                     heatmapSeries.getData().setAll(heatmapData);
@@ -1042,8 +1041,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                         Collections.emptyList());
                                 for (var data : res.getData()) {
                                     var hit = data.getYValue();
-                                    var severity = hit.getSeverity().getLabel();
-                                    var path = hit.getPath().getLabel();
+                                    var severity = hit.getSeverity().label();
+                                    var path = hit.getPath().label();
                                     var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
                                             message,
@@ -1212,8 +1211,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         eventNumColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> pathFacetEntries.getValue() == null ? "-" :
                         pathFacetEntries.getValue().stream()
-                                .filter(e -> e.getLabel().equalsIgnoreCase(p.getValue().getPathFacetValue()))
-                                .map(e -> Integer.toString(e.getNbOccurrences())).findFirst().orElse("0"),
+                                .filter(e -> e.label().equalsIgnoreCase(p.getValue().getPathFacetValue()))
+                                .map(e -> Integer.toString(e.occurrences())).findFirst().orElse("0"),
                 pathFacetEntries));
 
         TableColumn<LogFileSeriesInfo, ParsingProfile> parsingColumn = new TableColumn<>("Parsing rules");
@@ -1259,7 +1258,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         TableViewUtils.autoFillTableWidthWithLastColumn(fileTable);
     }
 
-    private final QueryParser queryParser = new QueryParser(LogFileIndex.FIELD_CONTENT, new StandardAnalyzer());
+    private final QueryParser queryParser = new QueryParser(Index.FIELD_CONTENT, new StandardAnalyzer());
 
     private final Predicate<String> queryValidator = text -> {
         if (!text.isBlank()) {
@@ -1283,7 +1282,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setSeverities(severityListView.getFacetPills()
                         .stream()
                         .filter(p -> p != null && p.isSelected())
-                        .map(p -> p.getFacet().getLabel())
+                        .map(p -> p.getFacet().label())
                         .collect(Collectors.toSet()))
                 .setPage(resetPage ? 0 : pager.getCurrentPageIndex())
                 .build();
@@ -1394,7 +1393,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var start = worksheet.getQueryParameters().getTimeRange().getBeginning().toInstant();
         var end = worksheet.getQueryParameters().getTimeRange().getEnd().toInstant();
         Map<String, Collection<String>> facets = new HashMap<>();
-        facets.put(LogFileIndex.PATH, worksheet.getSeriesInfo()
+        facets.put(Index.PATH, worksheet.getSeriesInfo()
                 .stream()
                 .filter(TimeSeriesInfo::isSelected)
                 .map(LogFileSeriesInfo::getPathFacetValue)
@@ -1402,10 +1401,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var params = worksheet.getQueryParameters();
         facets.put(CaptureGroup.SEVERITY, params.getSeverities());
         try {
-            return (facets.get(LogFileIndex.PATH).size() == 0) ? new SearchHitsProcessor() :
-                    index.search(start.toEpochMilli(), end.toEpochMilli(),
+            return (facets.get(Index.PATH).size() == 0) ? new SearchHitsProcessor() :
+                    index.search(start.toEpochMilli(),
+                            end.toEpochMilli(),
                             facets,
-                            List.of(),
                             params.getFilterQuery(),
                             params.getPage(),
                             timeRangePicker.getZoneId(),

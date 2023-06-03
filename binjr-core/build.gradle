@@ -66,6 +66,10 @@ jar {
     }
 }
 
+test {
+    useJUnitPlatform()
+}
+
 repositories {
     mavenCentral()
 }

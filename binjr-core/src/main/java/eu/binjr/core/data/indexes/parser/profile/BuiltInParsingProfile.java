@@ -20,10 +20,12 @@ import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public enum BuiltInParsingProfile implements ParsingProfile {
+    NONE("--", "BUILTIN_NONE", Map.of(), ""),
     ALL("All non empty lines",
             "BUILTIN_ALL",
             Map.of(CaptureGroup.of("LINE"), ".+"),
@@ -102,6 +104,10 @@ public enum BuiltInParsingProfile implements ParsingProfile {
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
         this.regex = Pattern.compile(buildParsingRegexString());
+    }
+
+    public static BuiltInParsingProfile[] editableProfiles() {
+        return Arrays.stream(values()).filter(v -> v != NONE).toArray(BuiltInParsingProfile[]::new);
     }
 
     @Override
