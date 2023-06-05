@@ -92,14 +92,10 @@ public class JfrEventParser implements EventParser {
                         numFields.put(field.getLabel(), jfrEvent.getValue(field.getName()));
                     }
                 }
-                if (jfrEvent.getEventType().getName().equals("jdk.YoungGenerationConfiguration")) {
-                    var foo = jfrEvent.toString();
-                }
-
                 return new ParsedEvent(
                         sequence.incrementAndGet(),
                         timestamp,
-                        "",//jfrEvent.toString(),
+                        jfrEvent.toString(),
                         Map.of(JfrEventFormat.CATEGORIES, categories),
                         numFields);
             } catch (Exception e) {
