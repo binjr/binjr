@@ -67,8 +67,8 @@ public class JfrAdapterPreferences extends DataAdapterPreferences {
      * A list of names of events that should be excluded
      */
     public ObservablePreference<String[]> excludedEventsNames = objectPreference(String[].class,
-            "excludedEventsNames",
-            new String[]{"GC Identifier", "starttime", "endtime"},
+            "excludedEventsByName",
+            new String[]{"gcId", "javaThreadId", "osThreadId", "modifiers"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 

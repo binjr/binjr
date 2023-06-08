@@ -54,6 +54,8 @@ import java.util.stream.Collectors;
  */
 public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
     private static final Logger logger = Logger.create(JfrChartsDataAdapter.class);
+    public static final int RECURSE_MAX_DEPTH = 10;
+    public static final String GCREF_WEAK_REFERENCE = "Weak reference";
 
 
     /**
@@ -131,18 +133,17 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                             .withAdapter(this)
                             .build());
                     branch.getInternalChildren().add(leaf);
-                    for (var field : eventType.getFields()) {
-                        if (JfrEventFormat.includeField(field)) {
-                            var unit = extractKnownUnit(field);
-                            leaf.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
-                                    .withLabel(field.getLabel())
-                                    .withPath(leaf.getValue().getPath())
-                                    .withParent(leaf.getValue())
-                                    .withUnitName(unit.name())
-                                    .withPrefix(unit.prefix())
-                                    .withGraphType(ChartType.LINE)
-                                    .withAdapter(this)
-                                    .build()));
+                    switch (eventType.getName()) {
+                        case JfrEventFormat.JDK_GCREFERENCE_STATISTICS -> {
+                            addField(JfrEventFormat.GCREF_FINAL_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                            addField(JfrEventFormat.GCREF_SOFT_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                            addField(GCREF_WEAK_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                            addField(JfrEventFormat.GCREF_PHANTOM_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                        }
+                        default -> {
+                            for (var field : eventType.getFields()) {
+                                addField("", field, leaf, 1);
+                            }
                         }
                     }
                 }
@@ -152,6 +153,29 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
         }
         return tree;
     }
+
+    private void addField(String parentName, ValueDescriptor field, FilterableTreeItem<SourceBinding> leaf, int depth) {
+        if (JfrEventFormat.includeField(field)) {
+            var unit = extractKnownUnit(field);
+            leaf.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
+                    .withLabel(String.join(" ", parentName, field.getLabel()).trim())
+                    .withPath(leaf.getValue().getPath())
+                    .withParent(leaf.getValue())
+                    .withUnitName(unit.name())
+                    .withPrefix(unit.prefix())
+                    .withGraphType(ChartType.LINE)
+                    .withAdapter(this)
+                    .build()));
+        }
+        for (var nestedField : field.getFields()) {
+            if (!field.getTypeName().equals(JfrEventFormat.JDK_TYPES_THREAD_GROUP) &&
+                    !field.getTypeName().equals(JfrEventFormat.JDK_TYPES_STACK_TRACE) &&
+                    depth <= RECURSE_MAX_DEPTH) {
+                addField(field.getLabel(), nestedField, leaf, depth + 1);
+            }
+        }
+    }
+
 
     @Override
     public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path,

@@ -22,6 +22,7 @@ import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import jdk.jfr.consumer.RecordedEvent;
+import jdk.jfr.consumer.RecordedObject;
 import jdk.jfr.consumer.RecordingFile;
 
 import java.io.IOException;
@@ -87,10 +88,11 @@ public class JfrEventParser implements EventParser {
                 Map<String, Number> numFields = new LinkedHashMap<>();
                 var categories = String.join("/", jfrEvent.getEventType().getCategoryNames()) +
                         "/" + jfrEvent.getEventType().getLabel();
-                for (var field : jfrEvent.getFields()) {
-                    if (JfrEventFormat.includeField(field)) {
-                        numFields.put(field.getLabel(), jfrEvent.getValue(field.getName()));
-                    }
+                switch (jfrEvent.getEventType().getName()) {
+                    case JfrEventFormat.JDK_GCREFERENCE_STATISTICS ->
+                            numFields.put(String.join(" ", jfrEvent.getValue(JfrEventFormat.GCREF_TYPE_FIELD),
+                                    JfrEventFormat.GCREF_TOTAL_COUNT), jfrEvent.getValue(JfrEventFormat.GCREF_COUNT_FIELD));
+                    default -> addField("", jfrEvent, numFields);
                 }
                 return new ParsedEvent(
                         sequence.incrementAndGet(),
@@ -102,6 +104,17 @@ public class JfrEventParser implements EventParser {
                 logger.error("Error parsing JFR event [" + (jfrEvent == null ? "unknown" : jfrEvent.getEventType().getName()) + "]: " + e.getMessage());
                 logger.debug("Stack trace", e);
                 return null;
+            }
+        }
+
+        private void addField(String parentLabel, RecordedObject jfrEvent, Map<String, Number> numFields) {
+            for (var field : jfrEvent.getFields()) {
+                if (JfrEventFormat.includeField(field)) {
+                    numFields.put(String.join(" ", parentLabel, field.getLabel()).trim(), jfrEvent.getValue(field.getName()));
+                }
+                if (!field.getFields().isEmpty() && jfrEvent.getValue(field.getName()) instanceof RecordedObject nestedEvent) {
+                    addField(field.getLabel(), nestedEvent, numFields);
+                }
             }
         }
 

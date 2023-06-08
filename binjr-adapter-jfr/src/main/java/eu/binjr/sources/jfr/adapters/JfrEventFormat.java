@@ -24,6 +24,7 @@ import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.sources.jfr.adapters.charts.JfrChartsDataAdapter;
+import jdk.jfr.MemoryAddress;
 import jdk.jfr.Timestamp;
 import jdk.jfr.ValueDescriptor;
 
@@ -34,9 +35,18 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class JfrEventFormat implements EventFormat<Path> {
+    private static final Logger logger = Logger.create(JfrEventParser.class);
     public static final String CATEGORIES = "categories";
     public static final String HAS_NUM_FIELDS = "hasNumFields";
-    private static final Logger logger = Logger.create(JfrEventParser.class);
+    public static final String GCREF_TYPE_FIELD = "type";
+    public static final String JDK_GCREFERENCE_STATISTICS = "jdk.GCReferenceStatistics";
+    public static final String GCREF_COUNT_FIELD = "count";
+    public static final String JDK_TYPES_THREAD_GROUP = "jdk.types.ThreadGroup";
+    public static final String GCREF_FINAL_REFERENCE = "Final reference";
+    public static final String GCREF_SOFT_REFERENCE = "Soft reference";
+    public static final String GCREF_PHANTOM_REFERENCE = "Phantom reference";
+    public static final String GCREF_TOTAL_COUNT = "Total Count";
+    public static final String JDK_TYPES_STACK_TRACE = "jdk.types.StackTrace";
     private final ZoneId zoneId;
     private final Charset encoding;
     private static final JfrAdapterPreferences adapterPrefs;
@@ -78,8 +88,9 @@ public class JfrEventFormat implements EventFormat<Path> {
 
     public static boolean includeField(ValueDescriptor field) {
         return field.getAnnotation(Timestamp.class) == null &&
+                field.getAnnotation(MemoryAddress.class) ==null &&
                 Arrays.stream(adapterPrefs.includedEventsDataTypes.get()).anyMatch(s -> Objects.equals(s, field.getTypeName())) &&
-                Arrays.stream(adapterPrefs.excludedEventsNames.get()).noneMatch(s -> Objects.equals(s, field.getLabel()));
+                Arrays.stream(adapterPrefs.excludedEventsNames.get()).noneMatch(s -> Objects.equals(s, field.getName()));
     }
 
 }
