@@ -44,6 +44,7 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
@@ -156,31 +158,39 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
             sources.forEach(index.getIndexedFiles()::remove);
         }
         final LongProperty charRead = new SimpleLongProperty(0);
+        var isCommitNecessary = new AtomicBoolean(false);
         for (var binding : sources) {
-            String filePath = binding.split("\\|")[0].replace(BuiltInParsingProfile.NONE.getProfileId() + "/", "");
-            index.getIndexedFiles().computeIfAbsent(filePath, CheckedLambdas.wrap(p -> {
+            index.getIndexedFiles().computeIfAbsent(binding, CheckedLambdas.wrap(p -> {
+                isCommitNecessary.set(true);
                 index.add(p,
-                        fileBrowser.getEntry(filePath).getPath(),
-                        true,
+                        binding,
+                        false,
                         eventFormat,
                         (doc, event) -> {
                             // Add number fields
                             event.getNumberFields().forEach((key, value) -> doc.add(new StoredField(key, value.doubleValue())));
                             // Set HAS_NUM field
-                            doc.add(new StringField(JfrEventFormat.HAS_NUM_FIELDS,  event.getNumberFields().size() > 0 ? "true":"false", Field.Store.NO));
+                            doc.add(new StringField(JfrEventFormat.HAS_NUM_FIELDS, event.getNumberFields().size() > 0 ? "true" : "false", Field.Store.NO));
                             // Add event categories as severity
                             String severity = event.getTextField(JfrEventFormat.CATEGORIES) == null ? "JFR" :
-                                    event.getTextField(JfrEventFormat.CATEGORIES).split("/")[0].toLowerCase();
+                                    event.getTextField(JfrEventFormat.CATEGORIES);//.toLowerCase();
                             doc.add(new FacetField(SEVERITY, severity));
                             doc.add(new StoredField(SEVERITY, severity));
                             return doc;
                         },
                         charRead,
                         INDEXING_OK,
-                        (rootPath, parsedEvent) -> BuiltInParsingProfile.NONE.getProfileId() + "/" + rootPath + "|/" + parsedEvent.getTextField(JfrEventFormat.CATEGORIES));
+                        (rootPath, parsedEvent) -> {
+                            if (!rootPath.startsWith(BuiltInParsingProfile.NONE.getProfileId())) {
+                                return BuiltInParsingProfile.NONE.getProfileId() + "/" + rootPath;
+                            }
+                            return rootPath;
+                        });
                 return IndexingStatus.OK;
-
             }));
+        }
+        if (isCommitNecessary.get()){
+            index.commitIndexAndTaxonomy();
         }
     }
 

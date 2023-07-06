@@ -557,7 +557,7 @@ public class Index implements Indexable {
         }
     }
 
-    private void commitIndexAndTaxonomy() throws IOException {
+    public void commitIndexAndTaxonomy() throws IOException {
         indexLock.write().lock(() -> {
             try (Profiler p = Profiler.start("Commit index", logger::perf)) {
                 taxonomyWriter.commit();

@@ -93,57 +93,49 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+        String rootPath = BuiltInParsingProfile.NONE.getProfileId() + "/" + jfrFilePath.toString() + "|";
         FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
                 .withLabel(getSourceName())
-                .withPath(BuiltInParsingProfile.NONE.getProfileId() + "/" + jfrFilePath.toString() + "|")
+                .withPath(rootPath)
                 .withAdapter(this)
                 .build());
         try (var recordingFile = new RecordingFile(jfrFilePath)) {
-            ensureIndexed(Set.of(tree.getValue().getPath()), ReloadPolicy.UNLOADED);
-            var indexedEventTypes = index.getPaths(2, JfrEventFormat.HAS_NUM_FIELDS + ":true");
             for (EventType eventType : recordingFile.readEventTypes()) {
-                String eventKey = BuiltInParsingProfile.NONE.getProfileId() + "/" +
-                        jfrFilePath.toString() + "|/" +
-                        String.join("/", eventType.getCategoryNames()) + "/" +
-                        eventType.getLabel();
-                var facetEntry = indexedEventTypes.get(eventKey);
-                if (facetEntry != null) {
-                    var branch = tree;
-                    for (var cat : eventType.getCategoryNames()) {
-                        var pos = TreeViewUtils.findFirstInTree(tree, item -> item.getValue().getLabel().equals(cat));
-                        if (pos.isEmpty()) {
-                            var node = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
-                                    .withLabel(cat)
-                                    .withParent(branch.getValue())
-                                    .withPath(branch.getValue().getPath() + "/" + cat)
-                                    .withAdapter(this)
-                                    .build());
-                            branch.getInternalChildren().add(node);
-                            branch = node;
-                        } else {
-                            branch = (FilterableTreeItem<SourceBinding>) pos.get();
-                        }
+                var branch = tree;
+                for (var cat : eventType.getCategoryNames()) {
+                    var pos = TreeViewUtils.findFirstInTree(tree, item -> item.getValue().getLabel().equals(cat));
+                    if (pos.isEmpty()) {
+                        var node = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
+                                .withLabel(cat)
+                                .withParent(branch.getValue())
+                                .withPath(branch.getValue().getPath() + "/" + cat)
+                                .withAdapter(this)
+                                .build());
+                        branch.getInternalChildren().add(node);
+                        branch = node;
+                    } else {
+                        branch = (FilterableTreeItem<SourceBinding>) pos.get();
                     }
-                    var leaf = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
-                            .withLabel(eventType.getLabel())
-                            .withLegend(eventType.getLabel())
-                            .withPath(branch.getValue().getPath() + "/" + eventType.getLabel())
-                            .withParent(branch.getValue())
-                            .withGraphType(ChartType.LINE)
-                            .withAdapter(this)
-                            .build());
-                    branch.getInternalChildren().add(leaf);
-                    switch (eventType.getName()) {
-                        case JfrEventFormat.JDK_GCREFERENCE_STATISTICS -> {
-                            addField(JfrEventFormat.GCREF_FINAL_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
-                            addField(JfrEventFormat.GCREF_SOFT_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
-                            addField(GCREF_WEAK_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
-                            addField(JfrEventFormat.GCREF_PHANTOM_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
-                        }
-                        default -> {
-                            for (var field : eventType.getFields()) {
-                                addField("", field, leaf, 1);
-                            }
+                }
+                var leaf = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
+                        .withLabel(eventType.getLabel())
+                        .withLegend(eventType.getLabel())
+                        .withPath(rootPath + eventType.getName())
+                        .withParent(branch.getValue())
+                        .withGraphType(ChartType.LINE)
+                        .withAdapter(this)
+                        .build());
+                branch.getInternalChildren().add(leaf);
+                switch (eventType.getName()) {
+                    case JfrEventFormat.JDK_GCREFERENCE_STATISTICS -> {
+                        addField(JfrEventFormat.GCREF_FINAL_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                        addField(JfrEventFormat.GCREF_SOFT_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                        addField(GCREF_WEAK_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                        addField(JfrEventFormat.GCREF_PHANTOM_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                    }
+                    default -> {
+                        for (var field : eventType.getFields()) {
+                            addField("", field, leaf, 1);
                         }
                     }
                 }

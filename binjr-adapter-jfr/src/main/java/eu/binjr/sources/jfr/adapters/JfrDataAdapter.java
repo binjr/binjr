@@ -86,46 +86,38 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Pro
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+        String rootPath = jfrFilePath.toString() + "|";
         FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(new LogFilesBinding.Builder()
                 .withLabel(getSourceName())
                 .withPath(jfrFilePath.toString() + "|")
                 .withAdapter(this)
                 .build());
         try (var recordingFile = new RecordingFile(jfrFilePath)) {
-            ensureIndexed(Set.of(tree.getValue().getPath()), ReloadPolicy.UNLOADED);
-            var indexedEventTypes = index.getAllPaths();
             for (EventType eventType : recordingFile.readEventTypes()) {
-                String eventKey = BuiltInParsingProfile.NONE.getProfileId() + "/" +
-                        jfrFilePath.toString() + "|/" +
-                        String.join("/", eventType.getCategoryNames()) + "/" +
-                        eventType.getLabel();
-                var facetEntry = indexedEventTypes.get(eventKey);
-                if (facetEntry != null) {
-                    var branch = tree;
-                    for (var cat : eventType.getCategoryNames()) {
-                        var pos = TreeViewUtils.findFirstInTree(tree, item -> item.getValue().getLabel().equals(cat));
-                        if (pos.isEmpty()) {
-                            var node = new FilterableTreeItem<>((SourceBinding) new LogFilesBinding.Builder()
-                                    .withLabel(cat)
-                                    .withParent(branch.getValue())
-                                    .withPath(branch.getValue().getPath() + "/" + cat)
-                                    .withAdapter(this)
-                                    .build());
-                            branch.getInternalChildren().add(node);
-                            branch = node;
-                        } else {
-                            branch = (FilterableTreeItem<SourceBinding>) pos.get();
-                        }
+                var branch = tree;
+                for (var cat : eventType.getCategoryNames()) {
+                    var pos = TreeViewUtils.findFirstInTree(tree, item -> item.getValue().getLabel().equals(cat));
+                    if (pos.isEmpty()) {
+                        var node = new FilterableTreeItem<>((SourceBinding) new LogFilesBinding.Builder()
+                                .withLabel(cat)
+                                .withParent(branch.getValue())
+                                .withPath(branch.getValue().getPath() + "/" + cat)
+                                .withAdapter(this)
+                                .build());
+                        branch.getInternalChildren().add(node);
+                        branch = node;
+                    } else {
+                        branch = (FilterableTreeItem<SourceBinding>) pos.get();
                     }
-                    var leaf = new FilterableTreeItem<>((SourceBinding) new LogFilesBinding.Builder()
-                            .withLabel(eventType.getLabel())
-                            .withLegend(eventType.getLabel())
-                            .withPath(branch.getValue().getPath() + "/" + eventType.getLabel())
-                            .withParent(branch.getValue())
-                            .withAdapter(this)
-                            .build());
-                    branch.getInternalChildren().add(leaf);
                 }
+                var leaf = new FilterableTreeItem<>((SourceBinding) new LogFilesBinding.Builder()
+                        .withLabel(eventType.getLabel())
+                        .withLegend(eventType.getLabel())
+                        .withPath(rootPath + eventType.getName())
+                        .withParent(branch.getValue())
+                        .withAdapter(this)
+                        .build());
+                branch.getInternalChildren().add(leaf);
             }
         } catch (IOException e) {
             throw new DataAdapterException("Error while attempting to read JFR recording: " + e.getMessage(), e);

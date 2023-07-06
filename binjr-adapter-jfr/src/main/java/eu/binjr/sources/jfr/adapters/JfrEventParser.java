@@ -17,8 +17,10 @@
 package eu.binjr.sources.jfr.adapters;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import jdk.jfr.consumer.RecordedEvent;
@@ -42,12 +44,16 @@ public class JfrEventParser implements EventParser {
     private final JfrEventIterator eventIterator;
     private final RecordingFile recordingFile;
     private final LongProperty progress = new SimpleLongProperty(0);
+    private final String eventTypeFilter;
 
-    JfrEventParser(JfrEventFormat format, Path ias) {
+    JfrEventParser(JfrEventFormat format, String source) {
         this.sequence = new AtomicLong(0);
         this.format = format;
-        try {
-            this.recordingFile = new RecordingFile(ias);
+        try (var p = Profiler.start("Initialize JFR Recording file", logger::perf)) {
+            var a = source.split("\\|");
+            var filePath = Path.of(a[0].replace(BuiltInParsingProfile.NONE.getProfileId() + "/", ""));
+            this.eventTypeFilter = a[1];
+            this.recordingFile = new RecordingFile(filePath);
             this.eventIterator = new JfrEventIterator();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -84,10 +90,13 @@ public class JfrEventParser implements EventParser {
             RecordedEvent jfrEvent = null;
             try {
                 jfrEvent = recordingFile.readEvent();
+                if (!eventTypeFilter.equals(jfrEvent.getEventType().getName())) {
+                    return null;
+                }
                 ZonedDateTime timestamp = ZonedDateTime.ofInstant(jfrEvent.getStartTime(), format.getZoneId());
                 Map<String, Number> numFields = new LinkedHashMap<>();
-                var categories = String.join("/", jfrEvent.getEventType().getCategoryNames()) +
-                        "/" + jfrEvent.getEventType().getLabel();
+                var categories = jfrEvent.getEventType().getCategoryNames();
+                String catFacet = categories.size() > 1 ? categories.get(1) : categories.get(0);
                 switch (jfrEvent.getEventType().getName()) {
                     case JfrEventFormat.JDK_GCREFERENCE_STATISTICS ->
                             numFields.put(String.join(" ", jfrEvent.getValue(JfrEventFormat.GCREF_TYPE_FIELD),
@@ -98,7 +107,7 @@ public class JfrEventParser implements EventParser {
                         sequence.incrementAndGet(),
                         timestamp,
                         jfrEvent.toString(),
-                        Map.of(JfrEventFormat.CATEGORIES, categories),
+                        Map.of(JfrEventFormat.CATEGORIES, catFacet),
                         numFields);
             } catch (Exception e) {
                 logger.error("Error parsing JFR event [" + (jfrEvent == null ? "unknown" : jfrEvent.getEventType().getName()) + "]: " + e.getMessage());

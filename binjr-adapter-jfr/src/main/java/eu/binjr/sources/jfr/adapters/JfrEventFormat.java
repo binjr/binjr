@@ -23,18 +23,16 @@ import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
-import eu.binjr.sources.jfr.adapters.charts.JfrChartsDataAdapter;
 import jdk.jfr.MemoryAddress;
 import jdk.jfr.Timestamp;
 import jdk.jfr.ValueDescriptor;
 
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class JfrEventFormat implements EventFormat<Path> {
+public class JfrEventFormat implements EventFormat<String> {
     private static final Logger logger = Logger.create(JfrEventParser.class);
     public static final String CATEGORIES = "categories";
     public static final String HAS_NUM_FIELDS = "hasNumFields";
@@ -72,8 +70,8 @@ public class JfrEventFormat implements EventFormat<Path> {
     }
 
     @Override
-    public EventParser parse(Path ias) {
-        return new JfrEventParser(this, ias);
+    public EventParser parse(String source) {
+        return new JfrEventParser(this, source);
     }
 
     @Override
