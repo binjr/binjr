@@ -49,10 +49,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -158,38 +155,43 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
             sources.forEach(index.getIndexedFiles()::remove);
         }
         final LongProperty charRead = new SimpleLongProperty(0);
-        var isCommitNecessary = new AtomicBoolean(false);
+        var isCommitNecessary = false;
+        var filterMap = new HashMap<Path, HashSet<String>>();
         for (var binding : sources) {
-            index.getIndexedFiles().computeIfAbsent(binding, CheckedLambdas.wrap(p -> {
-                isCommitNecessary.set(true);
-                index.add(p,
-                        binding,
-                        false,
-                        eventFormat,
-                        (doc, event) -> {
-                            // Add number fields
-                            event.getNumberFields().forEach((key, value) -> doc.add(new StoredField(key, value.doubleValue())));
-                            // Set HAS_NUM field
-                            doc.add(new StringField(JfrEventFormat.HAS_NUM_FIELDS, event.getNumberFields().size() > 0 ? "true" : "false", Field.Store.NO));
-                            // Add event categories as severity
-                            String severity = event.getTextField(JfrEventFormat.CATEGORIES) == null ? "JFR" :
-                                    event.getTextField(JfrEventFormat.CATEGORIES);//.toLowerCase();
-                            doc.add(new FacetField(SEVERITY, severity));
-                            doc.add(new StoredField(SEVERITY, severity));
-                            return doc;
-                        },
-                        charRead,
-                        INDEXING_OK,
-                        (rootPath, parsedEvent) -> {
-                            if (!rootPath.startsWith(BuiltInParsingProfile.NONE.getProfileId())) {
-                                return BuiltInParsingProfile.NONE.getProfileId() + "/" + rootPath;
-                            }
-                            return rootPath;
-                        });
-                return IndexingStatus.OK;
-            }));
+            if (!index.getIndexedFiles().containsKey(binding)) {
+                var a = binding.split("\\|");
+                var filePath = Path.of(a[0].replace(BuiltInParsingProfile.NONE.getProfileId() + "/", ""));
+                var eventType = a[1];
+                filterMap.computeIfAbsent(filePath, p -> new HashSet<>()).add(eventType);
+                isCommitNecessary = true;
+                index.getIndexedFiles().put(binding, IndexingStatus.OK);
+            }
         }
-        if (isCommitNecessary.get()){
+        for (Map.Entry<Path, HashSet<String>> entry : filterMap.entrySet()) {
+            Path path = entry.getKey();
+            HashSet<String> strings = entry.getValue();
+            index.add(path.toString(),
+                    new JfrRecordingFilter(path, strings),
+                    false,
+                    eventFormat,
+                    (doc, event) -> {
+                        // Add number fields
+                        event.getNumberFields().forEach((key, value) -> doc.add(new StoredField(key, value.doubleValue())));
+                        // Set HAS_NUM field
+                        doc.add(new StringField(JfrEventFormat.HAS_NUM_FIELDS, event.getNumberFields().size() > 0 ? "true" : "false", Field.Store.NO));
+                        // Add event categories as severity
+                        String severity = event.getTextField(JfrEventFormat.CATEGORIES) == null ? "JFR" :
+                                event.getTextField(JfrEventFormat.CATEGORIES);//.toLowerCase();
+                        doc.add(new FacetField(SEVERITY, severity));
+                        doc.add(new StoredField(SEVERITY, severity));
+                        return doc;
+                    },
+                    charRead,
+                    INDEXING_OK,
+                    (rootPath, parsedEvent) -> BuiltInParsingProfile.NONE.getProfileId() + "/" + rootPath + "|" + parsedEvent.getTextField(JfrEventFormat.EVENT_TYPE_NAME),
+                    (source) -> source.eventTypes().stream().map(type -> BuiltInParsingProfile.NONE.getProfileId() + "/" + source.recordingPath().toString() + "|" + type).toList());
+        }
+        if (isCommitNecessary) {
             index.commitIndexAndTaxonomy();
         }
     }

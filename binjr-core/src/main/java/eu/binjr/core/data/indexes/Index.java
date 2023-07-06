@@ -450,7 +450,7 @@ public class Index implements Indexable {
                         EnrichDocumentFunction enrichDocumentFunction,
                         LongProperty progress,
                         Property<IndexingStatus> cancellationRequested) throws IOException {
-        add(path, source, commit, eventFormat, enrichDocumentFunction, progress, cancellationRequested, (root, event) -> path);
+        add(path, source, commit, eventFormat, enrichDocumentFunction, progress, cancellationRequested, (root, event) -> path, (ignore) -> List.of(path));
     }
 
     public <T> void add(String path,
@@ -460,9 +460,10 @@ public class Index implements Indexable {
                         EnrichDocumentFunction enrichDocumentFunction,
                         LongProperty progress,
                         Property<IndexingStatus> cancellationRequested,
-                        BiFunction<String, ParsedEvent, String> computePathFacetValue) throws IOException {
+                        BiFunction<String, ParsedEvent, String> computePathFacetValue,
+                        Function<T, List<String>> computeDeletePaths) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
-            indexWriter.deleteDocuments(new Term(DOC_URI, path));
+            indexWriter.deleteDocuments(computeDeletePaths.apply(source).stream().map(s -> new Term(DOC_URI, s)).toArray(Term[]::new));
         }
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             final AtomicLong nbLogEvents = new AtomicLong(0);

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public interface Indexable extends Closeable {
 
@@ -47,7 +48,8 @@ public interface Indexable extends Closeable {
                  EnrichDocumentFunction enrichDocumentFunction,
                  LongProperty progress,
                  Property<IndexingStatus> cancellationRequested,
-                 BiFunction<String, ParsedEvent, String> computePathFacetValue) throws IOException;
+                 BiFunction<String, ParsedEvent, String> computePathFacetValue,
+                 Function<T, List<String>> computeDeletePaths) throws IOException;
 
     TimeRange getTimeRangeBoundaries(List<String> files, ZoneId zoneId) throws IOException;
 

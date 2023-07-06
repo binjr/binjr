@@ -77,7 +77,7 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Pro
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
         try {
-            ensureIndexed(seriesInfo.stream().map(info -> info.getBinding().getPath()).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
+            ensureIndexed(seriesInfo.stream().map(info -> BuiltInParsingProfile.NONE.getProfileId() + "/" + info.getBinding().getPath()).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
             return index.getTimeRangeBoundaries(seriesInfo.stream().map(ts -> BuiltInParsingProfile.NONE.getProfileId() + "/" + ts.getBinding().getPath()).toList(), getTimeZoneId());
         } catch (IOException e) {
             throw new DataAdapterException("Error retrieving initial time range", e);
@@ -144,7 +144,7 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Pro
                                                                                      Property<IndexingStatus> indexingStatus) throws DataAdapterException {
         Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
         try {
-            ensureIndexed(seriesInfo.stream().map(info -> info.getBinding().getPath()).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
+            ensureIndexed(seriesInfo.stream().map(info -> BuiltInParsingProfile.NONE.getProfileId() + "/" + info.getBinding().getPath()).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }

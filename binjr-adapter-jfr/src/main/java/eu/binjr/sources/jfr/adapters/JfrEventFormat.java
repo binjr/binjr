@@ -32,7 +32,8 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class JfrEventFormat implements EventFormat<String> {
+public class JfrEventFormat implements EventFormat<JfrRecordingFilter> {
+    public static final String EVENT_TYPE_NAME = "eventTypeName";
     private static final Logger logger = Logger.create(JfrEventParser.class);
     public static final String CATEGORIES = "categories";
     public static final String HAS_NUM_FIELDS = "hasNumFields";
@@ -70,7 +71,7 @@ public class JfrEventFormat implements EventFormat<String> {
     }
 
     @Override
-    public EventParser parse(String source) {
+    public EventParser parse(JfrRecordingFilter source) {
         return new JfrEventParser(this, source);
     }
 
