@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2020-2021 Frederic Thevenet
+  ~    Copyright 2020-2023 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -116,9 +116,10 @@
                         </graphic>
                     </ToggleButton>
                     <ToggleButton fx:id="textSizeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                            maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                            text="Adjust text size">
+                                  maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                  mnemonicParsing="false"
+                                  prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                  text="Adjust text size">
                         <tooltip>
                             <Tooltip showDelay="500ms" text="Adjust text size"/>
                         </tooltip>
@@ -162,7 +163,7 @@
                 </padding>
                 <HBox fx:id="filteringBar" maxWidth="1.7976931348623157E308" spacing="10.0" HBox.hgrow="ALWAYS">
                     <children>
-                        <HBox fx:id="filterBar" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="600"
+                        <HBox fx:id="filterBar" alignment="CENTER_LEFT" minWidth="320" maxHeight="-Infinity" maxWidth="600"
                               prefHeight="27.0"
                               spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
                             <padding>
@@ -240,10 +241,9 @@
                                 </tooltip>
                             </Button>
                         </HBox>
-                        <FacetPillsContainer fx:id="severityListView" alignment="CENTER_LEFT" spacing="7"
+                        <FacetPillsContainer fx:id="severityListView" styleClass="facet-pills-container"
                                              HBox.hgrow="SOMETIMES"/>
                     </children>
-
                 </HBox>
 
             </VBox>

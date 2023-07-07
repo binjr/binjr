@@ -345,4 +345,6 @@
     -fx-background-radius: 8;
 }
 
-
+.facet-pills-container {
+    -fx-spacing: 7;
+}

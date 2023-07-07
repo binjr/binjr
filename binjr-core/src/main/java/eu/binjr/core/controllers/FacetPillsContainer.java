@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -40,14 +40,14 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableSet;
 import javafx.scene.control.CheckBox;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.ToolBar;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-public class FacetPillsContainer extends HBox implements Closeable {
+public class FacetPillsContainer extends ToolBar implements Closeable {
     private final ObservableList<FacetPill> facetPills = FXCollections.observableArrayList();
     private final BindingManager bindingManager = new BindingManager();
     private final ObservableSet<FacetPill> selectedPills = FXCollections.observableSet();
@@ -65,7 +65,7 @@ public class FacetPillsContainer extends HBox implements Closeable {
                                         selectedPills.remove(pill);
                                     }
                                 });
-                        this.getChildren().add(pill);
+                        this.getItems().add(pill);
                         if (pill.isSelected()) {
                             selectedPills.add(pill);
                         }
@@ -73,7 +73,7 @@ public class FacetPillsContainer extends HBox implements Closeable {
                 }
                 if (c.wasRemoved()) {
                     c.getRemoved().forEach(pill -> {
-                        this.getChildren().remove(pill);
+                        this.getItems().remove(pill);
                         selectedPills.remove(pill);
                     });
                 }
