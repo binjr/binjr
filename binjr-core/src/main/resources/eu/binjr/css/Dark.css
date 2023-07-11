@@ -2005,18 +2005,20 @@
 
 /**** UNKNOWN ****/
 {
-    -unknown-color: white
-;
+    -unknown-color:  derive(-binjr-background-color, 100%);
+    -unknown-background-color: derive(-binjr-background-color, -35%);
+    -unknown-border-color: derive(-binjr-background-color, 100%);
 }
+
 .facet-pill-unknown {
-    -fx-background-color: #ffffff50;
-    -fx-text-fill: -unknown-color;
-    -fx-border-color: -unknown-color;
+    -fx-background-color: -unknown-background-color;
+    -fx-text-fill:  -unknown-border-color;
+    -fx-border-color: -unknown-border-color;
 }
 
 .facet-pill-unknown .box {
-    -fx-text-fill: -unknown-color;
-    -fx-border-color: -unknown-color;
+    -fx-text-fill:  -unknown-border-color;
+    -fx-border-color:  -unknown-border-color;
 }
 
 .facet-pill-unknown:selected .box .mark {
@@ -2025,7 +2027,7 @@
 
 .styled-text-area .unknown,
 .log-unknown {
-    -fx-fill: -unknown-color;
+    -fx-fill: white;
 }
 
 /**** WARN ****/
