@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.controllers.XYChartsWorksheetController;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -38,7 +39,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 
@@ -554,6 +554,12 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
             allInfo.addAll(chart.getSeries());
         }
         return allInfo;
+    }
+
+    @XmlTransient
+    @Override
+    public VisualizationType getVisualizationType() {
+        return VisualizationType.CHARTS;
     }
 
 }

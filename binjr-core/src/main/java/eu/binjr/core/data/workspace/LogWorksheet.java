@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,10 +21,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.LogFilesBinding;
-import eu.binjr.core.data.adapters.LogQueryParameters;
-import eu.binjr.core.data.adapters.ProgressAdapter;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -269,6 +266,12 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     public void setQueryParameters(LogQueryParameters queryParameters) {
         this.queryParameters.setValue(queryParameters);
+    }
+
+    @XmlTransient
+    @Override
+    public VisualizationType getVisualizationType() {
+        return VisualizationType.EVENTS;
     }
 
     @Override

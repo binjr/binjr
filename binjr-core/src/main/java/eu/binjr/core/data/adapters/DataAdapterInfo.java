@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.version.Version;
 import javafx.beans.property.BooleanProperty;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Dialog;
 
 import java.util.Collection;
@@ -138,6 +141,15 @@ public interface DataAdapterInfo {
      */
     default SourceLocality getSourceLocality() {
         return SourceLocality.UNKNOWN;
+    }
+
+    /**
+     * Returns the visualization type for the data provided by this adapter.
+     *
+     * @return the visualization type for the data provided by this adapter.
+     */
+    default VisualizationType getVisualizationType() {
+        return VisualizationType.UNKNOWN;
     }
 
 }

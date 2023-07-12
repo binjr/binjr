@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package eu.binjr.sources.jrds.adapters;
 import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
@@ -36,7 +37,8 @@ import eu.binjr.core.preferences.AppEnvironment;
         adapterClass = JrdsDataAdapter.class,
         dialogClass = JrdsAdapterDialog.class,
         sourceLocality = SourceLocality.REMOTE,
-        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL,
+        visualizationType = VisualizationType.CHARTS
 )
 public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 

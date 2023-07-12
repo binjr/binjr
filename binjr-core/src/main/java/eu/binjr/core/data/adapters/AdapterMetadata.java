@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -84,4 +84,9 @@ public @interface AdapterMetadata {
      * @return Indicates whether the source is local or remote
      */
     SourceLocality sourceLocality() default SourceLocality.UNKNOWN;
+
+    /**
+     * @return Indicates the visualization type for the data provided by this adapter
+     */
+    VisualizationType visualizationType() default VisualizationType.UNKNOWN;
 }

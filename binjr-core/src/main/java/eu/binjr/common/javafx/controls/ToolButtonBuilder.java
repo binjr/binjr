@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2021 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -176,7 +176,12 @@ public class ToolButtonBuilder<T extends ButtonBase> {
     }
 
     public static Node makeIconNode(Pos position, String... iconStyles) {
+        return makeIconNode(position, 0, 0, iconStyles);
+    }
+
+    public static Node makeIconNode(Pos position, double width, double height, String... iconStyles) {
         Region r = new Region();
+        r.setMinSize(width, height);
         r.getStyleClass().addAll(iconStyles);
         HBox box = new HBox(r);
         box.setAlignment(position);

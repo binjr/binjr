@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final Version apiLevel;
     private final DataAdapterPreferences adapterPreferences;
     private final SourceLocality sourceLocality;
+    private final VisualizationType visualizationType;
     private final BooleanProperty enabled = new SimpleBooleanProperty(true);
 
 
@@ -67,6 +68,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         this.adapterClass = meta.adapterClass();
         this.adapterDialog = meta.dialogClass();
         this.sourceLocality = meta.sourceLocality();
+        this.visualizationType = meta.visualizationType();
         this.apiLevel = Version.parseVersion(meta.apiLevel());
         var version = Version.parseVersion(meta.version());
         this.version = (version.equals(Version.emptyVersion)) ?
@@ -186,6 +188,11 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     @Override
     public SourceLocality getSourceLocality() {
         return this.sourceLocality;
+    }
+
+    @Override
+    public VisualizationType getVisualizationType(){
+        return this.visualizationType;
     }
 
 }

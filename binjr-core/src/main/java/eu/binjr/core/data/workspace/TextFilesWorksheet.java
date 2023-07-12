@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.core.controllers.TextWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.TextFilesBinding;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -139,5 +140,11 @@ public class TextFilesWorksheet extends Worksheet<String> {
 
     public void setSyntaxHighlightEnabled(boolean syntaxHighlightEnabled) {
         this.syntaxHighlightEnabled = syntaxHighlightEnabled;
+    }
+
+    @XmlTransient
+    @Override
+    public VisualizationType getVisualizationType() {
+        return VisualizationType.TEXT;
     }
 }

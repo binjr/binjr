@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2022 Frederic Thevenet
+ *    Copyright 2016-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -279,7 +279,7 @@ public class MainViewController implements Initializable {
             stage.setTitle(AppEnvironment.APP_NAME);
             registerStageKeyEvents(stage);
 
-            StackPane dropZone = new StackPane(ToolButtonBuilder.makeIconNode(Pos.CENTER, "new-tab-icon"));
+            StackPane dropZone = new StackPane(ToolButtonBuilder.makeIconNode(Pos.CENTER, 0, 0, "new-tab-icon"));
             dropZone.getStyleClass().add("drop-zone");
             dropZone.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
             dropZone.setOnDragOver(this::worksheetAreaOnDragOver);
@@ -608,6 +608,8 @@ public class MainViewController implements Initializable {
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
         titleRegion.getColumnConstraints().add(
+                new ColumnConstraints(25, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, true));
+        titleRegion.getColumnConstraints().add(
                 new ColumnConstraints(65, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
         titleRegion.getColumnConstraints().add(
                 new ColumnConstraints(65, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
@@ -633,8 +635,6 @@ public class MainViewController implements Initializable {
                 }).build(Button::new);
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
-        GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
-        GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
         newPane.setGraphic(titleRegion);
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         newPane.setAnimated(false);
@@ -644,7 +644,6 @@ public class MainViewController implements Initializable {
                         source.setEditable(false);
                     }
                 });
-
         HBox editFieldsGroup = new HBox();
         DoubleBinding db = Bindings.createDoubleBinding(
                 () -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
@@ -656,6 +655,13 @@ public class MainViewController implements Initializable {
         TextField sourceNameField = new TextField();
         source.getBindingManager().bindBidirectional(sourceNameField.textProperty(), source.nameProperty());
         editFieldsGroup.getChildren().add(sourceNameField);
+        var icon = ToolButtonBuilder.makeIconNode(Pos.CENTER, 10, 10,
+                source.getAdapter().getAdapterInfo().getVisualizationType().getIconStyleClass(),
+                "scale-2-dot-2-icon");
+        GridPane.setConstraints(icon, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+        GridPane.setConstraints(label, 1, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+        GridPane.setConstraints(editFieldsGroup, 1, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+        GridPane.setConstraints(toolbar, 2, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
 
         sourceNameField.setOnAction(source.getBindingManager().registerHandler(event -> source.setEditable(false)));
         source.getBindingManager().attachListener(sourceNameField.focusedProperty(),
@@ -684,7 +690,7 @@ public class MainViewController implements Initializable {
                 .build(ToggleButton::new);
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
         toolbar.getChildren().addAll(filterButton, editButton, closeButton);
-        titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
+        titleRegion.getChildren().addAll(icon, label, editFieldsGroup, toolbar);
 
         newPane.setOnMouseClicked(source.getBindingManager().registerHandler(event -> {
             if (event.getClickCount() == 2) {
@@ -1184,7 +1190,10 @@ public class MainViewController implements Initializable {
                 .setIconStyleClass("cross-icon", "small-icon")
                 .build(Button::new);
         buttons.add(closeTabButton);
-        EditableTab newTab = new EditableTab("New worksheet", buttons.toArray(ButtonBase[]::new));
+        var icon = ToolButtonBuilder.makeIconNode(Pos.CENTER, 17, 17,
+                 worksheet.getVisualizationType().getIconStyleClass(),
+                "small-icon");
+        EditableTab newTab = new EditableTab(icon, "New worksheet", buttons.toArray(ButtonBase[]::new));
         loadWorksheet(worksheet, newTab, editMode);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
         return newTab;
@@ -1268,9 +1277,12 @@ public class MainViewController implements Initializable {
         return items;
     }
 
-    private Image renderTextTooltip(String text) {
-        var label = new Label("    " + text + "    ");
+    private Image renderTextTooltip(String text, String iconStyleClass) {
+        var label = new Label(text);
+        label.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER_LEFT, 17, 17, iconStyleClass, "small-icon"));
+      //  label.setGraphicTextGap(17);
         label.getStyleClass().add("tooltip");
+        label.setPadding(new Insets(10, 10, 10, 10));
         // The label must be added to a scene so that CSS and layout are applied.
         StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.RED));
         return NodeUtils.scaledSnapshot(label, Color.TRANSPARENT);
@@ -1296,7 +1308,7 @@ public class MainViewController implements Initializable {
                                         .map(t -> t.getValue().getLegend())
                                         .collect(Collectors.joining(", ")),
                                 100);
-                        db.setDragView(renderTextTooltip(toolTipText));
+                        db.setDragView(renderTextTooltip(toolTipText, treeView.getRoot().getValue().getAdapter().getAdapterInfo().getVisualizationType().getIconStyleClass()));
                         ClipboardContent content = new ClipboardContent();
                         treeView.getSelectionModel().getSelectedItems().forEach(s -> content.put(
                                 DataFormat.lookupMimeType(s.getValue().getMimeType()),

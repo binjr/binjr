@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package eu.binjr.sources.text.adapters;
 import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
@@ -39,7 +40,8 @@ import eu.binjr.core.preferences.AppEnvironment;
         dialogClass = TextDataAdapterDialog.class,
         preferencesClass = TextAdapterPreferences.class,
         sourceLocality = SourceLocality.LOCAL,
-        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL,
+        visualizationType = VisualizationType.TEXT
 )
 public class TextDataAdapterInfo extends BaseDataAdapterInfo {
 

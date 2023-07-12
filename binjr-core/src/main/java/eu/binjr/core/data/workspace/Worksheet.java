@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -116,4 +117,8 @@ public abstract class Worksheet<T> implements Dirtyable {
         }
     }
 
+    @XmlTransient
+    public VisualizationType getVisualizationType() {
+        return VisualizationType.UNKNOWN;
+    }
 }

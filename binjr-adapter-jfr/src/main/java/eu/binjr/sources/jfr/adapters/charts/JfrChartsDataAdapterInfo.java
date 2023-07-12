@@ -20,9 +20,9 @@ package eu.binjr.sources.jfr.adapters.charts;
 import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.sources.jfr.adapters.JfrAdapterPreferences;
 import eu.binjr.sources.jfr.adapters.JfrDataAdapterDialog;
 
 
@@ -40,7 +40,8 @@ import eu.binjr.sources.jfr.adapters.JfrDataAdapterDialog;
         adapterClass = JfrChartsDataAdapter.class,
         dialogClass = JfrDataAdapterDialog.class,
         sourceLocality = SourceLocality.LOCAL,
-        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL,
+        visualizationType = VisualizationType.CHARTS
 )
 public class JfrChartsDataAdapterInfo extends BaseDataAdapterInfo {
 

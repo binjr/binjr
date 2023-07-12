@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -384,10 +384,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var suggestRoot = new FilterableTreeItem<>(new StylableTreeItem("Filter Suggestions", PSEUDOCLASS_CATEGORY));
 
         var historyRoot = new FilterableTreeItem<>(new StylableTreeItem("History", PSEUDOCLASS_CATEGORY, PSEUDOCLASS_HISTORY));
-        historyRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "time-icon", "medium-icon", "tree-item-icon"));
+        historyRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER,0, 0, "time-icon", "medium-icon", "tree-item-icon"));
         historyRoot.setExpanded(true);
         var favoritesRoot = new FilterableTreeItem<>(new StylableTreeItem("Favorites", PSEUDOCLASS_CATEGORY, PSEUDOCLASS_FAVORITES));
-        favoritesRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "favorite-solid-icon", "small-icon", "tree-item-icon"));
+        favoritesRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER,0, 0, "favorite-solid-icon", "small-icon", "tree-item-icon"));
         favoritesRoot.setExpanded(true);
         suggestRoot.getInternalChildren().addAll(favoritesRoot, historyRoot);
         suggestTree.setRoot(suggestRoot);
@@ -838,10 +838,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void updateFavoriteButtonStatus(String filterValue) {
         if (favoriteLogFilters.contains(filterValue)) {
             favoriteButton.getTooltip().setText("Remove from favorites");
-            favoriteButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "favorite-solid-icon", "small-icon"));
+            favoriteButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, 0, 0, "favorite-solid-icon", "small-icon"));
         } else {
             favoriteButton.getTooltip().setText("Add to favorites");
-            favoriteButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "favorite-icon", "small-icon"));
+            favoriteButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, 0, 0, "favorite-icon", "small-icon"));
         }
     }
 

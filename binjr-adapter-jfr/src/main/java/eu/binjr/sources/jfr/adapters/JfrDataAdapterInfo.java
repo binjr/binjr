@@ -20,6 +20,7 @@ package eu.binjr.sources.jfr.adapters;
 import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
@@ -39,7 +40,8 @@ import eu.binjr.core.preferences.AppEnvironment;
         dialogClass = JfrDataAdapterDialog.class,
         preferencesClass = JfrAdapterPreferences.class,
         sourceLocality = SourceLocality.LOCAL,
-        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL,
+        visualizationType = VisualizationType.EVENTS
 )
 public class JfrDataAdapterInfo extends BaseDataAdapterInfo {
 
