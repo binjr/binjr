@@ -19,12 +19,15 @@ package eu.binjr.core.data.adapters;
 public enum VisualizationType {
     UNKNOWN("help-icon"),
     CHARTS("line-chart-icon"),
+    HISTOGRAMS("vertical-histogram-icon"),
+    FLAME_GRAPHS("flame-graph-icon"),
+    PIE_CHARTS("pie-chart-icon"),
     EVENTS("event-list-icon"),
     TEXT("text-size-icon");
 
     private final String iconStyleClass;
 
-    VisualizationType(String iconStyleClass){
+    VisualizationType(String iconStyleClass) {
         this.iconStyleClass = iconStyleClass;
     }
 
