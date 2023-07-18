@@ -196,12 +196,12 @@ public class StageAppearanceManager {
                         .collect(Collectors.joining(", "));
     }
 
-    private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<AppearanceOptions> options) {
+    private void setAppearance(Stage stage, String theme, Set<AppearanceOptions> options) {
         if (options.contains(AppearanceOptions.SET_NONE)) {
             return;
         }
         if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_THEME)) {
-            setUiTheme(stage.getScene(), theme);
+            setUiTheme(stage.getScene(), UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.LIGHT));
         }
         if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_ICON)) {
             setIcon(stage);
@@ -216,6 +216,10 @@ public class StageAppearanceManager {
                 new Image(getClass().getResourceAsStream("/eu/binjr/icons/binjr_128.png")),
                 new Image(getClass().getResourceAsStream("/eu/binjr/icons/binjr_256.png")),
                 new Image(getClass().getResourceAsStream("/eu/binjr/icons/binjr_512.png")));
+    }
+
+    private void setUiTheme(Scene scene, String theme, String... extraCss) {
+        setUiTheme(scene, UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.LIGHT), extraCss);
     }
 
     private void setUiTheme(Scene scene, UserInterfaceThemes theme, String... extraCss) {

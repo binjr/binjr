@@ -74,12 +74,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The User Interface theme applied to the application.
      */
-    public final ObservablePreference<UserInterfaceThemes> userInterfaceTheme =
-            objectPreference(UserInterfaceThemes.class,
-                    "userInterfaceTheme_v2",
-                    BuiltInUserInterfaceThemes.LIGHT,
-                    UserInterfaceThemes::name,
-                    s -> UserInterfaceThemes.valueOf(s, BuiltInUserInterfaceThemes.LIGHT));
+    public final ObservablePreference<String> userInterfaceTheme =
+            stringPreference("userInterfaceTheme_v2", BuiltInUserInterfaceThemes.LIGHT.name());
 
     /**
      * True if the last open workspace should be reload next time the app if started, false otherwise.

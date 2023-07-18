@@ -23,6 +23,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
+import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -58,6 +59,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
 
 /**
@@ -256,7 +258,11 @@ public class PreferenceDialogController implements Initializable {
         defaultTextSizeField.setTextFormatter(fontSizeformatter);
         fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
         bindEnumToChoiceBox(userPrefs.defaultDateTimeAnchor, dateTimeAnchorChoiceBox, DateTimeAnchor.values());
-        bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
+        bindEnumToChoiceBox(userPrefs.userInterfaceTheme,
+                s -> UserInterfaceThemes.valueOf(s, BuiltInUserInterfaceThemes.LIGHT),
+                UserInterfaceThemes::name,
+                uiThemeChoiceBox,
+                UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
@@ -328,18 +334,23 @@ public class PreferenceDialogController implements Initializable {
 
     }
 
-    @SafeVarargs
     private <T> void bindEnumToChoiceBox(ObservablePreference<T> observablePreference, ChoiceBox<T> choiceBox, T... initValues) {
+        bindEnumToChoiceBox(observablePreference, t -> t, t -> t, choiceBox, initValues);
+    }
+
+    private <A, B> void bindEnumToChoiceBox(ObservablePreference<A> observablePreference,
+                                            Function<A, B> fromAtoB, Function<B, A> fromBtoA,
+                                            ChoiceBox<B> choiceBox, B... initValues) {
         choiceBox.getItems().setAll(initValues);
-        choiceBox.getSelectionModel().select(observablePreference.get());
+        choiceBox.getSelectionModel().select(fromAtoB.apply(observablePreference.get()));
         observablePreference.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                choiceBox.getSelectionModel().select(newValue);
+                choiceBox.getSelectionModel().select(fromAtoB.apply(newValue));
             }
         });
         choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                observablePreference.set(newValue);
+                observablePreference.set(fromBtoA.apply(newValue));
             }
         });
     }

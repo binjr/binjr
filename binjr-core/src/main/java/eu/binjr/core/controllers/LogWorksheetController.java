@@ -216,7 +216,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private BinjrLoadingPane loadingPane;
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
-    private Index index = (Index) Indexes.LOG_FILES.get();
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -384,10 +383,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var suggestRoot = new FilterableTreeItem<>(new StylableTreeItem("Filter Suggestions", PSEUDOCLASS_CATEGORY));
 
         var historyRoot = new FilterableTreeItem<>(new StylableTreeItem("History", PSEUDOCLASS_CATEGORY, PSEUDOCLASS_HISTORY));
-        historyRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER,0, 0, "time-icon", "medium-icon", "tree-item-icon"));
+        historyRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, 0, 0, "time-icon", "medium-icon", "tree-item-icon"));
         historyRoot.setExpanded(true);
         var favoritesRoot = new FilterableTreeItem<>(new StylableTreeItem("Favorites", PSEUDOCLASS_CATEGORY, PSEUDOCLASS_FAVORITES));
-        favoritesRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER,0, 0, "favorite-solid-icon", "small-icon", "tree-item-icon"));
+        favoritesRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, 0, 0, "favorite-solid-icon", "small-icon", "tree-item-icon"));
         favoritesRoot.setExpanded(true);
         suggestRoot.getInternalChildren().addAll(favoritesRoot, historyRoot);
         suggestTree.setRoot(suggestRoot);
@@ -1402,7 +1401,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         facets.put(CaptureGroup.SEVERITY, params.getSeverities());
         try {
             return (facets.get(Index.PATH).size() == 0) ? new SearchHitsProcessor() :
-                    index.search(start.toEpochMilli(),
+                    Indexes.LOG_FILES.get().search(start.toEpochMilli(),
                             end.toEpochMilli(),
                             facets,
                             params.getFilterQuery(),
