@@ -71,7 +71,9 @@ public interface UserInterfaceThemes {
      * @return all the registered instance of the {@link UserInterfaceThemes} interface.
      */
     static UserInterfaceThemes[] values() {
-        return getRegisteredUiThemes().toArray(UserInterfaceThemes[]::new);
+        return getRegisteredUiThemes().stream()
+                .sorted(Comparator.comparing(UserInterfaceThemes::name))
+                .toArray(UserInterfaceThemes[]::new);
     }
 
     /**
