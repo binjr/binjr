@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2020 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package eu.binjr.core.appearance;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.plugins.ServiceLoaderHelper;
+import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.UserPreferences;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Defines user interface themes
@@ -41,10 +41,18 @@ public interface UserInterfaceThemes {
         private static Set<UserInterfaceThemes> loadUiThemes() {
             Set<UserInterfaceThemes> themes = new HashSet<>(Arrays.asList(BuiltInUserInterfaceThemes.values()));
             try {
+                var pluginPaths = new ArrayList<Path>();
                 Set<UserInterfaceThemes> loadedThemes = new HashSet<>();
+                // Load from classpath
                 ServiceLoaderHelper.loadFromClasspath(UserInterfaceThemes.class, loadedThemes);
+                // Add system plugin location
+                pluginPaths.add(AppEnvironment.getInstance().getSystemPluginPath());
+                // Add user plugin location
+                if (UserPreferences.getInstance().loadPluginsFromExternalLocation.get()) {
+                    pluginPaths.add(UserPreferences.getInstance().userPluginsLocation.get());
+                }
+                ServiceLoaderHelper.loadFromPaths(UserInterfaceThemes.class, loadedThemes, pluginPaths);
                 themes.addAll(loadedThemes);
-                //TODO: load themes from dynamically loaded plugins
             } catch (Throwable t) {
                 logger.error("Failed to load UserInterfaceThemes from plugin: " + t.getMessage());
                 logger.debug(() -> "Complete stack", t);
