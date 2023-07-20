@@ -39,12 +39,11 @@ public interface UserInterfaceThemes {
         private final static Set<UserInterfaceThemes> instance = loadUiThemes();
 
         private static Set<UserInterfaceThemes> loadUiThemes() {
-            Set<UserInterfaceThemes> themes = new HashSet<>(Arrays.asList(BuiltInUserInterfaceThemes.values()));
+            Set<UserInterfaceThemes> loadedThemes = new HashSet<>(Arrays.asList(BuiltInUserInterfaceThemes.values()));
             try {
-                var pluginPaths = new ArrayList<Path>();
-                Set<UserInterfaceThemes> loadedThemes = new HashSet<>();
                 // Load from classpath
                 ServiceLoaderHelper.loadFromClasspath(UserInterfaceThemes.class, loadedThemes);
+                var pluginPaths = new ArrayList<Path>();
                 // Add system plugin location
                 pluginPaths.add(AppEnvironment.getInstance().getSystemPluginPath());
                 // Add user plugin location
@@ -52,12 +51,11 @@ public interface UserInterfaceThemes {
                     pluginPaths.add(UserPreferences.getInstance().userPluginsLocation.get());
                 }
                 ServiceLoaderHelper.loadFromPaths(UserInterfaceThemes.class, loadedThemes, pluginPaths);
-                themes.addAll(loadedThemes);
-            } catch (Throwable t) {
-                logger.error("Failed to load UserInterfaceThemes from plugin: " + t.getMessage());
-                logger.debug(() -> "Complete stack", t);
+            } catch (Exception e) {
+                logger.error("Failed to load UserInterfaceThemes: " + e.getMessage());
+                logger.debug(() -> "Complete stack", e);
             }
-            return themes;
+            return loadedThemes;
         }
     }
 
