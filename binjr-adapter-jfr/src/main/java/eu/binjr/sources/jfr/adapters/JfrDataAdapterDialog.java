@@ -57,7 +57,7 @@ public class JfrDataAdapterDialog extends DataAdapterDialog<Path> {
      * @throws NoAdapterFoundException if no adapter could be found to get preferences for.
      */
     public JfrDataAdapterDialog(Node owner) throws NoAdapterFoundException {
-        super(owner, Mode.PATH, "mostRecentTextArchives", false);
+        super(owner, Mode.PATH, "mostRecentJfrFiles", false);
         this.prefs = (JfrAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(JfrDataAdapter.class.getName());
         setDialogHeaderText("Add a JFR File" /*, Zip Archive or Folder"*/);
       /*  extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));
