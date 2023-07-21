@@ -47,7 +47,7 @@ public class TextFilesWorksheet extends Worksheet<String> {
 
 
     public TextFilesWorksheet() {
-        this("New File (" + globalCounter.getAndIncrement() + ")", true);
+        this("New Worksheet (" + globalCounter.getAndIncrement() + ")", true);
     }
 
     protected TextFilesWorksheet(String name, boolean editModeEnabled) {

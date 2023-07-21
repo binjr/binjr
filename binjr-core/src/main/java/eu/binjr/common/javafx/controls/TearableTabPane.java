@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.input.*;
@@ -74,6 +75,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private final BindingManager bindingManager = new BindingManager();
     private final Property<StageStyle> detachedStageStyle;
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper(true);
+    private ContextMenu newTabContextMenu;
 
 
     /**
@@ -304,6 +306,10 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.newTabFactory = newTabFactory;
     }
 
+    public void setNewTabContextMenu(ContextMenu menu) {
+        this.newTabContextMenu = menu;
+    }
+
     /**
      * Sets the action that should be fired on the addition of a tab to the pane.
      *
@@ -450,6 +456,9 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         icon.getStyleClass().add("add-tab-button-icon");
         newTabButton.setGraphic(icon);
         newTabButton.setAlignment(Pos.CENTER);
+        if (newTabContextMenu != null) {
+            newTabButton.setContextMenu(newTabContextMenu);
+        }
         if (onAddNewTab != null) {
             newTabButton.setOnAction(bindingManager.registerHandler(onAddNewTab));
         } else {
@@ -647,7 +656,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
 
         public void setSelectedTab(Tab selectedTab) {
             this.selectedTab = selectedTab;
-            logger.trace(() -> "Selected Tab: " + ((selectedTab == null) ? "null" : selectedTab.toString() + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab)));
+            logger.trace(() -> "Selected Tab: " + ((selectedTab == null) ? "null" : selectedTab + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab)));
         }
 
         public void setMovingTab(boolean movingTab) {

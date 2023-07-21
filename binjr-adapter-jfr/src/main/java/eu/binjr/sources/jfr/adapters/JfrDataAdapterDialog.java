@@ -59,7 +59,7 @@ public class JfrDataAdapterDialog extends DataAdapterDialog<Path> {
     public JfrDataAdapterDialog(Node owner) throws NoAdapterFoundException {
         super(owner, Mode.PATH, "mostRecentJfrFiles", false);
         this.prefs = (JfrAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(JfrDataAdapter.class.getName());
-        setDialogHeaderText("Add a JFR File" /*, Zip Archive or Folder"*/);
+        setDialogHeaderText("Add a JFR File");
       /*  extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions:");
         GridPane.setConstraints(label, 0, 1, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));

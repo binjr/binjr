@@ -160,6 +160,8 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem saveMenuItem;
     @FXML
+    private Menu addWorksheetMenu;
+    @FXML
     private Menu openRecentMenu;
     @FXML
     private SplitPane contentView;
@@ -273,6 +275,15 @@ public class MainViewController implements Initializable {
         addWorksheetLabel.visibleProperty().bind(noWorksheetPresent);
         tearableTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         tearableTabPane.setNewTabFactory(this::worksheetTabFactory);
+
+        var contextMenu = new ContextMenu();
+        for (var type : WorksheetFactory.getInstance().getWorksheetTypes()) {
+            if (type.getShowInMenu()) {
+                addWorksheetMenu.getItems().add(makeMenuItem(type));
+                contextMenu.getItems().add(makeMenuItem(type));
+            }
+        }
+        tearableTabPane.setNewTabContextMenu(contextMenu);
         tearableTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
         tearableTabPane.setOnOpenNewWindow(event -> {
             Stage stage = (Stage) event.getSource();
@@ -349,6 +360,19 @@ public class MainViewController implements Initializable {
         });
 
         Platform.runLater(this::runAfterInitialize);
+    }
+
+    private MenuItem makeMenuItem(WorksheetType type) {
+        var item = new MenuItem("New " + type.getLabel(), ToolButtonBuilder.makeIconNode(Pos.CENTER, 10, 10, type.getVisualizationType().getIconStyleClass(), "small-icons"));
+        item.setOnAction(event -> {
+            try {
+                editWorksheet(WorksheetFactory.getInstance().createWorksheet(type.getType()));
+            } catch (DataAdapterException e) {
+                Dialogs.notifyException("Cannot create new worksheet: " + e.getMessage(), e);
+            }
+        });
+        item.setUserData(type);
+        return item;
     }
 
     protected void runAfterInitialize() {
@@ -1191,7 +1215,7 @@ public class MainViewController implements Initializable {
                 .build(Button::new);
         buttons.add(closeTabButton);
         var icon = ToolButtonBuilder.makeIconNode(Pos.CENTER, 17, 17,
-                 worksheet.getVisualizationType().getIconStyleClass(),
+                worksheet.getVisualizationType().getIconStyleClass(),
                 "small-icon");
         EditableTab newTab = new EditableTab(icon, "New worksheet", buttons.toArray(ButtonBase[]::new));
         loadWorksheet(worksheet, newTab, editMode);
@@ -1280,7 +1304,7 @@ public class MainViewController implements Initializable {
     private Image renderTextTooltip(String text, String iconStyleClass) {
         var label = new Label(text);
         label.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER_LEFT, 17, 17, iconStyleClass, "small-icon"));
-      //  label.setGraphicTextGap(17);
+        //  label.setGraphicTextGap(17);
         label.getStyleClass().add("tooltip");
         label.setPadding(new Insets(10, 10, 10, 10));
         // The label must be added to a scene so that CSS and layout are applied.
@@ -1583,6 +1607,7 @@ public class MainViewController implements Initializable {
                         .reduce((s, s2) -> s + " " + s2)
                         .orElse("null"));
     }
+
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
         try {

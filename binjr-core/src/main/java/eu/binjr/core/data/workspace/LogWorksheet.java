@@ -69,7 +69,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     private transient final  Property<IndexingStatus> indexingStatus = new SimpleObjectProperty<>(IndexingStatus.OK);
 
     public LogWorksheet() {
-        this("New File (" + globalCounter.getAndIncrement() + ")",
+        this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
                 LogQueryParameters.empty(),
                 true,
                 false);
@@ -80,7 +80,6 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
                            boolean editModeEnabled,
                            boolean isLinked) {
         super(name, editModeEnabled);
-
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
         this.dividerPosition = new SimpleDoubleProperty(0.85);

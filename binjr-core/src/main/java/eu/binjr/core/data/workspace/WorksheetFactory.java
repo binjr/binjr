@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,28 +16,45 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import javafx.collections.FXCollections;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 public class WorksheetFactory {
-
+    private static final Logger logger = Logger.create(WorksheetFactory.class);
 
     public static WorksheetFactory getInstance() {
         return WorksheetFactory.WorksheetFactoryHolder.instance;
     }
 
-    public <T extends Worksheet> T createWorksheet(Class<T> type, String title, BindingsHierarchy... rootItems) throws DataAdapterException {
+    public List<WorksheetType> getWorksheetTypes() {
+        // TODO: Discover and return worksheet types declared in plugins.
+        return List.of(BuiltinWorksheetType.values());
+    }
+
+    public <T extends Worksheet<?>> T createWorksheet(Class<T> type) throws DataAdapterException {
         try {
-            var w = type.getDeclaredConstructor().newInstance();
-            if (rootItems != null) {
-                w.initWithBindings(title, rootItems);
-            }
-            return w;
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            return type.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+                 IllegalAccessException e) {
             throw new CannotInitializeDataAdapterException("Could not create instance of Worksheet for " + type.getSimpleName(), e);
         }
+    }
+
+    public <T extends Worksheet<?>> T createWorksheet(Class<T> type, String title, BindingsHierarchy... rootItems) throws DataAdapterException {
+        Objects.requireNonNull(title);
+        var w = createWorksheet(type);
+        if (rootItems != null) {
+            w.initWithBindings(title, rootItems);
+        }
+        return w;
     }
 
     private static class WorksheetFactoryHolder {

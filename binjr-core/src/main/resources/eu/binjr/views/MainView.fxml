@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2016-2021 Frederic Thevenet
+  ~    Copyright 2016-2023 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -286,13 +286,13 @@
                 <Tooltip showDelay="500ms" text="Worksheets"/>
             </tooltip>
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
+                <Menu fx:id="addWorksheetMenu" mnemonicParsing="false" text="New Worksheet...">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addWorksheet-icon"/>
                         </HBox>
                     </graphic>
-                </MenuItem>
+                </Menu>
                 <MenuItem fx:id="restoreClosedWorksheetMenu" mnemonicParsing="false"
                           onAction="#handleRestoreClosedWorksheet" text="Restore Closed Worksheet">
                     <graphic>
