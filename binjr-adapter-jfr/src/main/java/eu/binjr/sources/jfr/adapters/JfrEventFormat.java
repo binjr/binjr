@@ -34,6 +34,10 @@ import java.util.Objects;
 
 public class JfrEventFormat implements EventFormat<JfrRecordingFilter> {
     public static final String EVENT_TYPE_NAME = "eventTypeName";
+    public static final String JDK_CPULOAD = "jdk.CPULoad";
+    public static final String JVM_SYSTEM = "jvmSystem";
+    public static final String JVM_USER = "jvmUser";
+    public static final String MACHINE_TOTAL = "machineTotal";
     private static final Logger logger = Logger.create(JfrEventParser.class);
     public static final String CATEGORIES = "categories";
     public static final String HAS_NUM_FIELDS = "hasNumFields";
@@ -43,9 +47,11 @@ public class JfrEventFormat implements EventFormat<JfrRecordingFilter> {
     public static final String JDK_TYPES_THREAD_GROUP = "jdk.types.ThreadGroup";
     public static final String GCREF_FINAL_REFERENCE = "Final reference";
     public static final String GCREF_SOFT_REFERENCE = "Soft reference";
+    public static final String GCREF_WEAK_REFERENCE = "Weak reference";
     public static final String GCREF_PHANTOM_REFERENCE = "Phantom reference";
     public static final String GCREF_TOTAL_COUNT = "Total Count";
     public static final String JDK_TYPES_STACK_TRACE = "jdk.types.StackTrace";
+    public static final String JDK_GARBAGE_COLLECTION = "jdk.GarbageCollection";
     private final ZoneId zoneId;
     private final Charset encoding;
     private static final JfrAdapterPreferences adapterPrefs;

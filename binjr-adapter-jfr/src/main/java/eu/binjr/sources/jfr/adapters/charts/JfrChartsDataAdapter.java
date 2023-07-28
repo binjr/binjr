@@ -33,6 +33,7 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.sources.jfr.adapters.BaseJfrDataAdapter;
 import eu.binjr.sources.jfr.adapters.JfrEventFormat;
+import javafx.scene.paint.Color;
 import jdk.jfr.*;
 import jdk.jfr.consumer.RecordingFile;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
@@ -44,7 +45,6 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
     private static final Logger logger = Logger.create(JfrChartsDataAdapter.class);
     public static final int RECURSE_MAX_DEPTH = 10;
-    public static final String GCREF_WEAK_REFERENCE = "Weak reference";
 
 
     /**
@@ -130,8 +129,62 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                     case JfrEventFormat.JDK_GCREFERENCE_STATISTICS -> {
                         addField(JfrEventFormat.GCREF_FINAL_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
                         addField(JfrEventFormat.GCREF_SOFT_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
-                        addField(GCREF_WEAK_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                        addField(JfrEventFormat.GCREF_WEAK_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
                         addField(JfrEventFormat.GCREF_PHANTOM_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
+                    }
+                    case JfrEventFormat.JDK_CPULOAD ->{
+                        var jvmBranch =new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
+                                .withLabel("JVM")
+                                .withPath(leaf.getValue().getPath())
+                                .withParent(leaf.getValue())
+                                .withUnitName("%")
+                                .withPrefix(UnitPrefixes.PERCENTAGE)
+                                .withGraphType(ChartType.STACKED)
+                                .withAdapter(this)
+                                .build());
+                        leaf.getInternalChildren().add(jvmBranch);
+
+                        jvmBranch.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
+                                .withLabel(eventType.getField(JfrEventFormat.JVM_SYSTEM).getLabel())
+                                .withPath(jvmBranch.getValue().getPath())
+                                .withParent(jvmBranch.getValue())
+                                .withUnitName("%")
+                                .withPrefix(UnitPrefixes.PERCENTAGE)
+                                .withColor(Color.RED)
+                                .withGraphType(ChartType.LINE)
+                                .withAdapter(this)
+                                .build()));
+
+                        jvmBranch.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
+                                .withLabel(eventType.getField(JfrEventFormat.JVM_USER).getLabel())
+                                .withPath(jvmBranch.getValue().getPath())
+                                .withParent(jvmBranch.getValue())
+                                .withUnitName("%")
+                                .withPrefix(UnitPrefixes.PERCENTAGE)
+                                .withColor(Color.DARKGREEN)
+                                .withGraphType(ChartType.LINE)
+                                .withAdapter(this)
+                                .build()));
+
+                        var machineBranch =new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
+                                .withLabel("Machine")
+                                .withPath(leaf.getValue().getPath())
+                                .withParent(leaf.getValue())
+                                .withUnitName("%")
+                                .withPrefix(UnitPrefixes.PERCENTAGE)
+                                .withGraphType(ChartType.LINE)
+                                .withAdapter(this)
+                                .build());
+                        leaf.getInternalChildren().add(machineBranch);
+                        machineBranch.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
+                                .withLabel(eventType.getField(JfrEventFormat.MACHINE_TOTAL).getLabel())
+                                .withPath(machineBranch.getValue().getPath())
+                                .withParent(machineBranch.getValue())
+                                .withUnitName("%")
+                                .withPrefix(UnitPrefixes.PERCENTAGE)
+                                .withGraphType(ChartType.LINE)
+                                .withAdapter(this)
+                                .build()));
                     }
                     default -> {
                         for (var field : eventType.getFields()) {

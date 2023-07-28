@@ -20,7 +20,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
-import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import jdk.jfr.consumer.RecordedEvent;
@@ -28,9 +27,10 @@ import jdk.jfr.consumer.RecordedObject;
 import jdk.jfr.consumer.RecordingFile;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 
