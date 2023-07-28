@@ -16,10 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
-import eu.binjr.common.text.BinaryPrefixFormatter;
-import eu.binjr.common.text.MetricPrefixFormatter;
-import eu.binjr.common.text.NoopPrefixFormatter;
-import eu.binjr.common.text.PrefixFormatter;
+import eu.binjr.common.text.*;
 
 /**
  * An enumeration of the support unit prefixes
@@ -29,6 +26,7 @@ import eu.binjr.common.text.PrefixFormatter;
 public enum UnitPrefixes {
     METRIC("Metric", new MetricPrefixFormatter()),
     BINARY("Binary", new BinaryPrefixFormatter()),
+    PERCENTAGE("Percentage",  new PercentagePrefixFormatter()),
     NONE("None", new NoopPrefixFormatter());
 
     private String label;

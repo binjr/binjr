@@ -23,6 +23,7 @@ import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.text.NoopPrefixFormatter;
+import eu.binjr.common.text.PercentagePrefixFormatter;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -306,6 +307,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             StableTicksAxis<Double> yAxis = switch (currentChart.getUnitPrefixes()) {
                 case BINARY -> new BinaryStableTicksAxis<>();
                 case METRIC -> new MetricStableTicksAxis<>();
+                case PERCENTAGE -> new StableTicksAxis<>(new PercentagePrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
                 case NONE -> new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
             };
             getBindingManager().bindBidirectional(yAxis.autoRangingProperty(), currentChart.autoScaleYAxisProperty());
