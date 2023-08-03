@@ -16,17 +16,16 @@
 
 package eu.binjr.common.io;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import eu.binjr.common.preferences.AesKeyring;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.Base64;
@@ -37,6 +36,7 @@ public class AesHelper {
     private static final String AES_CBC_PKCS_5_PADDING = "AES/CBC/PKCS5Padding";
     private static final String PBKDF_2_WITH_HMAC_SHA_256 = "PBKDF2WithHmacSHA256";
     private static final int IV_LEN = 16;
+    private static final Logger logger = LogManager.getLogger(AesHelper.class);
 
     public static String encrypt(String input, SecretKey key)
             throws GeneralSecurityException {
@@ -56,6 +56,20 @@ public class AesHelper {
         return new String(plainText);
     }
 
+    public static boolean validateKey(SecretKey key) {
+        try {
+            Cipher cipher = Cipher.getInstance(AES_CBC_PKCS_5_PADDING);
+            var iv = new IvParameterSpec(new byte[IV_LEN]);
+            cipher.init(Cipher.DECRYPT_MODE, key, iv);
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException |
+                 InvalidKeyException e) {
+            logger.error("Cannot initialize Cipher with provided key:" + e.getMessage());
+            logger.debug("Stack trace", e);
+          return false;
+        }
+        return true;
+    }
+
     public static SecretKey getKeyFromEncoded(String encoded) {
         byte[] buffer = Base64.getDecoder().decode(encoded);
         return new SecretKeySpec(buffer, AES);
@@ -68,7 +82,11 @@ public class AesHelper {
     }
 
     public static String generateEncodedKey(int n) throws NoSuchAlgorithmException {
-        return Base64.getEncoder().encodeToString(generateKey(n).getEncoded());
+        return encodeSecretKey(generateKey(n));
+    }
+
+    public static String encodeSecretKey(SecretKey secretKey) {
+        return Base64.getEncoder().encodeToString(secretKey.getEncoded());
     }
 
     public static SecretKey deriveKeyFromPassword(String password, String salt)

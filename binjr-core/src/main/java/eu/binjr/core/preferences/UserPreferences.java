@@ -21,7 +21,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
-import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
@@ -31,6 +30,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.Level;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -48,6 +48,20 @@ public class UserPreferences extends ObservablePreferenceFactory {
     private static final Logger logger = Logger.create(UserPreferences.class);
     private static final Gson gson = new Gson();
     public static final String BINJR_GLOBAL = "binjr/global";
+    private static final LocalKeyring keyring = new LocalKeyring();
+    private static class LocalKeyring extends AesKeyring {
+        private LocalKeyring() {
+            super("binjr/local");
+        }
+
+        private final ObservablePreference<SecretKey> masterKey = secretKeyPreference("application_id");
+    }
+
+    public ObfuscatedString.Obfuscator getObfuscator() {
+        return obfuscator;
+    }
+
+    private final ObfuscatedString.Obfuscator obfuscator = new AesStringObfuscator(keyring.masterKey.get());
 
     private final UserFavorites favorites = new UserFavorites(BINJR_GLOBAL);
 
@@ -69,7 +83,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The authentication token  used for authenticated access to the GitHub API.
      */
-    public final ObservablePreference<ObfuscatedString> githubAuthToken = obfuscatedStringPreference("githubAuthToken", "");
+    public final ObservablePreference<ObfuscatedString> githubAuthToken = obfuscatedStringPreference("githubAuthToken", "", this.obfuscator);
 
     /**
      * The User Interface theme applied to the application.
@@ -311,7 +325,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<String> httpProxyLogin = stringPreference("httpProxyLogin", "");
 
-    public final ObservablePreference<ObfuscatedString> httpProxyPassword = obfuscatedStringPreference("httpProxyPassword", "");
+    public final ObservablePreference<ObfuscatedString> httpProxyPassword = obfuscatedStringPreference("httpProxyPassword", "", obfuscator);
 
     public ObservablePreference<Number> maxSnapshotSnippetHeight = integerPreference("maxSnapshotSnippetHeight", 400);
 

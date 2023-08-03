@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2022 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -47,6 +47,15 @@ import java.util.function.Function;
 public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory {
     private static final Logger logger = Logger.create(ExtendedPropertyEditorFactory.class);
     private static final Gson gson = new Gson();
+    private final ObfuscatedString.Obfuscator obfuscator;
+
+    public ExtendedPropertyEditorFactory() {
+        this.obfuscator = null;
+    }
+
+    public ExtendedPropertyEditorFactory(ObfuscatedString.Obfuscator obfuscator) {
+        this.obfuscator = obfuscator;
+    }
 
     @Override
     public PropertyEditor<?> call(PropertySheet.Item item) {
@@ -105,8 +114,8 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
             }));
         }
 
-        if (ObfuscatedString.class.isAssignableFrom(item.getType())) {
-            return new PasswordPropertyEditor<ObfuscatedString>(item,new TextFormatter<>(new StringConverter<>() {
+        if (this.obfuscator != null && ObfuscatedString.class.isAssignableFrom(item.getType())) {
+            return new PasswordPropertyEditor<ObfuscatedString>(item, new TextFormatter<>(new StringConverter<>() {
                 @Override
                 public String toString(ObfuscatedString object) {
                     if (object == null) {
@@ -117,7 +126,7 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
 
                 @Override
                 public ObfuscatedString fromString(String string) {
-                    return ObfuscatedString.of(string);
+                    return obfuscator.fromPlainText(string);
                 }
             }));
         }
@@ -172,7 +181,7 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
         @SuppressWarnings("unchecked")
         public PasswordPropertyEditor(PropertySheet.Item item, TextFormatter<T> textFormatter) {
             textField = new PasswordField();
-            this.textFormatter =  textFormatter;
+            this.textFormatter = textFormatter;
             textField.setTextFormatter(textFormatter);
             item.getObservableValue().ifPresent(itemValue -> {
                 itemValue.addListener((observable, oldValue, newValue) -> textFormatter.setValue((T) newValue));

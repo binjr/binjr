@@ -16,13 +16,25 @@
 
 package eu.binjr.common.io;
 
+import eu.binjr.core.preferences.UserPreferences;
 import org.junit.jupiter.api.Test;
 
 import java.security.NoSuchAlgorithmException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class IOUtilsTest {
     @Test
     public void sha256sumTest() throws NoSuchAlgorithmException {
         System.out.println("IOUtils.sha256sum(\"foobar\") = " + IOUtils.sha256("foobar"));
+    }
+
+    @Test
+    public void obfuscatedStringTest() {
+        final String plainText = "This is some plain text";
+        var obfuscated = UserPreferences.getInstance().getObfuscator().fromPlainText(plainText);
+
+        assertEquals(plainText, obfuscated.toPlainText());
+        assertNotEquals(plainText + "foo", obfuscated.toPlainText());
     }
 }

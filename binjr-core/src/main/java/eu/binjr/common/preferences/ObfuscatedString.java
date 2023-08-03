@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,23 +16,30 @@
 
 package eu.binjr.common.preferences;
 
-import eu.binjr.common.io.AesHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.crypto.SecretKey;
+import java.util.Objects;
 
+/**
+ * Encapsulates a String and obfuscates its content.
+ * <p>
+ * <b>Remark:</b> if an empty string is used to initialize the {@link ObfuscatedString}, then it will not be obfuscated (i.e.
+ * its obfuscated value will also be an empty string).
+ *
+ * @author Frederic Thevenet
+ */
 public class ObfuscatedString {
     private static final Logger logger = LogManager.getLogger(ObfuscatedString.class);
 
     private final String obfuscated;
+    private final Obfuscator obfuscator;
 
-    ObfuscatedString(String obfuscated) {
+    private ObfuscatedString(String obfuscated, Obfuscator obfuscator) {
+        Objects.requireNonNull(obfuscated, "Cannot create an ObfuscatedString instance from a null value");
+        Objects.requireNonNull(obfuscator, "factory cannot be null");
+        this.obfuscator = obfuscator;
         this.obfuscated = obfuscated;
-    }
-
-    public static ObfuscatedString of(String plainText) {
-        return new ObfuscatedString(obfuscateString(plainText));
     }
 
     @Override
@@ -40,37 +47,47 @@ public class ObfuscatedString {
         return "************";
     }
 
+    /**
+     * Returns the plain text representation of the encapsulated string
+     *
+     * @return the plain text representation of the encapsulated string
+     */
     public String toPlainText() {
-        return deObfuscateString(obfuscated);
+        return obfuscator.deObfuscateString(obfuscated);
     }
 
+    /**
+     * Returns the obfuscated representation of the encapsulated string
+     *
+     * @return the obfuscated representation of the encapsulated string
+     */
     public String getObfuscated() {
         return obfuscated;
     }
 
-    private static String deObfuscateString(String obfuscated) {
-        try {
-            if (obfuscated.isEmpty()) {
-                return obfuscated;
-            }
-            return AesHelper.decrypt(obfuscated, Keyring.getInstance().getMasterKey());
-        } catch (Exception e) {
-            logger.error("Error while attempting to de-obfuscate string: " + e.getMessage());
-            logger.debug(() -> "Stack trace", e);
-            return "";
-        }
-    }
+    public abstract static class Obfuscator {
 
-    private static String obfuscateString(String clearText) {
-        try {
-            if (clearText.isEmpty()) {
-                return clearText;
-            }
-            return AesHelper.encrypt(clearText, Keyring.getInstance().getMasterKey());
-        } catch (Exception e) {
-            logger.error("Error while attempting to obfuscate string: " + e.getMessage());
-            logger.debug(() -> "Stack trace", e);
-            return "";
+        /**
+         * Returns an {@link ObfuscatedString} instance that stores the value of the provided String.
+         * <p>
+         * <b>Remark:</b> if an empty string is used to initialize the {@link ObfuscatedString}, then it will not be obfuscated (i.e.
+         * its obfuscated value will also be an empty string).
+         *
+         * @param plainText The value stored by the {@link ObfuscatedString} instance.
+         * @return an {@link ObfuscatedString} instance that stores the value of the provided String.
+         */
+        public ObfuscatedString fromPlainText(String plainText) {
+            return fromObfuscatedText(obfuscateString(plainText));
         }
+
+        public ObfuscatedString fromObfuscatedText(String obfuscated) {
+            return new ObfuscatedString(obfuscated, this);
+        }
+
+
+        protected abstract String deObfuscateString(String obfuscated);
+
+        protected abstract String obfuscateString(String clearText);
+
     }
 }

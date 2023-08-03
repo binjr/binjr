@@ -1,6 +1,5 @@
-
 /*
- *    Copyright 2019-2022 Frederic Thevenet
+ *    Copyright 2019-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -63,8 +62,8 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
         return p;
     }
 
-    public ObservablePreference<ObfuscatedString> obfuscatedStringPreference(String key, String defaultValue) {
-        var p = new ObservablePreference<>(ObfuscatedString.class, key, ObfuscatedString.of(defaultValue), backingStore) {
+    public ObservablePreference<ObfuscatedString> obfuscatedStringPreference(String key, String defaultValue, ObfuscatedString.Obfuscator obfuscator) {
+        var p = new ObservablePreference<>(ObfuscatedString.class, key, obfuscator.fromPlainText(defaultValue), backingStore) {
             @Override
             protected Property<ObfuscatedString> makeProperty(ObfuscatedString value) {
                 return new SimpleObjectProperty<>(value);
@@ -72,7 +71,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
 
             @Override
             protected ObfuscatedString loadFromBackend() {
-                return new ObfuscatedString(getBackingStore().get(getKey(), getDefaultValue().getObfuscated()));
+                return obfuscator.fromObfuscatedText(getBackingStore().get(getKey(), getDefaultValue().getObfuscated()));
             }
 
             @Override

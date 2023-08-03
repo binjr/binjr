@@ -326,7 +326,7 @@ public class PreferenceDialogController implements Initializable {
 
             @Override
             public ObfuscatedString fromString(String string) {
-                return ObfuscatedString.of(string);
+                return userPrefs.getObfuscator().fromPlainText(string);
             }
         });
         proxyPasswordTextfield.setTextFormatter(pwdFormatter);

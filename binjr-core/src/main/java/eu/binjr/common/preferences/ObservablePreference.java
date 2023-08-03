@@ -26,7 +26,7 @@ import java.util.prefs.Preferences;
 
 /**
  * An abstract class that defines a preference that can be accessed via a {@link Property} and is persisted as
- * use {@link Preferences}
+ * user {@link Preferences}
  *
  * @param <T> The type of the inner value of the preference
  * @author Frederic Thevenet

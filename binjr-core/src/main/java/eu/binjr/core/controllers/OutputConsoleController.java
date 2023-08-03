@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -159,7 +159,7 @@ public class OutputConsoleController implements Initializable {
             logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
                     UserPreferences.getInstance().rootLoggingLevel.set(newValue));
         });
-        preferenceEditor.setPropertyEditorFactory(new ExtendedPropertyEditorFactory());
+        preferenceEditor.setPropertyEditorFactory(new ExtendedPropertyEditorFactory(UserPreferences.getInstance().getObfuscator()));
         preferenceEditor.getItems().addAll(UserPreferences.getInstance()
                 .getAll().values()
                 .stream()
