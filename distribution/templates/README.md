@@ -75,20 +75,18 @@ with someone else.
 
 ***binjr*** can consume time series data provided by the following data sources:
 
-
-| Name                                                        | Description                                                                                                                                  | Built-in[^1]     | Source type |
-|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|------------------|-------------|
-| [JRDS](https://github.com/fbacchella/jrds)                  | A performance monitoring application written in Java.                                                                                        | :material-check: | Remote      |
-| [Netdata](https://www.netdata.cloud)                        | Distributed, real-time performance and health monitoring for systems and applications.                                                       | :material-check: | Remote      |
-| RRD Files                                                   | Round-Robin Database files produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).               | :material-check: | Local files | 
-| CSV Files                                                   | Comma Separated Values files.                                                                                                                | :material-check: | Local files | 
-| Log Files                                                   | Text based, semi-structured log files.                                                                                                       | :material-check: | Local files | 
-| [JDK Flight Recoder](https://openjdk.org/jeps/328)          | Low-overhead data collection framework for troubleshooting Java applications and the HotSpot JVM.                                            | :material-check: | Local files | 
-| [Demo Adapter](https://github.com/binjr/binjr-adapter-demo) | A plugin for binjr that provides data sources for demonstration purposes.                                                                    |                  | Local files |
+| Name                                                        | Description                                                                                                                    | Built-in[1] | Source type |
+|-------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|-------------|-------------|
+| [JRDS](https://github.com/fbacchella/jrds)                  | A performance monitoring application written in Java.                                                                          | ✓           | Remote      |
+| [Netdata](https://www.netdata.cloud)                        | Distributed, real-time performance and health monitoring for systems and applications.                                         | ✓           | Remote      |
+| RRD Files                                                   | Round-Robin Database files produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j). | ✓           | Local files | 
+| CSV Files                                                   | Comma Separated Values files.                                                                                                  | ✓           | Local files | 
+| Log Files                                                   | Text based, semi-structured log files.                                                                                         | ✓           | Local files | 
+| [JDK Flight Recoder](https://openjdk.org/jeps/328)          | Low-overhead data collection framework for troubleshooting Java applications and the HotSpot JVM.                              | ✓           | Local files | 
+| [Demo Adapter](https://github.com/binjr/binjr-adapter-demo) | A plugin for binjr that provides data sources for demonstration purposes.                                                      |             | Local files |
 
 [1]: Support for data sources not marked as *'Built-in'* requires additional plugins.
 
-  
 ## Getting help
 
 The documentation can be found [here](https://binjr.eu/documentation/user_guide/main/).
