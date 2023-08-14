@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters;
+package eu.binjr.sources.jfr.adapters.jfr;
 
 
 import com.google.gson.Gson;
-import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
-import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -33,7 +31,6 @@ import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleLongProperty;
@@ -44,14 +41,11 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 
 import java.io.IOException;
-import java.lang.annotation.Retention;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
@@ -62,11 +56,9 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
  */
 public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     private static final Logger logger = Logger.create(BaseJfrDataAdapter.class);
-    protected static final Gson gson = new Gson();
     protected static final Property<IndexingStatus> INDEXING_OK = new SimpleObjectProperty<>(IndexingStatus.OK);
     protected static final String ZONE_ID = "zoneId";
     protected static final String ENCODING = "encoding";
-    protected static final String PARSING_PROFILE = "parsingProfile";
     protected static final String PATH = "jfrPath";
     protected JfrEventFormat eventFormat;
 
@@ -75,8 +67,6 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     protected String encoding;
 
     protected Index index;
-    protected FileSystemBrowser fileBrowser;
-
 
     public BaseJfrDataAdapter(Path jfrPath, ZoneId zoneId) throws DataAdapterException {
         super();
@@ -131,7 +121,6 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     public void onStart() throws DataAdapterException {
         super.onStart();
         try {
-            this.fileBrowser = FileSystemBrowser.of(jfrFilePath.getParent());
             this.index = Indexes.LOG_FILES.acquire();
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
@@ -146,7 +135,6 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
             logger.error("An error occurred while releasing index " + Indexes.LOG_FILES.name() + ": " + e.getMessage());
             logger.debug("Stack Trace:", e);
         }
-        IOUtils.close(fileBrowser);
         super.close();
     }
 

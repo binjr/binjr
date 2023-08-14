@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters;
+package eu.binjr.sources.jfr.adapters.jfr.events;
 
 
 import eu.binjr.common.javafx.controls.TimeRange;
@@ -27,6 +27,7 @@ import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.sources.jfr.adapters.jfr.BaseJfrDataAdapter;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.Property;
 import jdk.jfr.EventType;
@@ -40,7 +41,6 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -48,28 +48,28 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
-    private static final Logger logger = Logger.create(JfrDataAdapter.class);
+public class JfrEventsDataAdapter extends BaseJfrDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
+    private static final Logger logger = Logger.create(JfrEventsDataAdapter.class);
 
     /**
-     * Initializes a new instance of the {@link JfrDataAdapter} class with a set of default values.
+     * Initializes a new instance of the {@link JfrEventsDataAdapter} class with a set of default values.
      *
      * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
      */
-    public JfrDataAdapter() throws DataAdapterException {
+    public JfrEventsDataAdapter() throws DataAdapterException {
         super(Path.of(""), ZoneId.systemDefault());
     }
 
 
     /**
-     * Initializes a new instance of the {@link JfrDataAdapter} class with the provided parameters.
+     * Initializes a new instance of the {@link JfrEventsDataAdapter} class with the provided parameters.
      *
      * @param jfrPath the path to the JFR file.
      * @param zoneId  the time zone to used.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
-    public JfrDataAdapter(Path jfrPath,
-                          ZoneId zoneId)
+    public JfrEventsDataAdapter(Path jfrPath,
+                                ZoneId zoneId)
             throws DataAdapterException {
         super(jfrPath, zoneId);
     }
@@ -153,8 +153,6 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Pro
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[JFR: Events] ")
-                .append(jfrFilePath != null ? jfrFilePath.getFileName() : "???")
-                .toString();
+        return "[JFR: Events] " + (jfrFilePath != null ? jfrFilePath.getFileName() : "???");
     }
 }

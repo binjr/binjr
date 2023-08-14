@@ -1,20 +1,20 @@
 /*
- *    Copyright 2023 Frederic Thevenet
+ * Copyright 2023 Frederic Thevenet
  *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters;
+package eu.binjr.sources.jfr.adapters.jfr.events;
 
 
 import com.google.gson.Gson;
@@ -22,12 +22,10 @@ import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
-import java.util.Set;
-
 /**
  * Defines the preferences associated with the Text files adapter.
  */
-public class JfrAdapterPreferences extends DataAdapterPreferences {
+public class JfrEventsAdapterPreferences extends DataAdapterPreferences {
     private static final Gson gson = new Gson();
 
     /**
@@ -73,12 +71,12 @@ public class JfrAdapterPreferences extends DataAdapterPreferences {
             s -> gson.fromJson(s, String[].class));
 
     /**
-     * Initialize a new instance of the {@link JfrAdapterPreferences} class associated to
+     * Initialize a new instance of the {@link JfrEventsAdapterPreferences} class associated to
      * a {@link DataAdapter} instance.
      *
      * @param dataAdapterClass the associated {@link DataAdapter}
      */
-    public JfrAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
+    public JfrEventsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters.charts;
+package eu.binjr.sources.jfr.adapters.jfr.charts;
 
 
 import eu.binjr.common.javafx.controls.TimeRange;
@@ -31,8 +31,8 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.UnitPrefixes;
-import eu.binjr.sources.jfr.adapters.BaseJfrDataAdapter;
-import eu.binjr.sources.jfr.adapters.JfrEventFormat;
+import eu.binjr.sources.jfr.adapters.jfr.BaseJfrDataAdapter;
+import eu.binjr.sources.jfr.adapters.jfr.JfrEventFormat;
 import javafx.scene.paint.Color;
 import jdk.jfr.*;
 import jdk.jfr.consumer.RecordingFile;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters;
+package eu.binjr.sources.jfr.adapters.jfr;
 
 import java.nio.file.Path;
 import java.util.Set;

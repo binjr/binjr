@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters;
+package eu.binjr.sources.jfr.adapters.jfr.charts;
 
 
 import eu.binjr.core.data.adapters.AdapterMetadata;
@@ -23,6 +23,7 @@ import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.sources.jfr.adapters.JvmDataAdapterDialog;
 
 
 /**
@@ -31,27 +32,30 @@ import eu.binjr.core.preferences.AppEnvironment;
  * @author Frederic Thevenet
  */
 @AdapterMetadata(
-        name = "JFR",
-        description = "JDK Flight Recorder Files Data Adapter (Events view)",
+        name = "JFR - Charts",
+        description = "JDK Flight Recorder Data Adapter (Charts view)",
         copyright = AppEnvironment.COPYRIGHT_NOTICE,
         license = AppEnvironment.LICENSE,
         siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
-        adapterClass = JfrDataAdapter.class,
-        dialogClass = JfrDataAdapterDialog.class,
-        preferencesClass = JfrAdapterPreferences.class,
+        adapterClass = JfrChartsDataAdapter.class,
+        dialogClass = JvmDataAdapterDialog.class,
         sourceLocality = SourceLocality.LOCAL,
         apiLevel = AppEnvironment.PLUGIN_API_LEVEL,
-        visualizationType = VisualizationType.EVENTS
+        visualizationType = VisualizationType.CHARTS
 )
-public class JfrDataAdapterInfo extends BaseDataAdapterInfo {
+public class JfrChartsDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
-     * Initialises a new instance of the {@link JfrDataAdapterInfo} class.
+     * Initialises a new instance of the {@link JfrChartsDataAdapterInfo} class.
      *
      * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
-    public JfrDataAdapterInfo() throws CannotInitializeDataAdapterException {
-        super(JfrDataAdapterInfo.class);
+    public JfrChartsDataAdapterInfo() throws CannotInitializeDataAdapterException {
+        super(JfrChartsDataAdapterInfo.class);
     }
 
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
 }

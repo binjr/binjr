@@ -15,6 +15,8 @@
 #
 
 # JFR Data adapter service implementation
-eu.binjr.sources.jfr.adapters.JfrDataAdapterInfo
-eu.binjr.sources.jfr.adapters.charts.JfrChartsDataAdapterInfo
+eu.binjr.sources.jfr.adapters.jfr.events.JfrEventsDataAdapterInfo
+eu.binjr.sources.jfr.adapters.jfr.charts.JfrChartsDataAdapterInfo
+eu.binjr.sources.jfr.adapters.JvmDataAdapterInfo
+eu.binjr.sources.jfr.adapters.gc.GcDataAdapterInfo
 
