@@ -59,7 +59,7 @@ public class AesHelper {
     public static boolean validateKey(SecretKey key) {
         try {
             Cipher cipher = Cipher.getInstance(AES_CBC_PKCS_5_PADDING);
-            var iv = new IvParameterSpec(new byte[IV_LEN]);
+            var iv = generateIv();
             cipher.init(Cipher.DECRYPT_MODE, key, iv);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException |
                  InvalidKeyException e) {
