@@ -6,16 +6,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for
 the specific language governing permissions and limitations under the License.
 
-Within the clear limits stated in the Licence, we do endeavor to fix any bugs and security vulnerabilities that are brought 
-to our attention in a timely manner, and strongly appraciate the help of the communinity in trying to improve the
-quality and safety of this software.
+Within the limits stated above, we do endeavor to fix bugs and security vulnerabilities that are brought to our 
+attention, and we truly appreciate the help of the community in trying to improve the quality and safety of this software.
 
-Please assume that any fix will only ever be made available in the most recent release of the software.
+Please assume that fixes for bugs or vulnerabilities will only be made available in the most recent release of the software.
 
 ## Reporting a Vulnerability
 
-Thank you for improving the security of our projects. 
-We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
-
-Report a security vulnerability privately using the button below.
+You can report a security vulnerability privately via this page: https://github.com/binjr/binjr/security
 
