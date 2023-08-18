@@ -16,12 +16,11 @@
 
 package eu.binjr.common.io;
 
-import eu.binjr.common.preferences.AesKeyring;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.crypto.*;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -33,39 +32,40 @@ import java.util.Base64;
 public class AesHelper {
 
     private static final String AES = "AES";
-    private static final String AES_CBC_PKCS_5_PADDING = "AES/CBC/PKCS5Padding";
+    public static final String AES_GCM_NO_PADDING = "AES/GCM/NoPadding";
     private static final String PBKDF_2_WITH_HMAC_SHA_256 = "PBKDF2WithHmacSHA256";
     private static final int IV_LEN = 16;
     private static final Logger logger = LogManager.getLogger(AesHelper.class);
 
+
     public static String encrypt(String input, SecretKey key)
             throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(AES_CBC_PKCS_5_PADDING);
-        var iv = generateIv();
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        var params = generateIv();
+        Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        cipher.init(Cipher.ENCRYPT_MODE, key, params);
         byte[] cipherText = cipher.doFinal(input.getBytes());
-        return Base64.getEncoder().encodeToString(IOUtils.concat(iv.getIV(), cipherText));
+        return Base64.getEncoder().encodeToString(IOUtils.concat(params.getIV(), cipherText));
     }
 
     public static String decrypt(String input, SecretKey key) throws GeneralSecurityException {
-        Cipher cipher = Cipher.getInstance(AES_CBC_PKCS_5_PADDING);
         var b = IOUtils.split(Base64.getDecoder().decode(input), IV_LEN);
-        var iv = new IvParameterSpec(b.first());
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
+        var params = new GCMParameterSpec(IV_LEN * 8, b.first());
+        Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+        cipher.init(Cipher.DECRYPT_MODE, key, params);
         byte[] plainText = cipher.doFinal(b.second());
         return new String(plainText);
     }
 
     public static boolean validateKey(SecretKey key) {
         try {
-            Cipher cipher = Cipher.getInstance(AES_CBC_PKCS_5_PADDING);
-            var iv = generateIv();
-            cipher.init(Cipher.DECRYPT_MODE, key, iv);
+            var params = generateIv();
+            Cipher cipher = Cipher.getInstance(AES_GCM_NO_PADDING);
+            cipher.init(Cipher.DECRYPT_MODE, key, params);
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidAlgorithmParameterException |
                  InvalidKeyException e) {
             logger.error("Cannot initialize Cipher with provided key:" + e.getMessage());
             logger.debug("Stack trace", e);
-          return false;
+            return false;
         }
         return true;
     }
@@ -101,9 +101,9 @@ public class AesHelper {
         return new SecretKeySpec(factory.generateSecret(spec).getEncoded(), AES);
     }
 
-    public static IvParameterSpec generateIv() {
+    public static GCMParameterSpec generateIv() {
         byte[] iv = new byte[IV_LEN];
         new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
+        return new GCMParameterSpec(IV_LEN * 8, iv);
     }
 }
