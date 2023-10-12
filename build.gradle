@@ -25,9 +25,9 @@ import java.text.SimpleDateFormat
 import java.time.Duration
 
 plugins {
-    id "de.undercouch.download" version "5.4.0"
+    id "de.undercouch.download" version "5.5.0"
     id 'org.kordamp.gradle.markdown' version '2.2.0'
-    id "com.github.ben-manes.versions" version "0.47.0"
+    id "com.github.ben-manes.versions" version "0.49.0"
     id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
 }
@@ -56,7 +56,7 @@ ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "20.0.2"
+ext.OPENJFX_VERSION = "21"
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
@@ -734,7 +734,7 @@ task signPackageDistribution() {
 
 def isNonStable = { String version ->
     // Ignore javafx early access and glassfish beta
-    def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(b)|(m))[-\+]*[0-9.]+$/
+    def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(alpha)|(b)|(m))[-\+]*[0-9.]+$/
     return (version ==~ regex)
 }
 
