@@ -86,22 +86,12 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     private final transient BooleanProperty showProperties;
     private final transient UserPreferences userPref;
 
+
     /**
      * Initializes a new instance of the {@link Chart} class
      */
     public Chart() {
-        this("New Chart (" + globalCounter.getAndIncrement() + ")",
-                ChartType.STACKED,
-                FXCollections.observableList(new LinkedList<>()),
-                "-",
-                UnitPrefixes.METRIC,
-                UserPreferences.getInstance().defaultOpacityStackedAreaCharts.get().doubleValue(),
-                UserPreferences.getInstance().showOutlineOnStackedAreaCharts.get(),
-                1.0,
-                true,
-                UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
-                0.0,
-                100.0);
+        this("New Chart (" + globalCounter.getAndIncrement() + ")", ChartType.UNDEFINED, "-", UnitPrefixes.UNDEFINED);
     }
 
     /**
@@ -118,12 +108,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 FXCollections.observableList(new LinkedList<>()),
                 unitName,
                 prefix,
-                chartType == ChartType.STACKED ?
-                        UserPreferences.getInstance().defaultOpacityStackedAreaCharts.get().doubleValue() :
-                        UserPreferences.getInstance().defaultOpacityAreaCharts.get().doubleValue(),
-                chartType == ChartType.STACKED ?
-                        UserPreferences.getInstance().showOutlineOnStackedAreaCharts.get() :
-                        UserPreferences.getInstance().showOutlineOnAreaCharts.get(),
+                UserPreferences.getInstance().getDefaultChartOpacity(chartType),
+                UserPreferences.getInstance().getDefaultChartOutlineVisibility(chartType),
                 1.0,
                 true,
                 UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
@@ -168,9 +154,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                   double yAxisMaxValue) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
-        this.chartType = new SimpleObjectProperty<>(chartType);
+        this.chartType = new SimpleObjectProperty<>(UserPreferences.getInstance().defineChartType(chartType));
         this.series = FXCollections.observableList(new LinkedList<>(bindings));
-        this.unitPrefixes = new SimpleObjectProperty<>(base);
+        this.unitPrefixes = new SimpleObjectProperty<>(UserPreferences.getInstance().defineUnitPrefix(base));
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
@@ -386,7 +372,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
      * @param chartType the type of chart hosted by the {@link Chart}
      */
     public void setChartType(ChartType chartType) {
-        this.chartType.setValue(chartType);
+        this.chartType.setValue(UserPreferences.getInstance().defineChartType(chartType));
     }
 
     /**
@@ -442,7 +428,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
      * @param unitPrefixes the unit prefix for the {@link Chart}'s times series Y axis
      */
     public void setUnitPrefixes(UnitPrefixes unitPrefixes) {
-        this.unitPrefixes.setValue(unitPrefixes);
+        this.unitPrefixes.setValue(UserPreferences.getInstance().defineUnitPrefix(unitPrefixes));
     }
 
     /**
@@ -455,9 +441,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     }
 
     /**
-     * Gets the opacity factor to apply the the graph
+     * Gets the opacity factor to apply the graph
      *
-     * @return the opacity factor to apply the the graph
+     * @return the opacity factor to apply the graph
      */
     @XmlAttribute
     public double getGraphOpacity() {
@@ -465,9 +451,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     }
 
     /**
-     * Sets the opacity factor to apply the the graph
+     * Sets the opacity factor to apply the graph
      *
-     * @param graphOpacity the opacity factor to apply the the graph
+     * @param graphOpacity the opacity factor to apply the graph
      */
     public void setGraphOpacity(double graphOpacity) {
         this.graphOpacity.set(graphOpacity);

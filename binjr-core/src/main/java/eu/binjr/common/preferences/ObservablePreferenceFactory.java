@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
@@ -256,7 +257,8 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
         return p;
     }
 
-    public <E extends Enum<E>> ObservablePreference<E> enumPreference(Class<E> type, String key, E defaultValue) {
+    @SafeVarargs
+    public final <E extends Enum<E>> ObservablePreference<E> enumPreference(Class<E> type, String key, E defaultValue, E... forbiddenValues) {
         var p = new ObservablePreference<>(type, key, defaultValue, backingStore) {
             @Override
             protected Property<E> makeProperty(E value) {
@@ -270,7 +272,28 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
 
             @Override
             protected void saveToBackend(E value) {
+                if (forbiddenValues != null) {
+                    for (var val : forbiddenValues) {
+                        if (value.equals(val)) {
+                            getBackingStore().put(getKey(), getDefaultValue().name());
+                            return;
+                        }
+                    }
+                }
                 getBackingStore().put(getKey(), value.name());
+            }
+
+            @Override
+            public void set(E value) {
+                if (forbiddenValues != null) {
+                    for (var val : forbiddenValues) {
+                        if (value.equals(val)) {
+                            super.set(getDefaultValue());
+                            return;
+                        }
+                    }
+                }
+                super.set(value);
             }
         };
         storedItems.put(p.getKey(), p);

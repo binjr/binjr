@@ -92,7 +92,7 @@ public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
                 return UnitPrefixes.BINARY;
             }
         }
-        return UnitPrefixes.METRIC;
+        return UnitPrefixes.UNDEFINED;
     }
 
     private ChartType getChartType(Graphdesc graphdesc) {
@@ -100,20 +100,16 @@ public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
                 .filter(desc -> !desc.graphType.equalsIgnoreCase("none") && !desc.graphType.equalsIgnoreCase("comment"))
                 .reduce((last, n) -> n)
                 .map(this::getChartType)
-                .orElse(ChartType.AREA);
+                .orElse(ChartType.UNDEFINED);
     }
 
     private ChartType getChartType(Graphdesc.SeriesDesc desc) {
-        switch (desc.graphType.toLowerCase()) {
-            case "area":
-                return ChartType.AREA;
-            case "line":
-                return ChartType.LINE;
-            case "none":
-            case "stacked":
-            default:
-                return ChartType.STACKED;
-        }
+        return switch (desc.graphType.toLowerCase()) {
+            case "area" -> ChartType.AREA;
+            case "line" -> ChartType.LINE;
+            case "stacked" -> ChartType.STACKED;
+            default -> ChartType.UNDEFINED;
+        };
     }
 
     private boolean isNullOrEmpty(String s) {

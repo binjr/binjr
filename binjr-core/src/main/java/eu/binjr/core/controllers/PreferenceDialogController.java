@@ -27,6 +27,8 @@ import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
+import eu.binjr.core.data.workspace.ChartType;
+import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.*;
 import eu.binjr.core.update.UpdateManager;
@@ -69,6 +71,10 @@ import java.util.prefs.BackingStoreException;
  */
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
+    @FXML
+    private ChoiceBox<ChartType> defaultChartTypeChoiceBox;
+    @FXML
+    private ChoiceBox<UnitPrefixes> defaultUnitPrefixChoiceBox;
     @FXML
     private ChoiceBox<IndexingTokenizer> indexingModeChoiceBox;
     @FXML
@@ -258,6 +264,9 @@ public class PreferenceDialogController implements Initializable {
         defaultTextSizeField.setTextFormatter(fontSizeformatter);
         fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
         bindEnumToChoiceBox(userPrefs.defaultDateTimeAnchor, dateTimeAnchorChoiceBox, DateTimeAnchor.values());
+
+        bindEnumToChoiceBox(userPrefs.defaultChartType, defaultChartTypeChoiceBox, ChartType.definedValues());
+        bindEnumToChoiceBox(userPrefs.defaultUnitPrefix, defaultUnitPrefixChoiceBox, UnitPrefixes.definedValues());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme,
                 s -> UserInterfaceThemes.valueOf(s, BuiltInUserInterfaceThemes.LIGHT),
                 UserInterfaceThemes::name,

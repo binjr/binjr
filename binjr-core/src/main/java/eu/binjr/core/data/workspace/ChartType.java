@@ -16,18 +16,22 @@
 
 package eu.binjr.core.data.workspace;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An enumeration of the type of charts supported.
  *
  * @author Frederic Thevenet
  */
 public enum ChartType {
+    UNDEFINED("Undefined"),
     STACKED("Stacked area chart"),
     AREA("Area chart"),
     LINE("Line chart"),
     SCATTER("Scatter chart");
 
-    private String label;
+    private final String label;
 
     ChartType(String label) {
         this.label = label;
@@ -38,6 +42,16 @@ public enum ChartType {
         return label;
     }
 
+    public static ChartType[] definedValues() {
+        var defined = new ArrayList<ChartType>();
+        for (var val : ChartType.values()) {
+            if (val != UNDEFINED) {
+                defined.add(val);
+            }
+        }
+        return defined.toArray(value -> new ChartType[0]);
+    }
+
     public static ChartType valueOrDefault(String name, ChartType defaultValue) {
         try {
             return Enum.valueOf(ChartType.class, name);
@@ -45,4 +59,5 @@ public enum ChartType {
             return defaultValue;
         }
     }
+
 }

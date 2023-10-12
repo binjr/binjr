@@ -27,6 +27,7 @@ import javafx.scene.paint.Color;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -52,10 +53,9 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
      */
     public TimeSeriesBinding() {
         super();
-        this.prefix = UnitPrefixes.BINARY;
-        this.graphType = ChartType.STACKED;
+        this.prefix = UnitPrefixes.UNDEFINED;
+        this.graphType = ChartType.UNDEFINED;
         this.unitName = "";
-
     }
 
     @Override
@@ -155,7 +155,7 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
     public int hashCode() {
         return super.hashCode() +
                 Objects.hashCode(prefix) +
-                Objects.hashCode(graphType)+
+                Objects.hashCode(graphType) +
                 Objects.hashCode(unitName);
     }
 
@@ -168,8 +168,8 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
     }
 
     public static class Builder extends SourceBinding.Builder<Double, TimeSeriesBinding, TimeSeriesBinding.Builder> {
-        private UnitPrefixes prefix = UnitPrefixes.METRIC;
-        private ChartType graphType = ChartType.STACKED;
+        private UnitPrefixes prefix = UnitPrefixes.UNDEFINED;
+        private ChartType graphType = ChartType.UNDEFINED;
         private String unitName = "-";
 
         public Builder withPrefix(UnitPrefixes prefix) {
@@ -193,7 +193,12 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
         }
 
         @Override
-        protected TimeSeriesBinding construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<Double> adapter) {
+        protected TimeSeriesBinding construct(String label,
+                                              String legend,
+                                              Color color,
+                                              String path,
+                                              String treeHierarchy,
+                                              DataAdapter<Double> adapter) {
             return new TimeSeriesBinding(label, path, color, legend, prefix, graphType, unitName, treeHierarchy, adapter);
         }
     }

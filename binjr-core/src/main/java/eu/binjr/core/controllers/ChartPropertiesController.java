@@ -159,7 +159,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
             chart.armSaveHistory();
         });
 
-        chartTypeChoice.getItems().setAll(ChartType.values());
+        chartTypeChoice.getItems().setAll(ChartType.definedValues());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         bindingManager.bind(chart.chartTypeProperty(), chartTypeChoice.getSelectionModel().selectedItemProperty());
         var strokeWithEditable = Bindings.createBooleanBinding(() ->

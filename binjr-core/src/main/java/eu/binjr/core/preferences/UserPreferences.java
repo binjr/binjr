@@ -21,11 +21,14 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
+import eu.binjr.core.controllers.ChartViewportsState;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.data.workspace.ChartType;
+import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.Level;
@@ -49,6 +52,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     private static final Gson gson = new Gson();
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
+
     private static class LocalKeyring extends AesKeyring {
         private LocalKeyring() {
             super("binjr/local");
@@ -327,28 +331,28 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<ObfuscatedString> httpProxyPassword = obfuscatedStringPreference("httpProxyPassword", "", obfuscator);
 
-    public ObservablePreference<Number> maxSnapshotSnippetHeight = integerPreference("maxSnapshotSnippetHeight", 400);
+    public final ObservablePreference<Number> maxSnapshotSnippetHeight = integerPreference("maxSnapshotSnippetHeight", 400);
 
-    public ObservablePreference<Number> maxSnapshotSnippetWidth = integerPreference("maxSnapshotSnippetWidth", 300);
+    public final ObservablePreference<Number> maxSnapshotSnippetWidth = integerPreference("maxSnapshotSnippetWidth", 300);
 
-    public ObservablePreference<Number> httpSocketTimeoutMs = integerPreference("httpSocketTimeoutMs", 30000);
+    public final ObservablePreference<Number> httpSocketTimeoutMs = integerPreference("httpSocketTimeoutMs", 30000);
 
-    public ObservablePreference<Number> httpConnectionTimeoutMs = integerPreference("httpConnectionTimeoutMs", 30000);
+    public final ObservablePreference<Number> httpConnectionTimeoutMs = integerPreference("httpConnectionTimeoutMs", 30000);
 
-    public ObservablePreference<Number> httpResponseTimeoutMs = integerPreference("httpResponseTimeoutMs", 30000);
+    public final ObservablePreference<Number> httpResponseTimeoutMs = integerPreference("httpResponseTimeoutMs", 30000);
 
-    public ObservablePreference<Number> httpSSLConnectionTTLMs = integerPreference("httpSSLConnectionTTLMs", 120000);
+    public final ObservablePreference<Number> httpSSLConnectionTTLMs = integerPreference("httpSSLConnectionTTLMs", 120000);
 
-    public ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB = integerPreference("dataAdapterFetchCacheMaxSizeMiB", 32);
+    public final ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB = integerPreference("dataAdapterFetchCacheMaxSizeMiB", 32);
 
-    public ObservablePreference<Path> temporaryFilesRoot = pathPreference("temporaryFilesRoot", Path.of(System.getProperty("java.io.tmpdir")));
+    public final ObservablePreference<Path> temporaryFilesRoot = pathPreference("temporaryFilesRoot", Path.of(System.getProperty("java.io.tmpdir")));
 
-    public ObservablePreference<Number> maxLinesFileTestPreview = integerPreference("maxLinesFileTestPreview", 20);
+    public final ObservablePreference<Number> maxLinesFileTestPreview = integerPreference("maxLinesFileTestPreview", 20);
 
     /**
      * A list of user defined {@link ParsingProfile} for parsing log events
      */
-    public ObservablePreference<ParsingProfile[]> userLogEventsParsingProfiles =
+    public final ObservablePreference<ParsingProfile[]> userLogEventsParsingProfiles =
             objectPreference(ParsingProfile[].class,
                     "userParsingProfiles",
                     new ParsingProfile[0],
@@ -356,28 +360,32 @@ public class UserPreferences extends ObservablePreferenceFactory {
                     s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
 
-    public ObservablePreference<DateFormat> labelDateFormat = enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
+    public final ObservablePreference<DateFormat> labelDateFormat = enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
 
-    public ObservablePreference<Number> numIdxMaxPageSize = integerPreference("numIdxMaxPageSize", 200000);
+    public final ObservablePreference<Number> numIdxMaxPageSize = integerPreference("numIdxMaxPageSize", 200000);
 
-    public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultFontSize", 9);
+    public final ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultFontSize", 9);
 
-    public ObservablePreference<DateTimeAnchor> defaultDateTimeAnchor = enumPreference(DateTimeAnchor.class, "defaultDateTimeAnchor", DateTimeAnchor.EPOCH);
+    public final ObservablePreference<DateTimeAnchor> defaultDateTimeAnchor = enumPreference(DateTimeAnchor.class, "defaultDateTimeAnchor", DateTimeAnchor.EPOCH);
 
-    public ObservablePreference<Boolean> alwaysUseEmbeddedFonts = booleanPreference("alwaysUseEmbeddedFonts", false);
+    public final ObservablePreference<Boolean> alwaysUseEmbeddedFonts = booleanPreference("alwaysUseEmbeddedFonts", false);
 
-    public ObservablePreference<Number> logIndexNGramSize = integerPreference("logIndexNGramSize", 2);
+    public final ObservablePreference<Number> logIndexNGramSize = integerPreference("logIndexNGramSize", 2);
 
-    public ObservablePreference<Boolean> logIndexAutoExpendShorterTerms = booleanPreference("logIndexAutoExpendShorterTerms", false);
+    public final ObservablePreference<Boolean> logIndexAutoExpendShorterTerms = booleanPreference("logIndexAutoExpendShorterTerms", false);
 
-    public ObservablePreference<Boolean> optimizeNGramQueries = booleanPreference("optimizeNGramQueries", true);
+    public final ObservablePreference<Boolean> optimizeNGramQueries = booleanPreference("optimizeNGramQueries", true);
 
-    public ObservablePreference<Boolean> showInlineHelpButtons = booleanPreference("showInlinSHow/eHelpButtons", true);
+    public final ObservablePreference<Boolean> showInlineHelpButtons = booleanPreference("showInlinSHow/eHelpButtons", true);
 
-    public ObservablePreference<IndexingTokenizer> indexingTokenizer =
+    public final ObservablePreference<IndexingTokenizer> indexingTokenizer =
             enumPreference(IndexingTokenizer.class, "indexingTokenizer", IndexingTokenizer.NGRAMS);
 
-    public ObservablePreference<Boolean> defaultForceZeroInYAxisAutoRange = booleanPreference("defaultForceZeroInYAxisAutoRange", true);
+    public final ObservablePreference<Boolean> defaultForceZeroInYAxisAutoRange = booleanPreference("defaultForceZeroInYAxisAutoRange", true);
+
+    public final ObservablePreference<ChartType> defaultChartType = enumPreference(ChartType.class, "defaultChartType", ChartType.STACKED, ChartType.UNDEFINED);
+
+    public final ObservablePreference<UnitPrefixes> defaultUnitPrefix = enumPreference(UnitPrefixes.class, "defaultUnitPrefix", UnitPrefixes.METRIC, UnitPrefixes.UNDEFINED);
 
     public static class UserFavorites extends MruFactory {
 
@@ -451,4 +459,26 @@ public class UserPreferences extends ObservablePreferenceFactory {
         var style = severityStyleMap.get(toMap.toLowerCase(Locale.ROOT));
         return (style == null) ? "unknown" : style;
     }
+
+    public ChartType defineChartType(ChartType chartType) {
+        return chartType != ChartType.UNDEFINED ? chartType : UserPreferences.getInstance().defaultChartType.get();
+    }
+
+    public UnitPrefixes defineUnitPrefix(UnitPrefixes prefix) {
+        return prefix != UnitPrefixes.UNDEFINED ? prefix : UserPreferences.getInstance().defaultUnitPrefix.get();
+    }
+
+    public boolean getDefaultChartOutlineVisibility(ChartType chartType) {
+        return defineChartType(chartType) == ChartType.STACKED ?
+                showOutlineOnStackedAreaCharts.get() :
+                showOutlineOnAreaCharts.get();
+    }
+
+    public double getDefaultChartOpacity(ChartType chartType) {
+        return defineChartType(chartType) == ChartType.STACKED ?
+                defaultOpacityStackedAreaCharts.get().doubleValue() :
+                defaultOpacityAreaCharts.get().doubleValue();
+    }
+
+
 }

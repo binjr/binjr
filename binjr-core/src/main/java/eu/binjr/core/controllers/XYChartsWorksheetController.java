@@ -264,7 +264,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             getBindingManager().bind(newChartDropTarget.visibleProperty(), getParentController().treeItemDragAndDropInProgressProperty());
             setSelectedChart(worksheet.getSelectedChart());
         } catch (Exception e) {
-            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
+            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e));
         }
         super.initialize(location, resources);
     }
@@ -307,8 +307,10 @@ public class XYChartsWorksheetController extends WorksheetController {
             StableTicksAxis<Double> yAxis = switch (currentChart.getUnitPrefixes()) {
                 case BINARY -> new BinaryStableTicksAxis<>();
                 case METRIC -> new MetricStableTicksAxis<>();
-                case PERCENTAGE -> new StableTicksAxis<>(new PercentagePrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
-                case NONE -> new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
+                case PERCENTAGE ->
+                        new StableTicksAxis<>(new PercentagePrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
+                case NONE, UNDEFINED ->
+                        new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
             };
             getBindingManager().bindBidirectional(yAxis.autoRangingProperty(), currentChart.autoScaleYAxisProperty());
             getBindingManager().bindBidirectional(yAxis.forceZeroInRangeProperty(), currentChart.alwaysIncludeOriginInAutoScaleProperty());
@@ -319,24 +321,26 @@ public class XYChartsWorksheetController extends WorksheetController {
                             () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
                             currentChart.nameProperty(),
                             currentChart.unitProperty()));
-            XYChart<ZonedDateTime, Double> viewPort;
-            switch (currentChart.getChartType()) {
-                case AREA:
-                    viewPort = new AreaChart<>(xAxis, yAxis);
-                    ((AreaChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
-                    break;
-                case STACKED:
-                    viewPort = new NaNStackedAreaChart<>(xAxis, yAxis);
-                    ((StackedAreaChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
-                    break;
-                case SCATTER:
-                    viewPort = new ScatterChart<>(xAxis, yAxis);
-                    break;
-                case LINE:
-                default:
-                    viewPort = new LineChart<>(xAxis, yAxis);
-                    ((LineChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
-            }
+            XYChart<ZonedDateTime, Double> viewPort = switch (currentChart.getChartType()) {
+                case AREA -> {
+                    var v = new AreaChart<>(xAxis, yAxis);
+                    v.setCreateSymbols(false);
+                    yield v;
+                }
+                case STACKED -> {
+                    var v = new NaNStackedAreaChart<>(xAxis, yAxis);
+                    v.setCreateSymbols(false);
+                    yield v;
+                }
+                case LINE -> {
+                    var v = new LineChart<>(xAxis, yAxis);
+                    v.setCreateSymbols(false);
+                    yield v;
+                }
+                case SCATTER -> new ScatterChart<>(xAxis, yAxis);
+                case UNDEFINED ->
+                        throw new UnsupportedOperationException("Cannot render of viewport with an undefined chart type");
+            };
             viewPort.getStyleClass().add("drop-target");
             viewPort.setCache(true);
             viewPort.setCacheHint(CacheHint.SPEED);
@@ -923,7 +927,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             TextField unitNameField = new TextField();
             unitNameField.textProperty().bindBidirectional(currentViewPort.getDataStore().unitProperty());
             ChoiceBox<UnitPrefixes> unitPrefixChoiceBox = new ChoiceBox<>();
-            unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.values());
+            unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.definedValues());
             unitPrefixChoiceBox.getSelectionModel().select(currentViewPort.getDataStore().getUnitPrefixes());
             getBindingManager().bind(currentViewPort.getDataStore().unitPrefixesProperty(), unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
             HBox.setHgrow(chartNameField, Priority.ALWAYS);

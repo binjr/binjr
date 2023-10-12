@@ -18,24 +18,39 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.text.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An enumeration of the support unit prefixes
  *
  * @author Frederic Thevenet
  */
 public enum UnitPrefixes {
+    UNDEFINED("Undefined", new NoopPrefixFormatter()),
     METRIC("Metric", new MetricPrefixFormatter()),
     BINARY("Binary", new BinaryPrefixFormatter()),
-    PERCENTAGE("Percentage",  new PercentagePrefixFormatter()),
+    PERCENTAGE("Percentage", new PercentagePrefixFormatter()),
     NONE("None", new NoopPrefixFormatter());
 
-    private String label;
-    private PrefixFormatter prefixFormatter;
+    private final String label;
+    private final PrefixFormatter prefixFormatter;
 
     UnitPrefixes(String label, PrefixFormatter prefixFormatter) {
         this.label = label;
         this.prefixFormatter = prefixFormatter;
     }
+
+    public static UnitPrefixes[] definedValues() {
+        var defined = new ArrayList<UnitPrefixes>();
+        for (var val : UnitPrefixes.values()) {
+            if (val != UNDEFINED) {
+                defined.add(val);
+            }
+        }
+        return defined.toArray(t -> new UnitPrefixes[0]);
+    }
+
 
     @Override
     public String toString() {
