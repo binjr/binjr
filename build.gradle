@@ -420,7 +420,7 @@ task createRuntimeImage(type: Exec) {
             '--no-header-files',
             '--no-man-pages',
             "--vm=server",
-            "--compress=2",
+            "--compress=zip-6",
             '--output', "${APP_IMAGE_PATH}/runtime"
     ]
     doLast {
