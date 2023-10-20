@@ -2,3 +2,4 @@
 [New] Source and target compatibility level for binjr's artifacts have been updated to 21  
 [New] It is now possible to set the default values for chart type and unit prefixes, used when these aren't defined by the source  
 [New] Enhanced JVM logging parsing profiles to accept ISO timestamps  
+[New] Clicking on the find or filter button in a log worksheet now sets focus on the relevant input field  
