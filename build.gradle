@@ -116,8 +116,8 @@ configure(subprojects) {
     apply plugin: "signing"
     group GROUP_ID
     version BINJR_VERSION
-    sourceCompatibility = 17
-    targetCompatibility = 17
+    sourceCompatibility = 21
+    targetCompatibility = 21
     description BINJR_DESCRIPTION
     compileJava.options.encoding = 'UTF-8'
 
