@@ -111,8 +111,8 @@ jobs:
           echo "**************************************"
           git clone https://github.com/binjr/repos.binjr.eu.git build/tmp/repos.binjr.eu
           cd  build/tmp/repos.binjr.eu
+          echo "https://binjr-bot:$(gh.access.token)@github.com" >> ~/.git-credentials
           git config credential.helper store
-          echo "https://binjr-bot:$(gh.access.token)@github.com" >> "$HOME/.git-credentials"
           git config user.email "binjr.bot@free.fr"
           git config user.name "binjr-bot"
           rm -rf apt/dists
@@ -134,6 +134,8 @@ jobs:
           git add .
           git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
           git push -f
+          git config credential.helper cache
+          shred -fuz ~/.git-credentials
         condition: and(succeeded(), eq(variables['isTag'], 'true'), ne(variables['isSnapshot'], 'true'), not(contains(variables['Build.SourceBranch'], '-b')), eq(variables['Agent.OS'], 'Linux'))
 
 

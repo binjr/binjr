@@ -101,19 +101,21 @@ stages:
             python3 -m pip --version
             python3 -m pip install --upgrade pip setuptools
             python3 -m pip install mkdocs
-            python3 -m pip install mkdocs-material
+            python3 -m pip install mkdocs-material==9.*
             git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
             cd  build/tmp/binjr-site
             cp ../expanded/CHANGELOG.md docs/download/CHANGELOG.md
             cp ../expanded/latest_release.md docs/download/latest_release.md
-            git config credential.helper store
             echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
+            git config credential.helper store
             git config user.email "binjr.bot@free.fr"
             git config user.name "binjr-bot"
             wget https://api.github.com/repos/binjr/binjr/releases/latest -O docs/repos/binjr/binjr/releases/latest
             git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
             git push
-            python3 -m mkdocs gh-deploy --remote-branch master
+            python3 -m mkdocs gh-deploy --no-history --remote-branch master
+            git config credential.helper cache
+            shred -fuz "$HOME/.git-credentials"
           env:
             GH_ACCESS_TOKEN: $(gh.access.token)
 
