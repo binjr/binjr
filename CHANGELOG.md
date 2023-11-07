@@ -1,3 +1,12 @@
+## [binjr v3.14.0](https://github.com/binjr/binjr/releases/tag/v3.14.0)
+Released on Mon, 30 Oct 2023
+
+_[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.1  
+_[New]_ Source and target compatibility level for binjr's artifacts have been updated to 21  
+_[New]_ It is now possible to set the default values for chart type and unit prefixes, used when these aren't defined by the source  
+_[New]_ Enhanced JVM logging parsing profiles to accept ISO timestamps  
+_[New]_ Clicking on the find or filter button in a log worksheet now sets focus on the relevant input field
+
 ## [binjr v3.13.0](https://github.com/binjr/binjr/releases/tag/v3.13.0)
 Released on Wed, 9 Aug 2023
 
