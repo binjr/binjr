@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform<Double> {
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         // collect values for second pass
         if (threshold > 0 && data.size() > threshold) {
-            var values = data.stream().map(XYChart.Data::getYValue).toArray(Double[]::new);
+            var values = data.stream().map(d -> Double.isNaN(d.getYValue()) ? 0.0 : d.getYValue()).toArray(Double[]::new);
             rwMonitor.write().lock(() -> {
                 seriesValues.add(values);
                 if (timeStamps == null) {

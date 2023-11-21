@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2020 Frederic Thevenet
+ *    Copyright 2016-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransfor
      *
      * @param threshold the maximum number of points to keep following the reduction.
      */
-    public LargestTriangleThreeBucketsTransform( final int threshold) {
+    public LargestTriangleThreeBucketsTransform(final int threshold) {
         super("LargestTriangleThreeBucketsTransform");
         this.threshold = threshold;
     }
@@ -77,8 +77,8 @@ public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransfor
             avgRangeEnd = Math.min(avgRangeEnd, dataLength);
             int avgRangeLength = avgRangeEnd - avgRangeStart;
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
-                avgX += data.get(avgRangeStart).getXValue().toInstant().toEpochMilli();
-                avgY += data.get(avgRangeStart).getYValue();
+                avgX += getXValue(data.get(avgRangeStart));
+                avgY += getYValue(data.get(avgRangeStart));
             }
             avgX /= avgRangeLength;
             avgY /= avgRangeLength;
@@ -87,13 +87,13 @@ public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransfor
             int rangeTo = (int) (Math.floor((i + 1) * every) + 1);
 
             // Point a
-            double pointAx = data.get(a).getXValue().toInstant().toEpochMilli();
-            double pointAy = data.get(a).getYValue();
+            double pointAx = getXValue(data.get(a));
+            double pointAy = getYValue(data.get(a));
             double maxArea = -1;
             for (; rangeOffs < rangeTo; rangeOffs++) {
                 // Calculate triangle area over three buckets
-                double area = Math.abs((pointAx - avgX) * (data.get(rangeOffs).getYValue() - pointAy) -
-                        (pointAx - data.get(rangeOffs).getXValue().toInstant().toEpochMilli()) * (avgY - pointAy)
+                double area = Math.abs((pointAx - avgX) * (getYValue(data.get(rangeOffs)) - pointAy) -
+                        (pointAx - getXValue(data.get(rangeOffs))) * (avgY - pointAy)
                 ) * 0.5;
                 if (area > maxArea) {
                     maxArea = area;
@@ -109,5 +109,15 @@ public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransfor
         return sampled;
     }
 
+    private double getYValue(XYChart.Data<ZonedDateTime, Double> sample) {
+        if (Double.isNaN(sample.getYValue())) {
+            return 0.0;
+        }
+        return sample.getYValue();
+    }
+
+    private double getXValue(XYChart.Data<ZonedDateTime, Double> sample) {
+        return sample.getXValue().toInstant().toEpochMilli();
+    }
 
 }
