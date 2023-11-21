@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -717,6 +717,7 @@ public class Index implements Indexable {
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             var clean = new NanToZeroTransform();
+            clean.setEnabled(userPref.forceNanToZero.get());
             var reduce = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
             AtomicLong hitsCollected = new AtomicLong(0);
             int pageSize = prefs.numIdxMaxPageSize.get().intValue();
