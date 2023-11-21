@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -177,13 +177,15 @@ public abstract class TimeSeriesProcessor<T> {
      */
     @SafeVarargs
     public final void applyTransforms(TimeSeriesTransform<T>... seriesTransforms) {
-        if (!data.isEmpty()) {
-            for (var t : seriesTransforms) {
-                setData(monitor.write().lock(() -> t.transform(data)));
+        monitor.write().lock(() -> {
+            if (!data.isEmpty()) {
+                for (var t : seriesTransforms) {
+                    this.data = new ArrayList<>(t.transform(data));
+                }
+            } else {
+                logger.trace("Don't apply transform on empty data store");
             }
-        } else {
-            logger.trace("Don't apply transform on empty data store");
-        }
+        });
     }
 
     protected abstract T computeMinValue();
