@@ -16,9 +16,9 @@
 
 
 dependencies {
-    api 'org.apache.logging.log4j:log4j-core:2.21.1'
-    api 'org.apache.logging.log4j:log4j-jcl:2.21.1'
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.21.1'
+    api 'org.apache.logging.log4j:log4j-core:2.22.0'
+    api 'org.apache.logging.log4j:log4j-jcl:2.22.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.22.0'
     api 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
     api 'org.controlsfx:controlsfx:11.2.0'
     implementation 'org.gillius:jfxutils:1.0'
@@ -26,7 +26,7 @@ dependencies {
     api 'org.apache.commons:commons-csv:1.10.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.4'
-    implementation 'org.bouncycastle:bcpg-jdk18on:1.76'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.77'
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.11.0'
     api 'org.apache.lucene:lucene-core:9.8.0'
