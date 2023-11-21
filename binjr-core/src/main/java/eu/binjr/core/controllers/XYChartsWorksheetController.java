@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2022 Frederic Thevenet
+ *    Copyright 2016-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -245,6 +245,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidate(false, false, false));
+            getBindingManager().attachListener(userPrefs.forceNanToZero.property(), ((observable, oldValue, newValue) -> refresh()));
             getBindingManager().attachListener(userPrefs.downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
             getBindingManager().attachListener(userPrefs.downSamplingThreshold.property(), ((observable, oldValue, newValue) -> {
                 if (userPrefs.downSamplingEnabled.get())

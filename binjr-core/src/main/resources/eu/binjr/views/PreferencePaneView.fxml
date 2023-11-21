@@ -182,6 +182,11 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="alwaysIncludeOriginInAutoScale" prefWidth="1.0"/>
                             </VBox>
+                            <LabelWithInlineHelp text="Treat undefined Y values as 0"
+                                                 inlineHelp="Check this option if you want undefined Y axis values to be treated as being zero."/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="forceNaNtoZeroSwitch" prefWidth="1.0"/>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

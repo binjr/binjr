@@ -72,6 +72,8 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private ToggleSwitch forceNaNtoZeroSwitch;
+    @FXML
     private ChoiceBox<ChartType> defaultChartTypeChoiceBox;
     @FXML
     private ChoiceBox<UnitPrefixes> defaultUnitPrefixChoiceBox;
@@ -199,6 +201,8 @@ public class PreferenceDialogController implements Initializable {
                 .bindBidirectional(UserPreferences.getInstance().downSamplingEnabled.property());
         alwaysIncludeOriginInAutoScale.selectedProperty()
                 .bindBidirectional(UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.property());
+        forceNaNtoZeroSwitch.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().forceNanToZero.property());
         fullHeightCrosshair.selectedProperty()
                 .bindBidirectional(userPrefs.fullHeightCrosshairMarker.property());
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {
