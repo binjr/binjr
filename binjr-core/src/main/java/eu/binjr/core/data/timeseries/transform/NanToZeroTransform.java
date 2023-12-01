@@ -25,10 +25,15 @@ import java.util.stream.Collectors;
 public class NanToZeroTransform extends BaseTimeSeriesTransform<Double> {
 
     /**
-     * Base constructor for {@link BaseTimeSeriesTransform} instances.
+     * Constructor for {@link NanToZeroTransform} instances.
      */
     public NanToZeroTransform() {
+        this(true);
+    }
+
+    public NanToZeroTransform(boolean enabled) {
         super("NaNtoZeroTransform");
+        this.setEnabled(enabled);
     }
 
     @Override

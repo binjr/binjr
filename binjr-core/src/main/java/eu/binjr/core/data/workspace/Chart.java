@@ -193,8 +193,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
         });
 
         var align = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
-        var clean = new NanToZeroTransform();
-        clean.setEnabled(userPref.forceNanToZero.get());
+        // Stacked area charts in javaFX do not properly support NaN values,
+        // so NanToZeroTransform is always enabled for such charts
+        var clean = new NanToZeroTransform(userPref.forceNanToZero.get() || this.chartType.getValue() == ChartType.STACKED);
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream()
                 .collect(groupingBy(o -> o.getBinding().getAdapter()));
