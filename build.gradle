@@ -70,6 +70,7 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "java.sql," +
         "java.xml," +
         "java.management," +
+        "java.net.http," +
         "java.rmi," +
         "jdk.localedata," +
         "java.management.rmi," +
