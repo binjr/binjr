@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 
 package eu.binjr.core.update;
 
-import eu.binjr.common.github.GithubApiHelper;
+import eu.binjr.common.concurrent.ReadWriteLockHelper;
+import eu.binjr.common.github.GitHubApiHelper;
 import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.io.ProxyConfiguration;
 import eu.binjr.common.javafx.controls.NodeUtils;
@@ -64,30 +65,47 @@ public class UpdateManager {
     private Path updatePackage = null;
     private Version updateVersion = null;
     private boolean restartRequested = false;
-    private final GithubApiHelper github;
+    private GitHubApiHelper github;
     private final PlatformUpdater platformUpdater;
+    private final ReadWriteLockHelper ghhMonitor = new ReadWriteLockHelper();
 
     private static class UpdateManagerHolder {
         private final static UpdateManager instance = new UpdateManager();
     }
 
+    private void resetGithubHelper() {
+        ghhMonitor.write().tryLock(() -> {
+            if (this.github != null) {
+                try {
+                    github.close();
+                } catch (IOException e) {
+                    logger.error("Error while attempting to close GitHub helper: " + e.getMessage());
+                    logger.debug("StackTrace", e);
+                }
+            }
+            this.github = GitHubApiHelper.of(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU),
+                    new ProxyConfiguration(userPrefs.enableHttpProxy.get(),
+                            userPrefs.httpProxyHost.get(),
+                            userPrefs.httpProxyPort.get().intValue(),
+                            userPrefs.useHttpProxyAuth.get(),
+                            userPrefs.httpProxyLogin.get(),
+                            userPrefs.httpProxyPassword.get().toPlainText().toCharArray()),
+                    userPrefs.githubUserName.get(),
+                    userPrefs.githubAuthToken.get().toPlainText());
+        });
+    }
+
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU),
-                new ProxyConfiguration(userPrefs.enableHttpProxy.get(),
-                        userPrefs.httpProxyHost.get(),
-                        userPrefs.httpProxyPort.get().intValue(),
-                        userPrefs.useHttpProxyAuth.get(),
-                        userPrefs.httpProxyLogin.get(),
-                        userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
-        userPrefs.githubUserName.property().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(newValue, userPrefs.githubAuthToken.get().toPlainText());
-        });
-        userPrefs.githubAuthToken.property().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(userPrefs.githubUserName.get(), newValue.toPlainText());
-        });
-        github.setUserCredentials(userPrefs.githubUserName.get(), userPrefs.githubAuthToken.get().toPlainText());
-
+        resetGithubHelper();
+        userPrefs.enableHttpProxy.property().addListener(observable -> resetGithubHelper());
+        userPrefs.httpProxyHost.property().addListener(observable -> resetGithubHelper());
+        userPrefs.httpProxyPort.property().addListener(observable -> resetGithubHelper());
+        userPrefs.useHttpProxyAuth.property().addListener(observable -> resetGithubHelper());
+        userPrefs.httpProxyLogin.property().addListener(observable -> resetGithubHelper());
+        userPrefs.httpProxyPassword.property().addListener(observable -> resetGithubHelper());
+        userPrefs.githubUserName.property().addListener(observable -> resetGithubHelper());
+        userPrefs.githubAuthToken.property().addListener(observable -> resetGithubHelper());
         platformUpdater = switch (appEnv.getPackaging()) {
             case LINUX_TAR -> new LinuxTarballUpdater();
             case WIN_MSI -> new WindowsMsiUpdater();
@@ -153,9 +171,8 @@ public class UpdateManager {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
                 logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                return github
-                        .getLatestRelease(appEnv.getUpdateRepoSlug())
-                        .filter(r -> r.getVersion().compareTo(appEnv.getVersion()) > 0);
+                return ghhMonitor.read().tryLock(() -> github.getLatestRelease(appEnv.getUpdateRepoSlug())
+                        .filter(r -> r.getVersion().compareTo(appEnv.getVersion()) > 0)).orElseThrow();
             }
         };
         getLatestTask.setOnSucceeded(workerStateEvent -> {
@@ -271,7 +288,7 @@ public class UpdateManager {
 
     private Path downloadAsset(GithubRelease release,
                                String assetName,
-                               Path targetDir) throws IOException, URISyntaxException {
+                               Path targetDir) throws Exception {
         var asset = release.getAssets()
                 .stream()
                 .filter(a -> a.getName().equalsIgnoreCase(assetName))
@@ -280,7 +297,7 @@ public class UpdateManager {
                         " for release " +
                         release.getName()));
         logger.info("Downloading asset from " + asset.getBrowserDownloadUrl());
-        return github.downloadAsset(asset, targetDir);
+        return ghhMonitor.read().tryLock(() -> github.downloadAsset(asset, targetDir)).orElseThrow();
     }
 
     private void showUpdateReadyNotification(Node root) {

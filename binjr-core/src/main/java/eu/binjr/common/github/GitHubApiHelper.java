@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,30 +20,23 @@ package eu.binjr.common.github;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.io.ProxyConfiguration;
+import eu.binjr.common.io.SSLContextUtils;
+import eu.binjr.common.io.SSLCustomContextException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.preferences.UserPreferences;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.StandardCookieSpec;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.net.URIBuilder;
 
 import java.io.Closeable;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /**
@@ -52,10 +45,10 @@ import java.util.*;
  *
  * @author Frederic Thevenet
  */
-public class GithubApiHelper {
-    private static final Logger logger = Logger.create(GithubApiHelper.class);
+public class GitHubApiHelper implements Closeable {
+    private static final Logger logger = Logger.create(GitHubApiHelper.class);
     public static final String HTTPS_API_GITHUB_COM = "https://api.github.com";
-    protected final CloseableHttpClient httpClient;
+    protected final HttpClient httpClient;
     private final URI apiEndpoint;
     protected String userCredentials;
     private static final Gson GSON = new Gson();
@@ -65,74 +58,84 @@ public class GithubApiHelper {
     private final static Type ghAssetArrayType = new TypeToken<ArrayList<GithubAsset>>() {
     }.getType();
 
-    private GithubApiHelper() {
+    private GitHubApiHelper() {
         this(null);
     }
 
-    private GithubApiHelper(URI apiEndpoint) {
-        this(apiEndpoint, null);
+    private GitHubApiHelper(URI apiEndpoint) {
+        this(apiEndpoint, null, null, null);
     }
 
-    private GithubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig) {
+    private GitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig, String userName, String token) {
         this.apiEndpoint = Objects.requireNonNullElseGet(apiEndpoint, () -> URI.create(HTTPS_API_GITHUB_COM));
-        var builder = HttpClients
-                .custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).build());
+        HttpClient.Builder builder = null;
+
+        builder = HttpClient.newBuilder()
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
+        try {
+            builder.sslContext(SSLContextUtils.withPlatformKeystore());
+        } catch (SSLCustomContextException e) {
+            logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
+            logger.debug("Stacktrace", e);
+        }
         if (proxyConfig != null && proxyConfig.enabled()) {
             try {
-                builder.setProxy(new HttpHost(proxyConfig.host(), proxyConfig.port()));
+                var proxySelector = ProxySelector.of(InetSocketAddress.createUnresolved(proxyConfig.host(), proxyConfig.port()));
                 if (proxyConfig.useAuth()) {
-                    var credsProvider = new BasicCredentialsProvider();
-                    credsProvider.setCredentials(
-                            new AuthScope(proxyConfig.host(), proxyConfig.port()),
-                            new UsernamePasswordCredentials(proxyConfig.login(), proxyConfig.pwd()));
-                    builder.setDefaultCredentialsProvider(credsProvider);
+                    builder.authenticator(new Authenticator() {
+                        @Override
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            if (getRequestorType().equals(RequestorType.PROXY)) {
+                                return new PasswordAuthentication(proxyConfig.login(), proxyConfig.pwd());
+                            } else {
+                                return null;
+                            }
+                        }
+                    });
                 }
+                builder.proxy(proxySelector);
             } catch (Exception e) {
                 logger.error("Failed to setup http proxy: " + e.getMessage());
                 logger.debug(() -> "Stack", e);
             }
         }
+        setUserCredentials(userName, token);
         httpClient = builder.build();
     }
 
-    /**
-     * Returns the singleton instance of {@link GithubApiHelper}
-     *
-     * @return the singleton instance of {@link GithubApiHelper}
-     */
-    private static GithubApiHelper getDefault() {
-        return GithubApiHolder.instance;
-    }
 
     /**
-     * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
+     * Initializes a new instance of the {@link GitHubApiHelper} class.
      *
      * @param apiEndpoint the URI that specifies the API endpoint.
-     * @return a new instance of the {@link ClosableGitHubApiHelper} class.
+     * @return a new instance of the {@link GitHubApiHelper} class.
      */
-    public static ClosableGitHubApiHelper createCloseable(URI apiEndpoint) {
-        return new ClosableGitHubApiHelper(apiEndpoint);
+    public static GitHubApiHelper of(URI apiEndpoint) {
+        return new GitHubApiHelper(apiEndpoint);
     }
 
     /**
-     * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
+     * Initializes a new instance of the {@link GitHubApiHelper} class.
      *
      * @param apiEndpoint        the URI that specifies the API endpoint.
      * @param proxyConfiguration Configuration for http proxy
-     * @return a new instance of the {@link ClosableGitHubApiHelper} class.
+     * @return a new instance of the {@link GitHubApiHelper} class.
      */
-    public static ClosableGitHubApiHelper createCloseable(URI apiEndpoint, ProxyConfiguration proxyConfiguration) {
-        return new ClosableGitHubApiHelper(apiEndpoint, proxyConfiguration);
+    public static GitHubApiHelper of(URI apiEndpoint,
+                                                  ProxyConfiguration proxyConfiguration,
+                                                  String userName,
+                                                  String token) {
+        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token);
     }
 
     /**
-     * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
+     * Initializes a new instance of the {@link GitHubApiHelper} class.
      *
-     * @return a new instance of the {@link ClosableGitHubApiHelper} class.
+     * @return a new instance of the {@link GitHubApiHelper} class.
      */
-    public static ClosableGitHubApiHelper createCloseable() {
-        return new ClosableGitHubApiHelper();
+    public static GitHubApiHelper createDefault() {
+        return new GitHubApiHelper();
     }
 
     /**
@@ -144,7 +147,7 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while communicating with GiHub
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public Optional<GithubRelease> getLatestRelease(String owner, String repo) throws IOException, URISyntaxException {
+    public Optional<GithubRelease> getLatestRelease(String owner, String repo) throws IOException, URISyntaxException, InterruptedException {
         return getRelease(owner, repo, "latest");
     }
 
@@ -156,7 +159,7 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while communicating with GiHub
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public Optional<GithubRelease> getLatestRelease(String slug) throws IOException, URISyntaxException {
+    public Optional<GithubRelease> getLatestRelease(String slug) throws IOException, URISyntaxException, InterruptedException {
         return getRelease(slug, "latest");
     }
 
@@ -170,7 +173,7 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while communicating with GitHub.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public Optional<GithubRelease> getRelease(String owner, String repo, String id) throws IOException, URISyntaxException {
+    public Optional<GithubRelease> getRelease(String owner, String repo, String id) throws IOException, URISyntaxException, InterruptedException {
         return getRelease(owner + "/" + repo, id);
     }
 
@@ -183,13 +186,17 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while communicating with GitHub.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public Optional<GithubRelease> getRelease(String slug, String id) throws IOException, URISyntaxException {
-        URIBuilder requestUrl = new URIBuilder(apiEndpoint)
-                .setPath("/repos/" + slug + "/releases/" + id);
+    public Optional<GithubRelease> getRelease(String slug, String id) throws IOException, URISyntaxException, InterruptedException {
+        var requestUrl = URI.create(apiEndpoint + "/repos/" + slug + "/releases/" + id);
         logger.debug(() -> "requestUrl = " + requestUrl);
-        HttpGet httpget = basicAuthGet(requestUrl.build());
-        return Optional.ofNullable(httpClient.execute(httpget,
-                response -> GSON.fromJson(EntityUtils.toString(response.getEntity()), GithubRelease.class)));
+        var httpget = basicAuthGet(requestUrl);
+        var response = httpClient.send(httpget, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to get release from " +
+                    requestUrl +
+                    "(HTTP status: " + response.statusCode() + ")");
+        }
+        return Optional.ofNullable(GSON.fromJson(response.body(), GithubRelease.class));
     }
 
     /**
@@ -201,7 +208,7 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while communicating with GitHub.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public List<GithubRelease> getAllReleases(String owner, String repo) throws IOException, URISyntaxException {
+    public List<GithubRelease> getAllReleases(String owner, String repo) throws IOException, URISyntaxException, InterruptedException {
         return getAllReleases(owner + "/" + repo);
     }
 
@@ -213,14 +220,18 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while communicating with GitHub.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public List<GithubRelease> getAllReleases(String slug) throws IOException, URISyntaxException {
-        URIBuilder requestUrl = new URIBuilder(apiEndpoint)
-                .setPath("/repos/" + slug + "/releases")
-                .addParameter("per_page", "100");
+    public List<GithubRelease> getAllReleases(String slug) throws IOException, URISyntaxException, InterruptedException {
+        var requestUrl = URI.create(apiEndpoint +
+                "/repos/" + slug + "/releases?per_page=100");
         logger.debug(() -> "requestUrl = " + requestUrl);
-        HttpGet httpget = basicAuthGet(requestUrl.build());
-        return httpClient.execute(httpget,
-                response -> GSON.fromJson(EntityUtils.toString(response.getEntity()), ghReleaseArrayType));
+        var httpget = basicAuthGet(requestUrl);
+        var response = httpClient.send(httpget, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to get release list from " +
+                    requestUrl +
+                    "(HTTP status: " + response.statusCode() + ")");
+        }
+        return GSON.fromJson(response.body(), ghReleaseArrayType);
     }
 
     /**
@@ -231,11 +242,16 @@ public class GithubApiHelper {
      * @throws URISyntaxException if the crafted URI is incorrect.
      * @throws IOException        if an IO error occurs while communicating with GitHub.
      */
-    public List<GithubAsset> getAssets(GithubRelease release) throws URISyntaxException, IOException {
+    public List<GithubAsset> getAssets(GithubRelease release) throws URISyntaxException, IOException, InterruptedException {
         logger.debug(() -> "requestUrl = " + release.getAssetsUrl());
-        HttpGet httpget = basicAuthGet(release.getAssetsUrl().toURI());
-        return httpClient.execute(httpget,
-                response -> GSON.fromJson(EntityUtils.toString(response.getEntity()), ghAssetArrayType));
+        var httpget = basicAuthGet(release.getAssetsUrl().toURI());
+        var response = httpClient.send(httpget, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to download asset list from " +
+                    release.getAssetsUrl() +
+                    "(HTTP status: " + response.statusCode() + ")");
+        }
+        return GSON.fromJson(response.body(), ghAssetArrayType);
     }
 
     /**
@@ -246,7 +262,7 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while attempting to download the file.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public Path downloadAsset(GithubAsset asset) throws IOException, URISyntaxException {
+    public Path downloadAsset(GithubAsset asset) throws IOException, URISyntaxException, InterruptedException {
         return downloadAsset(asset, Files.createTempDirectory(UserPreferences.getInstance().temporaryFilesRoot.get(), "binjr-updates_"));
     }
 
@@ -259,18 +275,24 @@ public class GithubApiHelper {
      * @throws IOException        if an IO error occurs while attempting to download the file.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public Path downloadAsset(GithubAsset asset, Path targetDir) throws IOException, URISyntaxException {
+    public Path downloadAsset(GithubAsset asset, Path targetDir) throws IOException, URISyntaxException, InterruptedException {
         if (!Files.isDirectory(targetDir)) {
             throw new NotDirectoryException(targetDir.toString());
         }
+        var get = HttpRequest.newBuilder()
+                .uri(asset.getBrowserDownloadUrl().toURI())
+                .build();
         Path target = targetDir.resolve(asset.getName());
-        HttpGet get = new HttpGet(asset.getBrowserDownloadUrl().toURI());
-        return httpClient.execute(get, response -> {
-            try (var fos = new FileOutputStream(target.toFile())) {
-                response.getEntity().writeTo(fos);
-            }
-            return target;
-        });
+        var response = httpClient.send(get, HttpResponse.BodyHandlers.ofInputStream());
+        if (response.statusCode() != 200) {
+            throw new IOException("Failed to download asset from " +
+                    asset.getBrowserDownloadUrl() +
+                    "(HTTP status: " + response.statusCode() + ")");
+        }
+        Files.copy(response.body(),
+                target,
+                StandardCopyOption.REPLACE_EXISTING);
+        return target;
     }
 
     /**
@@ -280,43 +302,28 @@ public class GithubApiHelper {
      * @param token    a github personal access token.
      */
     public void setUserCredentials(String username, String token) {
-        if (username != null && token != null && username.trim().length() > 0) {
+        if (username != null && token != null && !username.trim().isEmpty()) {
             this.userCredentials = Base64.getEncoder().encodeToString((username + ":" + token).getBytes(StandardCharsets.UTF_8));
         } else {
             this.userCredentials = null;
         }
     }
 
-    protected HttpGet basicAuthGet(URI requestUri) {
-        HttpGet httpget = new HttpGet(requestUri);
+    protected HttpRequest basicAuthGet(URI requestUri) {
+        var requestBuilder = HttpRequest.newBuilder()
+                .GET()
+                .uri(requestUri);
         if (userCredentials != null) {
-            httpget.addHeader("Authorization", "Basic " + userCredentials);
+            requestBuilder.header("Authorization", "Basic " + userCredentials);
         }
-        return httpget;
+        return requestBuilder.build();
     }
 
-    private static class GithubApiHolder {
-        private final static GithubApiHelper instance = new GithubApiHelper();
+
+    @Override
+    public void close() throws IOException {
+        httpClient.close();
     }
+    
 
-    /**
-     * An instance of {@link GithubApiHelper} that implements {@link Closeable}
-     */
-    public static class ClosableGitHubApiHelper extends GithubApiHelper implements Closeable {
-        public ClosableGitHubApiHelper() {
-        }
-
-        public ClosableGitHubApiHelper(URI apiEndpoint) {
-            super(apiEndpoint);
-        }
-
-        public ClosableGitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfiguration) {
-            super(apiEndpoint, proxyConfiguration);
-        }
-
-        @Override
-        public void close() throws IOException {
-            httpClient.close();
-        }
-    }
 }
