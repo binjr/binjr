@@ -19,11 +19,13 @@ package eu.binjr.common.github;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.io.ProxyConfiguration;
 import eu.binjr.common.io.SSLContextUtils;
 import eu.binjr.common.io.SSLCustomContextException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.property.DoubleProperty;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -33,10 +35,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.NotDirectoryException;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.*;
 
 /**
@@ -123,9 +122,9 @@ public class GitHubApiHelper implements Closeable {
      * @return a new instance of the {@link GitHubApiHelper} class.
      */
     public static GitHubApiHelper of(URI apiEndpoint,
-                                                  ProxyConfiguration proxyConfiguration,
-                                                  String userName,
-                                                  String token) {
+                                     ProxyConfiguration proxyConfiguration,
+                                     String userName,
+                                     String token) {
         return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token);
     }
 
@@ -266,6 +265,7 @@ public class GitHubApiHelper implements Closeable {
         return downloadAsset(asset, Files.createTempDirectory(UserPreferences.getInstance().temporaryFilesRoot.get(), "binjr-updates_"));
     }
 
+
     /**
      * Download the byteArrayTuple of the specified github asset into the specified directory.
      *
@@ -276,9 +276,24 @@ public class GitHubApiHelper implements Closeable {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public Path downloadAsset(GithubAsset asset, Path targetDir) throws IOException, URISyntaxException, InterruptedException {
+        return downloadAsset(asset, targetDir, null);
+    }
+
+    /**
+     * Download the byteArrayTuple of the specified github asset into the specified directory.
+     *
+     * @param asset     the asset to download.
+     * @param targetDir the target directory to download the asset to.
+     * @param progress  A {@link DoubleProperty} used to report download progression.
+     * @return the {@link Path} where it was downloaded.
+     * @throws IOException        if an IO error occurs while attempting to download the file.
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     */
+    public Path downloadAsset(GithubAsset asset, Path targetDir, DoubleProperty progress) throws IOException, URISyntaxException, InterruptedException {
         if (!Files.isDirectory(targetDir)) {
             throw new NotDirectoryException(targetDir.toString());
         }
+        var assetSize = asset.getSize();
         var get = HttpRequest.newBuilder()
                 .uri(asset.getBrowserDownloadUrl().toURI())
                 .build();
@@ -289,9 +304,14 @@ public class GitHubApiHelper implements Closeable {
                     asset.getBrowserDownloadUrl() +
                     "(HTTP status: " + response.statusCode() + ")");
         }
-        Files.copy(response.body(),
-                target,
-                StandardCopyOption.REPLACE_EXISTING);
+        if (progress == null) {
+            Files.copy(response.body(), target, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            IOUtils.copyStreams(response.body(),
+                    Files.newOutputStream(target, StandardOpenOption.CREATE_NEW),
+                    assetSize,
+                    progress);
+        }
         return target;
     }
 
@@ -319,11 +339,9 @@ public class GitHubApiHelper implements Closeable {
         return requestBuilder.build();
     }
 
-
     @Override
     public void close() throws IOException {
         httpClient.close();
     }
-    
 
 }

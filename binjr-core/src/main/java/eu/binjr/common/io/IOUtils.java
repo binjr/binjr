@@ -18,6 +18,7 @@ package eu.binjr.common.io;
 
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Logger;
+import javafx.beans.property.DoubleProperty;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
  * @author Frederic Thevenet
  */
 public class IOUtils {
-    private static final int DEFAULT_COPY_BUFFER_SIZE = 32 * 1024;
+    private static final int DEFAULT_COPY_BUFFER_SIZE = 16384;
     private static final int EOF = -1;
     private static final Logger logger = Logger.create(IOUtils.class);
 
@@ -79,6 +80,24 @@ public class IOUtils {
             output.write(buffer, 0, n);
             count += n;
         }
+        return count;
+    }
+
+    public static long copyStreams(InputStream input, OutputStream output,long size, DoubleProperty progress) throws IOException {
+        Objects.requireNonNull(input, "Argument input must not be null");
+        Objects.requireNonNull(output, "Argument output must not be null");
+        if (size == 0){
+            size = -1;
+        }
+        byte[] buffer = new byte[DEFAULT_COPY_BUFFER_SIZE];
+        long count = 0;
+        int n;
+        while (EOF != (n = input.read(buffer))) {
+            output.write(buffer, 0, n);
+            count += n;
+            progress.set(count / (double) size);
+        }
+        progress.set(1.0);
         return count;
     }
 

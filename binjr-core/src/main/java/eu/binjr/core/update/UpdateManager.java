@@ -27,6 +27,8 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -199,7 +201,7 @@ public class UpdateManager {
     private void asyncDownloadUpdatePackage(GithubRelease release,
                                             Consumer<Path> onDownloadComplete,
                                             Consumer<Throwable> onFailure) {
-        Task<Path> downloadTask = new Task<Path>() {
+        Task<Path> downloadTask = new Task<>() {
             @Override
             protected Path call() throws Exception {
                 var targetDir = Files.createTempDirectory(userPrefs.temporaryFilesRoot.get(), "binjr-update_");
@@ -207,12 +209,18 @@ public class UpdateManager {
                         release.getVersion(),
                         appEnv.getOsFamily().getPlatformClassifier(),
                         appEnv.getPackaging().getBundleExtension());
-                var packagePath = downloadAsset(release, packageAssetName, targetDir);
-                if (!appEnv.isSignatureVerificationDisabled()) {
-                    var sigPath = downloadAsset(release, packageAssetName + ".asc", targetDir);
-                    verifyUpdatePackage(packagePath, sigPath);
+                var taskProgress = new SimpleDoubleProperty(0.0);
+                Dialogs.notifyProgress("Downloading Update...", "Downloading " + packageAssetName, taskProgress);
+                try {
+                    var packagePath = downloadAsset(release, packageAssetName, targetDir, taskProgress);
+                    if (!appEnv.isSignatureVerificationDisabled()) {
+                        var sigPath = downloadAsset(release, packageAssetName + ".asc", targetDir);
+                        verifyUpdatePackage(packagePath, sigPath);
+                    }
+                    return packagePath;
+                } finally {
+                    taskProgress.set(1.0);
                 }
-                return packagePath;
             }
         };
 
@@ -289,6 +297,13 @@ public class UpdateManager {
     private Path downloadAsset(GithubRelease release,
                                String assetName,
                                Path targetDir) throws Exception {
+        return downloadAsset(release, assetName, targetDir, null);
+    }
+
+    private Path downloadAsset(GithubRelease release,
+                               String assetName,
+                               Path targetDir,
+                               DoubleProperty progress) throws Exception {
         var asset = release.getAssets()
                 .stream()
                 .filter(a -> a.getName().equalsIgnoreCase(assetName))
@@ -297,7 +312,7 @@ public class UpdateManager {
                         " for release " +
                         release.getName()));
         logger.info("Downloading asset from " + asset.getBrowserDownloadUrl());
-        return ghhMonitor.read().tryLock(() -> github.downloadAsset(asset, targetDir)).orElseThrow();
+        return ghhMonitor.read().tryLock(() -> github.downloadAsset(asset, targetDir, progress)).orElseThrow();
     }
 
     private void showUpdateReadyNotification(Node root) {

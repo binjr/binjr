@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,15 +24,19 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
+import javafx.scene.control.*;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.ExceptionDialog;
@@ -46,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.atomic.DoubleAccumulator;
 
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
@@ -206,6 +211,31 @@ public class Dialogs {
                 .owner(null).showInformation());
     }
 
+    public static void notifyProgress(String title, String message, DoubleProperty progress) {
+        var progressBar = new ProgressBar();
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+        progressBar.setPrefHeight(10.0);
+        progressBar.prefWidth(Region.USE_COMPUTED_SIZE);
+        progressBar.progressProperty().bind(progress);
+        progress.addListener((observable, oldValue, newValue) -> {
+            if (newValue.doubleValue() >= 1.0) {
+                dismissParentNotificationPopup(progressBar);
+            }
+        });
+        var pane = new VBox();
+        pane.setFillWidth(true);
+        var label = new Label(message);
+        pane.getChildren().addAll(progressBar, label);
+        VBox.setMargin(progressBar, new Insets(10, 0, 10, 0));
+        runOnFXThread(() -> Notifications.create()
+                .title(title)
+                .hideCloseButton()
+                .graphic(pane)
+                .hideAfter(Duration.INDEFINITE)
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(null).show());
+    }
+
 
     public static void dismissParentNotificationPopup(Node n) {
         if (n == null) {
@@ -235,7 +265,7 @@ public class Dialogs {
 
     @Deprecated
     public static double getOutputScaleX(Node node) {
-       return NodeUtils.getOutputScaleX(node);
+        return NodeUtils.getOutputScaleX(node);
     }
 
     @Deprecated
