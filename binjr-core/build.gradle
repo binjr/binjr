@@ -19,7 +19,7 @@ dependencies {
     api 'org.apache.logging.log4j:log4j-core:2.22.0'
     api 'org.apache.logging.log4j:log4j-jcl:2.22.0'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.22.0'
-    api 'org.apache.httpcomponents.client5:httpclient5:5.2.2'
+    api 'org.apache.httpcomponents.client5:httpclient5:5.2.3'
     api 'org.controlsfx:controlsfx:11.2.0'
     implementation 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.10.1'
@@ -29,10 +29,10 @@ dependencies {
     implementation 'org.bouncycastle:bcpg-jdk18on:1.77'
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.11.0'
-    api 'org.apache.lucene:lucene-core:9.8.0'
-    api 'org.apache.lucene:lucene-facet:9.8.0'
-    implementation 'org.apache.lucene:lucene-queryparser:9.8.0'
-    implementation 'org.apache.lucene:lucene-analysis-common:9.8.0'
+    api 'org.apache.lucene:lucene-core:9.9.0'
+    api 'org.apache.lucene:lucene-facet:9.9.0'
+    implementation 'org.apache.lucene:lucene-queryparser:9.9.0'
+    implementation 'org.apache.lucene:lucene-analysis-common:9.9.0'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
