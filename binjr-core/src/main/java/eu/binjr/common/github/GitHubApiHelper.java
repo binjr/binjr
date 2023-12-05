@@ -304,13 +304,14 @@ public class GitHubApiHelper implements Closeable {
                     asset.getBrowserDownloadUrl() +
                     "(HTTP status: " + response.statusCode() + ")");
         }
-        if (progress == null) {
-            Files.copy(response.body(), target, StandardCopyOption.REPLACE_EXISTING);
-        } else {
-            IOUtils.copyStreams(response.body(),
-                    Files.newOutputStream(target, StandardOpenOption.CREATE_NEW),
-                    assetSize,
-                    progress);
+        try (var in = response.body()) {
+            if (progress == null) {
+                Files.copy(in, target, StandardCopyOption.REPLACE_EXISTING);
+            } else {
+                try (var out = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
+                    IOUtils.copyStreams(in, out, assetSize, progress);
+                }
+            }
         }
         return target;
     }
