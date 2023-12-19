@@ -21,7 +21,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
-import eu.binjr.core.controllers.ChartViewportsState;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
@@ -376,7 +375,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> optimizeNGramQueries = booleanPreference("optimizeNGramQueries", true);
 
-    public final ObservablePreference<Boolean> showInlineHelpButtons = booleanPreference("showInlinSHow/eHelpButtons", true);
+    public final ObservablePreference<Boolean> showInlineHelpButtons = booleanPreference("showInlineHelpButtons", true);
 
     public final ObservablePreference<IndexingTokenizer> indexingTokenizer =
             enumPreference(IndexingTokenizer.class, "indexingTokenizer", IndexingTokenizer.NGRAMS);
