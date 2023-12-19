@@ -133,24 +133,27 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                 }));
     }
 
-    protected <R> R doHttpGet(URI requestUri, HttpResponse.BodyHandler<R> bodyHandler) throws DataAdapterException {
-        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::perf)) {
+    protected <R> R doHttpGet(URI url, HttpResponse.BodyHandler<R> bodyHandler) throws DataAdapterException {
+        try (Profiler p = Profiler.start("Executing HTTP request: [" + url.toString() + "]", logger::perf)) {
             var httpGet = HttpRequest.newBuilder()
                     .GET()
-                    .uri(requestUri).build();
-            logger.debug(() -> "requestUri = " + requestUri);
+                    .uri(url).build();
+            logger.debug(() -> "requestUri = " + url);
             HttpResponse<R> response = httpClient.send(httpGet, bodyHandler);
             if (response == null) {
-                throw new FetchingDataFromAdapterException("Invalid response to \"" + requestUri + "\"");
+                throw new FetchingDataFromAdapterException("Invalid response to \"" + url + "\"");
             } else if (response.statusCode() >= 300) {
                 String msg = switch (response.statusCode()) {
-                    case 401 -> "Authentication failed while trying to access \"" + requestUri + "\"";
-                    case 403 -> "Access to the resource at \"" + requestUri + "\" is denied.";
-                    case 404 -> "The resource at \"" + requestUri + "\" could not be found.";
-                    case 500 ->
-                            "A server-side error has occurred while trying to access the resource at \"" + requestUri;
-                    default ->
-                            "Error executing HTTP request \"" + requestUri + "(Status=" + response.statusCode() + ")";
+                    case 401 -> "Authentication failed while trying to access \"" + url + "\"";
+                    case 403 -> "Access to the resource at \"" + url + "\" is denied.";
+                    case 404 -> "The resource at \"" + url + "\" could not be found.";
+                    case 407 -> "Proxy authentication is required to access resource at \"" + url + "\"";
+                    case 500 -> "A server-side error has occurred while accessing the resource at \"" + url + "\"";
+                    case 501 -> "Request method is not supported by the server at \"" + url + "\"";
+                    case 502 -> "Bad gateway at \"" + url + "\"";
+                    case 503 -> "Service unavailable at \"" + url + "\"";
+                    case 504 -> "Gateway timeout at \"" + url + "\"";
+                    default -> "Error executing HTTP request \"" + url + "\" (Status=" + response.statusCode() + ")";
                 };
                 throw new SourceCommunicationException(msg);
             }
