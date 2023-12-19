@@ -124,6 +124,9 @@ public class Binjr extends Application {
         if (AppEnvironment.getInstance().getJavaVersion().getMajor() >= 13) {
             System.setProperty("sun.security.jgss.native", "true");
         }
+        if (UserPreferences.getInstance().forceTunnelingDisabledSchemes.get()) {
+            System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
+        }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {

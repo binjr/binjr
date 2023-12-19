@@ -386,6 +386,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<UnitPrefixes> defaultUnitPrefix = enumPreference(UnitPrefixes.class, "defaultUnitPrefix", UnitPrefixes.METRIC, UnitPrefixes.UNDEFINED);
 
+    public final ObservablePreference<Boolean> forceTunnelingDisabledSchemes = booleanPreference("forceTunnelingDisabledSchemes", false);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
