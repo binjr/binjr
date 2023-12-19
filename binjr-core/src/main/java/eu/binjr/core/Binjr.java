@@ -129,7 +129,7 @@ public class Binjr extends Application {
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
-        if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
+        if (jaasCfgPath == null || jaasCfgPath.trim().isEmpty()) {
             var defaultJaasConf = Binjr.class.getResource("/jaas_login.conf");
             if (defaultJaasConf != null) {
                 System.setProperty("java.security.auth.login.config", defaultJaasConf.toExternalForm());
@@ -160,10 +160,10 @@ public class Binjr extends Application {
 
         try (Profiler p = Profiler.start("Set scene", logger::perf)) {
             var lastWindowPosition = UserPreferences.getInstance().windowLastPosition.get();
-            if (Screen.getScreensForRectangle(
+            if (!Screen.getScreensForRectangle(
                     lastWindowPosition.getMinX(),
                     lastWindowPosition.getMinY(),
-                    10, 10).size() > 0) {
+                    10, 10).isEmpty()) {
                 primaryStage.setX(lastWindowPosition.getMinX());
                 primaryStage.setY(lastWindowPosition.getMinY());
                 primaryStage.setWidth(lastWindowPosition.getWidth());
