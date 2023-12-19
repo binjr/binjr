@@ -30,7 +30,6 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
-import org.apache.hc.core5.http.NameValuePair;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.net.URI;
@@ -89,7 +88,7 @@ public class NetdataAdapter extends HttpDataAdapter<Double> {
 
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
-        var params = new ArrayList<NameValuePair>();
+        var params = new ArrayList<UriParameter>();
         params.add(UriParameter.of("points",
                 (userPrefs.downSamplingEnabled.get() && !adapterPrefs.disableServerSideDownsampling.get()
                         ? userPrefs.downSamplingThreshold.get() : adapterPrefs.maxSamplesAllowed.get())));

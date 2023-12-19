@@ -23,6 +23,7 @@ import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.adapters.HttpDataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.adapters.UriParameter;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
@@ -37,11 +38,6 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
@@ -49,6 +45,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -147,9 +144,9 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
         return craftRequestUri("download",
-                new BasicNameValuePair("id", path),
-                new BasicNameValuePair("begin", Long.toString(begin.toEpochMilli())),
-                new BasicNameValuePair("end", Long.toString(end.toEpochMilli()))
+                new UriParameter("id", path),
+                new UriParameter("begin", Long.toString(begin.toEpochMilli())),
+                new UriParameter("end", Long.toString(end.toEpochMilli()))
         );
     }
 
@@ -275,10 +272,10 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     }
 
     private String getJsonTree(String tabName, String argName, String argValue) throws DataAdapterException, URISyntaxException {
-        List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("tab", tabName));
+        List<UriParameter> params = new ArrayList<>();
+        params.add(new UriParameter("tab", tabName));
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
-            params.add(new BasicNameValuePair(argName, argValue));
+            params.add(new UriParameter(argName, argValue));
         }
         String entityString = doHttpGetJson(craftRequestUri("jsontree", params));
         logger.trace(entityString);
@@ -287,9 +284,9 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
 
 
     private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
-        URI requestUri = craftRequestUri("graphdesc", new BasicNameValuePair("id", id));
-        return doHttpGet(requestUri, response -> {
-            if (response.getCode() == 404) {
+        URI requestUri = craftRequestUri("graphdesc", new UriParameter("id", id));
+        return doHttpGet(requestUri, responseInfo -> HttpResponse.BodySubscribers.mapping(HttpResponse.BodySubscribers.ofInputStream(), body -> {
+            if (responseInfo.statusCode() == 404) {
                 // This is probably an older version of JRDS that doesn't provide the graphdesc service,
                 // so we're falling back to recovering the datastore name from the csv file provided by
                 // the download service.
@@ -297,23 +294,18 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
                 try {
                     return getGraphDescriptorLegacy(id);
                 } catch (Exception e) {
-                    throw new IOException(e);
+                    throw new RuntimeException(e);
                 }
             }
-            HttpEntity entity = response.getEntity();
-            if (response.getCode() >= 300) {
-                EntityUtils.consume(entity);
-                throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
+            if (body == null) {
+                return null;
             }
-            if (entity != null) {
-                try {
-                    return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
-                } catch (Exception e) {
-                    throw new IOException("Failed to unmarshall graphdesc response", e);
-                }
+            try {
+                return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(body), Graphdesc.class);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to unmarshall graphdesc response", e);
             }
-            return null;
-        });
+        }));
     }
 
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {

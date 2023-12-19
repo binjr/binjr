@@ -16,53 +16,29 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.io.ProxyConfiguration;
+import eu.binjr.common.io.SSLContextUtils;
+import eu.binjr.common.io.SSLCustomContextException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
-import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
-import org.apache.hc.client5.http.ClientProtocolException;
-import org.apache.hc.client5.http.HttpResponseException;
-import org.apache.hc.client5.http.SystemDefaultDnsResolver;
-import org.apache.hc.client5.http.auth.*;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.StandardCookieSpec;
-import org.apache.hc.client5.http.impl.auth.*;
-import org.apache.hc.client5.http.impl.classic.AbstractHttpClientResponseHandler;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.NoHttpResponseException;
-import org.apache.hc.core5.http.config.RegistryBuilder;
-import org.apache.hc.core5.http.io.HttpClientResponseHandler;
-import org.apache.hc.core5.http.io.SocketConfig;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.ssl.TLS;
-import org.apache.hc.core5.net.URIBuilder;
-import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
-import org.apache.hc.core5.pool.PoolReusePolicy;
-import org.apache.hc.core5.ssl.SSLContexts;
-import org.apache.hc.core5.util.TimeValue;
-import org.apache.hc.core5.util.Timeout;
 
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
 import java.net.*;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.Security;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.net.http.HttpResponse.BodySubscribers;
 
 /**
  * This class provides a base on which to implement {@link DataAdapter} instances that communicate with sources via the HTTP protocol.
@@ -75,7 +51,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private static final Logger logger = Logger.create(HttpDataAdapter.class);
     public static final String APPLICATION_JSON = "application/json";
-    private final CloseableHttpClient httpClient;
+    private final HttpClient httpClient;
     private URL baseAddress;
 
     /**
@@ -100,43 +76,9 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         httpClient = httpClientFactory();
     }
 
-    protected static SSLContext createSslCustomContext() {
-        // Load platform specific Trusted CA keystore
-        String keystoreType;
-        switch (AppEnvironment.getInstance().getOsFamily()) {
-            case WINDOWS:
-                keystoreType = "Windows-ROOT";
-                break;
-            case OSX:
-                keystoreType = "KeychainStore";
-                break;
-            case LINUX:
-            case UNSUPPORTED:
-            default:
-                logger.trace("No attempt to load system keystore on OS=" + AppEnvironment.getInstance().getOsFamily());
-                return SSLContexts.createSystemDefault();
-        }
-        try {
-            logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
-            KeyStore tks = KeyStore.getInstance(keystoreType);
-            tks.load(null, null);
-            return SSLContexts.custom().loadTrustMaterial(tks, null).build();
-        } catch (KeyStoreException e) {
-            logger.debug("Could not find the requested OS specific keystore", e);
-        } catch (Exception e) {
-            logger.debug("Error loading OS specific keystore", e);
-        }
-        return SSLContexts.createSystemDefault();
-    }
-
     @Override
     public byte[] onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
-        return doHttpGet(craftFetchUri(path, begin, end), new AbstractHttpClientResponseHandler<>() {
-            @Override
-            public byte[] handleEntity(HttpEntity entity) throws IOException {
-                return EntityUtils.toByteArray(entity);
-            }
-        });
+        return doHttpGet(craftFetchUri(path, begin, end), r -> BodySubscribers.ofByteArray());
     }
 
     @Override
@@ -170,53 +112,49 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     public void close() {
         try {
             this.httpClient.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             logger.error("Error closing HttpDataAdapter", e);
         }
         super.close();
     }
 
     protected String doHttpGetJson(URI requestUri) throws DataAdapterException {
-        return doHttpGet(requestUri, response -> {
-            var entity = response.getEntity();
-            if (response.getCode() >= 300) {
-                EntityUtils.consume(entity);
-                throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
-            }
-            if (entity == null) {
-                throw new NoHttpResponseException("Invalid response to \"" + requestUri + "\": null");
-            }
-            String contentType = entity.getContentType();
-            if (contentType == null || contentType.isBlank()) {
-                throw new ClientProtocolException("No content type specified");
-            }
-            if (!APPLICATION_JSON.equalsIgnoreCase(contentType.split(";")[0].trim())) {
-                throw new ClientProtocolException("Invalid content type: received: '" +
-                        entity.getContentType() +
-                        "', expected: '" + APPLICATION_JSON + "')");
-            }
-            return EntityUtils.toString(entity);
-        });
+        return doHttpGet(requestUri, responseInfo -> BodySubscribers.mapping(
+                BodySubscribers.ofString(StandardCharsets.UTF_8),
+                s -> {
+                    String contentType = responseInfo.headers().firstValue("Content-Type")
+                            .orElseThrow(() -> new RuntimeException("No content type specified"));
+
+                    if (!APPLICATION_JSON.equalsIgnoreCase(contentType.split(";")[0].trim())) {
+                        throw new RuntimeException("Invalid content type: received: '" +
+                                s + "', expected: '" + APPLICATION_JSON + "')");
+                    }
+                    return s;
+                }));
     }
 
-    protected <R> R doHttpGet(URI requestUri, HttpClientResponseHandler<R> responseHandler) throws DataAdapterException {
+    protected <R> R doHttpGet(URI requestUri, HttpResponse.BodyHandler<R> bodyHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::perf)) {
+            var httpGet = HttpRequest.newBuilder()
+                    .GET()
+                    .uri(requestUri).build();
             logger.debug(() -> "requestUri = " + requestUri);
-            R result = httpClient.execute(new HttpGet(requestUri), responseHandler);
-            if (result == null) {
+            HttpResponse<R> response = httpClient.send(httpGet, bodyHandler);
+            if (response == null) {
                 throw new FetchingDataFromAdapterException("Invalid response to \"" + requestUri + "\"");
+            } else if (response.statusCode() >= 300) {
+                String msg = switch (response.statusCode()) {
+                    case 401 -> "Authentication failed while trying to access \"" + requestUri + "\"";
+                    case 403 -> "Access to the resource at \"" + requestUri + "\" is denied.";
+                    case 404 -> "The resource at \"" + requestUri + "\" could not be found.";
+                    case 500 ->
+                            "A server-side error has occurred while trying to access the resource at \"" + requestUri;
+                    default ->
+                            "Error executing HTTP request \"" + requestUri + "(Status=" + response.statusCode() + ")";
+                };
+                throw new SourceCommunicationException(msg);
             }
-            return result;
-        } catch (HttpResponseException e) {
-            String msg = switch (e.getStatusCode()) {
-                case 401 -> "Authentication failed while trying to access \"" + requestUri + "\"";
-                case 403 -> "Access to the resource at \"" + requestUri + "\" is denied.";
-                case 404 -> "The resource at \"" + requestUri + "\" could not be found.";
-                case 500 -> "A server-side error has occurred while trying to access the resource at \""
-                        + requestUri + "\": " + e.getMessage();
-                default -> "Error executing HTTP request \"" + requestUri + "\": " + e.getMessage();
-            };
-            throw new SourceCommunicationException(msg, e);
+            return response.body();
         } catch (ConnectException e) {
             throw new SourceCommunicationException(e.getMessage(), e);
         } catch (UnknownHostException e) {
@@ -233,59 +171,47 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         }
     }
 
-    protected CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
+    protected HttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
         try {
             var userPrefs = UserPreferences.getInstance();
-            var schemeFactoryRegistry = RegistryBuilder.<AuthSchemeFactory>create()
-                    .register(StandardAuthScheme.BASIC, BasicSchemeFactory.INSTANCE)
-                    .register(StandardAuthScheme.DIGEST, DigestSchemeFactory.INSTANCE)
-                    .register(StandardAuthScheme.NTLM, NTLMSchemeFactory.INSTANCE)
-                    .register(StandardAuthScheme.KERBEROS, KerberosSchemeFactory.DEFAULT)
-                    .register(StandardAuthScheme.SPNEGO, new SPNegoSchemeFactory(
-                            KerberosConfig.custom()
-                                    .setRequestDelegCreds(KerberosConfig.Option.DEFAULT)
-                                    .setStripPort(KerberosConfig.Option.DEFAULT)
-                                    .setUseCanonicalHostname(KerberosConfig.Option.DEFAULT)
-                                    .build(),
-                            SystemDefaultDnsResolver.INSTANCE))
-                    .build();
-
-            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
-                    .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
-                            .setSslContext(createSslCustomContext())
-                            .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
-                            .build())
-                    .setDefaultSocketConfig(SocketConfig.custom()
-                            .setSoTimeout(Timeout.ofMilliseconds(userPrefs.httpSocketTimeoutMs.get().intValue()))
-                            .build())
-                    .setConnectionTimeToLive(Timeout.ofMilliseconds(userPrefs.httpSSLConnectionTTLMs.get().intValue()))
-                    .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.STRICT)
-                    .setConnPoolPolicy(PoolReusePolicy.LIFO)
-                    .setMaxConnPerRoute(16)
-                    .setMaxConnTotal(100)
-                    .build();
-
-            var builder = HttpClients.custom()
-                    .setUserAgent(AppEnvironment.APP_NAME + "/" +
-                            AppEnvironment.getInstance().getVersion() +
-                            " (Authenticates like: Firefox/Safari/Internet Explorer)")
-                    .setConnectionManager(connectionManager)
-                    .setDefaultAuthSchemeRegistry(schemeFactoryRegistry)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(Timeout.ofMilliseconds(userPrefs.httpConnectionTimeoutMs.get().intValue()))
-                            .setResponseTimeout(Timeout.ofMilliseconds(userPrefs.httpResponseTimeoutMs.get().intValue()))
-                            .setCookieSpec(StandardCookieSpec.STRICT)
-                            .build());
+            var builder = HttpClient.newBuilder()
+//                    . (AppEnvironment.APP_NAME + "/" +
+//                            AppEnvironment.getInstance().getVersion() +
+//                            " (Authenticates like: Firefox/Safari/Internet Explorer)")
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
+            try {
+                builder.sslContext(SSLContextUtils.withPlatformKeystore());
+            } catch (SSLCustomContextException e) {
+                logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
+                logger.debug("Stacktrace", e);
+            }
             if (userPrefs.enableHttpProxy.get()) {
-                builder.setProxy(new HttpHost(userPrefs.httpProxyHost.get(), userPrefs.httpProxyPort.get().intValue()));
-                if (userPrefs.useHttpProxyAuth.get()) {
-                    var credsProvider = new BasicCredentialsProvider();
-                    credsProvider.setCredentials(
-                            new AuthScope(userPrefs.httpProxyHost.get(),
-                                    userPrefs.httpProxyPort.get().intValue()),
-                            new UsernamePasswordCredentials(userPrefs.httpProxyLogin.get(),
-                                    userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
-                    builder.setDefaultCredentialsProvider(credsProvider);
+                try {
+                    var proxyConfig = new ProxyConfiguration(
+                            userPrefs.enableHttpProxy.get(),
+                            userPrefs.httpProxyHost.get(),
+                            userPrefs.httpProxyPort.get().intValue(),
+                            userPrefs.useHttpProxyAuth.get(),
+                            userPrefs.httpProxyLogin.get(),
+                            userPrefs.httpProxyPassword.get().toPlainText().toCharArray());
+                    var proxySelector = ProxySelector.of(InetSocketAddress.createUnresolved(proxyConfig.host(), proxyConfig.port()));
+                    if (proxyConfig.useAuth()) {
+                        builder.authenticator(new Authenticator() {
+                            @Override
+                            protected PasswordAuthentication getPasswordAuthentication() {
+                                if (getRequestorType().equals(RequestorType.PROXY)) {
+                                    return new PasswordAuthentication(proxyConfig.login(), proxyConfig.pwd());
+                                } else {
+                                    return null;
+                                }
+                            }
+                        });
+                    }
+                    builder.proxy(proxySelector);
+                } catch (Exception e) {
+                    logger.error("Failed to setup http proxy: " + e.getMessage());
+                    logger.debug(() -> "Stack", e);
                 }
             }
             return builder.build();
@@ -295,23 +221,19 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         }
     }
 
-    protected URI craftRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
+    protected URI craftRequestUri(String path, List<UriParameter> params) throws SourceCommunicationException {
         Objects.requireNonNull(path);
         try {
             List<String> res = new ArrayList<>(Arrays.asList(getBaseAddress().getPath().split("/")));
             res.addAll(Arrays.asList(path.split("/")));
-            String sanitizedPath = res.stream().filter(s -> !s.isEmpty()).reduce("", (p, e) -> p + "/" + e);
-            URIBuilder builder = new URIBuilder(getBaseAddress().toURI().resolve(sanitizedPath));
-            if (params != null) {
-                builder.addParameters(params);
-            }
-            return builder.build();
+            return getBaseAddress().toURI().resolve(res.stream().filter(s -> !s.isEmpty()).reduce("", (p, e) -> p + "/" + e) +
+                    params.stream().map(UriParameter::encoded).collect(Collectors.joining("&", path.contains("?") ? "&" : "?", "")));
         } catch (URISyntaxException e) {
             throw new SourceCommunicationException("Error building URI for request", e);
         }
     }
 
-    protected URI craftRequestUri(String path, NameValuePair... params) throws SourceCommunicationException {
+    protected URI craftRequestUri(String path, UriParameter... params) throws SourceCommunicationException {
         return craftRequestUri(path, params != null ? Arrays.asList(params) : null);
     }
 
@@ -342,15 +264,10 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
      */
     public boolean ping() {
         try {
-            return doHttpGet(craftRequestUri(""), response -> {
-                HttpEntity entity = null;
-                try {
-                    entity = response.getEntity();
-                    return response.getCode() < 300 && entity != null;
-                } finally {
-                    EntityUtils.consumeQuietly(entity);
-                }
-            });
+            return doHttpGet(craftRequestUri(""),
+                    responseInfo -> BodySubscribers.mapping(
+                            BodySubscribers.discarding(),
+                            unused -> responseInfo.statusCode() < 300));
         } catch (Exception e) {
             logger.debug(() -> "Ping failed", e);
             return false;

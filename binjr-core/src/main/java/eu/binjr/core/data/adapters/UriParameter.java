@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,33 +17,29 @@
 package eu.binjr.core.data.adapters;
 
 
-import org.apache.hc.core5.http.NameValuePair;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
-public class UriParameter implements NameValuePair {
+public record UriParameter(String name, String value) {
 
-    private final String name;
-    private final String value;
-
-    public static UriParameter of (String name, Object value){
+    public static UriParameter of(String name, Object value) {
         return new UriParameter(name, value.toString());
     }
-    UriParameter(String name, String value) {
-        this.name = name;
-        this.value = value;
+
+    public String encoded() {
+        return urlEncode(name) + "=" + urlEncode(value);
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public String getValue() {
-        return this.value;
+    private String urlEncode(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     @Override
     public String toString() {
-        return value;
+        return name + "=" + value;
     }
 }
