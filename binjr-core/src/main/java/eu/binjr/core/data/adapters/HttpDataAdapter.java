@@ -126,6 +126,9 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         return doHttpGet(requestUri, responseInfo -> BodySubscribers.mapping(
                 BodySubscribers.ofString(StandardCharsets.UTF_8),
                 s -> {
+                    if (responseInfo.statusCode() >= 300) {
+                        return null;
+                    }
                     String contentType = responseInfo.headers().firstValue("Content-Type")
                             .orElseThrow(() -> new RuntimeException("No content type specified"));
 
@@ -145,9 +148,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                     .uri(url).build();
             logger.debug(() -> "requestUri = " + url);
             HttpResponse<R> response = httpClient.send(httpGet, bodyHandler);
-            if (response == null) {
-                throw new FetchingDataFromAdapterException("Invalid response to \"" + url + "\"");
-            } else if (response.statusCode() >= 300) {
+            if (response.statusCode() >= 300) {
                 String msg = switch (response.statusCode()) {
                     case 401 -> "Authentication failed while trying to access \"" + url + "\"";
                     case 403 -> "Access to the resource at \"" + url + "\" is denied.";
@@ -163,6 +164,8 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                 throw new SourceCommunicationException(msg);
             }
             return response.body();
+        } catch (SourceCommunicationException e) {
+            throw e;
         } catch (ConnectException e) {
             throw new SourceCommunicationException(e.getMessage(), e);
         } catch (UnknownHostException e) {
