@@ -288,11 +288,11 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
      */
     public static URL urlFromString(String address) throws CannotInitializeDataAdapterException {
         try {
-            // Detect if URL protocol is present. If not, assume http.
+            // Detect if URL protocol is present. If not, assume https.
             if (!uriSchemePattern.matcher(address).find()) {
-                address = "http://" + address;
+                address = "https://" + address;
             }
-            URL url = new URL(address.trim());
+            URL url = URI.create(address.trim()).toURL();
             if (url.getHost().trim().isEmpty()) {
                 throw new CannotInitializeDataAdapterException("Malformed URL: no host");
             }
