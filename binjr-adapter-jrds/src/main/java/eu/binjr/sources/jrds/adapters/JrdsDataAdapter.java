@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2021 Frederic Thevenet
+ *    Copyright 2016-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,10 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.xml.XmlUtils;
-import eu.binjr.core.data.adapters.HttpDataAdapter;
-import eu.binjr.core.data.adapters.SerializedDataAdapter;
-import eu.binjr.core.data.adapters.SourceBinding;
-import eu.binjr.core.data.adapters.UriParameter;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
@@ -272,7 +269,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     }
 
     private String getJsonTree(String tabName, String argName, String argValue) throws DataAdapterException, URISyntaxException {
-        List<UriParameter> params = new ArrayList<>();
+        List<NameValuePair> params = new ArrayList<>();
         params.add(new UriParameter("tab", tabName));
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
             params.add(new UriParameter(argName, argValue));

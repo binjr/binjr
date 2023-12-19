@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ public class NetdataAdapter extends HttpDataAdapter<Double> {
 
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
-        var params = new ArrayList<UriParameter>();
+        var params = new ArrayList<NameValuePair>();
         params.add(UriParameter.of("points",
                 (userPrefs.downSamplingEnabled.get() && !adapterPrefs.disableServerSideDownsampling.get()
                         ? userPrefs.downSamplingThreshold.get() : adapterPrefs.maxSamplesAllowed.get())));

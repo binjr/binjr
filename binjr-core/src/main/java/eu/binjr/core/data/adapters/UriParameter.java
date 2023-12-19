@@ -17,29 +17,46 @@
 package eu.binjr.core.data.adapters;
 
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-public record UriParameter(String name, String value) {
+public final class UriParameter implements NameValuePair {
+    private final String name;
+    private final String value;
+
+    public UriParameter(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
     public static UriParameter of(String name, Object value) {
         return new UriParameter(name, value.toString());
-    }
-
-    public String encoded() {
-        return urlEncode(name) + "=" + urlEncode(value);
-    }
-
-    private String urlEncode(String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 
     @Override
     public String toString() {
         return name + "=" + value;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (UriParameter) obj;
+        return Objects.equals(this.name, that.name) &&
+                Objects.equals(this.value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, value);
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2023 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -229,20 +229,24 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         }
     }
 
-    protected URI craftRequestUri(String path, List<UriParameter> params) throws SourceCommunicationException {
+    protected URI craftRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
         Objects.requireNonNull(path);
         try {
             List<String> res = new ArrayList<>(Arrays.asList(getBaseAddress().getPath().split("/")));
             res.addAll(Arrays.asList(path.split("/")));
-            return getBaseAddress().toURI().resolve(res.stream().filter(s -> !s.isEmpty()).reduce("", (p, e) -> p + "/" + e) +
-                    params.stream().map(UriParameter::encoded).collect(Collectors.joining("&", path.contains("?") ? "&" : "?", "")));
+            return getBaseAddress().toURI()
+                    .resolve(res.stream().filter(s -> !s.isEmpty()).reduce("", (p, e) -> p + "/" + e) +
+                            params.stream()
+                                    .map(p -> URLEncoder.encode(p.getName(), StandardCharsets.UTF_8) + "=" +
+                                            URLEncoder.encode(p.getValue(), StandardCharsets.UTF_8))
+                                    .collect(Collectors.joining("&", path.contains("?") ? "&" : "?", "")));
         } catch (URISyntaxException e) {
             throw new SourceCommunicationException("Error building URI for request", e);
         }
     }
 
-    protected URI craftRequestUri(String path, UriParameter... params) throws SourceCommunicationException {
-        return craftRequestUri(path, params != null ? Arrays.asList(params) : null);
+    protected URI craftRequestUri(String path, NameValuePair... params) throws SourceCommunicationException {
+        return craftRequestUri(path, params != null ? Arrays.asList(params) : Collections.emptyList());
     }
 
     protected abstract URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException;
