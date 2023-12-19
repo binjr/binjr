@@ -22,6 +22,7 @@ import eu.binjr.common.io.SSLCustomContextException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -51,6 +52,9 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private static final Logger logger = Logger.create(HttpDataAdapter.class);
     public static final String APPLICATION_JSON = "application/json";
+    public static final String USER_AGENT_STRING = AppEnvironment.APP_NAME +
+            "/" + AppEnvironment.getInstance().getVersion() +
+            " (Authenticates like: Firefox/Safari/Internet Explorer)";
     private final HttpClient httpClient;
     private URL baseAddress;
 
@@ -137,6 +141,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + url.toString() + "]", logger::perf)) {
             var httpGet = HttpRequest.newBuilder()
                     .GET()
+                    .setHeader("User-Agent", USER_AGENT_STRING)
                     .uri(url).build();
             logger.debug(() -> "requestUri = " + url);
             HttpResponse<R> response = httpClient.send(httpGet, bodyHandler);
@@ -178,9 +183,6 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         try {
             var userPrefs = UserPreferences.getInstance();
             var builder = HttpClient.newBuilder()
-//                    . (AppEnvironment.APP_NAME + "/" +
-//                            AppEnvironment.getInstance().getVersion() +
-//                            " (Authenticates like: Firefox/Safari/Internet Explorer)")
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
             try {
