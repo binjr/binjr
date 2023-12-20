@@ -934,7 +934,11 @@ public class MainViewController implements Initializable {
                     if (treeView.isPresent()) {
                         newSourcePane.setContent(buildSourcePaneContent(treeView.get(), newSource));
                     } else {
-                        newSourcePane.setContent(failedLoadingSource("Error connecting to " + newSource.getName()));
+                        if (UserPreferences.getInstance().keepFailedConnectionSourcePaneOpen.get()) {
+                            newSourcePane.setContent(failedLoadingSource("Error connecting to " + newSource.getName()));
+                        } else {
+                            sourcesPane.getPanes().remove(newSourcePane);
+                        }
                     }
                 },
                 event -> {

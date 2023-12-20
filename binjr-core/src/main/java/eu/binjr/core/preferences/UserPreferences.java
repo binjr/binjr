@@ -21,6 +21,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
+import eu.binjr.core.controllers.ChartViewportsState;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
@@ -387,6 +388,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<UnitPrefixes> defaultUnitPrefix = enumPreference(UnitPrefixes.class, "defaultUnitPrefix", UnitPrefixes.METRIC, UnitPrefixes.UNDEFINED);
 
     public final ObservablePreference<Boolean> forceTunnelingDisabledSchemes = booleanPreference("forceTunnelingDisabledSchemes", false);
+
+    public ObservablePreference<Boolean> keepFailedConnectionSourcePaneOpen = booleanPreference("keepFailedConnectionSourcePaneOpen", false);
 
     public static class UserFavorites extends MruFactory {
 
