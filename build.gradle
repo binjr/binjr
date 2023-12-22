@@ -430,7 +430,13 @@ task createRuntimeImage(type: Exec) {
     }
 }
 
-task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
+task generateCdsArchive(type: Exec, dependsOn: createRuntimeImage) {
+    workingDir project.projectDir
+    commandLine = ["${APP_IMAGE_PATH}/runtime/bin/java", '-Xshare:dump']
+}
+
+
+task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, generateCdsArchive]) {
     doFirst {
         mkdir ARTIFACTS_ROOT_PATH
     }
