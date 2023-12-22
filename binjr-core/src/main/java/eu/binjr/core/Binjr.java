@@ -26,6 +26,7 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -180,5 +181,11 @@ public class Binjr extends Application {
         if (splash != null) {
             splash.close();
         }
+        Platform.runLater((()-> {
+            if (env.isStartupBenchmark()){
+                Platform.exit();
+            }
+        }));
+
     }
 }

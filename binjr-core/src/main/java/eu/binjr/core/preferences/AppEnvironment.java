@@ -81,6 +81,7 @@ public class AppEnvironment {
     private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
     private Path systemPluginPath;
+    private boolean startupBenchmark = false;
 
     private AppEnvironment() {
         this.manifest = getManifest();
@@ -164,6 +165,9 @@ public class AppEnvironment {
                     this.setSystemPluginPath(val);
                     break;
                 case "log-file":
+                    break;
+                case "startup-bench":
+                    this.startupBenchmark = Boolean.parseBoolean(val);
                     break;
             }
         });
@@ -532,6 +536,10 @@ public class AppEnvironment {
 
     public Path getSystemPluginPath() {
         return this.systemPluginPath;
+    }
+
+    public boolean isStartupBenchmark() {
+        return startupBenchmark;
     }
 
     private static class EnvironmentHolder {
