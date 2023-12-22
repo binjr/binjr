@@ -425,6 +425,7 @@ task createRuntimeImage(type: Exec) {
             '--output', "${APP_IMAGE_PATH}/runtime"
     ]
     doLast {
+        Files.createDirectories(Paths.get("${APP_IMAGE_PATH}/cds/"))
         System.out.println("Application '${project.name}' packaged.")
         System.out.println(" -> location: ${APP_IMAGE_PATH}/")
     }
@@ -432,11 +433,26 @@ task createRuntimeImage(type: Exec) {
 
 task generateCdsArchive(type: Exec, dependsOn: createRuntimeImage) {
     workingDir project.projectDir
-    commandLine = ["${APP_IMAGE_PATH}/runtime/bin/java", '-Xshare:dump']
+    commandLine = ["${APP_IMAGE_PATH}/runtime/bin/java", '-XX:+UseShenandoahGC', '-Xshare:dump']
+}
+
+task generateAppCdsArchive(type: Exec, dependsOn: generateCdsArchive) {
+    workingDir APP_IMAGE_PATH
+    commandLine = ["${APP_IMAGE_PATH}/runtime/bin/java",
+                   '-XX:+UseShenandoahGC',
+                   '-Xlog:cds',
+                   '-XX:ArchiveClassesAtExit=cds/binjr.jsa',
+//                   '-Dglass.platform=Monocle',
+//                   '-Dmonocle.platform=Headless',
+                   '-cp',
+                   'libs/*',
+                   'eu.binjr.core.Binjr',
+                   '--startup-bench=true'
+    ]
 }
 
 
-task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, generateCdsArchive]) {
+task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, generateAppCdsArchive]) {
     doFirst {
         mkdir ARTIFACTS_ROOT_PATH
     }
