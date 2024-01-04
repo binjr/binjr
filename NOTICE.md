@@ -3,7 +3,7 @@
 
 ---
 
-Copyright 2016-2023 Frederic Thevenet
+Copyright 2016-2024 Frederic Thevenet
 
 Licensed under the Apache License, Version 2.0 (the "License");  
 You may obtain a copy of the License at

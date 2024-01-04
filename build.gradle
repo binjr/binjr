@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2023 Frederic Thevenet
+ *    Copyright 2018-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ ext.GROUP_ID = 'eu.binjr'
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
 ext.LICENSE_URL = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
 ext.LICENSE_DISTRIBUTION = 'repo'
-ext.BINJR_COPYRIGHT = "Copyright (c) 2016-2023 Frederic Thevenet"
+ext.BINJR_COPYRIGHT = "Copyright (c) 2016-2024 Frederic Thevenet"
 ext.BINJR_DESCRIPTION = "A Time Series Browser"
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.OS_ARCH = System.getProperty("os.arch")
