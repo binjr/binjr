@@ -171,7 +171,7 @@ public class StageAppearanceManager {
      * {@link AppearanceOptions}
      *
      * @param stage   the {@link Stage} to register in the {@link StageAppearanceManager}
-     * @param options Appearance {@link AppearanceOptions} to apply the the registered stage.
+     * @param options Appearance {@link AppearanceOptions} to apply the registered stage.
      */
     public void register(Stage stage, AppearanceOptions... options) {
         if (stage == null) {
