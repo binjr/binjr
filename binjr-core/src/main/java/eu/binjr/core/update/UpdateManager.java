@@ -366,8 +366,7 @@ public class UpdateManager {
         PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn),
                 new JcaKeyFingerprintCalculator());
         PGPPublicKey key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
-        if (Arrays.compare(AppEnvironment.BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0 &&
-                Arrays.compare(AppEnvironment.ALT_BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0) {
+        if (Arrays.compare(AppEnvironment.BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0) {
             throw new IllegalArgumentException("Cannot verify signature: Unexpected fingerprint for the key downloaded at " +
                     AppEnvironment.BINJR_PUBLIC_KEY_URL);
         }

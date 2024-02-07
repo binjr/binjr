@@ -55,9 +55,6 @@ public class AppEnvironment {
     public static final String HTTP_BINJR_SHORTCUTS = "https://binjr.eu/documentation/user_guide/shortcuts/#keyboard-shortcuts";
     public static final String BINJR_PUBLIC_KEY_URL = "https://binjr.eu/openpgpkey/binjr_dev_pub_keys.asc";
     public static final byte[] BINJR_PUBLIC_FINGER_PRINT = decode(
-            "0xE3", "0xD2", "0xF8", "0x00", "0xBE", "0x2B", "0x44", "0xE5", "0x97", "0x44",
-            "0x7F", "0x29", "0x41", "0x2E", "0xC8", "0xA8", "0x54", "0x00", "0xAC", "0x3F");
-    public static final byte[] ALT_BINJR_PUBLIC_FINGER_PRINT = decode(
             "0x20", "0xCA", "0xEC", "0x83", "0x15", "0x1C", "0xCC", "0x7C", "0xE1", "0x2D",
             "0xF2", "0x9E", "0xAF", "0x45", "0xEE", "0xEF", "0xB2", "0x37", "0x02", "0xCB");
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2024 Frederic Thevenet";
