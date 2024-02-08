@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
-import eu.binjr.common.javafx.controls.LabelWithInlineHelp;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
 import eu.binjr.common.preferences.ObservablePreference;
@@ -59,8 +59,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
 
@@ -71,6 +70,16 @@ import java.util.prefs.BackingStoreException;
  */
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
+    @FXML
+    private LabelWithInlineHelp overrideScaleLabel;
+    @FXML
+    private ToggleSwitch overrideScalingToggle;
+    @FXML
+    private Slider customScalingSlider;
+    @FXML
+    private Label customScalingText;
+    @FXML
+    private ChoiceBox<HardwareAccelerationSupport> hwAccelerationChoiceBox;
     @FXML
     private ToggleSwitch forceNaNtoZeroSwitch;
     @FXML
@@ -265,10 +274,25 @@ public class PreferenceDialogController implements Initializable {
                 return val;
             }
         });
+
+        customScalingSlider.valueProperty().bindBidirectional(userPrefs.customUIScale.property());
+        customScalingText.textProperty().bind(Bindings.format("%d%%", userPrefs.customUIScale.property()));
+        overrideScalingToggle.selectedProperty().bindBidirectional(userPrefs.forceUIScaling.property());
+        customScalingSlider.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
+        customScalingSlider.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
+        customScalingText.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
+
+        // Overriding the UI scaling factor is only possible on Windows and Linux; don't show option if unavailable.
+        OsFamily osFamily = AppEnvironment.getInstance().getOsFamily();
+        setNodesVisibility(osFamily == OsFamily.LINUX || osFamily == OsFamily.WINDOWS,
+                overrideScaleLabel,
+                overrideScalingToggle,
+                customScalingSlider,
+                customScalingText);
+
         defaultTextSizeField.setTextFormatter(fontSizeformatter);
         fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
         bindEnumToChoiceBox(userPrefs.defaultDateTimeAnchor, dateTimeAnchorChoiceBox, DateTimeAnchor.values());
-
         bindEnumToChoiceBox(userPrefs.defaultChartType, defaultChartTypeChoiceBox, ChartType.definedValues());
         bindEnumToChoiceBox(userPrefs.defaultUnitPrefix, defaultUnitPrefixChoiceBox, UnitPrefixes.definedValues());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme,
@@ -276,6 +300,7 @@ public class PreferenceDialogController implements Initializable {
                 UserInterfaceThemes::name,
                 uiThemeChoiceBox,
                 UserInterfaceThemes.values());
+        bindEnumToChoiceBox(userPrefs.hardwareAcceleration, hwAccelerationChoiceBox, HardwareAccelerationSupport.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
@@ -290,7 +315,6 @@ public class PreferenceDialogController implements Initializable {
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
         dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
         dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
-
         proxyHostnameTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         proxyPortTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         useProxyAuthToggle.disableProperty().bind(enableProxyToggle.selectedProperty().not());
@@ -345,6 +369,13 @@ public class PreferenceDialogController implements Initializable {
         proxyPasswordTextfield.setTextFormatter(pwdFormatter);
         pwdFormatter.valueProperty().bindBidirectional(userPrefs.httpProxyPassword.property());
 
+    }
+
+    private void setNodesVisibility(boolean isVisible, Node... nodes) {
+        for (var n : nodes) {
+            n.setVisible(isVisible);
+            n.setManaged(isVisible);
+        }
     }
 
     private <T> void bindEnumToChoiceBox(ObservablePreference<T> observablePreference, ChoiceBox<T> choiceBox, T... initValues) {

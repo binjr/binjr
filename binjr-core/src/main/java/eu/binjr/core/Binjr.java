@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2022 Frederic Thevenet
+ *    Copyright 2016-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -121,12 +121,48 @@ public class Binjr extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
+//        jdk.gtk.verbose=true
+//        prism.verbose=true
+//        glass.gtk.uiScale=150%
+//        prism.order=es2,d3d,sw
+//        prism.forceGPU=true
+//        jdk.gtk.version=2
+
         if (AppEnvironment.getInstance().getJavaVersion().getMajor() >= 13) {
             System.setProperty("sun.security.jgss.native", "true");
         }
         if (UserPreferences.getInstance().forceTunnelingDisabledSchemes.get()) {
             System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
         }
+        if (UserPreferences.getInstance().forceUIScaling.get()) {
+            var uiScale = UserPreferences.getInstance().customUIScale.get().intValue();
+            if (uiScale < 50) {
+                logger.error("Forcing the UI scaling factor below 50% is not allowed!");
+            } else {
+                switch (AppEnvironment.getInstance().getOsFamily()) {
+                    case WINDOWS -> System.setProperty("glass.win.uiScale", uiScale + "%");
+                    case LINUX -> System.setProperty("glass.gtk.uiScale", uiScale + "%");
+                }
+                logger.warn("UI scaling factor forced by user to " + uiScale + "%");
+            }
+        }
+        switch (UserPreferences.getInstance().hardwareAcceleration.get()) {
+            case DISABLED -> {
+                System.setProperty("prism.order", "sw");
+                logger.warn("Hardware acceleration support disabled by user");
+            }
+            case FORCED -> {
+                System.setProperty("prism.forceGPU", "true");
+                logger.warn("Hardware acceleration support forced by user");
+            }
+        }
+        if (UserPreferences.getInstance().javaFxVerbose.get()) {
+            logger.warn("JavaFX verbose logging enabled");
+            System.setProperty("jdk.gtk.verbose", "true");
+            System.setProperty("prism.verbose", "true");
+        }
+
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().isEmpty()) {

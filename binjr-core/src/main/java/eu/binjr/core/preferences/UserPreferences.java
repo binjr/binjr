@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2023 Frederic Thevenet
+ *    Copyright 2019-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
-import eu.binjr.core.controllers.ChartViewportsState;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
@@ -349,6 +348,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> maxLinesFileTestPreview = integerPreference("maxLinesFileTestPreview", 20);
 
+    public final ObservablePreference<Boolean> forceUIScaling = booleanPreference("forceUIScaling", false);
+
+    public final ObservablePreference<Number> customUIScale = integerPreference("customUIScale", 100);
+
+    public final ObservablePreference<Boolean> javaFxVerbose = booleanPreference("javaFxVerbose", false);
+
     /**
      * A list of user defined {@link ParsingProfile} for parsing log events
      */
@@ -389,7 +394,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> forceTunnelingDisabledSchemes = booleanPreference("forceTunnelingDisabledSchemes", false);
 
-    public ObservablePreference<Boolean> keepFailedConnectionSourcePaneOpen = booleanPreference("keepFailedConnectionSourcePaneOpen", false);
+    public final ObservablePreference<Boolean> keepFailedConnectionSourcePaneOpen = booleanPreference("keepFailedConnectionSourcePaneOpen", false);
+
+    public final ObservablePreference<HardwareAccelerationSupport> hardwareAcceleration = enumPreference(HardwareAccelerationSupport.class, "hardwareAcceleration", HardwareAccelerationSupport.AUTO);
 
     public static class UserFavorites extends MruFactory {
 

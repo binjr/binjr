@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2023 Frederic Thevenet
-  ~
+  ~    Copyright 2017-2024
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
   ~    You may obtain a copy of the License at
@@ -81,14 +80,7 @@
                             <LabelWithInlineHelp text="Discard notifications after"
                                                  inlineHelp="The amount of time notifications popup should hover before being automatically dismissed."/>
                             <ChoiceBox fx:id="notifcationDurationChoiceBox" maxWidth="1.7976931348623157E308"/>
-                            <LabelWithInlineHelp text="Snapshot output scale"
-                                                 inlineHelp="The pixel count ratio at which snapshot of a worksheet will be rendered."/>
-                            <ChoiceBox fx:id="snapshotScaleChoiceBox" maxWidth="1.7976931348623157E308">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms"
-                                             text="The output scale factor to apply to the snapshot"/>
-                                </tooltip>
-                            </ChoiceBox>
+
                             <LabelWithInlineHelp text="Don't ask before closing tab"
                                                  inlineHelp="Check this option if you do not want a warning popup to show before closing a worksheet tab."/>
                             <VBox fillWidth="false">
@@ -357,6 +349,53 @@
                             <padding>
                                 <Insets left="5.0" right="5.0"/>
                             </padding>
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
+            <TitledPane fx:id="graphicsPrefsPane" animated="false" text="Graphics">
+                <ScrollPane fitToHeight="true" fitToWidth="true">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane>
+                        <VBox spacing="10.0"
+                              AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0"
+                              AnchorPane.topAnchor="0.0">
+                            <LabelWithInlineHelp text="Hardware acceleration"
+                                                 inlineHelp="Hardware accelerated rendering support:&#xd;  - Auto-detect: The application will use HW acceleration if available and supported (Recommended)&#xd;  - Disabled: HW acceleration will not be used even if available. Use this if the application crashes or displays rendering artefacts&#xd;  - Forced: Enable HW acceleration even when detected HW is unsupported. Use this if you want accelerated rendering in virtual machines or with unconventional HW, at the cost of reliability&#xd;&#xd;You will need to restart the application for this to take effect."/>
+                            <ChoiceBox fx:id="hwAccelerationChoiceBox" maxWidth="1.7976931348623157E308"/>
+                            <LabelWithInlineHelp text="Override UI scale"
+                                                 fx:id="overrideScaleLabel"
+                                                 inlineHelp="Overrides the detected UI scaling factor and use the value set below (NB: this scaling factor will be applied to all available monitors)&#xd;&#xd;You will need to restart the application for this to take effect."/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="overrideScalingToggle" prefWidth="1.0"/>
+                            </VBox>
+                            <VBox>
+                                <HBox alignment="TOP_LEFT" spacing="10">
+                                    <Slider fx:id="customScalingSlider"
+                                            blockIncrement="25"
+                                            max="500" min="50"
+                                            majorTickUnit="50"
+                                            minorTickCount="1"
+                                            showTickLabels="true"
+                                            showTickMarks="true"
+                                            snapToTicks="true"
+                                            HBox.hgrow="ALWAYS"
+                                    />
+                                    <Label fx:id="customScalingText" minWidth="35" text="100%"/>
+                                </HBox>
+                            </VBox>
+                            <LabelWithInlineHelp text="Snapshot output scale"
+                                                 inlineHelp="The pixel count ratio at which snapshot of a worksheet will be rendered."/>
+                            <ChoiceBox fx:id="snapshotScaleChoiceBox" maxWidth="1.7976931348623157E308">
+                                <tooltip>
+                                    <Tooltip showDelay="500ms"
+                                             text="The output scale factor to apply to the snapshot"/>
+                                </tooltip>
+                            </ChoiceBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
