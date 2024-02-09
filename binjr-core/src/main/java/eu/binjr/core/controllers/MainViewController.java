@@ -390,6 +390,7 @@ public class MainViewController implements Initializable {
         stage.setOnCloseRequest(event -> {
             if (!confirmAndClearWorkspace()) {
                 event.consume();
+                AppEnvironment.getInstance().cancelRestart();
             } else {
                 saveWindowPositionAndQuit();
             }
@@ -1655,7 +1656,10 @@ public class MainViewController implements Initializable {
                             stage.getWidth(),
                             stage.getHeight()));
         }
-        UpdateManager.getInstance().startUpdate();
+        if (!UpdateManager.getInstance().processUpdate()) {
+            // Do not restart the application if an update is pending
+            AppEnvironment.getInstance().processRestartRequest();
+        }
         Platform.exit();
     }
 

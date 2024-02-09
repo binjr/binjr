@@ -19,15 +19,19 @@ package eu.binjr.core.preferences;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.diagnostic.HotSpotDiagnosticHelper;
 import eu.binjr.common.function.CheckedConsumer;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
 import javafx.beans.property.*;
+import javafx.scene.Node;
 import javafx.stage.StageStyle;
+import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.Level;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
@@ -35,10 +39,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
@@ -78,6 +81,7 @@ public class AppEnvironment {
     private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
     private Path systemPluginPath;
+    private final AtomicBoolean restartRequested = new AtomicBoolean(false);
 
     private AppEnvironment() {
         this.manifest = getManifest();
@@ -473,6 +477,42 @@ public class AppEnvironment {
         }
         return JvmImplementation.UNSUPPORTED;
 
+    }
+
+    public void cancelRestart() {
+        this.restartRequested.set(false);
+    }
+
+    public void restartApp(Node root) {
+        var stage = NodeUtils.getStage(root);
+        this.restartRequested.set(true);
+        if (stage != null) {
+            var handler = stage.getOnCloseRequest();
+            if (handler != null) {
+                handler.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            }
+        }
+    }
+
+    public void processRestartRequest() {
+        if (this.restartRequested.compareAndSet(true, false)) {
+            try {
+                List<String> cmdline = new ArrayList<>();
+                ProcessHandle.current().info().command().ifPresentOrElse(
+                        cmdline::add,
+                        () -> logger.fatal("Could not restart application: Failed to retrieve process command line "));
+                ProcessHandle.current().info().arguments().ifPresent(args -> {
+                    Collections.addAll(cmdline, args);
+                });
+                var processBuilder = new ProcessBuilder();
+                processBuilder.command(cmdline);
+                logger.debug(() -> "Restarting application: " + processBuilder.command());
+                processBuilder.start();
+            } catch (Exception e) {
+                logger.fatal("Could not restart application: " + e.getMessage());
+                logger.debug(() -> "Stack trace", e);
+            }
+        }
     }
 
     private String getHeapStats() {

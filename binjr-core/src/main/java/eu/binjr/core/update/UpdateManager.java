@@ -238,14 +238,21 @@ public class UpdateManager {
         AsyncTaskManager.getInstance().submit(downloadTask);
     }
 
-    public void startUpdate() {
+    /**
+     * Checks if an update is pending and triggers it if necessary
+     *
+     * @return true if an update has been triggered, false otherwise.
+     */
+    public boolean processUpdate() {
         if (!appEnv.isDisableUpdateCheck() && updatePackage != null) {
             try {
                 platformUpdater.launchUpdater(updatePackage, updateVersion, restartRequested);
+                return true;
             } catch (Exception e) {
                 logger.error("Error starting update", e);
             }
         }
+        return false;
     }
 
     public Optional<Path> getUpdatePackagePath() {
