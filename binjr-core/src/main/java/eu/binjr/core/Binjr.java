@@ -20,6 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
+import eu.binjr.common.preferences.ReloadableItemStore;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -38,6 +39,7 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
+import javax.lang.model.element.RecordComponentElement;
 import java.awt.*;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -56,6 +58,15 @@ public class Binjr extends Application {
     public static final TextFlowAppender DEBUG_CONSOLE_APPENDER;
 
     static {
+        // Property "glass.gtk.uiScale" needs to be set before JavaFX is initialized
+        // which means is has to be done *without* & *before* invoking UserPreferences.getInstance()
+        if (ReloadableItemStore.readRawBoolean(UserPreferences.BINJR_GLOBAL, "forceUIScaling", false)) {
+            var uiScale = ReloadableItemStore.readRawInt(UserPreferences.BINJR_GLOBAL, "customUIScale", 100);
+            if (uiScale >= 50) {
+                System.setProperty("glass.gtk.uiScale", uiScale + "%");
+            }
+        }
+
         // initialize the debug console appender early to start capturing logs ASAP.
         TextFlowAppender textFlowAppender = null;
         try {
@@ -121,14 +132,6 @@ public class Binjr extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-
-//        jdk.gtk.verbose=true
-//        prism.verbose=true
-//        glass.gtk.uiScale=150%
-//        prism.order=es2,d3d,sw
-//        prism.forceGPU=true
-//        jdk.gtk.version=2
-
         if (AppEnvironment.getInstance().getJavaVersion().getMajor() >= 13) {
             System.setProperty("sun.security.jgss.native", "true");
         }
@@ -140,10 +143,8 @@ public class Binjr extends Application {
             if (uiScale < 50) {
                 logger.error("Forcing the UI scaling factor below 50% is not allowed!");
             } else {
-                switch (AppEnvironment.getInstance().getOsFamily()) {
-                    case WINDOWS -> System.setProperty("glass.win.uiScale", uiScale + "%");
-                    case LINUX -> System.setProperty("glass.gtk.uiScale", uiScale + "%");
-                }
+                System.setProperty("glass.win.uiScale", uiScale + "%");
+                // NB: Equivalent property for gtk has to be set *before* jfx is initialized (see static init above)
                 logger.warn("UI scaling factor forced by user to " + uiScale + "%");
             }
         }

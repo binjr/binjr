@@ -46,6 +46,32 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
     private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);
 
+
+    static public boolean readRawBoolean(String backingStoreKey, String key, boolean defaultValue){
+        var pref = getBackingPreference(backingStoreKey);
+        return pref.getBoolean(key, defaultValue);
+    }
+
+    static public long readRawLong(String backingStoreKey, String key, long defaultValue){
+        var pref = getBackingPreference(backingStoreKey);
+        return pref.getLong(key, defaultValue);
+    }
+
+    static public double readRawDouble(String backingStoreKey, String key, double defaultValue){
+        var pref = getBackingPreference(backingStoreKey);
+        return pref.getDouble(key, defaultValue);
+    }
+
+    static public long readRawInt(String backingStoreKey, String key, int defaultValue){
+        var pref = getBackingPreference(backingStoreKey);
+        return pref.getInt(key, defaultValue);
+    }
+
+    static public String readRawString(String backingStoreKey, String key, String defaultValue){
+       var pref = getBackingPreference(backingStoreKey);
+       return pref.get(key, defaultValue);
+    }
+
     ReloadableItemStore(String backingStoreKey) {
         this.backingStore = getBackingPreference(backingStoreKey);
         storedItems.addListener((MapChangeListener<String, T>) c -> {
@@ -68,7 +94,7 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
         storedItems.values().forEach(T::reload);
     }
 
-    private Preferences getBackingPreference(String name) {
+    private static  Preferences getBackingPreference(String name) {
         if (Boolean.parseBoolean(System.getProperty(AppEnvironment.PORTABLE_PROPERTY))) {
             try {
                 var jarLocation = Paths.get(Binjr.class.getProtectionDomain().getCodeSource().getLocation().toURI());
