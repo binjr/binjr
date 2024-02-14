@@ -37,6 +37,7 @@ import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -48,6 +49,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.stage.Screen;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -276,6 +278,10 @@ public class PreferenceDialogController implements Initializable {
                 return val;
             }
         });
+        // Initialize ui scale to current value
+        var currentScaleFactor = Math.round(Screen.getPrimary().getOutputScaleX() * 100);
+        var overriddenAtInit = userPrefs.forceUIScaling.get();
+        userPrefs.customUIScale.set(currentScaleFactor);
 
         customScalingSlider.valueProperty().bindBidirectional(userPrefs.customUIScale.property());
         customScalingText.textProperty().bind(Bindings.format("%d%%", userPrefs.customUIScale.property()));
@@ -287,15 +293,23 @@ public class PreferenceDialogController implements Initializable {
         // Delay the search until at least the following amount of time elapsed
         var delay = new PauseTransition(Duration.millis(300));
         var lastTrigger = new AtomicInteger(userPrefs.customUIScale.get().intValue());
-        delay.setOnFinished(event -> Dialogs.notifyRestartNeeded("Override UI scale", root));
+        delay.setOnFinished(event -> {
+            if (userPrefs.customUIScale.get().intValue() != currentScaleFactor) {
+                Dialogs.notifyRestartNeeded("Override UI scale", root);
+            }
+        });
         customScalingSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (Math.abs(lastTrigger.get() - newVal.intValue()) >= 20) {
                 lastTrigger.set(newVal.intValue());
                 delay.playFromStart();
             }
         });
-        UserPreferences.getInstance().forceUIScaling.property().addListener(i -> Dialogs.notifyRestartNeeded("Override UI scale", root));
-        UserPreferences.getInstance().hardwareAcceleration.property().addListener(i -> Dialogs.notifyRestartNeeded("Hardware acceleration support changed", root));
+        userPrefs.forceUIScaling.property().addListener((obs, old, val) -> {
+            if (overriddenAtInit && !val) {
+                Dialogs.notifyRestartNeeded("Override UI scale", root);
+            }
+        });
+        userPrefs.hardwareAcceleration.property().addListener(i -> Dialogs.notifyRestartNeeded("Hardware acceleration support changed", root));
 
         // Overriding the UI scaling factor is only possible on Windows and Linux; don't show option if unavailable.
         OsFamily osFamily = AppEnvironment.getInstance().getOsFamily();
