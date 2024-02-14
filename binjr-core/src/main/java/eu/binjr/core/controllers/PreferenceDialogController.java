@@ -32,11 +32,11 @@ import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.*;
 import eu.binjr.core.update.UpdateManager;
+import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.Property;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -48,7 +48,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -63,7 +62,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
 
@@ -286,13 +287,18 @@ public class PreferenceDialogController implements Initializable {
         customScalingSlider.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
         customScalingText.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
 
-//        userPrefs.forceUIScaling.property().addListener((observable, oldValue, newValue) -> Dialogs.notifyInfo(
-//                "",
-//                "Changes will take effect the next time binjr is started",
-//                Pos.BOTTOM_RIGHT,
-//                root));
-        notitifyChangeNeedsRestart(UserPreferences.getInstance().forceUIScaling.property(), "Override UI scale");
-        notitifyChangeNeedsRestart(UserPreferences.getInstance().hardwareAcceleration.property(), "Hardware acceleration support changed");
+        // Delay the search until at least the following amount of time elapsed
+        var delay = new PauseTransition(Duration.millis(300));
+        var lastTrigger = new AtomicInteger(userPrefs.customUIScale.get().intValue());
+        delay.setOnFinished(event -> notitifyChangeNeedsRestart("Override UI scale"));
+        customScalingSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (Math.abs(lastTrigger.get() - newVal.intValue()) >= 20) {
+                lastTrigger.set(newVal.intValue());
+                delay.playFromStart();
+            }
+        });
+        UserPreferences.getInstance().forceUIScaling.property().addListener(i -> notitifyChangeNeedsRestart("Override UI scale"));
+        UserPreferences.getInstance().hardwareAcceleration.property().addListener(i -> notitifyChangeNeedsRestart("Hardware acceleration support changed"));
 
         // Overriding the UI scaling factor is only possible on Windows and Linux; don't show option if unavailable.
         OsFamily osFamily = AppEnvironment.getInstance().getOsFamily();
@@ -383,17 +389,15 @@ public class PreferenceDialogController implements Initializable {
 
     }
 
-    private void notitifyChangeNeedsRestart(Property<?> property, String msg) {
-        property.addListener((observable, oldValue, newValue) -> {
-            Notifications n = Notifications.create()
-                    .title(msg)
-                    .text("Changes will take effect the next time binjr is started")
-                    .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
-                    .position(Pos.BOTTOM_RIGHT)
-                    .owner(root);
-            n.action(new Action("Restart now", event -> AppEnvironment.getInstance().restartApp(root)));
-            n.showInformation();
-        });
+    private void notitifyChangeNeedsRestart(String msg) {
+        Notifications n = Notifications.create()
+                .title(msg)
+                .text("Changes will take effect the next time binjr is started")
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(root);
+        n.action(new Action("Restart now", event -> AppEnvironment.getInstance().restartApp(root)));
+        n.showInformation();
     }
 
     private void setNodesVisibility(boolean isVisible, Node... nodes) {
