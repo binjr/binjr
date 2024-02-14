@@ -51,9 +51,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
-import org.controlsfx.control.Notifications;
 import org.controlsfx.control.ToggleSwitch;
-import org.controlsfx.control.action.Action;
 
 import java.io.File;
 import java.io.IOException;
@@ -240,10 +238,9 @@ public class PreferenceDialogController implements Initializable {
                         root);
                 Platform.runLater(() -> userPrefs.userPluginsLocation.set(oldValue));
             } else {
-                Dialogs.notifyInfo(
+                Dialogs.notifyRestartNeeded(
                         "Plugins Folder Location Changed",
                         "Changes to the plugins folder location will take effect the next time binjr is started",
-                        Pos.BOTTOM_RIGHT,
                         root);
             }
         });
@@ -290,15 +287,15 @@ public class PreferenceDialogController implements Initializable {
         // Delay the search until at least the following amount of time elapsed
         var delay = new PauseTransition(Duration.millis(300));
         var lastTrigger = new AtomicInteger(userPrefs.customUIScale.get().intValue());
-        delay.setOnFinished(event -> notitifyChangeNeedsRestart("Override UI scale"));
+        delay.setOnFinished(event -> Dialogs.notifyRestartNeeded("Override UI scale", root));
         customScalingSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (Math.abs(lastTrigger.get() - newVal.intValue()) >= 20) {
                 lastTrigger.set(newVal.intValue());
                 delay.playFromStart();
             }
         });
-        UserPreferences.getInstance().forceUIScaling.property().addListener(i -> notitifyChangeNeedsRestart("Override UI scale"));
-        UserPreferences.getInstance().hardwareAcceleration.property().addListener(i -> notitifyChangeNeedsRestart("Hardware acceleration support changed"));
+        UserPreferences.getInstance().forceUIScaling.property().addListener(i -> Dialogs.notifyRestartNeeded("Override UI scale", root));
+        UserPreferences.getInstance().hardwareAcceleration.property().addListener(i -> Dialogs.notifyRestartNeeded("Hardware acceleration support changed", root));
 
         // Overriding the UI scaling factor is only possible on Windows and Linux; don't show option if unavailable.
         OsFamily osFamily = AppEnvironment.getInstance().getOsFamily();
@@ -389,24 +386,12 @@ public class PreferenceDialogController implements Initializable {
 
     }
 
-    private void notitifyChangeNeedsRestart(String msg) {
-        Notifications n = Notifications.create()
-                .title(msg)
-                .text("Changes will take effect the next time binjr is started")
-                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
-                .position(Pos.BOTTOM_RIGHT)
-                .owner(root);
-        n.action(new Action("Restart now", event -> AppEnvironment.getInstance().restartApp(root)));
-        n.showInformation();
-    }
-
     private void setNodesVisibility(boolean isVisible, Node... nodes) {
         for (var n : nodes) {
             n.setVisible(isVisible);
             n.setManaged(isVisible);
         }
     }
-
 
     private <T> void bindEnumToChoiceBox(ObservablePreference<T> observablePreference, ChoiceBox<T> choiceBox, T... initValues) {
         bindEnumToChoiceBox(observablePreference, t -> t, t -> t, choiceBox, initValues);
@@ -500,7 +485,10 @@ public class PreferenceDialogController implements Initializable {
         fileChooser.setTitle("Select binjr plugins location");
         try {
             Path pluginPath = Paths.get(pluginLocTextfield.getText()).toRealPath();
-            if (Files.isDirectory(pluginPath)) {
+            if (!Files.isDirectory(pluginPath)) {
+                pluginPath = pluginPath.getParent();
+            }
+            if (pluginPath != null) {
                 fileChooser.setInitialDirectory(pluginPath.toFile());
             }
         } catch (Exception e) {

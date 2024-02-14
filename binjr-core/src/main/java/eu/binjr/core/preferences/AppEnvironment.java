@@ -484,6 +484,7 @@ public class AppEnvironment {
     }
 
     public void restartApp(Node root) {
+        Objects.requireNonNull(root, "Root node cannot be null");
         var stage = NodeUtils.getStage(root);
         this.restartRequested.set(true);
         if (stage != null) {

@@ -33,7 +33,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -50,7 +49,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
-import java.util.concurrent.atomic.DoubleAccumulator;
 
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
@@ -234,6 +232,22 @@ public class Dialogs {
                 .hideAfter(Duration.INDEFINITE)
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(null).show());
+    }
+
+    public static void notifyRestartNeeded(String title, Node owner) {
+        notifyRestartNeeded(title, "Changes will take effect the next time binjr is started", owner);
+    }
+
+    public static void notifyRestartNeeded(String title, String message, Node owner) {
+        logger.info(message + " - " + title);
+        runOnFXThread(() -> Notifications.create()
+                .title(title)
+                .text(message)
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(owner)
+                .action(new Action("Restart now", event -> AppEnvironment.getInstance().restartApp(owner)))
+                .showInformation());
     }
 
 
@@ -448,5 +462,4 @@ public class Dialogs {
         }
         return Optional.empty();
     }
-
 }
