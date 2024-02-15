@@ -55,6 +55,7 @@ public class CsvEventParser implements EventParser {
             var builder = CSVFormat.Builder.create()
                     .setAllowMissingColumnNames(true)
                     .setSkipHeaderRecord(true)
+                    .setTrim(format.getProfile().isTrimCellValues())
                     .setQuote(format.getProfile().getQuoteCharacter())
                     .setDelimiter(StringUtils.stringToEscapeSequence(format.getProfile().getDelimiter()));
             if (format.getProfile().isReadColumnNames()) {

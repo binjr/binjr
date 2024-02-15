@@ -34,11 +34,11 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     private final boolean readColumnNames;
     @JsonAdapter(LocaleJsonAdapter.class)
     private final Locale formattingLocale;
+    private final boolean trimCellValues;
 
     public CustomCsvParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault());
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false);
     }
-
 
 
     public static CsvParsingProfile of(CsvParsingProfile parsingProfile) {
@@ -51,7 +51,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.getTimestampColumn(),
                 parsingProfile.getExcludedColumns(),
                 parsingProfile.isReadColumnNames(),
-                parsingProfile.getNumberFormattingLocale());
+                parsingProfile.getNumberFormattingLocale(),
+                parsingProfile.isTrimCellValues());
     }
 
 
@@ -62,7 +63,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    String delimiter,
                                    char quoteCharacter, int timestampColumn,
                                    int[] excludedColumns, boolean readColumnNames,
-                                   Locale formattingLocale) {
+                                   Locale formattingLocale, boolean trimCellValues) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
         this.delimiter = delimiter;
         this.quoteCharacter = quoteCharacter;
@@ -70,6 +71,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         this.excludedColumns = excludedColumns;
         this.readColumnNames = readColumnNames;
         this.formattingLocale = formattingLocale;
+        this.trimCellValues = trimCellValues;
     }
 
     @Override
@@ -100,5 +102,10 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     @Override
     public char getQuoteCharacter() {
         return quoteCharacter;
+    }
+
+    @Override
+    public boolean isTrimCellValues() {
+        return trimCellValues;
     }
 }

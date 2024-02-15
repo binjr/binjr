@@ -35,4 +35,6 @@ public interface CsvParsingProfile extends ParsingProfile {
     Locale getNumberFormattingLocale();
 
     char getQuoteCharacter();
+
+    boolean isTrimCellValues();
 }

@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import com.google.gson.reflect.TypeToken;
+import eu.binjr.common.javafx.charts.StableTicksAxis;
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
@@ -68,6 +69,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private CheckBox readColumnNameCheckBox;
     @FXML
     private TextField parsingLocaleTextField;
+    @FXML
+    private CheckBox trimCellsCheckbox;
 
     private final UnaryOperator<TextFormatter.Change> clampToSingleChar = c -> {
         if (c.isContentChange()) {
@@ -83,7 +86,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         return c;
     };
     private NumberFormat numberFormat = NumberFormat.getNumberInstance();
-    private final CsvAdapterPreferences prefs;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -91,6 +94,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         delimiterTextField.textProperty().addListener((observable) -> resetTest());
         timeColumnTextField.valueProperty().addListener(observable -> resetTest());
         readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
+        trimCellsCheckbox.selectedProperty().addListener(observable -> resetTest());
         TextFields.bindAutoCompletion(parsingLocaleTextField,
                 Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
         delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
@@ -105,6 +109,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, profile.getTimestampColumn()));
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
+        this.trimCellsCheckbox.setSelected(profile.isTrimCellValues());
     }
 
     public record ColumnPosition(int index) {
@@ -180,7 +185,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 allowTemporalCaptureGroupsOnly,
                 defaultCharset,
                 defaultZoneId);
-        this.prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
+        CsvAdapterPreferences prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
     }
 
     @Override
@@ -318,7 +323,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 this.timeColumnTextField.getValue().index(),
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
-                Locale.forLanguageTag(parsingLocaleTextField.getText())));
+                Locale.forLanguageTag(parsingLocaleTextField.getText()),
+                this.trimCellsCheckbox.isSelected()));
     }
 
     private String formatToDouble(String value) {

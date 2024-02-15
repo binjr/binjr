@@ -142,6 +142,8 @@
                                     <Separator orientation="VERTICAL" prefHeight="20.0"/>
                                     <CheckBox fx:id="readColumnNameCheckBox"
                                               text="Use values from first line as column names"/>
+                                    <CheckBox fx:id="trimCellsCheckbox"
+                                              text="Trim cell values "/>
                                 </children>
                             </HBox>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
