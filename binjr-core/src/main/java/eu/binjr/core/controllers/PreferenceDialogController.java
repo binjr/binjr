@@ -32,12 +32,10 @@ import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.*;
 import eu.binjr.core.update.UpdateManager;
-import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -49,7 +47,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Screen;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -64,7 +61,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.prefs.BackingStoreException;
 
@@ -76,13 +72,9 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
-    private LabelWithInlineHelp overrideScaleLabel;
+    private ChoiceBox<ScalingFactor> uiScaleChoiceBox;
     @FXML
-    private ToggleSwitch overrideScalingToggle;
-    @FXML
-    private Slider customScalingSlider;
-    @FXML
-    private Label customScalingText;
+    private LabelWithInlineHelp uiScaleLabel;
     @FXML
     private ChoiceBox<HardwareAccelerationSupport> hwAccelerationChoiceBox;
     @FXML
@@ -136,7 +128,7 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
     @FXML
-    private ChoiceBox<SnapshotOutputScale> snapshotScaleChoiceBox;
+    private ChoiceBox<ScalingFactor> snapshotScaleChoiceBox;
     @FXML
     private TitledPane updatePreferences;
     @FXML
@@ -278,46 +270,12 @@ public class PreferenceDialogController implements Initializable {
                 return val;
             }
         });
-        // Initialize ui scale to current value
-        var currentScaleFactor = Math.round(Screen.getPrimary().getOutputScaleX() * 100);
-        var overriddenAtInit = userPrefs.forceUIScaling.get();
-        userPrefs.customUIScale.set(currentScaleFactor);
-
-        customScalingSlider.valueProperty().bindBidirectional(userPrefs.customUIScale.property());
-        customScalingText.textProperty().bind(Bindings.format("%d%%", userPrefs.customUIScale.property()));
-        overrideScalingToggle.selectedProperty().bindBidirectional(userPrefs.forceUIScaling.property());
-        customScalingSlider.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
-        customScalingSlider.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
-        customScalingText.disableProperty().bind(overrideScalingToggle.selectedProperty().not());
-
-        // Delay the search until at least the following amount of time elapsed
-        var delay = new PauseTransition(Duration.millis(300));
-        var lastTrigger = new AtomicInteger(userPrefs.customUIScale.get().intValue());
-        delay.setOnFinished(event -> {
-            if (userPrefs.customUIScale.get().intValue() != currentScaleFactor) {
-                Dialogs.notifyRestartNeeded("Override UI scale", root);
-            }
-        });
-        customScalingSlider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            if (Math.abs(lastTrigger.get() - newVal.intValue()) >= 20) {
-                lastTrigger.set(newVal.intValue());
-                delay.playFromStart();
-            }
-        });
-        userPrefs.forceUIScaling.property().addListener((obs, old, val) -> {
-            if (overriddenAtInit && !val) {
-                Dialogs.notifyRestartNeeded("Override UI scale", root);
-            }
-        });
         userPrefs.hardwareAcceleration.property().addListener(i -> Dialogs.notifyRestartNeeded("Hardware acceleration support changed", root));
-
+        userPrefs.uiScalingFactor.property().addListener(i -> Dialogs.notifyRestartNeeded("User interface scaling factor changed", root));
+        bindEnumToChoiceBox(userPrefs.uiScalingFactor, uiScaleChoiceBox, ScalingFactor.values());
         // Overriding the UI scaling factor is only possible on Windows and Linux; don't show option if unavailable.
         OsFamily osFamily = AppEnvironment.getInstance().getOsFamily();
-        setNodesVisibility(osFamily == OsFamily.LINUX || osFamily == OsFamily.WINDOWS,
-                overrideScaleLabel,
-                overrideScalingToggle,
-                customScalingSlider,
-                customScalingText);
+        setNodesVisibility(osFamily == OsFamily.LINUX || osFamily == OsFamily.WINDOWS, uiScaleLabel, uiScaleChoiceBox);
 
         defaultTextSizeField.setTextFormatter(fontSizeformatter);
         fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
@@ -333,7 +291,7 @@ public class PreferenceDialogController implements Initializable {
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
-        bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
+        bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, ScalingFactor.values());
         bindEnumToChoiceBox(userPrefs.indexingTokenizer, indexingModeChoiceBox, IndexingTokenizer.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());

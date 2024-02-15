@@ -72,6 +72,15 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
        return pref.get(key, defaultValue);
     }
 
+    static public <E extends Enum<E>> E readRawEnum(Class<E> enumType, String backingStoreKey, String key, E defaultValue){
+        var pref = getBackingPreference(backingStoreKey);
+        try {
+            return Enum.valueOf(enumType, pref.get(key, defaultValue.toString()));
+        }catch (Exception e){
+            return defaultValue;
+        }
+    }
+
     ReloadableItemStore(String backingStoreKey) {
         this.backingStore = getBackingPreference(backingStoreKey);
         storedItems.addListener((MapChangeListener<String, T>) c -> {

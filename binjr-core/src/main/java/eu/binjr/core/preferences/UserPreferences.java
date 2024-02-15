@@ -253,8 +253,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
 
-    public final ObservablePreference<SnapshotOutputScale> snapshotOutputScale =
-            enumPreference(SnapshotOutputScale.class, "snapshotOutputScale", SnapshotOutputScale.AUTO);
+    public final ObservablePreference<ScalingFactor> snapshotOutputScale =
+            enumPreference(ScalingFactor.class, "snapshotOutputScale", ScalingFactor.AUTO);
 
     public final ObservablePreference<DownSamplingAlgorithm> downSamplingAlgorithm =
             enumPreference(DownSamplingAlgorithm.class, "downSamplingAlgorithm", DownSamplingAlgorithm.AUTO);
@@ -348,9 +348,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> maxLinesFileTestPreview = integerPreference("maxLinesFileTestPreview", 20);
 
-    public final ObservablePreference<Boolean> forceUIScaling = booleanPreference("forceUIScaling", false);
-
-    public final ObservablePreference<Number> customUIScale = integerPreference("customUIScale", 100);
+    public final ObservablePreference<ScalingFactor> uiScalingFactor = enumPreference(ScalingFactor.class, "uiScalingFactor", ScalingFactor.AUTO);
 
     public final ObservablePreference<Boolean> javaFxVerbose = booleanPreference("javaFxVerbose", false);
 

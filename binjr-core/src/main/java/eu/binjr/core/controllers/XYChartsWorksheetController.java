@@ -33,7 +33,7 @@ import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.SnapshotOutputScale;
+import eu.binjr.core.preferences.ScalingFactor;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -1507,10 +1507,10 @@ public class XYChartsWorksheetController extends WorksheetController {
             worksheetTitleBlock.setVisible(true);
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
-            var scaleX = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
+            var scaleX = userPrefs.snapshotOutputScale.get() == ScalingFactor.AUTO ?
                     NodeUtils.getOutputScaleX(root) :
                     userPrefs.snapshotOutputScale.get().getScaleFactor();
-            var scaleY = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
+            var scaleY = userPrefs.snapshotOutputScale.get() == ScalingFactor.AUTO ?
                     NodeUtils.getOutputScaleY(root) :
                     userPrefs.snapshotOutputScale.get().getScaleFactor();
             return NodeUtils.scaledSnapshot(screenshotCanvas, screenshotCanvas.getScene().getFill(), scaleX, scaleY);

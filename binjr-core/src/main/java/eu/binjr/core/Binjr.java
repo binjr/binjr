@@ -24,6 +24,7 @@ import eu.binjr.common.preferences.ReloadableItemStore;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.ScalingFactor;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Application;
@@ -60,13 +61,11 @@ public class Binjr extends Application {
     static {
         // Property "glass.gtk.uiScale" needs to be set before JavaFX is initialized
         // which means is has to be done *without* & *before* invoking UserPreferences.getInstance()
-        if (ReloadableItemStore.readRawBoolean(UserPreferences.BINJR_GLOBAL, "forceUIScaling", false)) {
-            var uiScale = ReloadableItemStore.readRawInt(UserPreferences.BINJR_GLOBAL, "customUIScale", 100);
-            if (uiScale >= 50) {
-                System.setProperty("glass.gtk.uiScale", uiScale + "%");
-            }
+        var uiScale = ReloadableItemStore.readRawEnum(ScalingFactor.class, UserPreferences.BINJR_GLOBAL, "uiScalingFactor", ScalingFactor.AUTO);
+        if (uiScale != ScalingFactor.AUTO) {
+            System.setProperty("glass.win.uiScale", uiScale.getLabel());
+            System.setProperty("glass.gtk.uiScale", uiScale.getLabel());
         }
-
         // initialize the debug console appender early to start capturing logs ASAP.
         TextFlowAppender textFlowAppender = null;
         try {
@@ -124,6 +123,10 @@ public class Binjr extends Application {
             logger.error("Failed to initialize logging console appender", t);
         }
         DEBUG_CONSOLE_APPENDER = textFlowAppender;
+        // Log now that appender is fully attached
+        if (uiScale != ScalingFactor.AUTO) {
+            logger.warn("UI scaling factor forced by user to " + uiScale.getLabel());
+        }
     }
 
     /**
@@ -137,16 +140,6 @@ public class Binjr extends Application {
         }
         if (UserPreferences.getInstance().forceTunnelingDisabledSchemes.get()) {
             System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
-        }
-        if (UserPreferences.getInstance().forceUIScaling.get()) {
-            var uiScale = UserPreferences.getInstance().customUIScale.get().intValue();
-            if (uiScale < 50) {
-                logger.error("Forcing the UI scaling factor below 50% is not allowed!");
-            } else {
-                System.setProperty("glass.win.uiScale", uiScale + "%");
-                // NB: Equivalent property for gtk has to be set *before* jfx is initialized (see static init above)
-                logger.warn("UI scaling factor forced by user to " + uiScale + "%");
-            }
         }
         switch (UserPreferences.getInstance().hardwareAcceleration.get()) {
             case DISABLED -> {
@@ -163,7 +156,6 @@ public class Binjr extends Application {
             System.setProperty("jdk.gtk.verbose", "true");
             System.setProperty("prism.verbose", "true");
         }
-
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().isEmpty()) {

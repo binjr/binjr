@@ -19,18 +19,25 @@ package eu.binjr.core.preferences;
 /**
  * An enumeration of commonly-used snapshot output scales.
  */
-public enum SnapshotOutputScale {
-    AUTO("Auto (Same as screen)", 0.0),
-    ONE("100%", 1.0),
-    ONE_TWENTY_FIVE("125%", 1.25),
-    ONE_FIFTY("150%", 1.5),
-    ONE_SEVENTY_FIVE("175%", 1.75),
-    TWO("200%", 2.0);
-
+public enum ScalingFactor {
+    AUTO("Auto-detect", -1.0),
+    TO_50_PERCENT("50%", 0.5),
+    TO_75_PERCENT("75%", 0.75),
+    TO_100_PERCENT("100%", 1.0),
+    TO_125_PERCENT("125%", 1.25),
+    TO_150_PERCENT("150%", 1.5),
+    TO_175_PERCENT("175%", 1.75),
+    TO_200_PERCENT("200%", 2.0),
+    TO_225_PERCENT("225%", 2.25),
+    TO_250_PERCENT("250%", 2.5),
+    TO_275_PERCENT("275%", 2.75),
+    TO_300_PERCENT("300%", 3.0),
+    TO_325_PERCENT("325%", 3.25),
+    TO_350_PERCENT("350%", 3.5);
     private final String label;
     private final double scaleFactor;
 
-    SnapshotOutputScale(String label, double scaleFactor) {
+    ScalingFactor(String label, double scaleFactor) {
         this.label = label;
         this.scaleFactor = scaleFactor;
     }
