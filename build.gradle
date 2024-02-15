@@ -27,7 +27,7 @@ import java.time.Duration
 plugins {
     id "de.undercouch.download" version "5.5.0"
     id 'org.kordamp.gradle.markdown' version '2.2.0'
-    id "com.github.ben-manes.versions" version "0.50.0"
+    id "com.github.ben-manes.versions" version "0.51.0"
     id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
 }
