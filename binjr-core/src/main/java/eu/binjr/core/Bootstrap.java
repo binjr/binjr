@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,14 +17,16 @@
 package eu.binjr.core;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.preferences.ReloadableItemStore;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.ScalingFactor;
+import eu.binjr.core.preferences.UserPreferences;
 
 import java.util.Arrays;
 
 
 /**
- * Bootstrap class for binjr to workaround for JavaFX runtime presence  checks built into openJfx 11 which incorrectly
- * fails if app is started from classpath.
+ * Bootstrap class for binjr to initialize system properties prior to JavaFX Application initialization.
  *
  * @author Frederic Thevenet
  */
@@ -38,6 +40,12 @@ public final class Bootstrap {
      */
     public static void main(String[] args) {
         try {
+            // Property "glass.gtk.uiScale" needs to be set before JavaFX is initialized
+            var uiScale = UserPreferences.getInstance().uiScalingFactor.get();
+            if (uiScale != ScalingFactor.AUTO) {
+                System.setProperty("glass.win.uiScale", uiScale.getLabel());
+                System.setProperty("glass.gtk.uiScale", uiScale.getLabel());
+            }
             Binjr.main(args);
         } catch (Exception e) {
             logger.fatal("Failed to load " + AppEnvironment.APP_NAME, e);

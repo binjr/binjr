@@ -20,7 +20,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
-import eu.binjr.common.preferences.ReloadableItemStore;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -40,7 +39,6 @@ import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
-import javax.lang.model.element.RecordComponentElement;
 import java.awt.*;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -59,13 +57,6 @@ public class Binjr extends Application {
     public static final TextFlowAppender DEBUG_CONSOLE_APPENDER;
 
     static {
-        // Property "glass.gtk.uiScale" needs to be set before JavaFX is initialized
-        // which means is has to be done *without* & *before* invoking UserPreferences.getInstance()
-        var uiScale = ReloadableItemStore.readRawEnum(ScalingFactor.class, UserPreferences.BINJR_GLOBAL, "uiScalingFactor", ScalingFactor.AUTO);
-        if (uiScale != ScalingFactor.AUTO) {
-            System.setProperty("glass.win.uiScale", uiScale.getLabel());
-            System.setProperty("glass.gtk.uiScale", uiScale.getLabel());
-        }
         // initialize the debug console appender early to start capturing logs ASAP.
         TextFlowAppender textFlowAppender = null;
         try {
@@ -123,10 +114,6 @@ public class Binjr extends Application {
             logger.error("Failed to initialize logging console appender", t);
         }
         DEBUG_CONSOLE_APPENDER = textFlowAppender;
-        // Log now that appender is fully attached
-        if (uiScale != ScalingFactor.AUTO) {
-            logger.warn("UI scaling factor forced by user to " + uiScale.getLabel());
-        }
     }
 
     /**
@@ -135,13 +122,15 @@ public class Binjr extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (AppEnvironment.getInstance().getJavaVersion().getMajor() >= 13) {
+        var prefs = UserPreferences.getInstance();
+        var env = AppEnvironment.getInstance();
+        if (env.getJavaVersion().getMajor() >= 13) {
             System.setProperty("sun.security.jgss.native", "true");
         }
-        if (UserPreferences.getInstance().forceTunnelingDisabledSchemes.get()) {
+        if (prefs.forceTunnelingDisabledSchemes.get()) {
             System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
         }
-        switch (UserPreferences.getInstance().hardwareAcceleration.get()) {
+        switch (prefs.hardwareAcceleration.get()) {
             case DISABLED -> {
                 System.setProperty("prism.order", "sw");
                 logger.warn("Hardware acceleration support disabled by user");
@@ -151,7 +140,7 @@ public class Binjr extends Application {
                 logger.warn("Hardware acceleration support forced by user");
             }
         }
-        if (UserPreferences.getInstance().javaFxVerbose.get()) {
+        if (prefs.javaFxVerbose.get()) {
             logger.warn("JavaFX verbose logging enabled");
             System.setProperty("jdk.gtk.verbose", "true");
             System.setProperty("prism.verbose", "true");
@@ -164,13 +153,14 @@ public class Binjr extends Application {
                 System.setProperty("java.security.auth.login.config", defaultJaasConf.toExternalForm());
             }
         }
-        AppEnvironment.getInstance().bindHeapDumpPreferences();
+        env.bindHeapDumpPreferences();
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         var env = AppEnvironment.getInstance();
+        var prefs = UserPreferences.getInstance();
         logger.info(() -> String.format("""
                 Starting...
                  ╭─╮   ╭─╮       ╭─╮
@@ -180,6 +170,9 @@ public class Binjr extends Application {
                  ╰────╯└─┘└─┘└─┘╭╯ │└─┘  v%s
                                 ╰──╯""", env.getVersion()));
         env.getSysInfoProperties().forEach(logger::info);
+        if (prefs.uiScalingFactor.get() != ScalingFactor.AUTO) {
+            logger.warn("UI scaling factor forced by user to " + prefs.uiScalingFactor.get().getLabel());
+        }
         env.processCommandLineOptions(getParameters());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
         Parent root = loader.load();
@@ -188,7 +181,7 @@ public class Binjr extends Application {
         primaryStage.setTitle(AppEnvironment.APP_NAME);
 
         try (Profiler p = Profiler.start("Set scene", logger::perf)) {
-            var lastWindowPosition = UserPreferences.getInstance().windowLastPosition.get();
+            var lastWindowPosition = prefs.windowLastPosition.get();
             if (!Screen.getScreensForRectangle(
                     lastWindowPosition.getMinX(),
                     lastWindowPosition.getMinY(),

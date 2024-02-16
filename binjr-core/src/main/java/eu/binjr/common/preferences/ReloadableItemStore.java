@@ -46,41 +46,6 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
     private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);
 
-
-    static public boolean readRawBoolean(String backingStoreKey, String key, boolean defaultValue){
-        var pref = getBackingPreference(backingStoreKey);
-        return pref.getBoolean(key, defaultValue);
-    }
-
-    static public long readRawLong(String backingStoreKey, String key, long defaultValue){
-        var pref = getBackingPreference(backingStoreKey);
-        return pref.getLong(key, defaultValue);
-    }
-
-    static public double readRawDouble(String backingStoreKey, String key, double defaultValue){
-        var pref = getBackingPreference(backingStoreKey);
-        return pref.getDouble(key, defaultValue);
-    }
-
-    static public long readRawInt(String backingStoreKey, String key, int defaultValue){
-        var pref = getBackingPreference(backingStoreKey);
-        return pref.getInt(key, defaultValue);
-    }
-
-    static public String readRawString(String backingStoreKey, String key, String defaultValue){
-       var pref = getBackingPreference(backingStoreKey);
-       return pref.get(key, defaultValue);
-    }
-
-    static public <E extends Enum<E>> E readRawEnum(Class<E> enumType, String backingStoreKey, String key, E defaultValue){
-        var pref = getBackingPreference(backingStoreKey);
-        try {
-            return Enum.valueOf(enumType, pref.get(key, defaultValue.toString()));
-        }catch (Exception e){
-            return defaultValue;
-        }
-    }
-
     ReloadableItemStore(String backingStoreKey) {
         this.backingStore = getBackingPreference(backingStoreKey);
         storedItems.addListener((MapChangeListener<String, T>) c -> {

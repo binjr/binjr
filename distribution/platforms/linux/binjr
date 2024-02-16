@@ -22,7 +22,7 @@ exec "$JAVACMD" \
   -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
   -Dbinjr.portable=true \
-  "eu.binjr.core.Binjr" \
+  "eu.binjr.core.Bootstrap" \
   --system-plugins-path="$BASEDIR/plugins" \
   --packaging="LINUX_TAR" \
   "$@"
