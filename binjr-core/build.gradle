@@ -28,10 +28,10 @@ dependencies {
     implementation 'org.bouncycastle:bcpg-jdk18on:1.77'
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.11.0'
-    api 'org.apache.lucene:lucene-core:9.9.2'
-    api 'org.apache.lucene:lucene-facet:9.9.2'
-    implementation 'org.apache.lucene:lucene-queryparser:9.9.2'
-    implementation 'org.apache.lucene:lucene-analysis-common:9.9.2'
+    api 'org.apache.lucene:lucene-core:9.10.0'
+    api 'org.apache.lucene:lucene-facet:9.10.0'
+    implementation 'org.apache.lucene:lucene-queryparser:9.10.0'
+    implementation 'org.apache.lucene:lucene-analysis-common:9.10.0'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
