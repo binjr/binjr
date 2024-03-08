@@ -95,6 +95,7 @@ ext.ARTIFACTS_PATH_PKG = file("${ARTIFACTS_ROOT_PATH}/pkg/")
 ext.ARTIFACTS_PATH_RPM = file("${ARTIFACTS_ROOT_PATH}/rpm/")
 ext.ARTIFACTS_PATH_DEB = file("${ARTIFACTS_ROOT_PATH}/deb/")
 ext.ARTIFACTS_PATH_TGZ = file("${ARTIFACTS_ROOT_PATH}/tgz/")
+ext.ARTIFACTS_PATH_AUR = file("${ARTIFACTS_ROOT_PATH}/aur/")
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = System.getenv('GPG_KEYRING_PATH')
@@ -465,6 +466,27 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
     outputs.dir ARTIFACTS_PATH_TGZ
 }
 
+task expandPKGBUILD(type: Copy) {
+    from "${projectDir}/distribution/bundlers/linux_aur/PKGBUILD"
+    into ARTIFACTS_PATH_AUR
+    filteringCharset = 'UTF-8'
+    expand(["version": "$BINJR_VERSION"])
+}
+
+task packageDistributionAur(type: Exec, dependsOn: [prepareAppBundle, expandPKGBUILD]) {
+    doFirst {
+        Files.copy(Paths.get("${projectDir}/distribution/bundlers/linux_aur/binjr"),
+                Paths.get("${APP_IMAGE_PATH}/binjr"),
+                StandardCopyOption.REPLACE_EXISTING)
+    }
+    workingDir APP_IMAGE_ROOT
+    commandLine = [
+            "sh", "-c",
+            "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${ARTIFACTS_PATH_AUR}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
+    ]
+    outputs.dir ARTIFACTS_PATH_AUR
+}
+
 task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
@@ -703,6 +725,12 @@ task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
     archiveFileName = "${DISTRIBUTION_NAME}.deb"
 }
 
+task packageAsAur(type: WrapTaskForSigning, dependsOn: [packageDistributionAur]) {
+    from "${ARTIFACTS_PATH_DEB}/${DISTRIBUTION_NAME}.tar.gz"
+    destinationDirectory = ARTIFACTS_PATH_AUR
+    archiveFileName = "${DISTRIBUTION_NAME}.tar.gz"
+}
+
 signing {
     sign packageAsZip
     sign packageAsMsi
@@ -710,6 +738,7 @@ signing {
     sign packageAsTarGz
     sign packageAsRpm
     sign packageAsDeb
+    sign packageAsAur
 }
 
 task packageDistribution() {
@@ -718,7 +747,7 @@ task packageDistribution() {
     } else if (IS_MAC) {
         finalizedBy(packageAsPkg, packageAsTarGz)
     } else {
-        finalizedBy(packageAsTarGz, packageAsDeb, packageAsRpm)
+        finalizedBy(packageAsTarGz, packageAsDeb, packageAsRpm, packageAsAur)
     }
 }
 
@@ -728,7 +757,7 @@ task signPackageDistribution() {
     } else if (IS_MAC) {
         finalizedBy(signPackageAsPkg, signPackageAsTarGz)
     } else {
-        finalizedBy(signPackageAsTarGz, signPackageAsDeb, signPackageAsRpm)
+        finalizedBy(signPackageAsTarGz, signPackageAsDeb, signPackageAsRpm, signPackageAsAur)
     }
 }
 

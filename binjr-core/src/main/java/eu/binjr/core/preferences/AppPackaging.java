@@ -25,7 +25,8 @@ public enum AppPackaging {
     WIN_ZIP("Windows ZIP", "zip"),
     LINUX_TAR("Linux Tarball", "tar.gz"),
     LINUX_DEB("Linux DEB", "deb"),
-    LINUX_RPM("Linux DEB", "deb"),
+    LINUX_RPM("Linux RPM", "deb"),
+    LINUX_AUR("Linux AUR", "tar.gz"),
     MAC_DMG("macOS DMG", "dmg"),
     MAC_TAR("macOS Tarball", "tar.gz");
 

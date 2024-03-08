@@ -1,0 +1,28 @@
+#! /bin/sh
+
+BASEDIR="$(dirname "$(readlink -f "$0")")"
+
+JAVACMD="$BASEDIR/runtime/bin/java"
+
+exec "$JAVACMD" \
+  -splash:"$BASEDIR/resources/images/splashscreen.png" \
+  -cp "$BASEDIR/libs/*" \
+  -Xmx4096M \
+  -XX:+UnlockExperimentalVMOptions \
+  -XX:+UseShenandoahGC \
+  -XX:ShenandoahGCHeuristics=compact \
+  -XX:ShenandoahAllocationThreshold=20 \
+  --add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED \
+  --add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED \
+  --add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED \
+  --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED \
+  --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED \
+  -Dapp.name="binjr" \
+  -Dapp.pid="$$" \
+  -Dapp.home="$BASEDIR" \
+  -Dbasedir="$BASEDIR" \
+  -Dbinjr.portable=true \
+  "eu.binjr.core.Bootstrap" \
+  --system-plugins-path="$BASEDIR/plugins" \
+  --packaging="LINUX_AUR" \
+  "$@"
