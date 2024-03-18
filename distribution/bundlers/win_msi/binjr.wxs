@@ -38,9 +38,9 @@
 
         <Icon Id="binjr.ico" SourceFile="$(var.resourcesDir)\platforms\windows\resources\icons\binjr.ico"/>
         <Property Id="ARPPRODUCTICON" Value="binjr.ico"/>
-        <Property Id="ARPHELPLINK" Value="https://github.com/binjr/binjr/wiki"/>
+        <Property Id="ARPHELPLINK" Value="https://binjr.eu/documentation/getting-started/"/>
         <Property Id="ARPURLINFOABOUT" Value="https://binjr.eu"/>
-        <Property Id="ARPURLUPDATEINFO" Value="https://github.com/binjr/binjr/releases"/>
+        <Property Id="ARPURLUPDATEINFO" Value="https://binjr.eu/download/latest_release/"/>
         <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes"/>
         <Property Id="LAUNCHREQUESTED" Value="0"/>
 
