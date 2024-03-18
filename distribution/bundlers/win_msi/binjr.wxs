@@ -110,11 +110,17 @@
                 </Directory>
             </Directory>
         </Directory>
+
+        <Component Id="comp_env_path" Directory="APPLICATIONFOLDER" Guid="7388eff2-3cb6-4e01-8bcb-9227634ce086" KeyPath="yes">
+            <Environment Id="env_path" Name="PATH" Value="[APPLICATIONFOLDER]" Action="set" Part="last" System="no"/>
+        </Component>
+
         <Feature Id="DefaultFeature" Title="Main Feature" Level="1" ConfigurableDirectory="APPLICATIONFOLDER">
             <ComponentRef Id="CleanupMainApplicationFolder"/>
             <ComponentRef Id="StartMenuShortcuts"/>
             <ComponentRef Id="binjrDir"/>
             <ComponentGroupRef Id="binjrFiles"/>
+            <ComponentRef Id="comp_env_path"/>
         </Feature>
 
         <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
