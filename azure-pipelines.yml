@@ -119,6 +119,21 @@ stages:
           env:
             GH_ACCESS_TOKEN: $(gh.access.token)
 
+  - stage: winget_update
+    dependsOn: build
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')), not(contains(variables['Build.SourceBranch'], '-b')))
+    jobs:
+    # Submit update to winget packages repository
+    - job: winget_update
+      pool:
+        vmImage: 'windows-latest'
+      steps:
+        - script: |
+            wingetcreate.exe update --submit --token ${GH_ACCESS_TOKEN} --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} binjr.core-x64
+          env:
+            GH_ACCESS_TOKEN: $(gh.access.token)
+            REPO_TAG_NAME: $(Build.SourceBranchName)
+
   - stage: maven_publish
     dependsOn: build
     jobs:
