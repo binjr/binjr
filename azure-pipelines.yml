@@ -14,7 +14,7 @@ variables:
   system.debug: false
   isTag: 'false'
   isSnapshot: 'false'
-  javaVersion: '21'
+  javaVersion: '22'
 
 stages:
   - stage: build
