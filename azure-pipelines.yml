@@ -57,127 +57,188 @@ stages:
     dependsOn: build
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')), not(contains(variables['Build.SourceBranch'], '-b')))
     jobs:
-    - job: deploy_site
-      pool:
-        vmImage: 'ubuntu-22.04'
-      steps:
-        - script: |
-            curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
+      - job: deploy_site
+        pool:
+          vmImage: 'ubuntu-22.04'
+        steps:
+          - script: |
+              curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
 
-        - task: JavaToolInstaller@0
-          inputs:
-            versionSpec: $(javaVersion)
-            jdkArchitectureOption: x64
-            jdkSourceOption: LocalDirectory
-            jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
-            jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
-            cleanDestinationDirectory: true
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: $(javaVersion)
+              jdkArchitectureOption: x64
+              jdkSourceOption: LocalDirectory
+              jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+              jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
+              cleanDestinationDirectory: true
 
-        - task: DownloadSecureFile@1
-          name: gpgKeyring
-          displayName: 'Download GPG Keyring'
-          inputs:
-            secureFile: 'keyring.gpg'
+          - task: DownloadSecureFile@1
+            name: gpgKeyring
+            displayName: 'Download GPG Keyring'
+            inputs:
+              secureFile: 'keyring.gpg'
 
-        - task: Gradle@2
-          env:
-            IS_TAG: 'true'
-            REPO_TAG_NAME: $(Build.SourceBranchName)
-            GPG_KEY_NAME: $(gpg.keyname)
-            GPG_PASSPHRASE: $(gpg.passphrase)
-            GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
-            OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
-            OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
-          inputs:
-            gradleWrapperFile: 'gradlew'
-            javaHomeOption: 'JDKVersion'
-            jdkVersionOption: 1.$(javaVersion)
-            jdkArchitectureOption: 'x64'
-            publishJUnitResults: false
-            tasks: 'expandMdTemplates'
+          - task: Gradle@2
+            env:
+              IS_TAG: 'true'
+              REPO_TAG_NAME: $(Build.SourceBranchName)
+              GPG_KEY_NAME: $(gpg.keyname)
+              GPG_PASSPHRASE: $(gpg.passphrase)
+              GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
+              OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
+              OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
+            inputs:
+              gradleWrapperFile: 'gradlew'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: 1.$(javaVersion)
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: false
+              tasks: 'expandMdTemplates'
 
-        - bash: |
-            python3 --version
-            python3 -m pip --version
-            python3 -m pip install --upgrade pip setuptools
-            python3 -m pip install mkdocs
-            python3 -m pip install mkdocs-material==9.*
-            git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
-            cd  build/tmp/binjr-site
-            cp ../expanded/CHANGELOG.md docs/download/CHANGELOG.md
-            cp ../expanded/latest_release.md docs/download/latest_release.md
-            echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
-            git config credential.helper store
-            git config user.email "binjr.bot@free.fr"
-            git config user.name "binjr-bot"
-            wget https://api.github.com/repos/binjr/binjr/releases/latest -O docs/repos/binjr/binjr/releases/latest
-            git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
-            git push
-            python3 -m mkdocs gh-deploy --no-history --remote-branch master
-            git config credential.helper cache
-            shred -fuz "$HOME/.git-credentials"
-          env:
-            GH_ACCESS_TOKEN: $(gh.access.token)
+          - bash: |
+              python3 --version
+              python3 -m pip --version
+              python3 -m pip install --upgrade pip setuptools
+              python3 -m pip install mkdocs
+              python3 -m pip install mkdocs-material==9.*
+              git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
+              cd  build/tmp/binjr-site
+              cp ../expanded/CHANGELOG.md docs/download/CHANGELOG.md
+              cp ../expanded/latest_release.md docs/download/latest_release.md
+              echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
+              git config credential.helper store
+              git config user.email "binjr.bot@free.fr"
+              git config user.name "binjr-bot"
+              wget https://api.github.com/repos/binjr/binjr/releases/latest -O docs/repos/binjr/binjr/releases/latest
+              git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
+              git push
+              python3 -m mkdocs gh-deploy --no-history --remote-branch master
+              git config credential.helper cache
+              shred -fuz "$HOME/.git-credentials"
+            env:
+              GH_ACCESS_TOKEN: $(gh.access.token)
+
+  - stage: aur_update
+    dependsOn: build
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')), not(contains(variables['Build.SourceBranch'], '-b')))
+    jobs:
+      # Submit update to winget packages repository
+      - job: aur_update
+        pool:
+          vmImage: 'ubuntu-22.04'
+        steps:
+          - checkout: none
+          - task: DownloadSecureFile@1
+            name: aur_ssh_key_file
+            displayName: 'Download AUR ssh key'
+            inputs:
+              secureFile: 'aur_ssh_key_file'
+
+          # Install an SSH key prior to a build or deployment.
+          - task: InstallSSHKey@0
+            inputs:
+              knownHostsEntry: 'aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN'
+              sshPublicKey: '$(aur.ssh.public)'
+              sshPassphrase: '$(aur.ssh.password)'
+              sshKeySecureFile: 'aur_ssh_key_file'
+              # Advanced
+              addEntryToConfig: true
+              configHostAlias: 'aur.archlinux.org'
+              configHostname: 'aur.archlinux.org'
+              configUser: 'aur'
+
+          - bash: |
+              git clone ssh://aur@aur.archlinux.org/binjr-bin.git
+              cd binjr-bin
+              export OLD_VER=$(grep -Po 'pkgver=\K[^"]*' PKGBUILD)
+              export NEW_VER=${REPO_TAG_NAME//v}
+              # Change version and release number
+              sed -i "s/$OLD_VER/$NEW_VER/g" PKGBUILD
+              sed -i "s/^pkgrel=.*$/pkgrel=1/" PKGBUILD
+              sed -i "s/$OLD_VER/$NEW_VER/g" .SRCINFO
+              sed -i "s/pkgrel =.*/pkgrel = 1/" .SRCINFO
+              # Commit and push update
+              git config user.email "binjr.bot@free.fr"
+              git config user.name "binjr-bot"
+              git commit -am "Release ${REPO_TAG_NAME}-1"
+              git show
+              git push
+            env:
+              REPO_TAG_NAME: $(Build.SourceBranchName)
+
 
   - stage: winget_update
     dependsOn: build
     condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')), not(contains(variables['Build.SourceBranch'], '-b')))
     jobs:
-    # Submit update to winget packages repository
-    - job: winget_update
-      pool:
-        vmImage: 'windows-latest'
-      steps:
-        - script: |
-            wingetcreate.exe update --submit --token ${GH_ACCESS_TOKEN} --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} binjr.core-x64
-          env:
-            GH_ACCESS_TOKEN: $(gh.access.token)
-            REPO_TAG_NAME: $(Build.SourceBranchName)
+      # Submit update to winget packages repository
+      - job: winget_update
+        pool:
+          vmImage: 'windows-2022'
+        steps:
+          - checkout: none
+          - task: PowerShell@2
+            displayName: install wingetCreate
+            inputs:
+              targetType: inline
+              script: |
+                # Download and install C++ Runtime framework package.
+                iwr https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx -OutFile vcLibsBundleFile.appx
+                Add-AppxPackage vcLibsBundleFile.appx
+                # Download, install, and execute update.
+                iwr https://aka.ms/wingetcreate/latest/msixbundle -OutFile wingetcreate.appx
+                Add-AppxPackage wingetcreate.appx
+          - bash: |
+              wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
+            env:
+              GH_ACCESS_TOKEN: $(gh.access.token)
+              REPO_TAG_NAME: $(Build.SourceBranchName)
 
   - stage: maven_publish
     dependsOn: build
     jobs:
-    # Publish to Maven repo
-    - job: maven_publish
-      pool:
-        vmImage: 'ubuntu-22.04'
-      steps:
-        - script: |
-            echo '##vso[task.setvariable variable=isTag;]true'
-          condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+      # Publish to Maven repo
+      - job: maven_publish
+        pool:
+          vmImage: 'ubuntu-22.04'
+        steps:
+          - script: |
+              echo '##vso[task.setvariable variable=isTag;]true'
+            condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
-        - script: |
-            curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
+          - script: |
+              curl --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz -O -J -L https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
 
-        - task: JavaToolInstaller@0
-          inputs:
-            versionSpec: $(javaVersion)
-            jdkArchitectureOption: x64
-            jdkSourceOption: LocalDirectory
-            jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
-            jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
-            cleanDestinationDirectory: true
+          - task: JavaToolInstaller@0
+            inputs:
+              versionSpec: $(javaVersion)
+              jdkArchitectureOption: x64
+              jdkSourceOption: LocalDirectory
+              jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+              jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
+              cleanDestinationDirectory: true
 
-        - task: DownloadSecureFile@1
-          name: gpgKeyring
-          displayName: 'Download GPG Keyring'
-          inputs:
-            secureFile: 'keyring.gpg'
+          - task: DownloadSecureFile@1
+            name: gpgKeyring
+            displayName: 'Download GPG Keyring'
+            inputs:
+              secureFile: 'keyring.gpg'
 
-        - task: Gradle@2
-          env:
-            IS_TAG: $(isTag)
-            REPO_TAG_NAME: $(Build.SourceBranchName)
-            BINJR_BUILD_NUMBER: $(Build.BuildNumber)
-            GPG_KEY_NAME: $(gpg.package.keyname)
-            GPG_PASSPHRASE: $(gpg.package.passphrase)
-            GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
-            OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
-            OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
-          inputs:
-            gradleWrapperFile: 'gradlew'
-            javaHomeOption: 'JDKVersion'
-            jdkVersionOption: 1.$(javaVersion)
-            jdkArchitectureOption: 'x64'
-            publishJUnitResults: false
-            tasks: 'publishArtifacts'
+          - task: Gradle@2
+            env:
+              IS_TAG: $(isTag)
+              REPO_TAG_NAME: $(Build.SourceBranchName)
+              BINJR_BUILD_NUMBER: $(Build.BuildNumber)
+              GPG_KEY_NAME: $(gpg.package.keyname)
+              GPG_PASSPHRASE: $(gpg.package.passphrase)
+              GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
+              OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
+              OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
+            inputs:
+              gradleWrapperFile: 'gradlew'
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: 1.$(javaVersion)
+              jdkArchitectureOption: 'x64'
+              publishJUnitResults: false
+              tasks: 'publishArtifacts'
