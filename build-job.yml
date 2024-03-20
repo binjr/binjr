@@ -65,6 +65,10 @@ jobs:
           action: edit
           tag: $(Build.SourceBranchName)
           assets: |
+            $(System.DefaultWorkingDirectory)/build/artifacts/deb/*.deb
+            $(System.DefaultWorkingDirectory)/build/artifacts/deb/*.deb.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/rpm/*.rpm
+            $(System.DefaultWorkingDirectory)/build/artifacts/rpm/*.rpm.asc
             $(System.DefaultWorkingDirectory)/build/artifacts/dmg/*.dmg
             $(System.DefaultWorkingDirectory)/build/artifacts/dmg/*.dmg.asc
             $(System.DefaultWorkingDirectory)/build/artifacts/pkg/*.pkg

@@ -29,18 +29,27 @@ Complete release information can be found in the [change log](CHANGELOG.md).
   }
 </style>
 
+## Package managers
+binjr can be installed and updated using various package managers, depending on you operating system.
+
+| Version          | Operating System                        | Architecture | Package manager                                              |
+|------------------|-----------------------------------------|--------------|--------------------------------------------------------------|
+| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+) | x84 64-bit   | [binjr APT epository](https://repos.binjr.eu/apt)            |
+| binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)        | x84 64-bit   | [binjr RPM Repository](https://repos.binjr.eu/rpm)           |
+| binjr ${tagName} | **ArchLinux**                           | x84 64-bit   | [Arch User Repository](https://repos.binjr.eu/aur)           |
+| binjr ${tagName} | **Windows** (10[^2] or 11)              | x84 64-bit   | [Winget Community Repository](https://repos.binjr.eu/winget) |
+
+
 ## Installable bundles
 
 Installable bundles integrate with the host OS to provide menu shortcuts, file associations and per user settings.
 
 | Version          | Operating System                        | Architecture | Download                                                                                                                                                                    | Signature[^1]                                                                                                                                                                    |
 |------------------|-----------------------------------------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+) | x84 64-bit   | [From APT](https://repos.binjr.eu/apt)                                                                                                                                      |                                                                                                                                                                                  |
-| binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)        | x84 64-bit   | [From RPM](https://repos.binjr.eu/rpm)                                                                                                                                      |                                                                                                                                                                                  |
-| binjr ${tagName} | **ArchLinux**                           | x84 64-bit   | [From AUR](https://repos.binjr.eu/aur)                                                                                                                                      |                                                                                                                                                                                  |
+| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+) | x84 64-bit   | [<button ><img alt="" src="../../assets/images/download.svg"> .deb</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.deb)  | [<button ><img alt="" src="../../assets/images/download.svg"> .asc</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.deb.asc)   |
+| binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)        | x84 64-bit   | [<button><img alt="" src="../../assets/images/download.svg"> .rpm</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.rpm)   | [<button ><img alt="" src="../../assets/images/download.svg"> .asc</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.deb.asc)   |
 | binjr ${tagName} | **macOS** (13.x or later)               | x84 64-bit   | [<button ><img alt="" src="../../assets/images/download.svg"> .pkg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.pkg)   | [<button ><img alt="" src="../../assets/images/download.svg"> .asc</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.pkg.asc)    |
 | binjr ${tagName} | **Windows** (7 or later)                | x84 64-bit   | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [<button ><img alt="" src="../../assets/images/download.svg"> .asc</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc) |
-| binjr ${tagName} | **Windows** (10[^2] or 11)              | x84 64-bit   | [From Winget](https://repos.binjr.eu/winget)                                                                                                                                |                                                                                                                                                                                  |
 
 ## Portable bundles
 
@@ -52,15 +61,12 @@ Portable bundles can be unpacked to and used from a detachable drive or a file s
 | binjr ${tagName} | **macOS** (13.x or later)        | x84 64-bit   | [<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz)  | [<button ><img alt="" src="../../assets/images/download.svg"> .asc</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz.asc)  |
 | binjr ${tagName} | **Windows** (7 or later)         | x84 64-bit   | [<button><img alt="" src="../../assets/images/download.svg"> .zip</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip)      | [<button ><img alt="" src="../../assets/images/download.svg"> .asc</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip.asc)  |
 
-[^1]: [How to verify the integrity of the downloaded file?](/documentation/verify-signature/)
-[^2]: The winget command line tool is only supported on Windows 10 1709 (build 16299) or later
-
 !!! Warning "If you're having trouble launching binjr..."
-=== "...on macOS"
-**binjr** might not be recognized by the Apple notary service, so you may get a warning when trying to run it the
-first time.
-To override it, locate binjr in the Finder on your Mac, control-click the app icon, then choose `Open` from the
-shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-help/mh40616/mac)).
+    === "...on macOS"
+    **binjr** might not be recognized by the Apple notary service, so you may get a warning when trying to run it the
+    first time.
+    To override it, locate binjr in the Finder on your Mac, control-click the app icon, then choose `Open` from the
+    shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-help/mh40616/mac)).
 
     === "...on Windows"
         **binjr** might not be recognized by Microsoft Defender SmartScreen, so you might need to suppress a warning
@@ -69,4 +75,7 @@ shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-h
         
     To ensure that your download has not been tempered with,
     [you should verify its OpenGPG signature](/documentation/verify-signature).
-           
+
+[^1]: [How to verify the integrity of the downloaded file?](/documentation/verify-signature/)
+[^2]: The winget command line tool is only supported on Windows 10 1709 (build 16299) or later
+
