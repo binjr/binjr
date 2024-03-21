@@ -57,6 +57,8 @@ ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "22"
+ext.USE_BUILD_JDK_IN_BUNDLE = false
+ext.BUNDLE_JDK_VERSION = "jdk-22+36"
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
@@ -403,19 +405,49 @@ task downloadOpenJfxModules(type: Download) {
     dest new File(DL_CACHE_PATH, "openjfx-jmods_${OPENJFX_VERSION}.zip")
 }
 
+task downloadJlinkOpenJdk(type: Download) {
+    onlyIfModified true
+    src craftJlinkJdkUrl()
+    dest new File(DL_CACHE_PATH, "openjdk_${BUNDLE_JDK_VERSION}${IS_WINDOWS ? '.zip' : '.tar.gz'}")
+}
+
+
 task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
     from zipTree(downloadOpenJfxModules.dest)
     into "${buildDir}/jmods/"
 }
 
+task unzipJlinkOpenJdk(dependsOn: downloadJlinkOpenJdk, type: Copy) {
+    from zipTree(downloadJlinkOpenJdk.dest)
+    into "${buildDir}/jlinkOpenJDK/"
+}
+
+task untarJlinkOpenJdk(dependsOn: downloadJlinkOpenJdk, type: Copy) {
+    from tarTree(downloadJlinkOpenJdk.dest)
+    into "${buildDir}/jlinkOpenJDK/"
+}
+
+
 task createRuntimeImage(type: Exec) {
     if (!IS_JAVAFX_BUNDLED) {
         dependsOn unzipOpenJfxModules
     }
+    def jlinkJdkDir
+    if (USE_BUILD_JDK_IN_BUNDLE){
+        jlinkJdkDir = "${JDK_HOME}"
+    } else {
+        if (IS_WINDOWS) {
+            dependsOn unzipJlinkOpenJdk
+        } else {
+            dependsOn untarJlinkOpenJdk
+        }
+        jlinkJdkDir =  "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home':''}"
+    }
+
     workingDir project.projectDir
     commandLine = [
-            "${JDK_HOME}/bin/jlink",
-            '-p', "${JDK_HOME}/jmods${ADDITIONAL_JMOD_PATH}",
+            "${jlinkJdkDir}/bin/jlink",
+            '-p', "${jlinkJdkDir}/jmods${ADDITIONAL_JMOD_PATH}",
             '--add-modules', JLINK_ADD_MODULES,
             '--strip-debug',
             '--no-header-files',
@@ -764,6 +796,39 @@ def craftPlatformClassifier() {
         classifier += "-monocle"
     }
     return classifier
+}
+
+def craftJlinkJdkUrl() {
+    def platform
+    switch (OS_FAMILY) {
+        case "windows":
+            platform = "windows"
+            break
+        case "linux":
+            platform = "linux"
+            break
+        case "mac":
+            platform = "mac"
+            break
+        default:
+            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+    }
+    def arch
+    switch (OS_ARCH) {
+        case "amd64":
+        case "x86_64":
+            arch = "x64"
+            break
+        case "x86":
+            arch = "x86"
+            break
+        case "aarch64":
+            arch = "aarch64"
+            break
+        default:
+            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+    }
+    return "https://api.adoptium.net/v3/binary/version/${BUNDLE_JDK_VERSION}/${platform}/${arch}/jdk/hotspot/normal/eclipse"
 }
 
 def craftOpenJfxModsUrl() {
