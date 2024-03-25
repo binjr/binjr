@@ -1,3 +1,13 @@
+## [binjr v3.17.0](https://github.com/binjr/binjr/releases/tag/v3.17.0)
+Released on Wed, 21 Mar 2024
+
+_[New]_ Updated the embedded runtimes for Java and JavaFX to version 22.  
+_[New]_ Support for new package managers: AUR for Archlinux and winget for Windows.  
+_[New]_ Added an option to override hardware acceleration support.  
+_[New]_ Added an option to change the user interface scaling factor.  
+_[New]_ Added an option to trim extraneous spaces in malformed CSV files in parsing profiles.  
+_[Fixed]_ Dead links for support pages in MSI installer metadata.
+
 ## [binjr v3.16.0](https://github.com/binjr/binjr/releases/tag/v3.16.0)
 Released on Wed, 7 Feb 2024
 
