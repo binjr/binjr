@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package eu.binjr.core.appearance;
 
+import javafx.application.Platform;
+
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * An enumeration of built-in user interface themes
@@ -24,14 +27,18 @@ import java.util.Objects;
  * @author Frederic Thevenet
  */
 public enum BuiltInUserInterfaceThemes implements UserInterfaceThemes {
-    LIGHT("Light", "/eu/binjr/css/Light.css"),
-    DARK("Dark", "/eu/binjr/css/Dark.css"),
-    CLASSIC("Classic", "/eu/binjr/css/Classic.css");
+    SYSTEM("System", () -> switch (Platform.getPreferences().colorSchemeProperty().get()) {
+        case DARK -> "/eu/binjr/css/Dark.css";
+        case LIGHT -> "/eu/binjr/css/Light.css";
+    }),
+    LIGHT("Light", () -> "/eu/binjr/css/Light.css"),
+    DARK("Dark", () -> "/eu/binjr/css/Dark.css"),
+    CLASSIC("Classic", () -> "/eu/binjr/css/Classic.css");
 
-    private final String cssPath;
+    private final Supplier<String> cssPath;
     private final String label;
 
-    BuiltInUserInterfaceThemes(String label, String cssPath) {
+    BuiltInUserInterfaceThemes(String label, Supplier<String> cssPath) {
         this.label = label;
         this.cssPath = cssPath;
     }
@@ -42,7 +49,7 @@ public enum BuiltInUserInterfaceThemes implements UserInterfaceThemes {
      * @return the path of the css for this theme.
      */
     public String getCssPath() {
-        return cssPath;
+        return cssPath.get();
     }
 
     @Override

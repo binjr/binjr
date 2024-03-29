@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2021 Frederic Thevenet
+ *    Copyright 2019-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package eu.binjr.core.appearance;
 
-import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -32,8 +31,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -84,17 +81,22 @@ public class StageAppearanceManager {
         private final static StageAppearanceManager instance = new StageAppearanceManager();
     }
 
-    private final Map<Stage, Set<AppearanceOptions>> registeredStages;
+    private final Map<Stage, Set<AppearanceOptions>> registeredStages = new WeakHashMap<>();
 
     /**
      * Initializes a new instance of the {@link StageAppearanceManager} class.
      */
     private StageAppearanceManager() {
-        registeredStages = new WeakHashMap<>();
+        // Apply user-selected appearance settings
         UserPreferences.getInstance().userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 registeredStages.forEach((stage, options) -> setAppearance(stage, newValue, options));
             }
+        });
+        //Refresh appearance on change in system-wide preferences
+        Platform.getPreferences().colorSchemeProperty().addListener((observableValue, colorScheme, t1) -> {
+            registeredStages.forEach((stage, options) ->
+                    setAppearance(stage, UserPreferences.getInstance().userInterfaceTheme.get(), options));
         });
     }
 
@@ -201,7 +203,7 @@ public class StageAppearanceManager {
             return;
         }
         if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_THEME)) {
-            setUiTheme(stage.getScene(), UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.LIGHT));
+            setUiTheme(stage.getScene(), UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.SYSTEM));
         }
         if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_ICON)) {
             setIcon(stage);
@@ -219,7 +221,7 @@ public class StageAppearanceManager {
     }
 
     private void setUiTheme(Scene scene, String theme, String... extraCss) {
-        setUiTheme(scene, UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.LIGHT), extraCss);
+        setUiTheme(scene, UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.SYSTEM), extraCss);
     }
 
     private void setUiTheme(Scene scene, UserInterfaceThemes theme, String... extraCss) {
