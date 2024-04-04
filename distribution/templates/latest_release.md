@@ -63,10 +63,10 @@ Portable bundles can be unpacked to and used from a detachable drive or a file s
 
 !!! Warning "If you're having trouble launching binjr..."
     === "...on macOS"
-    **binjr** might not be recognized by the Apple notary service, so you may get a warning when trying to run it the
-    first time.
-    To override it, locate binjr in the Finder on your Mac, control-click the app icon, then choose `Open` from the
-    shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-help/mh40616/mac)).
+        **binjr** might not be recognized by the Apple notary service, so you may get a warning when trying to run it the
+        first time.
+        To override it, locate binjr in the Finder on your Mac, control-click the app icon, then choose `Open` from the
+        shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-help/mh40616/mac)).
 
     === "...on Windows"
         **binjr** might not be recognized by Microsoft Defender SmartScreen, so you might need to suppress a warning
@@ -74,7 +74,7 @@ Portable bundles can be unpacked to and used from a detachable drive or a file s
         ([see more](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-smartscreen/microsoft-defender-smartscreen-overview)).
         
     To ensure that your download has not been tempered with,
-    [you should verify its OpenGPG signature](/documentation/verify-signature).
+    [you should verify its OpenPGP signature](/documentation/verify-signature).
 
 [^1]: [How to verify the integrity of the downloaded file?](/documentation/verify-signature/)
 [^2]: The winget command line tool is only supported on Windows 10 1709 (build 16299) or later
