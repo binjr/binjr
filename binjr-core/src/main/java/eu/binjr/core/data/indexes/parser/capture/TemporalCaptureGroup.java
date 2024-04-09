@@ -53,7 +53,8 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     EPOCH(ChronoField.INSTANT_SECONDS),
     MILLI(ChronoField.MILLI_OF_SECOND),
     NANO(ChronoField.NANO_OF_SECOND),
-    FRACTION(ChronoField.MILLI_OF_SECOND);
+    FRACTION(ChronoField.MILLI_OF_SECOND),
+    ELAPSED(ChronoField.SECOND_OF_DAY);
 
     private final TemporalField temporalMapping;
     private final Function<String, Long> tranformer;
