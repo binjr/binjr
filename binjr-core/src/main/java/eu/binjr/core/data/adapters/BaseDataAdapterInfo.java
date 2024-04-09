@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final SourceLocality sourceLocality;
     private final VisualizationType visualizationType;
     private final BooleanProperty enabled = new SimpleBooleanProperty(true);
+    private final String category;
 
 
     /**
@@ -61,6 +62,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         }
         var meta = infoClass.getAnnotation(AdapterMetadata.class);
         this.name = meta.name();
+        this.category = meta.category();
         this.description = meta.description();
         this.copyright = meta.copyright();
         this.license = meta.license();
@@ -92,6 +94,15 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     @Override
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns the category of the data adapter.
+     * @return the category of the data adapter.
+     */
+    @Override
+    public String getCategory() {
+        return this.category;
     }
 
     /**

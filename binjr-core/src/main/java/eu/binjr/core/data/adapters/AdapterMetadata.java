@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,13 +27,18 @@ import java.util.Collection;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 /**
- * Defines the meta data used to initialise a class that implements {@link DataAdapterInfo}
+ * Defines the metadata used to initialise a class that implements {@link DataAdapterInfo}
  */
 public @interface AdapterMetadata {
     /**
      * @return the name of the data adapter.
      */
     String name();
+
+    /**
+     * @return the category if the data adapter.
+     */
+    String category() default "";
 
     /**
      * @return the description associated to the data adapter.

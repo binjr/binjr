@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2023 Frederic Thevenet
+ *    Copyright 2016-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -730,9 +730,18 @@ public class MainViewController implements Initializable {
 
     //region private members
     private Collection<MenuItem> populateSourceMenu() {
-        List<MenuItem> menuItems = new ArrayList<>();
+        Set<MenuItem> menuItems = new HashSet<>();
+        Map<String, Menu> adapterCategories = new HashMap<>();
         for (DataAdapterInfo adapterInfo : DataAdapterFactory.getInstance().getActiveAdapters()) {
-            MenuItem menuItem = new MenuItem(adapterInfo.getName());
+            MenuItem rootMenu;
+            var menuItem = new MenuItem(adapterInfo.getName());
+            if (adapterInfo.getCategory().isEmpty()) {
+                rootMenu = menuItem;
+            } else {
+                var catMenu = adapterCategories.computeIfAbsent(adapterInfo.getCategory(), Menu::new);
+                catMenu.getItems().add(menuItem);
+                rootMenu = catMenu;
+            }
             menuItem.setOnAction(eventHandler -> {
                 try {
                     if (adapterInfo.getAdapterDialog() != null) {
@@ -749,11 +758,14 @@ public class MainViewController implements Initializable {
                     Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e, root);
                 }
             });
-            menuItems.add(menuItem);
+            menuItems.add(rootMenu);
         }
-        var none = new MenuItem("None");
-        none.setDisable(true);
-        return menuItems.size() > 0 ? menuItems : Collections.singletonList(none);
+        if (menuItems.isEmpty()) {
+            var none = new MenuItem("None");
+            none.setDisable(true);
+            return Collections.singletonList(none);
+        }
+        return menuItems.stream().sorted(Comparator.comparing(MenuItem::getText)).toList();
     }
 
     TreeView<SourceBinding> getSelectedTreeView() {

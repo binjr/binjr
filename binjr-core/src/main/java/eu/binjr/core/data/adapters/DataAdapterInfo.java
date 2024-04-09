@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,8 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.version.Version;
 import javafx.beans.property.BooleanProperty;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Dialog;
 
 import java.util.Collection;
@@ -38,6 +35,15 @@ public interface DataAdapterInfo {
      * @return the name of the data adapter.
      */
     public String getName();
+
+    /**
+     * Returns the category of the data adapter.
+     *
+     * @return the category of the data adapter.
+     */
+    default String getCategory() {
+        return "";
+    }
 
     /**
      * Returns the description associated to the data adapter.
