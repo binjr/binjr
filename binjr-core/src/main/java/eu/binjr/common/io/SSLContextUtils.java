@@ -16,6 +16,8 @@
 
 package eu.binjr.common.io;
 
+import eu.binjr.common.logging.Logger;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
@@ -25,6 +27,7 @@ import java.security.cert.CertificateException;
 import java.util.*;
 
 public class SSLContextUtils {
+    private static final Logger logger = Logger.create(SSLContextUtils.class);
 
     public enum PlatformKeyStore {
         NONE("none"),
@@ -56,7 +59,8 @@ public class SSLContextUtils {
 
     public static SSLContext withKeystore(PlatformKeyStore keyStore) throws SSLCustomContextException {
         try {
-            var sslContext = SSLContext.getInstance("TLS");
+            var sslContext = SSLContext.getInstance("TLSv1.2");
+            logger.debug(() -> "Using platform specific keystore: " + keyStore);
             TrustManager[] trustManagers = null;
             if (keyStore != PlatformKeyStore.NONE) {
                 var tks = KeyStore.getInstance(keyStore.getName());
