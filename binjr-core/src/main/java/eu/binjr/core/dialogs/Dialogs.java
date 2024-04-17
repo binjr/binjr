@@ -58,6 +58,7 @@ import java.util.Optional;
 public class Dialogs {
     private static final Logger logger = Logger.create(Dialogs.class);
     private static final double TOOL_BUTTON_SIZE = 20;
+    private static final int MAX_NOTIFICATION_LEN = 300;
 
     /**
      * Displays an error notification
@@ -92,7 +93,7 @@ public class Dialogs {
         }
         runOnFXThread(() -> Notifications.create()
                 .title(title)
-                .text(e.getMessage())
+                .text(sanitizeNotificationMessage(e.getMessage()))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .action(new Action("Details", ae -> displayException(title, e)))
@@ -138,7 +139,7 @@ public class Dialogs {
         logger.error(title + " - " + message);
         runOnFXThread(() -> Notifications.create()
                 .title(title)
-                .text(message)
+                .text(sanitizeNotificationMessage(message))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showError());
@@ -169,7 +170,7 @@ public class Dialogs {
         logger.warn(title + " - " + message);
         runOnFXThread(() -> Notifications.create()
                 .title(title)
-                .text(message)
+                .text(sanitizeNotificationMessage(message))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showWarning());
@@ -187,7 +188,7 @@ public class Dialogs {
         logger.info(title + " - " + message);
         runOnFXThread(() -> Notifications.create()
                 .title(title)
-                .text(message)
+                .text(sanitizeNotificationMessage(message))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showInformation());
@@ -203,7 +204,7 @@ public class Dialogs {
         logger.info(title + " - " + message);
         runOnFXThread(() -> Notifications.create()
                 .title(title)
-                .text(message)
+                .text(sanitizeNotificationMessage(message))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(null).showInformation());
@@ -242,7 +243,7 @@ public class Dialogs {
         logger.info(message + " - " + title);
         runOnFXThread(() -> Notifications.create()
                 .title(title)
-                .text(message)
+                .text(sanitizeNotificationMessage(message))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(owner)
@@ -445,6 +446,14 @@ public class Dialogs {
             dlgStage.setAlwaysOnTop(true);
         } else {
             logger.debug("Failed to retrieve dialog's stage: cannot set dialog to be always on top");
+        }
+    }
+
+    private static String sanitizeNotificationMessage(String msg) {
+        if (msg.length() <= MAX_NOTIFICATION_LEN) {
+            return msg;
+        } else {
+            return msg.substring(0, MAX_NOTIFICATION_LEN) + "...";
         }
     }
 

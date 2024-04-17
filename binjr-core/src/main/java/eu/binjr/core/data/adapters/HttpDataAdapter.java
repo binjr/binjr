@@ -130,11 +130,10 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                         return null;
                     }
                     String contentType = responseInfo.headers().firstValue("Content-Type")
-                            .orElseThrow(() -> new RuntimeException("No content type specified"));
+                            .orElseThrow(() -> new RuntimeException("No content type specified")).split(";")[0].trim();
 
-                    if (!APPLICATION_JSON.equalsIgnoreCase(contentType.split(";")[0].trim())) {
-                        throw new RuntimeException("Invalid content type: received: '" +
-                                s + "', expected: '" + APPLICATION_JSON + "')");
+                    if (!APPLICATION_JSON.equalsIgnoreCase(contentType)) {
+                        throw new RuntimeException("Invalid content type: received: '" + contentType + "', expected: '" + APPLICATION_JSON );
                     }
                     return s;
                 }));
