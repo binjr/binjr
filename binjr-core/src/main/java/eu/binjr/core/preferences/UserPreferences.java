@@ -69,6 +69,11 @@ public class UserPreferences extends ObservablePreferenceFactory {
     private final UserFavorites favorites = new UserFavorites(BINJR_GLOBAL);
 
     /**
+     * True if the app should use the CA certs from the JVM rather that the platform specific ones on Windows and macOS.
+     */
+    public final ObservablePreference<Boolean> useJvmCacerts = booleanPreference("useJvmCacerts", false);
+
+    /**
      * True if series down-sampling is enabled, false otherwise.
      */
     public final ObservablePreference<Boolean> downSamplingEnabled = booleanPreference("downSamplingEnabled", true);

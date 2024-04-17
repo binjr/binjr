@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -62,21 +62,23 @@ public class GitHubApiHelper implements Closeable {
     }
 
     private GitHubApiHelper(URI apiEndpoint) {
-        this(apiEndpoint, null, null, null);
+        this(apiEndpoint, null, null, null, false);
     }
 
-    private GitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig, String userName, String token) {
+    private GitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig, String userName, String token, boolean useJvmCacerts) {
         this.apiEndpoint = Objects.requireNonNullElseGet(apiEndpoint, () -> URI.create(HTTPS_API_GITHUB_COM));
         HttpClient.Builder builder = null;
 
         builder = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
-        try {
-            builder.sslContext(SSLContextUtils.withPlatformKeystore());
-        } catch (SSLCustomContextException e) {
-            logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
-            logger.debug("Stacktrace", e);
+        if (!useJvmCacerts) {
+            try {
+                builder.sslContext(SSLContextUtils.withPlatformKeystore());
+            } catch (SSLCustomContextException e) {
+                logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
+                logger.debug("Stacktrace", e);
+            }
         }
         if (proxyConfig != null && proxyConfig.enabled()) {
             try {
@@ -124,8 +126,23 @@ public class GitHubApiHelper implements Closeable {
     public static GitHubApiHelper of(URI apiEndpoint,
                                      ProxyConfiguration proxyConfiguration,
                                      String userName,
+                                     String token,
+                                     boolean useJvmCacerts) {
+        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token, useJvmCacerts);
+    }
+
+    /**
+     * Initializes a new instance of the {@link GitHubApiHelper} class.
+     *
+     * @param apiEndpoint        the URI that specifies the API endpoint.
+     * @param proxyConfiguration Configuration for http proxy
+     * @return a new instance of the {@link GitHubApiHelper} class.
+     */
+    public static GitHubApiHelper of(URI apiEndpoint,
+                                     ProxyConfiguration proxyConfiguration,
+                                     String userName,
                                      String token) {
-        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token);
+        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token, false);
     }
 
     /**

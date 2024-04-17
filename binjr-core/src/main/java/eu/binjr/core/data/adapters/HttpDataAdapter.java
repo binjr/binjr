@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -188,11 +188,13 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
             var builder = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
-            try {
-                builder.sslContext(SSLContextUtils.withPlatformKeystore());
-            } catch (SSLCustomContextException e) {
-                logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
-                logger.debug("Stacktrace", e);
+            if (!userPrefs.useJvmCacerts.get()) {
+                try {
+                    builder.sslContext(SSLContextUtils.withPlatformKeystore());
+                } catch (SSLCustomContextException e) {
+                    logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
+                    logger.debug("Stacktrace", e);
+                }
             }
             if (userPrefs.enableHttpProxy.get()) {
                 try {
