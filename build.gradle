@@ -564,7 +564,8 @@ task jpackageDmg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
-            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
         def source = java.nio.file.Path.of("${ARTIFACTS_PATH_DMG}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.dmg")
@@ -596,7 +597,8 @@ task jpackagePkg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
-            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
         def source = java.nio.file.Path.of("${ARTIFACTS_PATH_PKG}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.pkg")

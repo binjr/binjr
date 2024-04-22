@@ -17,12 +17,9 @@
 package eu.binjr.core;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.common.preferences.ReloadableItemStore;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.ScalingFactor;
 import eu.binjr.core.preferences.UserPreferences;
-
-import java.util.Arrays;
 
 
 /**

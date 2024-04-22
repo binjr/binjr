@@ -35,6 +35,7 @@ exec $JAVACMD \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
+  -Dapple.awt.application.appearance=system \
   -Dbinjr.portable=true \
   "eu.binjr.core.Bootstrap" \
   --system-plugins-path="$BASEDIR/plugins" \
