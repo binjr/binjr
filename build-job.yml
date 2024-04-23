@@ -27,6 +27,14 @@ jobs:
           jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
           cleanDestinationDirectory: true
 
+      - script: |
+          dotnet tool install --global wix --version 5.0.0
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+
+      - script: |
+          wix --version
+        condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+
       - task: DownloadSecureFile@1
         name: gpgKeyring
         displayName: 'Download GPG Keyring'
