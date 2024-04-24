@@ -2,6 +2,8 @@ parameters:
   name: ''
   pool: ''
   platform: ''
+  arch: ''
+  wixVersion: ''
 
 jobs:
   - job: ${{ parameters.name }}
@@ -21,19 +23,20 @@ jobs:
       - task: JavaToolInstaller@0
         inputs:
           versionSpec: ${{ parameters.javaVersion }}
-          jdkArchitectureOption: x64
+          jdkArchitectureOption: ${{ parameters.arch }}
           jdkSourceOption: LocalDirectory
           jdkFile: ${{ parameters.jdkFile }}
           jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
           cleanDestinationDirectory: true
 
       - script: |
-          dotnet tool install --global wix --version 5.0.0
+          mkdir "%TOOL_DIR%/WixToolSet.Heat/"
+          nuget install WixToolSet.Heat -Version %WIX_VERSION% -OutputDirectory "%TOOL_DIR%"
+          dotnet tool install --global wix --version %WIX_VERSION%
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
-
-      - script: |
-          wix --version
-        condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
+        env:
+          TOOL_DIR: $(Agent.ToolsDirectory)
+          WIX_VERSION: ${{ parameters.wixVersion }}
 
       - task: DownloadSecureFile@1
         name: gpgKeyring
@@ -56,12 +59,13 @@ jobs:
           BINJR_BUILD_NUMBER: $(Build.BuildNumber)
           IS_TAG: $(isTag)
           REPO_TAG_NAME: $(Build.SourceBranchName)
+          WIX_HEAT_HOME: $(Agent.ToolsDirectory)/wixtoolset.heat.${{ parameters.wixVersion }}/tools/net472/${{ parameters.arch }}
         inputs:
           options: '--stacktrace --info'
           gradleWrapperFile: 'gradlew'
           javaHomeOption: 'JDKVersion'
           jdkVersionOption: 1.${{ parameters.javaVersion }}
-          jdkArchitectureOption: 'x64'
+          jdkArchitectureOption: ${{ parameters.arch }}
           publishJUnitResults: false
           tasks: 'signPackageDistribution'
 

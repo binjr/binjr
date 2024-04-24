@@ -24,6 +24,7 @@ stages:
         parameters:
           name: app_bundle_linux
           platform: linux
+          arch: x64
           jdkDownloadUrl: https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/linux/x64/jdk/hotspot/normal/eclipse
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           javaVersion: $(javaVersion)
@@ -35,6 +36,7 @@ stages:
         parameters:
           name: app_bundle_mac
           platform: mac
+          arch: x64
           jdkDownloadUrl: https://api.adoptium.net/v3/installer/latest/$(javaVersion)/ga/mac/x64/jdk/hotspot/normal/eclipse
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
           javaVersion: $(javaVersion)
@@ -46,6 +48,8 @@ stages:
         parameters:
           name: app_bundle_windows
           platform: win
+          arch: x64
+          wixVersion: '5.0.0'
           jdkDownloadUrl: https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/windows/x64/jdk/hotspot/normal/eclipse
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           javaVersion: $(javaVersion)

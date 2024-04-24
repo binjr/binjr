@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+﻿<!--
   ~    Copyright 2019 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,19 +21,10 @@
     candleArgs: 
     lightArgs: "<projectname>.wixobj" -out "<projectname>.msi" -ext WixUIExtension
 -->
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*"
-             Name="binjr"
-             Language="1033"
-             Version="$(var.binjrVersion)"
-             Manufacturer="binjr"
-             UpgradeCode="6362B9A7-06AA-42CB-8A81-5743B319CE23">
-        <Package Description="binjr - A time Series Browser"
-                 Comments="binjr - A time Series Browser"
-                 InstallerVersion="200"
-                 InstallScope="perUser"
-                 Platform="x64"
-                 Compressed="yes"/>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Package Name="binjr" Language="1033" Version="$(var.binjrVersion)" Manufacturer="binjr"
+             UpgradeCode="6362B9A7-06AA-42CB-8A81-5743B319CE23" InstallerVersion="200" Scope="perUser">
+        <SummaryInformation Description="binjr - A time Series Browser"/>
 
         <Icon Id="binjr.ico" SourceFile="$(var.resourcesDir)\platforms\windows\resources\icons\binjr.ico"/>
         <Property Id="ARPPRODUCTICON" Value="binjr.ico"/>
@@ -45,73 +35,36 @@
         <Property Id="LAUNCHREQUESTED" Value="0"/>
 
         <Upgrade Id="6362B9A7-06AA-42CB-8A81-5743B319CE23">
-            <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED"
-                            IncludeMinimum="yes" IncludeMaximum="yes"
+            <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="yes"
                             Minimum="2.0.0.0" Maximum="99.99.99.99"/>
         </Upgrade>
         <InstallExecuteSequence>
             <RemoveExistingProducts After="InstallInitialize"/>
-            <Custom Action="LaunchApplication" After="InstallFinalize">
-                (LAUNCHREQUESTED = 1) and (NOT Installed)
-            </Custom>
+            <Custom Action="LaunchApplication" After="InstallFinalize"
+                    Condition="(LAUNCHREQUESTED = 1) and (NOT Installed)"/>
         </InstallExecuteSequence>
 
         <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
         <Property Id="OVERRIDEAPPFOLDER" Value="~"/>
 
         <Property Id="APPLICATIONFOLDER">
-            <RegistrySearch Key="Software\[Manufacturer]\[ProductName]"
-                            Root="HKCU" Type="raw"
+            <RegistrySearch Key="Software\[Manufacturer]\[ProductName]" Root="HKCU" Type="raw"
                             Id="APPLICATIONFOLDER_REGSEARCH" Name="Path"/>
         </Property>
 
         <DirectoryRef Id="APPLICATIONFOLDER">
-            <Component Id="CleanupMainApplicationFolder" Guid="*" Win64="yes">
-                <RegistryValue Root="HKCU"
-                               Key="Software\[Manufacturer]\[ProductName]"
-                               Name="Path" Type="string" Value="[APPLICATIONFOLDER]"
-                               KeyPath="yes"/>
+            <Component Id="CleanupMainApplicationFolder" Bitness="always64">
+                <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Name="Path" Type="string"
+                               Value="[APPLICATIONFOLDER]" KeyPath="yes"/>
             </Component>
         </DirectoryRef>
 
-        <SetProperty Id="APPLICATIONFOLDER" Before="CostFinalize" Sequence="execute" Value="[OVERRIDEAPPFOLDER]">
-            <![CDATA[OVERRIDEAPPFOLDER<>"~"]]>
-        </SetProperty>
+        <SetProperty Id="APPLICATIONFOLDER" Before="CostFinalize" Sequence="execute" Value="[OVERRIDEAPPFOLDER]"
+                     Condition="OVERRIDEAPPFOLDER&lt;&gt;&quot;~&quot;"/>
 
-        <Directory Id="TARGETDIR" Name="SourceDir">
-            <Directory Id="ProgramMenuFolder">
-                <Component Id="StartMenuShortcuts" Guid="FEE95032-6C02-4F3A-A3F7-B7C394F8E0EB">
-                    <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value=""
-                                   KeyPath="yes"/>
-                    <Shortcut Id="ExeShortcut"
-                              Directory="ProgramMenuFolder"
-                              Name="binjr"
-                              Advertise="no"
-                              Icon="binjr.ico"
-                              Target="[#binjr.exe]"/>
-                </Component>
-            </Directory>
-            <Directory Id="LocalAppDataFolder" Name="PFiles">
-                <Directory Id="APPLICATIONFOLDER" Name="binjr">
-                    <Component Id="binjrDir" DiskId="1" Guid="8584B94D-8E65-4D5F-AAD9-C542BFB0CF5A" Win64="yes">
-                        <CreateFolder/>
-                        <RemoveFolder Id="RemoveDir0" On="uninstall"/>
-                        <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]"
-                                     Action="createAndRemoveOnUninstall">
-                            <RegistryValue Name="Version" Value="[Version]" Type="string" KeyPath="yes"/>
-                        </RegistryKey>
-                        <ProgId Id='binjrFile' Description='binjr Workspace Files'>
-                            <Extension Id='bjr' Advertise='no' ContentType='bjr'>
-                                <MIME ContentType='bjr' Default='yes'/>
-                                <Verb Id='open' Command='Open' TargetFile='binjr.exe' Argument='"%1"'/>
-                            </Extension>
-                        </ProgId>
-                    </Component>
-                </Directory>
-            </Directory>
-        </Directory>
 
-        <Component Id="comp_env_path" Directory="APPLICATIONFOLDER" Guid="7388eff2-3cb6-4e01-8bcb-9227634ce086" KeyPath="yes">
+        <Component Id="comp_env_path" Directory="APPLICATIONFOLDER" Guid="7388eff2-3cb6-4e01-8bcb-9227634ce086"
+                   KeyPath="yes">
             <Environment Id="env_path" Name="PATH" Value="[APPLICATIONFOLDER]" Action="set" Part="last" System="no"/>
         </Component>
 
@@ -130,6 +83,18 @@
         <WixVariable Id="WixUIBannerBmp" Value="$(var.resourcesDir)\bundlers\win_msi\Install_Banner.jpg"/>
         <WixVariable Id="WixUIDialogBmp" Value="$(var.resourcesDir)\bundlers\win_msi\Install_Splash.png"/>
         <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch binjr"/>
+
+        <?foreach WIXUIARCH in X86;X64;A64 ?>
+        <UI Id="WixUI_InstallDir_$(WIXUIARCH)">
+            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath_$(WIXUIARCH)"
+                     Order="3" Condition="NOT WIXUI_DONTVALIDATEPATH"/>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath_$(WIXUIARCH)"
+                     Order="2" Condition="NOT WIXUI_DONTVALIDATEPATH"/>
+        </UI>
+
+        <UIRef Id="WixUI_InstallDir"/>
+        <?endforeach?>
+
         <UI Id="WixUI_InstallDir">
             <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>
             <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12"/>
@@ -146,66 +111,71 @@
             <DialogRef Id="ProgressDlg"/>
             <DialogRef Id="ResumeDlg"/>
             <DialogRef Id="UserExit"/>
-            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
-            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4">
-                <![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]>
-            </Publish>
-            <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
 
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">NOT Installed</Publish>
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">
-                Installed AND PATCH
-            </Publish>
-            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">
-                1
-            </Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT
-                WIXUI_DONTVALIDATEPATH
-            </Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3">
-                <![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]>
-            </Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4">
-                WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID="1"
-            </Publish>
-            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]"
-                     Order="1">1
-            </Publish>
-            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1
-            </Publish>
+            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"
+                     Condition="WIXUI_INSTALLDIR_VALID&lt;&gt;&quot;1&quot;"/>
+            <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999"/>
 
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">NOT
-                Installed
-            </Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">
-                Installed AND NOT PATCH
-            </Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">
-                Installed AND PATCH
-            </Publish>
-            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">
-                1
-            </Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">
-                1
-            </Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">
-                1
-            </Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">
-                1
-            </Publish>
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg"
+                     Condition="NOT Installed"/>
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg"
+                     Condition="Installed AND PATCH"/>
+            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg"/>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]"
+                     Order="1"/>
+
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"
+                     Condition="NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID&lt;&gt;&quot;1&quot;"/>
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Order="4"
+                     Condition="WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID=&quot;1&quot;"/>
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty"
+                     Value="[WIXUI_INSTALLDIR]" Order="1"/>
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2"/>
+
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1"
+                     Condition="NOT&#xA;                Installed"/>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2"
+                     Condition="Installed AND NOT PATCH"/>
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2"
+                     Condition="Installed AND PATCH"/>
+            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg"/>
+            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg"/>
+            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg"/>
+            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg"/>
             <Property Id="ARPNOMODIFY" Value="1"/>
-            <Publish Dialog="ExitDialog"
-                     Control="Finish"
-                     Event="DoAction"
-                     Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
-            </Publish>
+            <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication"
+                     Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed"/>
         </UI>
         <UIRef Id="WixUI_Common"/>
         <Property Id="WixShellExecTarget" Value="[#binjr.exe]"/>
-        <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes"/>
+        <CustomAction Id="LaunchApplication" DllEntry="WixShellExec" Impersonate="yes" BinaryRef="Wix4UtilCA_X86"/>
 
-    </Product>
+
+        <StandardDirectory Id="ProgramMenuFolder">
+            <Component Id="StartMenuShortcuts" Guid="FEE95032-6C02-4F3A-A3F7-B7C394F8E0EB">
+                <RegistryValue Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" Type="string" Value=""
+                               KeyPath="yes"/>
+                <Shortcut Id="ExeShortcut" Directory="ProgramMenuFolder" Name="binjr" Advertise="no" Icon="binjr.ico"
+                          Target="[#binjr.exe]"/>
+            </Component>
+        </StandardDirectory>
+        <StandardDirectory Id="LocalAppDataFolder">
+            <Directory Id="APPLICATIONFOLDER" Name="binjr">
+                <Component Id="binjrDir" DiskId="1" Guid="8584B94D-8E65-4D5F-AAD9-C542BFB0CF5A" Bitness="always64">
+                    <CreateFolder/>
+                    <RemoveFolder Id="RemoveDir0" On="uninstall"/>
+                    <RegistryKey Root="HKCU" Key="Software\[Manufacturer]\[ProductName]" ForceCreateOnInstall="yes"
+                                 ForceDeleteOnUninstall="yes">
+                        <RegistryValue Name="Version" Value="[Version]" Type="string" KeyPath="yes"/>
+                    </RegistryKey>
+                    <ProgId Id="binjrFile" Description="binjr Workspace Files">
+                        <Extension Id="bjr" Advertise="no" ContentType="bjr">
+                            <MIME ContentType="bjr" Default="yes"/>
+                            <Verb Id="open" Command="Open" TargetFile="binjr.exe" Argument="&quot;%1&quot;"/>
+                        </Extension>
+                    </ProgId>
+                </Component>
+            </Directory>
+        </StandardDirectory>
+    </Package>
 </Wix>

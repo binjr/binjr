@@ -89,6 +89,7 @@ ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.WIX_HOME = System.getenv("WIX")
+ext.WIX_HEAT_HOME = System.getenv("WIX_HEAT_HOME")
 ext.ARTIFACTS_ROOT_PATH = "${buildDir}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")
@@ -433,7 +434,7 @@ task createRuntimeImage(type: Exec) {
         dependsOn unzipOpenJfxModules
     }
     def jlinkJdkDir
-    if (USE_BUILD_JDK_IN_BUNDLE){
+    if (USE_BUILD_JDK_IN_BUNDLE) {
         jlinkJdkDir = "${JDK_HOME}"
     } else {
         if (IS_WINDOWS) {
@@ -441,7 +442,7 @@ task createRuntimeImage(type: Exec) {
         } else {
             dependsOn untarJlinkOpenJdk
         }
-        jlinkJdkDir =  "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home':''}"
+        jlinkJdkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home' : ''}"
     }
 
     workingDir project.projectDir
@@ -505,7 +506,7 @@ task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     }
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}/bin/heat.exe",
+            "${WIX_HEAT_HOME}/heat.exe",
             "dir", "${APP_IMAGE_PATH}",
             "-cg", "binjrFiles",
             "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
@@ -515,28 +516,53 @@ task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     ]
 }
 
-task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
-    workingDir project.projectDir
-    commandLine = [
-            "${WIX_HOME}/bin/candle.exe",
-            "-arch", "x64",
-            "-out", "${buildDir}/wix/obj/",
-            "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
-            "${buildDir}/wix/binjrFiles.wxs",
-            "-dbinjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
-            "-dbuildSourceDir=${APP_IMAGE_PATH}",
-            "-dresourcesDir=${projectDir}/distribution"
-    ]
+//task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
+//    workingDir project.projectDir
+//    commandLine = [
+//            "${WIX_HOME}/bin/candle.exe",
+//            "-arch", "x64",
+//            "-out", "${buildDir}/wix/obj/",
+//            "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
+//            "${buildDir}/wix/binjrFiles.wxs",
+//            "-dbinjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
+//            "-dbuildSourceDir=${APP_IMAGE_PATH}",
+//            "-dresourcesDir=${projectDir}/distribution"
+//    ]
+//}
+//
+//task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
+//    workingDir project.projectDir
+//    commandLine = [
+//            "${WIX_HOME}/bin/light.exe",
+//            "-sw", "-sice:ICE38", "-sice:ICE64",
+//            "-out", "${ARTIFACTS_PATH_MSI}/${DISTRIBUTION_NAME}.msi",
+//            "${buildDir}/wix/obj/*.wixobj",
+//            "-ext", "WixUtilExtension", "-ext", "WixUIExtension.dll"
+//    ]
+//    outputs.dir ARTIFACTS_PATH_MSI
+//}
+
+task wixAddUiExt(type: Exec, dependsOn: wixRunHeat) {
+    commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
 }
 
-task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
+task wixAddUtilExt(type: Exec, dependsOn: wixAddUiExt) {
+    commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
+}
+
+task wixRunBuild(type: Exec, dependsOn: [wixAddUtilExt]) {
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}/bin/light.exe",
-            "-sw", "-sice:ICE38", "-sice:ICE64",
+            "wix.exe", "build", "-arch", "${getArch()}",
+            "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
+            "${buildDir}/wix/binjrFiles.wxs",
+            "-ext", "WixToolset.UI.wixext",
+            "-ext", "WixToolset.Util.wixext",
+            "-d", "binjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
+            "-d", "buildSourceDir=${APP_IMAGE_PATH}",
+            "-d", "resourcesDir=${projectDir}/distribution",
             "-out", "${ARTIFACTS_PATH_MSI}/${DISTRIBUTION_NAME}.msi",
-            "${buildDir}/wix/obj/*.wixobj",
-            "-ext", "WixUtilExtension", "-ext", "WixUIExtension.dll"
+            "-pdbtype", "none"
     ]
     outputs.dir ARTIFACTS_PATH_MSI
 }
@@ -701,7 +727,7 @@ task packageAsZip(type: WrapTaskForSigning, dependsOn: [packageDistributionZip])
     archiveFileName = "${DISTRIBUTION_NAME}.zip"
 }
 
-task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunLight]) {
+task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunBuild]) {
     from "${ARTIFACTS_PATH_MSI}/${DISTRIBUTION_NAME}.msi"
     destinationDirectory = ARTIFACTS_PATH_MSI
     archiveFileName = "${DISTRIBUTION_NAME}.msi"
@@ -815,21 +841,7 @@ def craftJlinkJdkUrl() {
         default:
             throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
     }
-    def arch
-    switch (OS_ARCH) {
-        case "amd64":
-        case "x86_64":
-            arch = "x64"
-            break
-        case "x86":
-            arch = "x86"
-            break
-        case "aarch64":
-            arch = "aarch64"
-            break
-        default:
-            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
-    }
+    def arch = getArch()
     return "https://api.adoptium.net/v3/binary/version/${BUNDLE_JDK_VERSION}/${platform}/${arch}/jdk/hotspot/normal/eclipse"
 }
 
@@ -848,6 +860,11 @@ def craftOpenJfxModsUrl() {
         default:
             throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
     }
+    def arch = getArch()
+    return "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${platform}-${arch}_bin-jmods.zip"
+}
+
+def getArch() {
     def arch
     switch (OS_ARCH) {
         case "amd64":
@@ -863,9 +880,8 @@ def craftOpenJfxModsUrl() {
         default:
             throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
     }
-    return "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${platform}-${arch}_bin-jmods.zip"
+    return arch
 }
-
 
 dependencyUpdates {
     rejectVersionIf {
