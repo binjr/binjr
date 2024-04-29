@@ -35,10 +35,10 @@ public abstract class SourceBinding<T> {
     private static final Logger logger = Logger.create(SourceBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
-            return MessageDigest.getInstance("MD5");
+            return MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            logger.fatal("Failed to instantiate MD5 message digest");
-            throw new IllegalStateException("Failed to create a new instance of Md5HashTargetResolver", e);
+            logger.fatal("Failed to instantiate SHA-1 message digest");
+            throw new IllegalStateException("Failed to create a new instance of MessageDigest", e);
         }
     });
 

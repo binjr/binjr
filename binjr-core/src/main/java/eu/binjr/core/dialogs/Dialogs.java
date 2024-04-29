@@ -450,6 +450,9 @@ public class Dialogs {
     }
 
     private static String sanitizeNotificationMessage(String msg) {
+        if (msg == null) {
+            return "";
+        }
         if (msg.length() <= MAX_NOTIFICATION_LEN) {
             return msg;
         } else {

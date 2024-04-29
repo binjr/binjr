@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Frederic Thevenet
+ * Copyright 2023-2024 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import eu.binjr.core.preferences.AppEnvironment;
  */
 @AdapterMetadata(
         name = "JFR",
+        category = "JVM",
         description = "JDK Flight Recorder Files Data Adapter (Events view)",
         copyright = AppEnvironment.COPYRIGHT_NOTICE,
         license = AppEnvironment.LICENSE,

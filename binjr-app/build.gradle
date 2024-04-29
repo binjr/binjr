@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2023 Frederic Thevenet
+ *    Copyright 2018-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ dependencies {
     implementation project(':binjr-adapter-csv')
     implementation project(':binjr-adapter-jfr')
     implementation project(':binjr-adapter-jrds')
+    implementation project(':binjr-adapter-jvmgc')
     implementation project(':binjr-adapter-logs')
     implementation project(':binjr-adapter-netdata')
     implementation project(':binjr-adapter-rrd4j')

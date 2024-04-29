@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.binjr.sources.jfr.adapters.charts;
+package eu.binjr.sources.jvmgc.adapters;
 
 
 import eu.binjr.core.data.adapters.AdapterMetadata;
@@ -23,7 +23,6 @@ import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.sources.jfr.adapters.JfrDataAdapterDialog;
 
 
 /**
@@ -32,31 +31,28 @@ import eu.binjr.sources.jfr.adapters.JfrDataAdapterDialog;
  * @author Frederic Thevenet
  */
 @AdapterMetadata(
-        name = "JFR - Charts",
+        name = "GC Logs",
         category = "JVM",
-        description = "JDK Flight Recorder Charts Data Adapter",
+        description = "JVM Garbage Collection Logs Data Adapter",
         copyright = AppEnvironment.COPYRIGHT_NOTICE,
         license = AppEnvironment.LICENSE,
         siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
-        adapterClass = JfrChartsDataAdapter.class,
-        dialogClass = JfrDataAdapterDialog.class,
+        adapterClass = JvmGcDataAdapter.class,
+        dialogClass = JvmGcDataAdapterDialog.class,
         sourceLocality = SourceLocality.LOCAL,
         apiLevel = AppEnvironment.PLUGIN_API_LEVEL,
+        preferencesClass = JvmGcAdapterPreferences.class,
         visualizationType = VisualizationType.CHARTS
 )
-public class JfrChartsDataAdapterInfo extends BaseDataAdapterInfo {
+public class JvmGcDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
-     * Initialises a new instance of the {@link JfrChartsDataAdapterInfo} class.
+     * Initialises a new instance of the {@link JvmGcDataAdapterInfo} class.
      *
      * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
-    public JfrChartsDataAdapterInfo() throws CannotInitializeDataAdapterException {
-        super(JfrChartsDataAdapterInfo.class);
+    public JvmGcDataAdapterInfo() throws CannotInitializeDataAdapterException {
+        super(JvmGcDataAdapterInfo.class);
     }
 
-    @Override
-    public boolean isEnabled() {
-        return false;
-    }
 }
