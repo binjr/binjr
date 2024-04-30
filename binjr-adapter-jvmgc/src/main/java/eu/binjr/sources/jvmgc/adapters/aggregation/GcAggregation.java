@@ -20,14 +20,32 @@ import com.microsoft.gctoolkit.aggregator.Aggregation;
 import com.microsoft.gctoolkit.aggregator.Collates;
 import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
+import eu.binjr.core.data.workspace.ChartType;
+import eu.binjr.core.data.workspace.UnitPrefixes;
 
 
 @Collates(GcAggregator.class)
 public abstract class GcAggregation extends Aggregation {
 
-    abstract public void addHeapOccupancyDataPoint(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
 
-    abstract public void recordPauseDuration(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double duration);
+//    public abstract void addHeapSizeBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values);
+//
+//    abstract public void addHeapSizeAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
+//
+//    public abstract void addHeapOccupancyBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values);
+//
+//    abstract public void addHeapOccupancyAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
+//
+//    abstract public void recordPauseDuration(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double duration);
 
 
+    public abstract void storeSample(                                     String poolName,
+                                     String key,
+                                     String label,
+                                     String unit,
+                                     UnitPrefixes prefix,
+                                     ChartType chartType,
+                                     GarbageCollectionTypes gcType,
+                                     DateTimeStamp timeStamp,
+                                     double... values);
 }

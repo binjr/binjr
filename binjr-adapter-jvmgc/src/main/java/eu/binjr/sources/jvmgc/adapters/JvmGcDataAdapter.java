@@ -32,12 +32,10 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.ChartType;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import eu.binjr.core.data.workspace.UnitPrefixes;
-import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.core.data.workspace.*;
 import eu.binjr.sources.jvmgc.adapters.aggregation.AggregationInfo;
 import eu.binjr.sources.jvmgc.adapters.aggregation.GcDataStore;
+import javafx.animation.ScaleTransition;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
@@ -46,7 +44,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -61,12 +58,12 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     public static final String GC_FILE_PATH = "gcFilePath";
     public static final String ZONE_ID = "zoneId";
     public static final String ENCODING = "encoding";
-//    public static final String HEAP = "Heap";
+    //    public static final String HEAP = "Heap";
 //    public static final String OCCUPANCY_AFTER_COLLECTION = "OccupancyAfterCollection";
     private Path gcLogPath;
     private ZoneId zoneId;
     private String encoding;
-    private  Map<String, AggregationInfo> sortedDataStores;
+    private Map<String, AggregationInfo> sortedDataStores;
 
 
     /**
@@ -117,7 +114,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);
 
-            this.sortedDataStores= heapStore.get();
+            this.sortedDataStores = heapStore.get();
 
             FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                     new TimeSeriesBinding.Builder()
@@ -126,14 +123,24 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                             .withAdapter(this)
                             .build());
 
+            var poolDict = new HashMap<String, FilterableTreeItem<SourceBinding>>();
+
             sortedDataStores.forEach((s, m) -> {
-                var occupAfterGc = attachNode(m.name(), tree.getValue().getLabel(), m.label(),m.unit(),m.prefix(), tree);
+                var node = poolDict.computeIfAbsent(m.category(), cat -> {
+                    if (cat.isEmpty()) {
+                        return tree;
+                    }
+                    return attachNode(cat, tree.getValue().getLabel(), cat, "", UnitPrefixes.BINARY, ChartType.LINE, tree);
+                });
+
+                var occupAfterGc = attachNode(m.name(), node.getValue().getLabel(), m.label(), m.unit(), m.prefix(), m.chartType(), node);
                 m.encounteredGcTypes().forEach(garbageCollectionType -> {
                     attachNode(garbageCollectionType.name(),
                             m.name() + "/" + garbageCollectionType.name(),
                             garbageCollectionType.getLabel(),
                             m.unit(),
                             m.prefix(),
+                            m.chartType(),
                             occupAfterGc);
                 });
             });
@@ -145,23 +152,23 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         }
     }
 
-    private String getGCName(JavaVirtualMachine machine){
-        if (machine.isCMS()){
+    private String getGCName(JavaVirtualMachine machine) {
+        if (machine.isCMS()) {
             return "CMS";
         }
-        if (machine.isG1GC()){
+        if (machine.isG1GC()) {
             return "G1";
         }
-        if (machine.isParallel()){
+        if (machine.isParallel()) {
             return "Parallel";
         }
-        if (machine.isSerial()){
+        if (machine.isSerial()) {
             return "Serial";
         }
-        if (machine.isShenandoah()){
+        if (machine.isShenandoah()) {
             return "Shenandoah";
         }
-        if (machine.isZGC()){
+        if (machine.isZGC()) {
             return "ZGC";
         }
         return "Unknown";
@@ -172,6 +179,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                                                          String legend,
                                                          String unit,
                                                          UnitPrefixes prefix,
+                                                         ChartType chartType,
                                                          FilterableTreeItem<SourceBinding> parent) {
         SourceBinding binding = new TimeSeriesBinding.Builder()
                 .withLabel(label)
@@ -179,7 +187,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                 .withLegend(legend)
                 .withPrefix(prefix)
                 .withUnitName(unit)
-                .withGraphType(ChartType.LINE)
+                .withGraphType(chartType)
                 .withParent(parent.getValue())
                 .withAdapter(this)
                 .build();

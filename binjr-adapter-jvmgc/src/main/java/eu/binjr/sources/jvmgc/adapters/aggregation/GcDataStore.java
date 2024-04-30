@@ -19,59 +19,96 @@ package eu.binjr.sources.jvmgc.adapters.aggregation;
 import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.codec.csv.DataSample;
+import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 public class GcDataStore extends GcAggregation {
-    //private final ConcurrentNavigableMap<Long, DataSample> aggregations;
-    private final Map<String, AggregationInfo> aggregations = new ConcurrentHashMap<>();
-    // private final Set<GarbageCollectionTypes> encounteredGcEventTypes = new ConcurrentHashSet<>();
+    private final Map<String, AggregationInfo> aggregations = new TreeMap<>();
 
     public GcDataStore() {
-
-
     }
+
+//    @Override
+//    public void addHeapSizeBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values) {
+//        this.storeSample(
+//                "SizeBeforeCollection",
+//                "Heap Size (Before GC)",
+//                "bytes", UnitPrefixes.BINARY,
+//                ChartType.LINE,
+//                gcType,
+//                timeStamp,
+//                values);
+//    }
+//
+//    @Override
+//    public void addHeapSizeAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values) {
+//        this.storeSample(
+//                "SizeAfterCollection",
+//                "Heap Size (After GC)",
+//                "bytes", UnitPrefixes.BINARY,
+//                ChartType.LINE,
+//                gcType,
+//                timeStamp,
+//                values);
+//    }
+//
+//    @Override
+//    public void addHeapOccupancyBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values) {
+//        this.storeSample(
+//                "OccupancyBeforeCollection",
+//                "Heap Occupancy (Before GC)",
+//                "bytes", UnitPrefixes.BINARY,
+//                ChartType.LINE,
+//                gcType,
+//                timeStamp,
+//                values);
+//    }
+//
+//    @Override
+//    public void addHeapOccupancyAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values) {
+//        this.storeSample(
+//                "OccupancyAfterCollection",
+//                "Heap Occupancy (After GC)",
+//                "bytes", UnitPrefixes.BINARY,
+//                ChartType.LINE,
+//                gcType,
+//                timeStamp,
+//                values);
+//
+//    }
+//
+//    @Override
+//    public void recordPauseDuration(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double duration) {
+//        this.storeSample(
+//                "pauseTime",
+//                "Pause Time",
+//                "seconds",
+//                UnitPrefixes.METRIC,
+//                ChartType.SCATTER,
+//                gcType,
+//                timeStamp,
+//                duration);
+//    }
 
     @Override
-    public void addHeapOccupancyDataPoint(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values) {
-        this.storeSample(
-                "OccupancyAfterCollection",
-                "Heap Occupancy (After GC)",
-                "bytes", UnitPrefixes.BINARY,
-                gcType,
-                timeStamp,
-                values);
-
-    }
-
-    @Override
-    public void recordPauseDuration(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double duration) {
-        this.storeSample(
-                "pauseTime",
-                "Pause Time",
-                "seconds",
-                UnitPrefixes.METRIC,
-                gcType,
-                timeStamp,
-                duration);
-    }
-
-    private void storeSample(String key,
-                             String label,
-                             String unit,
-                             UnitPrefixes prefix,
-                             GarbageCollectionTypes gcType,
-                             DateTimeStamp timeStamp,
-                             double... values) {
+    public void storeSample(String poolName,
+                            String key,
+                            String label,
+                            String unit,
+                            UnitPrefixes prefix,
+                            ChartType chartType,
+                            GarbageCollectionTypes gcType,
+                            DateTimeStamp timeStamp,
+                            double... values) {
         DataSample sample;
-        var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(key, label, unit, prefix));
+        var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(poolName, key, label, unit, prefix, chartType));
         info.encounteredGcTypes().add(gcType);
         if (timeStamp.hasDateStamp()) {
             sample = new DataSample(timeStamp.getDateTime());
