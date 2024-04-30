@@ -80,7 +80,7 @@ public class GcDataStore extends GcAggregation {
         }
         new DataSample(timeStamp.getDateTime());
         for (var l : values) {
-            sample.getCells().put(gcType.getLabel(), l);
+            sample.getCells().put(gcType.name(), l);
         }
 
         info.data().put(sample.getTimeStamp().toInstant().toEpochMilli(), sample);
