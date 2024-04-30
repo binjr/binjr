@@ -37,7 +37,9 @@ import eu.binjr.sources.jvmgc.adapters.aggregation.AggregationInfo;
 import eu.binjr.sources.jvmgc.adapters.aggregation.GcDataStore;
 import eu.binjr.sources.jvmgc.adapters.aggregation.Sample;
 import javafx.animation.ScaleTransition;
+import javafx.scene.paint.Color;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
+
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -45,6 +47,7 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -131,10 +134,10 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                     if (cat.isEmpty()) {
                         return tree;
                     }
-                    return attachNode(cat, tree.getValue().getLabel(), cat, "", UnitPrefixes.BINARY, ChartType.LINE, tree);
+                    return attachNode(cat, tree.getValue().getLabel(), cat, m.unit(), m.prefix(), m.chartType(), m.color(), tree);
                 });
 
-               attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), node);
+                attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), m.color(), node);
 //                m.encounteredGcTypes().forEach(garbageCollectionType -> {
 //                    attachNode(garbageCollectionType.name(),
 //                            m.name() + "/" + garbageCollectionType.name(),
@@ -181,6 +184,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                                                          String unit,
                                                          UnitPrefixes prefix,
                                                          ChartType chartType,
+                                                         Color color,
                                                          FilterableTreeItem<SourceBinding> parent) {
         SourceBinding binding = new TimeSeriesBinding.Builder()
                 .withLabel(label)
@@ -189,6 +193,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                 .withPrefix(prefix)
                 .withUnitName(unit)
                 .withGraphType(chartType)
+                .withColor(color)
                 .withParent(parent.getValue())
                 .withAdapter(this)
                 .build();
@@ -218,19 +223,19 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
             rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
 
-        Long fromKey = Objects.requireNonNullElse(store.floorKey(begin.toEpochMilli()), begin.toEpochMilli());
-        Long toKey = Objects.requireNonNullElse(store.ceilingKey(end.toEpochMilli()), end.toEpochMilli());
-        for (var sample : store.subMap(fromKey, true, toKey, true).values()) {
-            //  for (String n : sample.getCells().keySet()) {
-            //    List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
-           // if (timeSeriesInfoList != null) {
-            //    for (var tsInfo : timeSeriesInfoList) {
-                    series.get(info).addSample(sample.timestamp(), sample.value());
-       //         }
-        //    }
-            // }
+            Long fromKey = Objects.requireNonNullElse(store.floorKey(begin.toEpochMilli()), begin.toEpochMilli());
+            Long toKey = Objects.requireNonNullElse(store.ceilingKey(end.toEpochMilli()), end.toEpochMilli());
+            for (var sample : store.subMap(fromKey, true, toKey, true).values()) {
+                //  for (String n : sample.getCells().keySet()) {
+                //    List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
+                // if (timeSeriesInfoList != null) {
+                //    for (var tsInfo : timeSeriesInfoList) {
+                series.get(info).addSample(sample.timestamp(), sample.value());
+                //         }
+                //    }
+                // }
+            }
         }
-    }
         return series;
     }
 

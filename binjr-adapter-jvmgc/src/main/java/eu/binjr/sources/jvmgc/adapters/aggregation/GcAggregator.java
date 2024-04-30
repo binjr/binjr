@@ -29,6 +29,7 @@ import com.microsoft.gctoolkit.event.zgc.ZGCCycle;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
+import javafx.scene.paint.Color;
 
 
 @Aggregates({EventSource.G1GC, EventSource.GENERATIONAL, EventSource.ZGC, EventSource.SHENANDOAH})
@@ -42,14 +43,14 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         register(ShenandoahCycle.class, this::processEvent);
     }
 
-    private void processMemPool(String poolName, MemoryPoolSummary memPool, GarbageCollectionTypes gcType, DateTimeStamp timeStamp) {
-        aggregation().storeSample(poolName, poolName + "OccupancyAfterCollection", "Occupancy (After GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+    private void processMemPool(String poolName, MemoryPoolSummary memPool, GarbageCollectionTypes gcType, DateTimeStamp timeStamp, Color color) {
+        aggregation().storeSample( "Occupancy (After GC)", poolName + "OccupancyAfterCollection",poolName, "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
                 gcType, timeStamp, memPool.getOccupancyAfterCollection() * 1024L);
-        aggregation().storeSample(poolName, poolName + "OccupancyBeforeCollection", "Occupancy (Before GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+        aggregation().storeSample( "Occupancy (Before GC)", poolName + "OccupancyBeforeCollection",poolName, "bytes", UnitPrefixes.BINARY, ChartType.STACKED,color,
                 gcType, timeStamp, memPool.getOccupancyBeforeCollection() * 1024L);
-        aggregation().storeSample(poolName, poolName + "SizeAfterCollection", "Size (After GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+        aggregation().storeSample("Size (After GC)", poolName + "SizeAfterCollection",poolName , "bytes", UnitPrefixes.BINARY, ChartType.LINE,color,
                 gcType, timeStamp, memPool.getSizeAfterCollection() * 1024L);
-        aggregation().storeSample(poolName, poolName + "SizeBeforeCollection", "Size (Before GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+        aggregation().storeSample("Size (Before GC)", poolName + "SizeBeforeCollection",poolName , "bytes", UnitPrefixes.BINARY, ChartType.LINE,color,
                 gcType, timeStamp, memPool.getSizeBeforeCollection() * 1024L);
     }
 
@@ -57,26 +58,26 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private void processEvent(GenerationalGCPauseEvent event) {
         aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
                 event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
-        if (event.getHeap() != null) {
-            processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp());
-        }
+//        if (event.getHeap() != null) {
+//            processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+//        }
         if (event.getPermOrMetaspace() != null) {
-            processMemPool("Metaspace", event.getPermOrMetaspace(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("Metaspace", event.getPermOrMetaspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.CHOCOLATE);
         }
         if (event.getTenured() != null) {
-            processMemPool("Tenured", event.getTenured(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+        processMemPool("Tenured", event.getTenured(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.SEAGREEN);
         }
 
         if (event.getYoung() != null) {
-            processMemPool("Young", event.getYoung(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("Young", event.getYoung(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.GOLD );
         }
 
         if (event.getNonClassspace() != null) {
-            processMemPool("NonClassSpace", event.getNonClassspace(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("NonClassSpace", event.getNonClassspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.MEDIUMPURPLE);
         }
 
         if (event.getClassspace() != null) {
-            processMemPool("ClassSpace", event.getClassspace(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("ClassSpace", event.getClassspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.AQUAMARINE);
         }
     }
 
@@ -85,69 +86,34 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
                 event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
         if (event.getHeap() != null) {
-            processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.SEAGREEN);
         }
         if (event.getPermOrMetaspace() != null) {
-            processMemPool("Metaspace", event.getPermOrMetaspace(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("Metaspace", event.getPermOrMetaspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.CHOCOLATE);
         }
-        if (event.getTenured() != null) {
-            processMemPool("Tenured", event.getTenured(), event.getGarbageCollectionType(), event.getDateTimeStamp());
-        }
-
+//        if (event.getTenured() != null) {
+//            processMemPool("Tenured", event.getTenured(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.BISQUE);
+//        }
         if (event.getEden() != null) {
-            processMemPool("Eden", event.getEden(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+            processMemPool("Eden", event.getEden(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.GOLD);
         }
-
         if (event.getSurvivor() != null) {
-            aggregation().storeSample("Survivor", "SurvivorOccupancyAfterCollection", "Occupancy (After GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+            aggregation().storeSample( "Occupancy (After GC)", "SurvivorOccupancyAfterCollection","Survivor", "bytes", UnitPrefixes.BINARY, ChartType.STACKED, Color.DEEPSKYBLUE,
                     event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getSurvivor().getOccupancyAfterCollection() * 1024L);
-            aggregation().storeSample("Survivor", "SurvivorOccupancyBeforeCollection", "Occupancy (Before GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+            aggregation().storeSample("Occupancy (Before GC)", "SurvivorOccupancyBeforeCollection", "Survivor", "bytes", UnitPrefixes.BINARY, ChartType.STACKED,Color.DEEPSKYBLUE,
                     event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getSurvivor().getOccupancyBeforeCollection() * 1024L);
-            aggregation().storeSample("Survivor", "SurvivorSize", "Size", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
+            aggregation().storeSample("Size (After GC)", "SurvivorSize", "Survivor", "bytes", UnitPrefixes.BINARY, ChartType.LINE,Color.DEEPSKYBLUE,
                     event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getSurvivor().getSize() * 1024L);
         }
-
-
-//        if (event.getHeap() != null) {
-//            aggregation().storeSample("OccupancyAfterCollection", "Heap Occupancy (After GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
-//                    event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getOccupancyAfterCollection() * 1024L);
-//            aggregation().storeSample("OccupancyBeforeCollection", "Heap Occupancy (Before GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
-//                    event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getOccupancyBeforeCollection() * 1024L);
-//            aggregation().storeSample("SizeAfterCollection", "Heap Size (After GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
-//                    event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getSizeAfterCollection() * 1024L);
-//            aggregation().storeSample("SizeBeforeCollection", "Heap Size (Before GC)", "bytes", UnitPrefixes.BINARY, ChartType.LINE,
-//                    event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getSizeBeforeCollection() * 1024L);
-//        }
-//        aggregation().recordPauseDuration(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
-//
-//        if (event.getHeap() != null) {
-//            aggregation().addHeapOccupancyAfterGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getOccupancyAfterCollection() * 1024L);
-//            aggregation().addHeapOccupancyBeforeGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getOccupancyBeforeCollection() * 1024L);
-//            aggregation().addHeapSizeAfterGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getSizeAfterCollection() * 1024L);
-//            aggregation().addHeapSizeBeforeGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getHeap().getSizeBeforeCollection() * 1024L);
-//        }
-//
-//        if (event.getPermOrMetaspace() != null) {
-//            aggregation().addHeapOccupancyAfterGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getPermOrMetaspace().getOccupancyAfterCollection() * 1024L);
-//        }
     }
 
     private void processEvent(ZGCCycle event) {
         aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
                 event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
-//        aggregation().recordPauseDuration(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
-//
-//        if (event.getLive() != null) {
-//            aggregation().addHeapOccupancyAfterGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getLive().getReclaimEnd() * 1024L);
-//            aggregation().addHeapOccupancyBeforeGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getLive().getReclaimStart() * 1024L);
-//            aggregation().addHeapSizeAfterGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getAllocated().getReclaimEnd() * 1024L);
-//            aggregation().addHeapSizeBeforeGc(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getAllocated().getReclaimStart() * 1024L);
-//        }
     }
 
     private void processEvent(ShenandoahCycle event) {
-//        aggregation().recordPauseDuration(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
-
-        //  aggregation().addDataPoint(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.get ());
+        aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
+                event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
     }
 }

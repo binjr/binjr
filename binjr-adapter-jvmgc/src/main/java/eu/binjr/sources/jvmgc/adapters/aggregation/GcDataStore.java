@@ -21,6 +21,7 @@ import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.codec.csv.DataSample;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
+import javafx.scene.paint.Color;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -34,8 +35,6 @@ public class GcDataStore extends GcAggregation {
 
     public GcDataStore() {
     }
-
-
 
 
 //    @Override
@@ -108,11 +107,12 @@ public class GcDataStore extends GcAggregation {
                             String unit,
                             UnitPrefixes prefix,
                             ChartType chartType,
+                            Color color,
                             GarbageCollectionTypes gcType,
                             DateTimeStamp timeStamp,
                             double value) {
-        var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(poolName, key, label, unit, prefix, chartType));
-      //  info.encounteredGcTypes().add(gcType);
+        var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(poolName, key, label, unit, prefix, chartType, color));
+        //  info.encounteredGcTypes().add(gcType);
         var ts = timeStamp.hasDateStamp() ? timeStamp.getDateTime() :
                 ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(timeStamp.getTimeStamp() * 1000)), ZoneId.systemDefault());
         info.data().put(ts.toInstant().toEpochMilli(), new Sample(ts, value));

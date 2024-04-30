@@ -21,6 +21,7 @@ import eu.binjr.core.data.workspace.Worksheet;
 import javafx.scene.paint.Color;
 
 import jakarta.xml.bind.annotation.*;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -37,11 +38,11 @@ public abstract class SourceBinding<T> {
         try {
             return MessageDigest.getInstance("SHA-1");
         } catch (NoSuchAlgorithmException e) {
-            logger.fatal("Failed to instantiate SHA-1 message digest");
+            logger.fatal("Failed to instantiate message digest");
             throw new IllegalStateException("Failed to create a new instance of MessageDigest", e);
         }
     });
-
+    public static final String SALT = "I2SI9PZ7MBNN7V213JZWETUQ1FGX3T77";
 
     @XmlAttribute(name = "sourceId")
     protected final UUID adapterId;
@@ -155,7 +156,7 @@ public abstract class SourceBinding<T> {
         return this.color == null ? computeDefaultColor(this.getLabel()) : this.color;
     }
 
-    public Color getAutoColor(String key){
+    public Color getAutoColor(String key) {
         return computeDefaultColor(key);
     }
 
@@ -208,7 +209,7 @@ public abstract class SourceBinding<T> {
 
     private long getHashValue(final String value) {
         long hashVal;
-        messageDigest.get().update(value.getBytes(StandardCharsets.UTF_8));
+        messageDigest.get().update((value + SALT).getBytes(StandardCharsets.UTF_8));
         hashVal = new BigInteger(1, messageDigest.get().digest()).longValue();
         return hashVal;
     }

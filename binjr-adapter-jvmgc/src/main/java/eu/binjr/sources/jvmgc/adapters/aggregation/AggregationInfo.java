@@ -21,6 +21,7 @@ import eu.binjr.core.data.codec.csv.DataSample;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import io.vertx.core.impl.ConcurrentHashSet;
+import javafx.scene.paint.Color;
 
 import java.time.ZonedDateTime;
 import java.util.Set;
@@ -33,15 +34,16 @@ public record AggregationInfo(String category,
                               String unit,
                               UnitPrefixes prefix,
                               ChartType chartType,
-                              //       Set<GarbageCollectionTypes> encounteredGcTypes,
+                              Color color,
                               ConcurrentNavigableMap<Long, Sample> data) {
     public AggregationInfo(String category,
                            String name,
                            String label,
                            String unit,
                            UnitPrefixes prefix,
-                           ChartType chartType) {
-        this(category, name, label, unit, prefix, chartType, new ConcurrentSkipListMap<>());
+                           ChartType chartType,
+                           Color color) {
+        this(category, name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
     }
 
     public AggregationInfo(String category,
@@ -50,7 +52,7 @@ public record AggregationInfo(String category,
                            String unit,
                            UnitPrefixes prefix,
                            ChartType chartType,
-                           //    Set<GarbageCollectionTypes> encounteredGcTypes,
+                           Color color,
                            ConcurrentNavigableMap<Long, Sample> data) {
         this.category = category;
         this.name = name;
@@ -58,7 +60,7 @@ public record AggregationInfo(String category,
         this.unit = unit;
         this.prefix = prefix;
         this.chartType = chartType;
-        //   this.encounteredGcTypes = encounteredGcTypes;
+        this.color = color;
         this.data = data;
     }
 }

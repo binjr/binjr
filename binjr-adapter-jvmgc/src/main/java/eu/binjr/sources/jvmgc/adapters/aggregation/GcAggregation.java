@@ -22,13 +22,14 @@ import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
+import javafx.scene.paint.Color;
 
 
 @Collates(GcAggregator.class)
 public abstract class GcAggregation extends Aggregation {
 
 
-//    public abstract void addHeapSizeBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values);
+    //    public abstract void addHeapSizeBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values);
 //
 //    abstract public void addHeapSizeAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
 //
@@ -37,15 +38,26 @@ public abstract class GcAggregation extends Aggregation {
 //    abstract public void addHeapOccupancyAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
 //
 //    abstract public void recordPauseDuration(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double duration);
+    public void storeSample(String poolName,
+                            String key,
+                            String label,
+                            String unit,
+                            UnitPrefixes prefix,
+                            ChartType chartType,
+                            GarbageCollectionTypes gcType,
+                            DateTimeStamp timeStamp,
+                            double value) {
+        storeSample(poolName, key, label, unit, prefix, chartType, null, gcType, timeStamp, value);
+    }
 
-
-    public abstract void storeSample(                                     String poolName,
+    public abstract void storeSample(String poolName,
                                      String key,
                                      String label,
                                      String unit,
                                      UnitPrefixes prefix,
                                      ChartType chartType,
+                                     Color color,
                                      GarbageCollectionTypes gcType,
                                      DateTimeStamp timeStamp,
-                                     double values);
+                                     double value);
 }
