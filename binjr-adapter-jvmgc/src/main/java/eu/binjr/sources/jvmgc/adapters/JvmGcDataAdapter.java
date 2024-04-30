@@ -119,14 +119,12 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
             this.sortedDataStores= heapStore.get();
 
-
             FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                     new TimeSeriesBinding.Builder()
                             .withLabel(getSourceName())
                             .withPath("/")
                             .withAdapter(this)
                             .build());
-          //  var heap = attachNode(HEAP, HEAP, HEAP, tree);
 
             sortedDataStores.forEach((s, m) -> {
                 var occupAfterGc = attachNode(m.name(), tree.getValue().getLabel(), m.label(),m.unit(),m.prefix(), tree);
@@ -278,20 +276,6 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     private ConcurrentNavigableMap<Long, DataSample> getDataStore(String path) throws DataAdapterException {
         var storeKey = path.split("/")[0];
         return sortedDataStores.get(storeKey).data();
-      //  return sortedDataStores.computeIfAbsent(storeKey, CheckedLambdas.wrap(this::buildSortedDataStore));
     }
-//
-//    private ConcurrentNavigableMap<Long, DataSample> buildSortedDataStore(String key) throws DataAdapterException {
-//        ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
-//        try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
-//            GCLogFile logFile = new SingleGCLogFile(gcLogPath);
-//            GCToolKit gcToolKit = new GCToolKit();
-//            gcToolKit.loadAggregation(new HeapDataStore(dataStore));
-//
-//            JavaVirtualMachine machine = gcToolKit.analyze(logFile);
-//        } catch (IOException e) {
-//            throw new DataAdapterException(e);
-//        }
-//        return dataStore;
-//    }
+
 }
