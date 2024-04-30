@@ -35,6 +35,9 @@ public class GcDataStore extends GcAggregation {
     public GcDataStore() {
     }
 
+
+
+
 //    @Override
 //    public void addHeapSizeBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values) {
 //        this.storeSample(
@@ -97,6 +100,7 @@ public class GcDataStore extends GcAggregation {
 //                duration);
 //    }
 
+
     @Override
     public void storeSample(String poolName,
                             String key,
@@ -106,21 +110,12 @@ public class GcDataStore extends GcAggregation {
                             ChartType chartType,
                             GarbageCollectionTypes gcType,
                             DateTimeStamp timeStamp,
-                            double... values) {
-        DataSample sample;
+                            double value) {
         var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(poolName, key, label, unit, prefix, chartType));
-        info.encounteredGcTypes().add(gcType);
-        if (timeStamp.hasDateStamp()) {
-            sample = new DataSample(timeStamp.getDateTime());
-        } else {
-            sample = new DataSample(ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(timeStamp.getTimeStamp() * 1000)), ZoneId.systemDefault()));
-        }
-        new DataSample(timeStamp.getDateTime());
-        for (var l : values) {
-            sample.getCells().put(gcType.name(), l);
-        }
-
-        info.data().put(sample.getTimeStamp().toInstant().toEpochMilli(), sample);
+      //  info.encounteredGcTypes().add(gcType);
+        var ts = timeStamp.hasDateStamp() ? timeStamp.getDateTime() :
+                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(timeStamp.getTimeStamp() * 1000)), ZoneId.systemDefault());
+        info.data().put(ts.toInstant().toEpochMilli(), new Sample(ts, value));
 
     }
 

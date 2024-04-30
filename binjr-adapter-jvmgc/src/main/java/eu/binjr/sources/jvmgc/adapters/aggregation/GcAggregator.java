@@ -55,7 +55,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
 
     private void processEvent(GenerationalGCPauseEvent event) {
-        aggregation().storeSample("", "pauseTime", "Pause Time", "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
+        aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
                 event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
         if (event.getHeap() != null) {
             processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp());
@@ -82,7 +82,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
 
     private void processEvent(G1GCPauseEvent event) {
-        aggregation().storeSample("", "pauseTime", "Pause Time", "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
+        aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
                 event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
         if (event.getHeap() != null) {
             processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp());
@@ -133,6 +133,8 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     }
 
     private void processEvent(ZGCCycle event) {
+        aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
+                event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
 //        aggregation().recordPauseDuration(event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
 //
 //        if (event.getLive() != null) {

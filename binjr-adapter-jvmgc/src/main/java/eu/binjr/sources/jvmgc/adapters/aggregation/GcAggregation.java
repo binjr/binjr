@@ -47,5 +47,5 @@ public abstract class GcAggregation extends Aggregation {
                                      ChartType chartType,
                                      GarbageCollectionTypes gcType,
                                      DateTimeStamp timeStamp,
-                                     double... values);
+                                     double values);
 }

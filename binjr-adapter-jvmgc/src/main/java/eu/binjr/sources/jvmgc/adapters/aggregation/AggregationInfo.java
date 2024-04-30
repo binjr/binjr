@@ -22,6 +22,7 @@ import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import io.vertx.core.impl.ConcurrentHashSet;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -32,15 +33,15 @@ public record AggregationInfo(String category,
                               String unit,
                               UnitPrefixes prefix,
                               ChartType chartType,
-                              Set<GarbageCollectionTypes> encounteredGcTypes,
-                              ConcurrentNavigableMap<Long, DataSample> data) {
+                              //       Set<GarbageCollectionTypes> encounteredGcTypes,
+                              ConcurrentNavigableMap<Long, Sample> data) {
     public AggregationInfo(String category,
-            String name,
+                           String name,
                            String label,
                            String unit,
                            UnitPrefixes prefix,
                            ChartType chartType) {
-        this(category, name, label, unit, prefix, chartType, new ConcurrentHashSet<>(), new ConcurrentSkipListMap<>());
+        this(category, name, label, unit, prefix, chartType, new ConcurrentSkipListMap<>());
     }
 
     public AggregationInfo(String category,
@@ -49,15 +50,15 @@ public record AggregationInfo(String category,
                            String unit,
                            UnitPrefixes prefix,
                            ChartType chartType,
-                           Set<GarbageCollectionTypes> encounteredGcTypes,
-                           ConcurrentNavigableMap<Long, DataSample> data) {
+                           //    Set<GarbageCollectionTypes> encounteredGcTypes,
+                           ConcurrentNavigableMap<Long, Sample> data) {
         this.category = category;
         this.name = name;
         this.label = label;
         this.unit = unit;
         this.prefix = prefix;
         this.chartType = chartType;
-        this.encounteredGcTypes = encounteredGcTypes;
+        //   this.encounteredGcTypes = encounteredGcTypes;
         this.data = data;
     }
 }

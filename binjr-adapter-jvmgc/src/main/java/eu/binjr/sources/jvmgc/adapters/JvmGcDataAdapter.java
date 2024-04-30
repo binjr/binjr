@@ -35,6 +35,7 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.sources.jvmgc.adapters.aggregation.AggregationInfo;
 import eu.binjr.sources.jvmgc.adapters.aggregation.GcDataStore;
+import eu.binjr.sources.jvmgc.adapters.aggregation.Sample;
 import javafx.animation.ScaleTransition;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -133,16 +134,16 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                     return attachNode(cat, tree.getValue().getLabel(), cat, "", UnitPrefixes.BINARY, ChartType.LINE, tree);
                 });
 
-                var occupAfterGc = attachNode(m.name(), node.getValue().getLabel(), m.label(), m.unit(), m.prefix(), m.chartType(), node);
-                m.encounteredGcTypes().forEach(garbageCollectionType -> {
-                    attachNode(garbageCollectionType.name(),
-                            m.name() + "/" + garbageCollectionType.name(),
-                            garbageCollectionType.getLabel(),
-                            m.unit(),
-                            m.prefix(),
-                            m.chartType(),
-                            occupAfterGc);
-                });
+               attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), node);
+//                m.encounteredGcTypes().forEach(garbageCollectionType -> {
+//                    attachNode(garbageCollectionType.name(),
+//                            m.name() + "/" + garbageCollectionType.name(),
+//                            garbageCollectionType.getLabel(),
+//                            m.unit(),
+//                            m.prefix(),
+//                            m.chartType(),
+//                            occupAfterGc);
+//                });
             });
 
 
@@ -202,7 +203,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
         var store = getDataStore(path);
-        return TimeRange.of(store.get(store.firstKey()).getTimeStamp(), store.get(store.lastKey()).getTimeStamp());
+        return TimeRange.of(store.get(store.firstKey()).timestamp(), store.get(store.lastKey()).timestamp());
     }
 
     @Override
@@ -216,19 +217,20 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         for (TimeSeriesInfo<Double> info : seriesInfo) {
             rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
-        }
+
         Long fromKey = Objects.requireNonNullElse(store.floorKey(begin.toEpochMilli()), begin.toEpochMilli());
         Long toKey = Objects.requireNonNullElse(store.ceilingKey(end.toEpochMilli()), end.toEpochMilli());
-        for (DataSample sample : store.subMap(fromKey, true, toKey, true).values()) {
-            for (String n : sample.getCells().keySet()) {
-                List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
-                if (timeSeriesInfoList != null) {
-                    for (var tsInfo : timeSeriesInfoList) {
-                        series.get(tsInfo).addSample(sample.getTimeStamp(), sample.getCells().get(n));
-                    }
-                }
-            }
+        for (var sample : store.subMap(fromKey, true, toKey, true).values()) {
+            //  for (String n : sample.getCells().keySet()) {
+            //    List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
+           // if (timeSeriesInfoList != null) {
+            //    for (var tsInfo : timeSeriesInfoList) {
+                    series.get(info).addSample(sample.timestamp(), sample.value());
+       //         }
+        //    }
+            // }
         }
+    }
         return series;
     }
 
@@ -281,7 +283,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         super.close();
     }
 
-    private ConcurrentNavigableMap<Long, DataSample> getDataStore(String path) throws DataAdapterException {
+    private ConcurrentNavigableMap<Long, Sample> getDataStore(String path) throws DataAdapterException {
         var storeKey = path.split("/")[0];
         return sortedDataStores.get(storeKey).data();
     }
