@@ -20,9 +20,7 @@ import com.microsoft.gctoolkit.aggregator.Aggregates;
 import com.microsoft.gctoolkit.aggregator.Aggregator;
 import com.microsoft.gctoolkit.aggregator.EventSource;
 import com.microsoft.gctoolkit.event.GCEvent;
-import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.event.MemoryPoolSummary;
-import com.microsoft.gctoolkit.event.RegionSummary;
 import com.microsoft.gctoolkit.event.g1gc.G1GCPauseEvent;
 import com.microsoft.gctoolkit.event.generational.GenerationalGCPauseEvent;
 import com.microsoft.gctoolkit.event.shenandoah.ShenandoahCycle;
@@ -46,90 +44,132 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         register(ShenandoahCycle.class, this::processEvent);
     }
 
-    private void processMemPool(String poolName, MemoryPoolSummary memPool, GarbageCollectionTypes gcType, DateTimeStamp timeStamp, Color color) {
-        if (memPool.getSizeBeforeCollection() >= 0) {
-            aggregation().storeSample("Size (Before GC)", poolName + "SizeBeforeCollection", poolName, "bytes", UnitPrefixes.BINARY, ChartType.LINE, color,
-                    gcType, timeStamp, memPool.getSizeBeforeCollection() * 1024L);
+    private void recordMemPoolStats(String poolName,
+                                    MemoryPoolSummary memPool,
+                                    GCEvent gcEvent,
+                                    Color color) {
+        recordMemPoolStats(poolName,
+                memPool.getSizeBeforeCollection(),
+                memPool.getSizeAfterCollection(),
+                memPool.getOccupancyBeforeCollection(),
+                memPool.getOccupancyAfterCollection(),
+                gcEvent,
+                color);
+    }
+
+    private void recordMemPoolStats(String poolName,
+                                    long sizeBeforeGc,
+                                    long sizeAfterGc,
+                                    long occupancyBeforeGc,
+                                    long occupancyAfterGc,
+                                    GCEvent gcEvent,
+                                    Color color) {
+        if (sizeBeforeGc >= 0) {
+            aggregation().storeSample("Size (Before GC)",
+                    poolName + "SizeBeforeCollection", poolName,
+                    "bytes", UnitPrefixes.BINARY, ChartType.LINE, color,
+                    gcEvent.getGarbageCollectionType(),
+                    gcEvent.getDateTimeStamp(),
+                    sizeBeforeGc * 1024L);
         }
-        if (memPool.getSizeAfterCollection() >= 0) {
-            aggregation().storeSample("Size (After GC)", poolName + "SizeAfterCollection", poolName, "bytes", UnitPrefixes.BINARY, ChartType.LINE, color,
-                    gcType, timeStamp, memPool.getSizeAfterCollection() * 1024L);
+        if (sizeAfterGc >= 0) {
+            aggregation().storeSample("Size (After GC)",
+                    poolName + "SizeAfterCollection", poolName,
+                    "bytes", UnitPrefixes.BINARY, ChartType.LINE, color,
+                    gcEvent.getGarbageCollectionType(),
+                    gcEvent.getDateTimeStamp(),
+                    sizeAfterGc * 1024L);
         }
-        if (memPool.getOccupancyBeforeCollection() >= 0) {
-            aggregation().storeSample("Occupancy (Compounded)", poolName + "OccupancyCompounded", poolName, "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
-                    gcType, timeStamp, memPool.getOccupancyBeforeCollection() * 1024L);
-            aggregation().storeSample("Occupancy (Before GC)", poolName + "OccupancyBeforeCollection", poolName, "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
-                    gcType, timeStamp, memPool.getOccupancyBeforeCollection() * 1024L);
+        if (occupancyBeforeGc >= 0) {
+            aggregation().storeSample("Occupancy (Compounded)",
+                    poolName + "OccupancyCompounded", poolName,
+                    "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
+                    gcEvent.getGarbageCollectionType(),
+                    gcEvent.getDateTimeStamp(),
+                    occupancyBeforeGc * 1024L);
+            aggregation().storeSample("Occupancy (Before GC)",
+                    poolName + "OccupancyBeforeCollection", poolName,
+                    "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
+                    gcEvent.getGarbageCollectionType(),
+                    gcEvent.getDateTimeStamp(),
+                    occupancyBeforeGc * 1024L);
         }
-        if (memPool.getOccupancyAfterCollection() >= 0) {
-            aggregation().storeSample("Occupancy (Compounded)", poolName + "OccupancyCompounded", poolName, "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
-                    gcType, new DateTimeStamp(timeStamp.getDateTime().plus(1, ChronoUnit.MILLIS), timeStamp.toEpochInMillis() + 1), memPool.getOccupancyAfterCollection() * 1024L);
-            aggregation().storeSample("Occupancy (After GC)", poolName + "OccupancyAfterCollection", poolName, "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
-                    gcType, timeStamp, memPool.getOccupancyAfterCollection() * 1024L);
+        if (occupancyAfterGc >= 0) {
+            aggregation().storeSample("Occupancy (Compounded)",
+                    poolName + "OccupancyCompounded", poolName,
+                    "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
+                    gcEvent.getGarbageCollectionType(),
+                    new DateTimeStamp(gcEvent.getDateTimeStamp().getDateTime().plus(1, ChronoUnit.MILLIS),
+                            gcEvent.getDateTimeStamp().toEpochInMillis() + 1),
+                    occupancyAfterGc * 1024L);
+            aggregation().storeSample("Occupancy (After GC)",
+                    poolName + "OccupancyAfterCollection", poolName,
+                    "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
+                    gcEvent.getGarbageCollectionType(),
+                    gcEvent.getDateTimeStamp(),
+                    occupancyAfterGc * 1024L);
         }
 
     }
 
     private void recordGcPauseEvent(GCEvent event) {
         if (event.getDuration() >= 0) {
-            aggregation().storeSample("Pause Time", event.getGarbageCollectionType().name(), event.getGarbageCollectionType().getLabel(), "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
-                    event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getDuration());
+            aggregation().storeSample("Pause Time",
+                    event.getGarbageCollectionType().name(),
+                    event.getGarbageCollectionType().getLabel(),
+                    "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
+                    event.getGarbageCollectionType(),
+                    event.getDateTimeStamp(), event.getDuration());
         }
     }
 
     private void processEvent(GenerationalGCPauseEvent event) {
         recordGcPauseEvent(event);
 //        if (event.getHeap() != null) {
-//            processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp());
+//            recordMemPoolStats("Heap", event.getHeap(), event, Color.DARKKHAKI);
 //        }
         if (event.getPermOrMetaspace() != null) {
-            processMemPool("Metaspace", event.getPermOrMetaspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.CHOCOLATE);
+            recordMemPoolStats("Metaspace", event.getPermOrMetaspace(), event, Color.CHOCOLATE);
         }
         if (event.getTenured() != null) {
-            processMemPool("Tenured", event.getTenured(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.SEAGREEN);
+            recordMemPoolStats("Tenured", event.getTenured(), event, Color.SEAGREEN);
         }
 
         if (event.getYoung() != null) {
-            processMemPool("Young", event.getYoung(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.GOLD);
+            recordMemPoolStats("Young", event.getYoung(), event, Color.GOLD);
         }
 
         if (event.getNonClassspace() != null) {
-            processMemPool("NonClassSpace", event.getNonClassspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.MEDIUMPURPLE);
+            recordMemPoolStats("NonClassSpace", event.getNonClassspace(), event, Color.MEDIUMPURPLE);
         }
 
         if (event.getClassspace() != null) {
-            processMemPool("ClassSpace", event.getClassspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.AQUAMARINE);
+            recordMemPoolStats("ClassSpace", event.getClassspace(), event, Color.AQUAMARINE);
         }
     }
 
 
     private void processEvent(G1GCPauseEvent event) {
         recordGcPauseEvent(event);
-        if (event.getHeap() != null) {
-            processMemPool("Heap", event.getHeap(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.SEAGREEN);
-        }
+//        if (event.getHeap() != null) {
+//            recordMemPoolStats("Heap", event.getHeap(), event, Color.DARKKHAKI);
+//        }
         if (event.getPermOrMetaspace() != null) {
-            processMemPool("Metaspace", event.getPermOrMetaspace(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.CHOCOLATE);
+            recordMemPoolStats("Metaspace", event.getPermOrMetaspace(), event, Color.CHOCOLATE);
         }
         if (event.getTenured() != null) {
-            processMemPool("Tenured", event.getTenured(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.BISQUE);
+            recordMemPoolStats("Tenured", event.getTenured(), event, Color.SEAGREEN);
         }
         if (event.getEden() != null) {
-            processMemPool("Eden", event.getEden(), event.getGarbageCollectionType(), event.getDateTimeStamp(), Color.GOLD);
+            recordMemPoolStats("Eden", event.getEden(), event, Color.GOLD);
         }
         if (event.getSurvivor() != null) {
-            if (event.getSurvivor().getOccupancyBeforeCollection() >= 0) {
-                aggregation().storeSample("Occupancy (Before GC)", "SurvivorOccupancyBeforeCollection", "Survivor", "bytes", UnitPrefixes.BINARY, ChartType.STACKED, Color.DEEPSKYBLUE,
-                        event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getSurvivor().getOccupancyBeforeCollection() * 1024L);
-            }
-            if (event.getSurvivor().getOccupancyAfterCollection() >= 0) {
-                aggregation().storeSample("Occupancy (After GC)", "SurvivorOccupancyAfterCollection", "Survivor", "bytes", UnitPrefixes.BINARY, ChartType.STACKED, Color.DEEPSKYBLUE,
-                        event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getSurvivor().getOccupancyAfterCollection() * 1024L);
-            }
-            if (event.getSurvivor().getSize() >= 0) {
-                aggregation().storeSample("Size (After GC)", "SurvivorSize", "Survivor", "bytes", UnitPrefixes.BINARY, ChartType.LINE, Color.DEEPSKYBLUE,
-                        event.getGarbageCollectionType(), event.getDateTimeStamp(), event.getSurvivor().getSize() * 1024L);
-            }
+            recordMemPoolStats("Survivor",
+                    event.getSurvivor().getSize(),
+                    event.getSurvivor().getSize(),
+                    event.getSurvivor().getOccupancyBeforeCollection(),
+                    event.getSurvivor().getOccupancyAfterCollection(),
+                    event, Color.DEEPSKYBLUE);
         }
     }
 
