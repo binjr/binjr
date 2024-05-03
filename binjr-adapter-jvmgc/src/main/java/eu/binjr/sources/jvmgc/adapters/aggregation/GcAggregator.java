@@ -19,6 +19,7 @@ package eu.binjr.sources.jvmgc.adapters.aggregation;
 import com.microsoft.gctoolkit.aggregator.Aggregates;
 import com.microsoft.gctoolkit.aggregator.Aggregator;
 import com.microsoft.gctoolkit.aggregator.EventSource;
+import com.microsoft.gctoolkit.event.CPUSummary;
 import com.microsoft.gctoolkit.event.GCEvent;
 import com.microsoft.gctoolkit.event.MemoryPoolSummary;
 import com.microsoft.gctoolkit.event.g1gc.G1GCPauseEvent;
@@ -30,7 +31,7 @@ import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 
-import java.time.temporal.ChronoUnit;
+import java.time.Duration;
 
 
 @Aggregates({EventSource.G1GC, EventSource.GENERATIONAL, EventSource.ZGC, EventSource.SHENANDOAH})
@@ -48,13 +49,15 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                                     MemoryPoolSummary memPool,
                                     GCEvent gcEvent,
                                     Color color) {
-        recordMemPoolStats(poolName,
-                memPool.getSizeBeforeCollection(),
-                memPool.getSizeAfterCollection(),
-                memPool.getOccupancyBeforeCollection(),
-                memPool.getOccupancyAfterCollection(),
-                gcEvent,
-                color);
+        if (memPool != null) {
+            recordMemPoolStats(poolName,
+                    memPool.getSizeBeforeCollection(),
+                    memPool.getSizeAfterCollection(),
+                    memPool.getOccupancyBeforeCollection(),
+                    memPool.getOccupancyAfterCollection(),
+                    gcEvent,
+                    color);
+        }
     }
 
     private void recordMemPoolStats(String poolName,
@@ -85,7 +88,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     poolName + "OccupancyCompounded", poolName,
                     "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
-                    gcEvent.getDateTimeStamp(),
+                    shiftDateTimeSamp(gcEvent, -1* gcEvent.getDuration()),
                     occupancyBeforeGc * 1024L);
             aggregation().storeSample("Occupancy (Before GC)",
                     poolName + "OccupancyBeforeCollection", poolName,
@@ -97,19 +100,27 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         if (occupancyAfterGc >= 0) {
             aggregation().storeSample("Occupancy (Compounded)",
                     poolName + "OccupancyCompounded", poolName,
-                    "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
+                    "bytes", UnitPrefixes.BINARY,
+                    ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
-                    new DateTimeStamp(gcEvent.getDateTimeStamp().getDateTime().plus(1, ChronoUnit.MILLIS),
-                            gcEvent.getDateTimeStamp().toEpochInMillis() + 1),
+                    gcEvent.getDateTimeStamp(),
                     occupancyAfterGc * 1024L);
             aggregation().storeSample("Occupancy (After GC)",
                     poolName + "OccupancyAfterCollection", poolName,
-                    "bytes", UnitPrefixes.BINARY, ChartType.STACKED, color,
+                    "bytes", UnitPrefixes.BINARY,
+                    ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
                     gcEvent.getDateTimeStamp(),
                     occupancyAfterGc * 1024L);
         }
+    }
 
+    private DateTimeStamp shiftDateTimeSamp(GCEvent gcEvent, double shift) {
+        if (gcEvent.getDateTimeStamp().getDateTime() == null) {
+            return new DateTimeStamp(gcEvent.getDateTimeStamp().getTimeStamp() + shift);
+        }
+        return new DateTimeStamp(gcEvent.getDateTimeStamp().getDateTime().plus(Duration.ofMillis(Math.round(shift*1000))),
+                gcEvent.getDateTimeStamp().getTimeStamp() + shift);
     }
 
     private void recordGcPauseEvent(GCEvent event) {
@@ -119,50 +130,65 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     event.getGarbageCollectionType().getLabel(),
                     "seconds", UnitPrefixes.METRIC, ChartType.SCATTER,
                     event.getGarbageCollectionType(),
-                    event.getDateTimeStamp(), event.getDuration());
+                    event.getDateTimeStamp(),
+                    event.getDuration());
         }
     }
+
+    private void recordCpuStats(GCEvent event, CPUSummary cpuSummary) {
+        if (cpuSummary != null) {
+
+            aggregation().storeSample("CPU Time",
+                    "CpuSummaryKernel",
+                    "Kernel",
+                    "seconds",
+                    UnitPrefixes.METRIC,
+                    ChartType.STACKED,
+                    Color.RED,
+                    event.getGarbageCollectionType(),
+                    event.getDateTimeStamp(),
+                    cpuSummary.getKernel());
+            aggregation().storeSample("CPU Time",
+                    "CpuSummaryUser",
+                    "User",
+                    "seconds",
+                    UnitPrefixes.METRIC,
+                    ChartType.STACKED,
+                    Color.GREEN,
+                    event.getGarbageCollectionType(),
+                    event.getDateTimeStamp(),
+                    cpuSummary.getUser());
+            aggregation().storeSample("CPU (Wall clock))",
+                    "CpuSummaryWallClock",
+                    "Wall Clock",
+                    "seconds",
+                    UnitPrefixes.METRIC,
+                    ChartType.AREA,
+                    Color.STEELBLUE,
+                    event.getGarbageCollectionType(),
+                    event.getDateTimeStamp(),
+                    cpuSummary.getWallClock());
+        }
+    }
+
 
     private void processEvent(GenerationalGCPauseEvent event) {
         recordGcPauseEvent(event);
-//        if (event.getHeap() != null) {
-//            recordMemPoolStats("Heap", event.getHeap(), event, Color.DARKKHAKI);
-//        }
-        if (event.getPermOrMetaspace() != null) {
-            recordMemPoolStats("Metaspace", event.getPermOrMetaspace(), event, Color.CHOCOLATE);
-        }
-        if (event.getTenured() != null) {
-            recordMemPoolStats("Tenured", event.getTenured(), event, Color.SEAGREEN);
-        }
-
-        if (event.getYoung() != null) {
-            recordMemPoolStats("Young", event.getYoung(), event, Color.GOLD);
-        }
-
-        if (event.getNonClassspace() != null) {
-            recordMemPoolStats("NonClassSpace", event.getNonClassspace(), event, Color.MEDIUMPURPLE);
-        }
-
-        if (event.getClassspace() != null) {
-            recordMemPoolStats("ClassSpace", event.getClassspace(), event, Color.AQUAMARINE);
-        }
+//        recordMemPoolStats("Heap", event.getHeap(), event, Color.DARKKHAKI);
+        recordCpuStats(event, event.getCpuSummary());
+        recordMemPoolStats("Metaspace", event.getPermOrMetaspace(), event, Color.CHOCOLATE);
+        recordMemPoolStats("Tenured", event.getTenured(), event, Color.SEAGREEN);
+        recordMemPoolStats("Young", event.getYoung(), event, Color.GOLD);
+        recordMemPoolStats("NonClassSpace", event.getNonClassspace(), event, Color.MEDIUMPURPLE);
+        recordMemPoolStats("ClassSpace", event.getClassspace(), event, Color.AQUAMARINE);
+        recordCpuStats(event, event.getCpuSummary());
     }
-
 
     private void processEvent(G1GCPauseEvent event) {
         recordGcPauseEvent(event);
-//        if (event.getHeap() != null) {
 //            recordMemPoolStats("Heap", event.getHeap(), event, Color.DARKKHAKI);
-//        }
-        if (event.getPermOrMetaspace() != null) {
-            recordMemPoolStats("Metaspace", event.getPermOrMetaspace(), event, Color.CHOCOLATE);
-        }
-        if (event.getTenured() != null) {
-            recordMemPoolStats("Tenured", event.getTenured(), event, Color.SEAGREEN);
-        }
-        if (event.getEden() != null) {
-            recordMemPoolStats("Eden", event.getEden(), event, Color.GOLD);
-        }
+        recordMemPoolStats("Tenured", event.getTenured(), event, Color.SEAGREEN);
+        recordMemPoolStats("Eden", event.getEden(), event, Color.GOLD);
         if (event.getSurvivor() != null) {
             recordMemPoolStats("Survivor",
                     event.getSurvivor().getSize(),
@@ -171,10 +197,12 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     event.getSurvivor().getOccupancyAfterCollection(),
                     event, Color.DEEPSKYBLUE);
         }
+        recordCpuStats(event, event.getCpuSummary());
     }
 
     private void processEvent(ZGCCycle event) {
         recordGcPauseEvent(event);
+
     }
 
     private void processEvent(ShenandoahCycle event) {
