@@ -24,21 +24,26 @@ import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 
+import java.util.List;
+
 
 @Collates(GcAggregator.class)
 public abstract class GcAggregation extends Aggregation {
 
+    public void storeSample(String category,
+                            String key,
+                            String label,
+                            String unit,
+                            UnitPrefixes prefix,
+                            ChartType chartType,
+                            Color color,
+                            GarbageCollectionTypes gcType,
+                            DateTimeStamp timeStamp,
+                            double value) {
+        storeSample(List.of(category), key, label, unit, prefix, chartType, color, gcType, timeStamp, value);
+    }
 
-    //    public abstract void addHeapSizeBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values);
-//
-//    abstract public void addHeapSizeAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
-//
-//    public abstract void addHeapOccupancyBeforeGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... values);
-//
-//    abstract public void addHeapOccupancyAfterGc(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double... samples);
-//
-//    abstract public void recordPauseDuration(GarbageCollectionTypes gcType, DateTimeStamp timeStamp, double duration);
-    public void storeSample(String poolName,
+    public void storeSample(String category,
                             String key,
                             String label,
                             String unit,
@@ -47,10 +52,22 @@ public abstract class GcAggregation extends Aggregation {
                             GarbageCollectionTypes gcType,
                             DateTimeStamp timeStamp,
                             double value) {
-        storeSample(poolName, key, label, unit, prefix, chartType, null, gcType, timeStamp, value);
+        storeSample(List.of(category), key, label, unit, prefix, chartType, null, gcType, timeStamp, value);
     }
 
-    public abstract void storeSample(String poolName,
+    public void storeSample(List<String> categories,
+                            String key,
+                            String label,
+                            String unit,
+                            UnitPrefixes prefix,
+                            ChartType chartType,
+                            GarbageCollectionTypes gcType,
+                            DateTimeStamp timeStamp,
+                            double value) {
+        storeSample(categories, key, label, unit, prefix, chartType, null, gcType, timeStamp, value);
+    }
+
+    public abstract void storeSample(List<String> categories,
                                      String key,
                                      String label,
                                      String unit,

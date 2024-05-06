@@ -16,19 +16,15 @@
 
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
-import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
-import eu.binjr.core.data.codec.csv.DataSample;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
-import io.vertx.core.impl.ConcurrentHashSet;
 import javafx.scene.paint.Color;
 
-import java.time.ZonedDateTime;
-import java.util.Set;
+import java.util.List;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public record AggregationInfo(String category,
+public record AggregationInfo(List<String> category,
                               String name,
                               String label,
                               String unit,
@@ -43,25 +39,17 @@ public record AggregationInfo(String category,
                            UnitPrefixes prefix,
                            ChartType chartType,
                            Color color) {
-        this(category, name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
+        this(List.of(category), name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
     }
-
-    public AggregationInfo(String category,
+    public AggregationInfo(List<String> categories,
                            String name,
                            String label,
                            String unit,
                            UnitPrefixes prefix,
                            ChartType chartType,
-                           Color color,
-                           ConcurrentNavigableMap<Long, Sample> data) {
-        this.category = category;
-        this.name = name;
-        this.label = label;
-        this.unit = unit;
-        this.prefix = prefix;
-        this.chartType = chartType;
-        this.color = color;
-        this.data = data;
+                           Color color) {
+        this(categories, name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
     }
+
 }
 

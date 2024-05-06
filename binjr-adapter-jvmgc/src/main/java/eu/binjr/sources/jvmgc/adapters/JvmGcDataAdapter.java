@@ -36,7 +36,6 @@ import eu.binjr.core.data.workspace.*;
 import eu.binjr.sources.jvmgc.adapters.aggregation.AggregationInfo;
 import eu.binjr.sources.jvmgc.adapters.aggregation.GcDataStore;
 import eu.binjr.sources.jvmgc.adapters.aggregation.Sample;
-import javafx.animation.ScaleTransition;
 import javafx.scene.paint.Color;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -50,6 +49,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.stream.Collectors;
 
 /**
  * A {@link DataAdapter} implementation used to feed {@link XYChartsWorksheet} instances
@@ -62,8 +62,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     public static final String GC_FILE_PATH = "gcFilePath";
     public static final String ZONE_ID = "zoneId";
     public static final String ENCODING = "encoding";
-    //    public static final String HEAP = "Heap";
-//    public static final String OCCUPANCY_AFTER_COLLECTION = "OccupancyAfterCollection";
+
     private Path gcLogPath;
     private ZoneId zoneId;
     private String encoding;
@@ -130,23 +129,13 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
             var poolDict = new HashMap<String, FilterableTreeItem<SourceBinding>>();
 
             sortedDataStores.forEach((s, m) -> {
-                var node = poolDict.computeIfAbsent(m.category(), cat -> {
-                    if (cat.isEmpty()) {
-                        return tree;
-                    }
-                    return attachNode(cat, tree.getValue().getLabel(), cat, m.unit(), m.prefix(), m.chartType(), m.color(), tree);
-                });
-
+                FilterableTreeItem<SourceBinding> node = tree;
+                for (var category : m.category()) {
+                    var nodecopy = node;
+                    node = poolDict.computeIfAbsent( category, k -> attachNode(k, nodecopy.getValue().getLabel(), k, m.unit(), m.prefix(), m.chartType(), m.color(), nodecopy));
+                }
                 attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), m.color(), node);
-//                m.encounteredGcTypes().forEach(garbageCollectionType -> {
-//                    attachNode(garbageCollectionType.name(),
-//                            m.name() + "/" + garbageCollectionType.name(),
-//                            garbageCollectionType.getLabel(),
-//                            m.unit(),
-//                            m.prefix(),
-//                            m.chartType(),
-//                            occupAfterGc);
-//                });
+
             });
 
 
