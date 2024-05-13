@@ -20,19 +20,22 @@ import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class GcDataStore extends GcAggregation {
     private final Map<String, AggregationInfo> aggregations = new LinkedHashMap<>();
+    private final ZonedDateTime timeStampAnchor;
 
     public GcDataStore() {
+        timeStampAnchor = UserPreferences.getInstance().defaultDateTimeAnchor.get().resolve().atZone(ZoneId.systemDefault());
     }
 
     @Override
@@ -48,7 +51,7 @@ public class GcDataStore extends GcAggregation {
                             double value) {
         var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(categories, key, label, unit, prefix, chartType, color));
         var ts = timeStamp.hasDateStamp() ? timeStamp.getDateTime() :
-                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(timeStamp.getTimeStamp() * 1000)), ZoneId.systemDefault());
+                timeStampAnchor.plus(Math.round(timeStamp.getTimeStamp() * 1000), ChronoUnit.MILLIS);
         info.data().put(ts.toInstant().toEpochMilli(), new Sample(ts, value));
 
     }
