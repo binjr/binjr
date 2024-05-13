@@ -92,6 +92,8 @@ stages:
               GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
               OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
               OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
+              GH_PKG_TOKEN: $(gh.pkg.token)
+              GH_PKG_USERNAME: $(gh.pkg.username)
             inputs:
               gradleWrapperFile: 'gradlew'
               javaHomeOption: 'JDKVersion'
@@ -239,6 +241,8 @@ stages:
               GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
               OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
               OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
+              GH_PKG_TOKEN: $(gh.pkg.token)
+              GH_PKG_USERNAME: $(gh.pkg.username)
             inputs:
               gradleWrapperFile: 'gradlew'
               javaHomeOption: 'JDKVersion'
