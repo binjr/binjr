@@ -87,6 +87,10 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 Copyright (c) 2010-2014 by tyPoland Lukasz Dziedzic (team@latofonts.com) with Reserved Font Name "Lato"  
 This Font Software is licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL)  
 
+**Microsoft GCToolkit**  
+Copyright (c) Microsoft Corporation.  
+Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
 **RichTextFX**  
 Copyright (c) 2013-2017, Tomas Mikula and contributors  
 Licensed under the [The 2-Clause BSD License](https://opensource.org/licenses/BSD-2-Clause)
