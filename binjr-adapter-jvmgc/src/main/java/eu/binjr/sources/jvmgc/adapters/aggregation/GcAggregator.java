@@ -58,6 +58,23 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     public static final String PAUSE_TIME = "Pause Time";
     public static final String CPU = "CPU";
     public static final String REFERENCES = "References";
+    public static final String ALLOCATION_RATE = "AllocationRate";
+    public static final String HEAP = "Heap";
+    public static final String OCCUPANCY_BEFORE_COLLECTION = "OccupancyBeforeCollection";
+    public static final String OCCUPANCY_AFTER_COLLECTION = "OccupancyAfterCollection";
+    public static final String OCCUPANCY_MERGED = "OccupancyMerged";
+    public static final String SIZE_AFTER_COLLECTION = "SizeAfterCollection";
+    public static final String SIZE_BEFORE_COLLECTION = "SizeBeforeCollection";
+    public static final String CPU_SUMMARY_KERNEL = "CpuSummaryKernel";
+    public static final String CPU_SUMMARY_USER = "CpuSummaryUser";
+    public static final String KERNEL = "Kernel";
+    public static final String USER = "User";
+    public static final String CPU_SUMMARY_WALL_CLOCK = "CpuSummaryWallClock";
+    public static final String CPU_TIME = "CPU Time";
+    public static final String CPU_WALL_CLOCK = "CPU (Wall Clock)";
+    public static final String REF_PAUSE_TIME = "RefPauseTime";
+    public static final String REF_COUNT = "RefCount";
+    public static final String UNIT_BYTES_PER_SECOND = "bytes/s";
 
     public GcAggregator(GcAggregation results) {
         super(results);
@@ -87,13 +104,13 @@ public class GcAggregator extends Aggregator<GcAggregation> {
             var occupancyBeforeGc = memPool.getOccupancyBeforeCollection();
             if (occupancyBeforeGc >= 0) {
                 aggregation().storeSample(List.of(OCCUPANCY, "Total Heap"),
-                        "HeapOccupancyMerged", "Heap (Merged)",
+                        HEAP + OCCUPANCY_MERGED, "Heap (Merged)",
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
                         gcEvent.getGarbageCollectionType(),
                         shiftDateTimeSamp(gcEvent, -1 * gcEvent.getDuration()),
                         occupancyBeforeGc * 1024L);
                 aggregation().storeSample(List.of(OCCUPANCY, "Total Heap"),
-                        "HeapOccupancyBeforeCollection", "Heap (Before GC)",
+                        HEAP + OCCUPANCY_BEFORE_COLLECTION, "Heap (Before GC)",
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.SEAGREEN,
                         gcEvent.getGarbageCollectionType(),
                         gcEvent.getDateTimeStamp(),
@@ -102,14 +119,14 @@ public class GcAggregator extends Aggregator<GcAggregation> {
             var occupancyAfterGc = memPool.getOccupancyAfterCollection();
             if (occupancyAfterGc >= 0) {
                 aggregation().storeSample(List.of(OCCUPANCY, "Total Heap"),
-                        "HeapOccupancyAfterCollection", "Heap (After GC)",
+                        HEAP + OCCUPANCY_AFTER_COLLECTION, "Heap (After GC)",
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.TOMATO,
                         gcEvent.getGarbageCollectionType(),
                         gcEvent.getDateTimeStamp(),
                         occupancyAfterGc * 1024L);
 
                 aggregation().storeSample(List.of(OCCUPANCY, "Total Heap"),
-                        "HeapOccupancyMerged", "Heap (Merged)",
+                        HEAP + OCCUPANCY_MERGED, "Heap (Merged)",
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
                         gcEvent.getGarbageCollectionType(),
                         gcEvent.getDateTimeStamp(),
@@ -128,7 +145,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                                     Color color) {
         if (sizeBeforeGc >= 0) {
             aggregation().storeSample(List.of(SIZE, "Size (Before GC)"),
-                    poolName + "SizeBeforeCollection", poolName,
+                    poolName + SIZE_BEFORE_COLLECTION, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, color,
                     gcEvent.getGarbageCollectionType(),
                     gcEvent.getDateTimeStamp(),
@@ -136,7 +153,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         }
         if (sizeAfterGc >= 0) {
             aggregation().storeSample(List.of(SIZE, "Size (After GC)"),
-                    poolName + "SizeAfterCollection", poolName,
+                    poolName + SIZE_AFTER_COLLECTION, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, color,
                     gcEvent.getGarbageCollectionType(),
                     gcEvent.getDateTimeStamp(),
@@ -144,13 +161,13 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         }
         if (occupancyBeforeGc >= 0) {
             aggregation().storeSample(List.of(OCCUPANCY, "Detailed (Merged)"),
-                    poolName + "OccupancyCompounded", poolName,
+                    poolName + OCCUPANCY_MERGED, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
                     shiftDateTimeSamp(gcEvent, -1 * gcEvent.getDuration()),
                     occupancyBeforeGc * 1024L);
             aggregation().storeSample(List.of(OCCUPANCY, "Detailed (Before GC)"),
-                    poolName + "OccupancyBeforeCollection", poolName,
+                    poolName + OCCUPANCY_BEFORE_COLLECTION, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
                     gcEvent.getDateTimeStamp(),
@@ -158,14 +175,14 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         }
         if (occupancyAfterGc >= 0) {
             aggregation().storeSample(List.of(OCCUPANCY, "Detailed (Merged)"),
-                    poolName + "OccupancyCompounded", poolName,
+                    poolName + OCCUPANCY_MERGED, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY,
                     ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
                     gcEvent.getDateTimeStamp(),
                     occupancyAfterGc * 1024L);
             aggregation().storeSample(List.of(OCCUPANCY, "Detailed (After GC)"),
-                    poolName + "OccupancyAfterCollection", poolName,
+                    poolName + OCCUPANCY_AFTER_COLLECTION, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY,
                     ChartType.STACKED, color,
                     gcEvent.getGarbageCollectionType(),
@@ -196,9 +213,9 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
     private void recordCpuStats(GCEvent event, CPUSummary cpuSummary) {
         if (cpuSummary != null) {
-            aggregation().storeSample(List.of(CPU, "CPU Time"),
-                    "CpuSummaryKernel",
-                    "Kernel",
+            aggregation().storeSample(List.of(CPU, CPU_TIME),
+                    CPU_SUMMARY_KERNEL,
+                    KERNEL,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
                     ChartType.STACKED,
@@ -206,9 +223,9 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     event.getGarbageCollectionType(),
                     event.getDateTimeStamp(),
                     cpuSummary.getKernel());
-            aggregation().storeSample(List.of(CPU, "CPU Time"),
-                    "CpuSummaryUser",
-                    "User",
+            aggregation().storeSample(List.of(CPU, CPU_TIME),
+                    CPU_SUMMARY_USER,
+                    USER,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
                     ChartType.STACKED,
@@ -216,9 +233,9 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     event.getGarbageCollectionType(),
                     event.getDateTimeStamp(),
                     cpuSummary.getUser());
-            aggregation().storeSample(List.of(CPU, "CPU (Wall clock)"),
-                    "CpuSummaryWallClock",
-                    "CPU (Wall Clock)",
+            aggregation().storeSample(List.of(CPU, CPU_WALL_CLOCK),
+                    CPU_SUMMARY_WALL_CLOCK,
+                    CPU_WALL_CLOCK,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
                     ChartType.AREA,
@@ -232,7 +249,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private void addRefCount(GCEvent event, String refType, Color color, long refCount) {
         if (refCount >= 0) {
             aggregation().storeSample(List.of(REFERENCES, "References (Count)"),
-                    refType.replace(" ", "") + "RefCount",
+                    refType.replace(" ", "") + REF_COUNT,
                     refType,
                     "",
                     UnitPrefixes.METRIC,
@@ -247,7 +264,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private void addRefPauseTime(GCEvent event, String refType, Color color, double refPauseTime) {
         if (refPauseTime >= 0) {
             aggregation().storeSample(List.of(REFERENCES, "References (Pause Time)"),
-                    refType.replace(" ", "") + "RefPauseTime",
+                    refType.replace(" ", "") + REF_PAUSE_TIME,
                     refType,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
@@ -261,16 +278,16 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
     private void recordReferenceStats(GCEvent event, ReferenceGCSummary referenceGCSummary) {
         if (referenceGCSummary != null) {
-            addRefCount(event, REF_JNI_WEAK,Color.CHARTREUSE, referenceGCSummary.getJniWeakReferenceCount());
-            addRefPauseTime(event, REF_JNI_WEAK,Color.CHARTREUSE, referenceGCSummary.getJniWeakReferencePauseTime());
-            addRefCount(event, REF_PHANTOM,Color.TOMATO, referenceGCSummary.getPhantomReferenceCount());
-            addRefPauseTime(event, REF_PHANTOM,Color.TOMATO, referenceGCSummary.getPhantomReferencePauseTime());
-            addRefCount(event, REF_SOFT,Color.SEAGREEN, referenceGCSummary.getSoftReferenceCount());
-            addRefPauseTime(event, REF_SOFT,Color.SEAGREEN, referenceGCSummary.getSoftReferencePauseTime());
-            addRefCount(event, REF_WEAK,Color.DEEPPINK, referenceGCSummary.getWeakReferenceCount());
-            addRefPauseTime(event, REF_WEAK,Color.DEEPPINK, referenceGCSummary.getWeakReferencePauseTime());
-            addRefCount(event, REF_FINAL,Color.MEDIUMPURPLE, referenceGCSummary.getFinalReferenceCount());
-            addRefPauseTime(event, REF_FINAL,Color.MEDIUMPURPLE, referenceGCSummary.getFinalReferencePauseTime());
+            addRefCount(event, REF_JNI_WEAK, Color.CHARTREUSE, referenceGCSummary.getJniWeakReferenceCount());
+            addRefPauseTime(event, REF_JNI_WEAK, Color.CHARTREUSE, referenceGCSummary.getJniWeakReferencePauseTime());
+            addRefCount(event, REF_PHANTOM, Color.TOMATO, referenceGCSummary.getPhantomReferenceCount());
+            addRefPauseTime(event, REF_PHANTOM, Color.TOMATO, referenceGCSummary.getPhantomReferencePauseTime());
+            addRefCount(event, REF_SOFT, Color.SEAGREEN, referenceGCSummary.getSoftReferenceCount());
+            addRefPauseTime(event, REF_SOFT, Color.SEAGREEN, referenceGCSummary.getSoftReferencePauseTime());
+            addRefCount(event, REF_WEAK, Color.DEEPPINK, referenceGCSummary.getWeakReferenceCount());
+            addRefPauseTime(event, REF_WEAK, Color.DEEPPINK, referenceGCSummary.getWeakReferencePauseTime());
+            addRefCount(event, REF_FINAL, Color.MEDIUMPURPLE, referenceGCSummary.getFinalReferenceCount());
+            addRefPauseTime(event, REF_FINAL, Color.MEDIUMPURPLE, referenceGCSummary.getFinalReferencePauseTime());
         }
     }
 

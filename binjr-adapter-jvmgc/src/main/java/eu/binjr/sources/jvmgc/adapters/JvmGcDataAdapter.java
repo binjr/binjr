@@ -17,9 +17,13 @@
 package eu.binjr.sources.jvmgc.adapters;
 
 import com.microsoft.gctoolkit.GCToolKit;
+import com.microsoft.gctoolkit.event.jvm.JVMEvent;
 import com.microsoft.gctoolkit.io.GCLogFile;
 import com.microsoft.gctoolkit.io.SingleGCLogFile;
 import com.microsoft.gctoolkit.jvm.JavaVirtualMachine;
+import com.microsoft.gctoolkit.message.ChannelName;
+import com.microsoft.gctoolkit.message.JVMEventChannel;
+import com.microsoft.gctoolkit.message.JVMEventChannelListener;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -34,6 +38,7 @@ import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.sources.jvmgc.adapters.aggregation.AggregationInfo;
+import eu.binjr.sources.jvmgc.adapters.aggregation.GcAggregator;
 import eu.binjr.sources.jvmgc.adapters.aggregation.GcDataStore;
 import eu.binjr.sources.jvmgc.adapters.aggregation.Sample;
 import javafx.scene.paint.Color;
@@ -112,12 +117,14 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
             GCLogFile logFile = new SingleGCLogFile(gcLogPath);
             GCToolKit gcToolKit = new GCToolKit();
-            var heapStore = new GcDataStore();
-            gcToolKit.loadAggregation(heapStore);
+            var gcDataStore = new GcDataStore();
+            gcToolKit.loadAggregation(gcDataStore);
 
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);
 
-            this.sortedDataStores = heapStore.get();
+            gcDataStore.computeAllocationRate();
+
+            this.sortedDataStores = gcDataStore.get();
 
             FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                     new TimeSeriesBinding.Builder()
@@ -211,18 +218,10 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         for (TimeSeriesInfo<Double> info : seriesInfo) {
             rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
-
             Long fromKey = Objects.requireNonNullElse(store.floorKey(begin.toEpochMilli()), begin.toEpochMilli());
             Long toKey = Objects.requireNonNullElse(store.ceilingKey(end.toEpochMilli()), end.toEpochMilli());
             for (var sample : store.subMap(fromKey, true, toKey, true).values()) {
-                //  for (String n : sample.getCells().keySet()) {
-                //    List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
-                // if (timeSeriesInfoList != null) {
-                //    for (var tsInfo : timeSeriesInfoList) {
                 series.get(info).addSample(sample.timestamp(), sample.value());
-                //         }
-                //    }
-                // }
             }
         }
         return series;

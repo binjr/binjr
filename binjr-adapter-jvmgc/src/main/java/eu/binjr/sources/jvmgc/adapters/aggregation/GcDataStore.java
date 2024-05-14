@@ -75,4 +75,48 @@ public class GcDataStore extends GcAggregation {
         return "Collected " + aggregations.size() + " different collection types";
     }
 
+    public void computeAllocationRate(){
+        computeAllocationRate(GcAggregator.HEAP, Color.ORANGERED);
+        computeAllocationRate(GcAggregator.TENURED, Color.SEAGREEN);
+        computeAllocationRate(GcAggregator.METASPACE, Color.CHOCOLATE);
+        computeAllocationRate(GcAggregator.SURVIVOR, Color.STEELBLUE);
+
+        computeAllocationRate(GcAggregator.EDEN, Color.GOLD);
+        computeAllocationRate(GcAggregator.YOUNG, Color.GOLD);
+    }
+
+    private void computeAllocationRate(String poolName, Color color) {
+        var beforeGc = this.aggregations.get(poolName + GcAggregator.OCCUPANCY_BEFORE_COLLECTION);
+        var afterGc = this.aggregations.get(poolName + GcAggregator.OCCUPANCY_AFTER_COLLECTION);
+        if (beforeGc == null || afterGc == null){
+            return;
+        }
+        if (beforeGc.data().size() != afterGc.data().size()) {
+            throw new IllegalStateException("After collection and Before collection series do no not match for memory pool " + poolName);
+        }
+        var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ALLOCATION_RATE,
+                a -> new AggregationInfo(List.of("Allocation Rate"),
+                        poolName + GcAggregator.ALLOCATION_RATE,
+                        poolName,
+                        GcAggregator.UNIT_BYTES_PER_SECOND,
+                        UnitPrefixes.BINARY,
+                        ChartType.LINE,
+                        color));
+        var prevIterator =  afterGc.data().entrySet().iterator();
+        boolean firstSkipped = false;
+        for (var current : beforeGc.data().entrySet()) {
+            if (firstSkipped) {
+                if (prevIterator.hasNext()) {
+                    var previous = prevIterator.next();
+                    var allocatedBytes = current.getValue().value() - previous.getValue().value();
+                    double secondsSinceLastGc = (current.getKey() - previous.getKey()) / 1000d;
+                    allocRateData.data().put(current.getKey(),
+                            new Sample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));
+                }
+            }
+            firstSkipped = true;
+        }
+
+    }
+
 }
