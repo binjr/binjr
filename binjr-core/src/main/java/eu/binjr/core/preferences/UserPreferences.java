@@ -139,6 +139,17 @@ public class UserPreferences extends ObservablePreferenceFactory {
      */
     public final ObservablePreference<Number> defaultOpacityStackedAreaCharts = doublePreference("defaultOpacityStackedAreaCharts", 0.70d);
 
+
+    /**
+     * The default stroke width value for line and area charts.
+     */
+    public final ObservablePreference<Number> defaultStrokeWidthLineCharts = doublePreference("defaultStrokeWidthLineCharts", 1.0d);
+
+    /**
+     * The default stroke width value for scatter point charts.
+     */
+    public final ObservablePreference<Number> defaultStrokeWidthScatterCharts = doublePreference("defaultStrokeWidthScatterCharts", 1.5d);
+
     /**
      * The amount of time notification should over before being automatically dismissed.
      */
@@ -492,6 +503,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
         return defineChartType(chartType) == ChartType.STACKED ?
                 defaultOpacityStackedAreaCharts.get().doubleValue() :
                 defaultOpacityAreaCharts.get().doubleValue();
+    }
+
+    public double getDefaultChartStrokeWidth(ChartType chartType) {
+        return defineChartType(chartType) == ChartType.SCATTER ?
+                defaultStrokeWidthScatterCharts.get().doubleValue() :
+                defaultStrokeWidthLineCharts.get().doubleValue();
     }
 
 

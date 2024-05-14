@@ -142,6 +142,14 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private Label stackedAreaChartsOpacityText;
     @FXML
+    private Slider lineStrokeWidthSlider;
+    @FXML
+    private Label lineStrokeWidthSliderText;
+    @FXML
+    private Slider pointStrokeWidthSlider;
+    @FXML
+    private Label pointStrokeWidthSliderText;
+    @FXML
     private ChoiceBox<BuiltInChartColorPalettes> logsPaletteChoiceBox;
     @FXML
     private Slider minChartHeightSlider;
@@ -199,6 +207,19 @@ public class PreferenceDialogController implements Initializable {
                 .bindBidirectional(userPrefs.defaultOpacityStackedAreaCharts.property());
         stackedAreaChartsOpacityText.textProperty()
                 .bind(Bindings.format("%.0f%%", stackedAreaChartOpacitySlider.valueProperty().multiply(100)));
+
+        lineStrokeWidthSlider.valueProperty()
+                .bindBidirectional(userPrefs.defaultStrokeWidthLineCharts.property());
+        lineStrokeWidthSliderText.textProperty()
+                .bind(Bindings.format("%.1f", lineStrokeWidthSlider.valueProperty()));
+
+
+        pointStrokeWidthSlider.valueProperty()
+                .bindBidirectional(userPrefs.defaultStrokeWidthScatterCharts.property());
+        pointStrokeWidthSliderText.textProperty()
+                .bind(Bindings.format("%.1f", pointStrokeWidthSlider.valueProperty()));
+
+
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);

@@ -153,6 +153,21 @@
                                     <Label fx:id="stackedAreaChartsOpacityText" text="100%"/>
                                 </HBox>
                             </VBox>
+                            <LabelWithInlineHelp text="Default line stroke width" inlineHelp="The default stroke width for line and area charts."/>
+                            <VBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Slider fx:id="lineStrokeWidthSlider" blockIncrement="0.1" min="0.1" max="20.0"/>
+                                    <Label fx:id="lineStrokeWidthSliderText" text="1.0"/>
+                                </HBox>
+                            </VBox>
+                            <LabelWithInlineHelp text="Default point stroke width"
+                                                 inlineHelp="The default stroke width for scatter points charts."/>
+                            <VBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Slider fx:id="pointStrokeWidthSlider" blockIncrement="0.1" min="0.1" max="20.0"/>
+                                    <Label fx:id="pointStrokeWidthSliderText" text="1.5"/>
+                                </HBox>
+                            </VBox>
                             <LabelWithInlineHelp text="Enable sample reduction"
                                                  inlineHelp="Check this option to enable sample reduction.&#xD;Sample reduction limits the number of samples to plot to improve chart rendering performances while attempting to keep a good approximation of the original data."/>
                             <VBox fillWidth="false">

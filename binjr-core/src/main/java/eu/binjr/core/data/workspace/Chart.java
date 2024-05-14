@@ -110,7 +110,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 prefix,
                 UserPreferences.getInstance().getDefaultChartOpacity(chartType),
                 UserPreferences.getInstance().getDefaultChartOutlineVisibility(chartType),
-                1.0,
+                UserPreferences.getInstance().getDefaultChartStrokeWidth(chartType),
                 true,
                 UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
                 0.0,
