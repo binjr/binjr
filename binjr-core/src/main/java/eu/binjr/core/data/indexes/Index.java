@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2023 Frederic Thevenet
+ *    Copyright 2022-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -669,7 +669,7 @@ public class Index implements Indexable {
         for (int i = 0; i < nbBuckets; i++) {
             long bucket_start = Math.round(start + i * intervalLength);
             long bucket_end = Math.round((start + i * intervalLength) + intervalLength);
-            ranges[i] = new LongRange(String.format("%d;%d", bucket_start, bucket_end), bucket_start, false, bucket_end, true);
+            ranges[i] = new LongRange(String.valueOf(numBuckets * 10 + i), bucket_start, false, bucket_end, true);
         }
         return ranges;
     }

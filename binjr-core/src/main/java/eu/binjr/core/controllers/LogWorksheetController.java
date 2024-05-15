@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -1385,7 +1384,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         worksheet.indexingStatusProperty());
             }
         }
-        if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
+        if (filter.getTimeRange().getBeginning().equals(LogQueryParameters.UNDEFINED_DATE_TIME) &&
                 filter.getTimeRange().getDuration() == java.time.Duration.ZERO) {
             var initialRange = worksheet.getInitialTimeRange();
             worksheet.setQueryParameters(new LogQueryParameters.Builder(filter).setTimeRange(initialRange).build());

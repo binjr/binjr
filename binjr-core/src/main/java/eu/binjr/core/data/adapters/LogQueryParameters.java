@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,8 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -32,20 +33,21 @@ import java.util.Set;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class LogQueryParameters {
+    public static final ZonedDateTime UNDEFINED_DATE_TIME = ZonedDateTime.of(
+            LocalDate.of(0, 1, 1),
+            LocalTime.MIDNIGHT,
+            ZoneId.of("UTC"));
     private String filterQuery;
-    private Set<String> severities;
+    private final Set<String> severities;
     private int page;
     private TimeRange timeRange;
-
 
     public static LogQueryParameters empty() {
         return new LogQueryParameters();
     }
 
     private LogQueryParameters() {
-        this(TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
-                        ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())),
-                "", new HashSet<>(), 0);
+        this(TimeRange.of(UNDEFINED_DATE_TIME, UNDEFINED_DATE_TIME), "", new HashSet<>(), 0);
     }
 
     private LogQueryParameters(TimeRange timeRange, String filterQuery, Set<String> severities, int page) {
@@ -114,8 +116,7 @@ public class LogQueryParameters {
         private TimeRange timeRange;
 
         public Builder() {
-            this.timeRange = TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
-                    ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
+            this.timeRange = TimeRange.of(UNDEFINED_DATE_TIME, UNDEFINED_DATE_TIME);
             this.filterQuery = "";
             this.page = 0;
             this.severities = new HashSet<>();
