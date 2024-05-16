@@ -87,6 +87,8 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     public static final String CAT_HEAP_MERGED = "Heap (Merged)";
     public static final String CAT_HEAP_AFTER_GC = "Heap (After GC)";
     public static final String CAT_HEAP_BEFORE_GC = "Heap (Before GC)";
+    public static final String ID_ALLOCATION_SIZE = "AllocationSize";
+    public static final String CAT_ALLOCATION_SIZE = "Allocation Size";
 
     public GcAggregator(GcAggregation results) {
         super(results);

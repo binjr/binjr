@@ -77,17 +77,17 @@ public class GcLogDataStore extends GcAggregation {
         return "Collected " + aggregations.size() + " different collection types";
     }
 
-    public void computeAllocationRate(){
-        computeAllocationRate(GcAggregator.POOL_HEAP, Color.ORANGERED);
-        computeAllocationRate(GcAggregator.POOL_TENURED, Color.SEAGREEN);
-        computeAllocationRate(GcAggregator.POOL_METASPACE, Color.CHOCOLATE);
-        computeAllocationRate(GcAggregator.POOL_SURVIVOR, Color.STEELBLUE);
+    public void computeAllocationStats(){
+        computeAllocationStats(GcAggregator.POOL_HEAP, Color.ORANGERED);
+        computeAllocationStats(GcAggregator.POOL_TENURED, Color.SEAGREEN);
+        computeAllocationStats(GcAggregator.POOL_METASPACE, Color.CHOCOLATE);
+        computeAllocationStats(GcAggregator.POOL_SURVIVOR, Color.STEELBLUE);
 
-        computeAllocationRate(GcAggregator.POOL_EDEN, Color.GOLD);
-        computeAllocationRate(GcAggregator.POOL_YOUNG, Color.GOLD);
+        computeAllocationStats(GcAggregator.POOL_EDEN, Color.GOLD);
+        computeAllocationStats(GcAggregator.POOL_YOUNG, Color.GOLD);
     }
 
-    private void computeAllocationRate(String poolName, Color color) {
+    private void computeAllocationStats(String poolName, Color color) {
         var beforeGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_BEFORE_COLLECTION);
         var afterGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_AFTER_COLLECTION);
         if (beforeGc == null || afterGc == null){
@@ -96,14 +96,7 @@ public class GcLogDataStore extends GcAggregation {
         if (beforeGc.data().size() != afterGc.data().size()) {
             throw new IllegalStateException("After collection and Before collection series do no not match for memory pool " + poolName);
         }
-        var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_RATE,
-                a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_RATE),
-                        poolName + GcAggregator.ID_ALLOCATION_RATE,
-                        poolName,
-                        GcAggregator.UNIT_BYTES_PER_SECOND,
-                        UnitPrefixes.BINARY,
-                        ChartType.LINE,
-                        color));
+
         var prevIterator =  afterGc.data().entrySet().iterator();
         boolean firstSkipped = false;
         for (var current : beforeGc.data().entrySet()) {
@@ -112,13 +105,31 @@ public class GcLogDataStore extends GcAggregation {
                     var previous = prevIterator.next();
                     var allocatedBytes = current.getValue().value() - previous.getValue().value();
                     double secondsSinceLastGc = (current.getKey() - previous.getKey()) / 1000d;
+                    var allocSizeData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_SIZE,
+                            a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_SIZE),
+                                    poolName + GcAggregator.ID_ALLOCATION_SIZE,
+                                    poolName,
+                                    GcAggregator.UNIT_BYTES,
+                                    UnitPrefixes.BINARY,
+                                    ChartType.LINE,
+                                    color));
+                    allocSizeData.data().put(current.getKey(),
+                            new TsSample(current.getValue().timestamp(), allocatedBytes));
+                    var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_RATE,
+                            a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_RATE),
+                                    poolName + GcAggregator.ID_ALLOCATION_RATE,
+                                    poolName,
+                                    GcAggregator.UNIT_BYTES_PER_SECOND,
+                                    UnitPrefixes.BINARY,
+                                    ChartType.LINE,
+                                    color));
                     allocRateData.data().put(current.getKey(),
                             new TsSample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));
+
                 }
             }
             firstSkipped = true;
         }
-
     }
 
     public static record TsSample(ZonedDateTime timestamp, double value){

@@ -114,7 +114,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);
 
-            gcDataStore.computeAllocationRate();
+            gcDataStore.computeAllocationStats();
 
             this.sortedDataStores = gcDataStore.get();
 
