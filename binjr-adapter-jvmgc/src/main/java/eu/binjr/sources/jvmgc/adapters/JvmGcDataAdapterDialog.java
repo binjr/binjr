@@ -16,25 +16,18 @@
 
 package eu.binjr.sources.jvmgc.adapters;
 
-import com.google.gson.Gson;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.sources.logs.adapters.LogsDataAdapter;
-import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,9 +42,6 @@ import java.util.List;
  */
 public class JvmGcDataAdapterDialog extends DataAdapterDialog<Path> {
     private static final Logger logger = Logger.create(JvmGcDataAdapterDialog.class);
-    // private final TextField extensionFiltersTextField;
-
-    private static final Gson gson = new Gson();
 
     /**
      * Initializes a new instance of the {@link JvmGcDataAdapterDialog} class.
@@ -63,8 +53,6 @@ public class JvmGcDataAdapterDialog extends DataAdapterDialog<Path> {
         super(owner, Mode.PATH, "mostRecentJvmGcFiles", false);
         setDialogHeaderText("Add a Hotspot GC log file");
     }
-
-
 
     @Override
     protected File displayFileChooser(Node owner) {

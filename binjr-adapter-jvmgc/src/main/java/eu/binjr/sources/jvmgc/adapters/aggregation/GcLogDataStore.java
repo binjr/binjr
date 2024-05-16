@@ -29,12 +29,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
-public class GcDataStore extends GcAggregation {
+public class GcLogDataStore extends GcAggregation {
     private final Map<String, AggregationInfo> aggregations = new LinkedHashMap<>();
     private final ZonedDateTime timeStampAnchor;
 
-    public GcDataStore() {
+    public GcLogDataStore() {
         timeStampAnchor = UserPreferences.getInstance().defaultDateTimeAnchor.get().resolve().atZone(ZoneId.systemDefault());
     }
 
@@ -52,7 +54,7 @@ public class GcDataStore extends GcAggregation {
         var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(categories, key, label, unit, prefix, chartType, color));
         var ts = timeStamp.hasDateStamp() ? timeStamp.getDateTime() :
                 timeStampAnchor.plus(Math.round(timeStamp.getTimeStamp() * 1000), ChronoUnit.MILLIS);
-        info.data().put(ts.toInstant().toEpochMilli(), new Sample(ts, value));
+        info.data().put(ts.toInstant().toEpochMilli(), new TsSample(ts, value));
 
     }
 
@@ -76,27 +78,27 @@ public class GcDataStore extends GcAggregation {
     }
 
     public void computeAllocationRate(){
-        computeAllocationRate(GcAggregator.HEAP, Color.ORANGERED);
-        computeAllocationRate(GcAggregator.TENURED, Color.SEAGREEN);
-        computeAllocationRate(GcAggregator.METASPACE, Color.CHOCOLATE);
-        computeAllocationRate(GcAggregator.SURVIVOR, Color.STEELBLUE);
+        computeAllocationRate(GcAggregator.POOL_HEAP, Color.ORANGERED);
+        computeAllocationRate(GcAggregator.POOL_TENURED, Color.SEAGREEN);
+        computeAllocationRate(GcAggregator.POOL_METASPACE, Color.CHOCOLATE);
+        computeAllocationRate(GcAggregator.POOL_SURVIVOR, Color.STEELBLUE);
 
-        computeAllocationRate(GcAggregator.EDEN, Color.GOLD);
-        computeAllocationRate(GcAggregator.YOUNG, Color.GOLD);
+        computeAllocationRate(GcAggregator.POOL_EDEN, Color.GOLD);
+        computeAllocationRate(GcAggregator.POOL_YOUNG, Color.GOLD);
     }
 
     private void computeAllocationRate(String poolName, Color color) {
-        var beforeGc = this.aggregations.get(poolName + GcAggregator.OCCUPANCY_BEFORE_COLLECTION);
-        var afterGc = this.aggregations.get(poolName + GcAggregator.OCCUPANCY_AFTER_COLLECTION);
+        var beforeGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_BEFORE_COLLECTION);
+        var afterGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_AFTER_COLLECTION);
         if (beforeGc == null || afterGc == null){
             return;
         }
         if (beforeGc.data().size() != afterGc.data().size()) {
             throw new IllegalStateException("After collection and Before collection series do no not match for memory pool " + poolName);
         }
-        var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ALLOCATION_RATE,
-                a -> new AggregationInfo(List.of("Allocation Rate"),
-                        poolName + GcAggregator.ALLOCATION_RATE,
+        var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_RATE,
+                a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_RATE),
+                        poolName + GcAggregator.ID_ALLOCATION_RATE,
                         poolName,
                         GcAggregator.UNIT_BYTES_PER_SECOND,
                         UnitPrefixes.BINARY,
@@ -111,7 +113,7 @@ public class GcDataStore extends GcAggregation {
                     var allocatedBytes = current.getValue().value() - previous.getValue().value();
                     double secondsSinceLastGc = (current.getKey() - previous.getKey()) / 1000d;
                     allocRateData.data().put(current.getKey(),
-                            new Sample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));
+                            new TsSample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));
                 }
             }
             firstSkipped = true;
@@ -119,4 +121,36 @@ public class GcDataStore extends GcAggregation {
 
     }
 
+    public static record TsSample(ZonedDateTime timestamp, double value){
+
+    }
+
+    public static record AggregationInfo(List<String> category,
+                                         String name,
+                                         String label,
+                                         String unit,
+                                         UnitPrefixes prefix,
+                                         ChartType chartType,
+                                         Color color,
+                                         ConcurrentNavigableMap<Long, TsSample> data) {
+        public AggregationInfo(String category,
+                               String name,
+                               String label,
+                               String unit,
+                               UnitPrefixes prefix,
+                               ChartType chartType,
+                               Color color) {
+            this(List.of(category), name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
+        }
+        public AggregationInfo(List<String> categories,
+                               String name,
+                               String label,
+                               String unit,
+                               UnitPrefixes prefix,
+                               ChartType chartType,
+                               Color color) {
+            this(categories, name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
+        }
+
+    }
 }

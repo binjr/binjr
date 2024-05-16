@@ -17,13 +17,9 @@
 package eu.binjr.sources.jvmgc.adapters;
 
 import com.microsoft.gctoolkit.GCToolKit;
-import com.microsoft.gctoolkit.event.jvm.JVMEvent;
 import com.microsoft.gctoolkit.io.GCLogFile;
 import com.microsoft.gctoolkit.io.SingleGCLogFile;
 import com.microsoft.gctoolkit.jvm.JavaVirtualMachine;
-import com.microsoft.gctoolkit.message.ChannelName;
-import com.microsoft.gctoolkit.message.JVMEventChannel;
-import com.microsoft.gctoolkit.message.JVMEventChannelListener;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -37,10 +33,7 @@ import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.*;
-import eu.binjr.sources.jvmgc.adapters.aggregation.AggregationInfo;
-import eu.binjr.sources.jvmgc.adapters.aggregation.GcAggregator;
-import eu.binjr.sources.jvmgc.adapters.aggregation.GcDataStore;
-import eu.binjr.sources.jvmgc.adapters.aggregation.Sample;
+import eu.binjr.sources.jvmgc.adapters.aggregation.GcLogDataStore;
 import javafx.scene.paint.Color;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -54,11 +47,10 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.stream.Collectors;
 
 /**
  * A {@link DataAdapter} implementation used to feed {@link XYChartsWorksheet} instances
- * with  data from a local CSV formatted file.
+ * with  data from a local JVM GC log file.
  *
  * @author Frederic Thevenet
  */
@@ -71,7 +63,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     private Path gcLogPath;
     private ZoneId zoneId;
     private String encoding;
-    private Map<String, AggregationInfo> sortedDataStores;
+    private Map<String, GcLogDataStore.AggregationInfo> sortedDataStores;
 
 
     /**
@@ -117,7 +109,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
             GCLogFile logFile = new SingleGCLogFile(gcLogPath);
             GCToolKit gcToolKit = new GCToolKit();
-            var gcDataStore = new GcDataStore();
+            var gcDataStore = new GcLogDataStore();
             gcToolKit.loadAggregation(gcDataStore);
 
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);
@@ -276,7 +268,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         super.close();
     }
 
-    private ConcurrentNavigableMap<Long, Sample> getDataStore(String path) throws DataAdapterException {
+    private ConcurrentNavigableMap<Long, GcLogDataStore.TsSample> getDataStore(String path) throws DataAdapterException {
         var storeKey = path.split("/")[0];
         return sortedDataStores.get(storeKey).data();
     }

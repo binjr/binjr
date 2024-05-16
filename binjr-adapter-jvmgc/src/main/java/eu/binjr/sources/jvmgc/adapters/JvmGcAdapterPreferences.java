@@ -17,8 +17,6 @@
 package eu.binjr.sources.jvmgc.adapters;
 
 
-import com.google.gson.Gson;
-import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
@@ -26,49 +24,6 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
  * Defines the preferences associated with the Text files adapter.
  */
 public class JvmGcAdapterPreferences extends DataAdapterPreferences {
-    private static final Gson gson = new Gson();
-
-    /**
-     * The default text panel font size preference.
-     */
-    public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
-
-    /**
-     * The filters used when scanning folders in the source filesystem.
-     */
-    public ObservablePreference<String[]> folderFilters = objectPreference(String[].class,
-            "folderFilters",
-            new String[]{"*"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
-
-
-    /**
-     * The filters used to prune file extensions to scan in the source filesystem.
-     */
-    public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
-            "fileExtensionFilters",
-            new String[]{".jfr"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
-
-    /**
-     * A list of value types for the event payload that should be included
-     */
-    public ObservablePreference<String[]> includedEventsDataTypes = objectPreference(String[].class,
-            "includedEventsDataTypes",
-            new String[]{"short", "int", "long", "float", "double"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
-
-    /**
-     * A list of names of events that should be excluded
-     */
-    public ObservablePreference<String[]> excludedEventsNames = objectPreference(String[].class,
-            "excludedEventsByName",
-            new String[]{"gcId", "javaThreadId", "osThreadId", "modifiers"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
 
     /**
      * Initialize a new instance of the {@link JvmGcAdapterPreferences} class associated to
