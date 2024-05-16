@@ -18,6 +18,7 @@ package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
 import jakarta.xml.bind.annotation.*;
@@ -34,15 +35,15 @@ import java.util.UUID;
 public abstract class SourceBinding<T> {
     public static final String MIME_TYPE = "x-binjr/SourceBinding";
     private static final Logger logger = Logger.create(SourceBinding.class);
-    private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
+    private static final ThreadLocal<MessageDigest> threadLocalMessageDigest = ThreadLocal.withInitial(() -> {
         try {
-            return MessageDigest.getInstance("SHA-1");
+            return MessageDigest.getInstance(UserPreferences.getInstance().colorNamesHashingAlgorithm.get());
         } catch (NoSuchAlgorithmException e) {
-            logger.fatal("Failed to instantiate message digest");
-            throw new IllegalStateException("Failed to create a new instance of MessageDigest", e);
+            logger.error("Failed to instantiate message digest: Unknown algorithm " +
+                    UserPreferences.getInstance().colorNamesHashingAlgorithm.get());
+            return null;
         }
     });
-    public static final String SALT = "I2SI9PZ7MBNN7V213JZWETUQ1FGX3T77";
 
     @XmlAttribute(name = "sourceId")
     protected final UUID adapterId;
@@ -209,8 +210,12 @@ public abstract class SourceBinding<T> {
 
     private long getHashValue(final String value) {
         long hashVal;
-        messageDigest.get().update((value + SALT).getBytes(StandardCharsets.UTF_8));
-        hashVal = new BigInteger(1, messageDigest.get().digest()).longValue();
+        var md = threadLocalMessageDigest.get();
+        if (md== null){
+            return value.hashCode();
+        }
+        md.update((value).getBytes(StandardCharsets.UTF_8));
+        hashVal = new BigInteger(1,md.digest()).longValue();
         return hashVal;
     }
 

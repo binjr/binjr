@@ -412,6 +412,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<HardwareAccelerationSupport> hardwareAcceleration = enumPreference(HardwareAccelerationSupport.class, "hardwareAcceleration", HardwareAccelerationSupport.AUTO);
 
+    public final ObservablePreference<String> colorNamesHashingAlgorithm =  stringPreference("colorNamesHashingAlgorithm", "MD5");
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
