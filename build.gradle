@@ -159,7 +159,7 @@ configure(subprojects) {
             maven {
                 url 'https://maven.pkg.github.com/fthevenet/*'
                 credentials {
-                    username = System.getenv('GH_PKG_USERNAME')
+                    username = ""
                     password = System.getenv('GH_PKG_TOKEN')
                 }
             }

@@ -61,7 +61,6 @@ jobs:
           REPO_TAG_NAME: $(Build.SourceBranchName)
           WIX_HEAT_HOME: $(Agent.ToolsDirectory)/wixtoolset.heat.${{ parameters.wixVersion }}/tools/net472/${{ parameters.arch }}
           GH_PKG_TOKEN: $(gh.pkg.token)
-          GH_PKG_USERNAME: $(gh.pkg.username)
         inputs:
           options: '--stacktrace --info'
           gradleWrapperFile: 'gradlew'
