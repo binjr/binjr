@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2021 Frederic Thevenet
+ *    Copyright 2016-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -192,10 +192,12 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
             return false;
         });
 
-        var align = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
+        final var isNotStackedChart = this.chartType.getValue() != ChartType.STACKED;
+        final var isNotScatterChart = this.chartType.getValue() != ChartType.SCATTER;
+        var align = new AlignBoundariesTransform(startTime, endTime, isNotStackedChart, isNotScatterChart);
         // Stacked area charts in javaFX do not properly support NaN values,
         // so NanToZeroTransform is always enabled for such charts
-        var clean = new NanToZeroTransform(userPref.forceNanToZero.get() || this.chartType.getValue() == ChartType.STACKED);
+        var clean = new NanToZeroTransform(userPref.forceNanToZero.get() || isNotStackedChart);
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream()
                 .collect(groupingBy(o -> o.getBinding().getAdapter()));
@@ -204,7 +206,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
             var reduce = userPref.downSamplingAlgorithm.get().instantiateTransform(getChartType(),
                     userPref.downSamplingThreshold.get().intValue());
             reduce.setEnabled(userPref.downSamplingEnabled.get());
-            DataAdapter<Double> adapter = (DataAdapter<Double>) byAdapterEntry.getKey();
+            DataAdapter<Double> adapter = byAdapterEntry.getKey();
             SortTransform<Double> sort = new SortTransform<>();
             sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path

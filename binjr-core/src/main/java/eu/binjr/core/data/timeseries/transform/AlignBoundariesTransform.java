@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2020 Frederic Thevenet
+ *    Copyright 2019-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,18 +37,25 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
     private double substituteValue = Double.NaN;
     private final ZonedDateTime startTime;
     private final ZonedDateTime endTime;
+    private final boolean interpolateBoundaries;
 
     /**
      * Base constructor for {@link BaseTimeSeriesTransform} instances.
      *
-     * @param startTime        The timestamp specifying the beginning of the time range on which to align.
-     * @param endTime          The timestamp specifying the end of the time range on which to align.
-     * @param chartSupportsNaN true if NaN is a valid value for the chart to display.
+     * @param startTime             The timestamp specifying the beginning of the time range on which to align.
+     * @param endTime               The timestamp specifying the end of the time range on which to align.
+     * @param chartSupportsNaN      true if NaN is a valid value for the chart to display.
+     * @param interpolateBoundaries true if values for start and end boundaries should be interpolated from data
+     *                              outside the selected interval.
      */
-    public AlignBoundariesTransform(ZonedDateTime startTime, ZonedDateTime endTime, boolean chartSupportsNaN) {
+    public AlignBoundariesTransform(ZonedDateTime startTime,
+                                    ZonedDateTime endTime,
+                                    boolean chartSupportsNaN,
+                                    boolean interpolateBoundaries) {
         super("AlignBoundariesTransform");
         this.startTime = startTime;
         this.endTime = endTime;
+        this.interpolateBoundaries = interpolateBoundaries;
         if (!chartSupportsNaN) {
             substituteValue = 0.0;
         }
@@ -66,8 +73,8 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
             // if the first available sample is later than the requested start time,
             // add a sample 1ns after last sample with a substitute value then another sample at start time in order to
             // create an abrupt truncation.
-            data.add(0, new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), substituteValue));
-            data.add(0, new XYChart.Data<>(startTime, substituteValue));
+            data.addFirst(new XYChart.Data<>(firstSample.getXValue().minusNanos(1), substituteValue));
+            data.addFirst(new XYChart.Data<>(startTime, substituteValue));
         } else if (firstSample.getXValue().isBefore(startTime)) {
             // remove all samples with timestamps occurring before the requested start time.
             var previous = firstSample;
@@ -109,6 +116,9 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
     }
 
     private Double interpolate(XYChart.Data<ZonedDateTime, Double> val1, XYChart.Data<ZonedDateTime, Double> val2, ZonedDateTime time) {
+        if (!interpolateBoundaries) {
+            return substituteValue;
+        }
         var x3 = (double) time.toInstant().toEpochMilli();
         var x1 = (double) val1.getXValue().toInstant().toEpochMilli();
         var y1 = val1.getYValue();
