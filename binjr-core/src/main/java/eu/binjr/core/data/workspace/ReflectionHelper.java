@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.data.adapters.SourceBinding;
 import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,7 +27,6 @@ import java.util.Set;
 public enum ReflectionHelper {
     INSTANCE;
 
-
     public static final String EU_BINJR = "eu.binjr";
     private final Set<Class<?>> classesToBeBound = new HashSet<>();
 
@@ -34,7 +34,7 @@ public enum ReflectionHelper {
         // Add Workspace class
         classesToBeBound.add(Workspace.class);
         // scan classpath
-        scan(new Reflections(EU_BINJR));
+        scan(new Reflections(new ConfigurationBuilder().forPackage(EU_BINJR)));
     }
 
     public Collection<Class<?>> getClassesToBeBound() {
@@ -42,8 +42,8 @@ public enum ReflectionHelper {
     }
 
     public void scanClassLoader(ClassLoader cl) {
-        // scan
-        scan(new Reflections(EU_BINJR, cl));
+        // scan class loader for package 'eu.binjr'
+        scan(new Reflections(new ConfigurationBuilder().forPackage(EU_BINJR, cl)));
     }
 
     private void scan(Reflections reflections) {
