@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
+ext.GCTOOLKIT_VERSION = "3.0.5-SNAPSHOT"
+
 dependencies {
     implementation project(path: ':binjr-adapter-logs')
     compileOnly project(':binjr-core')
-    implementation('com.microsoft.gctoolkit:gctoolkit-api:3.0.5-SNAPSHOT')
-    implementation('com.microsoft.gctoolkit:gctoolkit-parser:3.0.5-SNAPSHOT')
-    implementation('com.microsoft.gctoolkit:gctoolkit-vertx:3.0.5-SNAPSHOT')
-    //implementation('com.microsoft.gctoolkit:gctoolkit-sample:3.0.4')
+    implementation("com.microsoft.gctoolkit:gctoolkit-api:$GCTOOLKIT_VERSION")
+    implementation("com.microsoft.gctoolkit:gctoolkit-parser:$GCTOOLKIT_VERSION")
+    implementation("com.microsoft.gctoolkit:gctoolkit-vertx:$GCTOOLKIT_VERSION")
 }
 
 jar {
