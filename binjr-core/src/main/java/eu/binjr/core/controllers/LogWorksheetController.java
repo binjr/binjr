@@ -314,6 +314,18 @@ public class LogWorksheetController extends WorksheetController implements Synca
         });
         // Wrap text
         getBindingManager().bind(logsTextOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
+        getBindingManager().attachListener(logsTextOutput.wrapTextProperty(), (ChangeListener<Boolean>) (obs, oldVal, newVal) -> {
+          // Workaround to force text wrapping (see: https://github.com/FXMisc/RichTextFX/issues/979#issuecomment-737229331)
+            if (newVal) {
+                final int cp = logsTextOutput.getCaretPosition();
+                final int pi = logsTextOutput.firstVisibleParToAllParIndex();
+                final var doc = logsTextOutput.subDocument(0, logsTextOutput.getLength());
+                logsTextOutput.clear();
+                logsTextOutput.insert(0, doc);
+                logsTextOutput.showParagraphAtTop(pi);
+                logsTextOutput.moveTo(cp);
+            }
+        });
         refreshButton.setOnMouseClicked(getBindingManager().registerHandler(event -> refresh(event.isControlDown())));
         // TimeRange Picker initialization
         timeRangePicker.setReferenceEndDateSupplier(() -> worksheet.getInitialTimeRange().getEnd());
