@@ -32,7 +32,7 @@ import java.util.UUID;
 public abstract class BaseDataAdapter<T> implements DataAdapter<T> {
     private static final Logger logger = Logger.create(BaseDataAdapter.class);
     private UUID id = UUID.randomUUID();
-    private volatile boolean closed = false;
+    private boolean closed = false;
 
     @Override
     public UUID getId() {
