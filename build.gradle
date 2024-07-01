@@ -142,8 +142,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:5.10.2')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.10.2')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:5.10.3')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.10.3')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
@@ -531,32 +531,6 @@ task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     ]
 }
 
-//task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
-//    workingDir project.projectDir
-//    commandLine = [
-//            "${WIX_HOME}/bin/candle.exe",
-//            "-arch", "x64",
-//            "-out", "${buildDir}/wix/obj/",
-//            "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
-//            "${buildDir}/wix/binjrFiles.wxs",
-//            "-dbinjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
-//            "-dbuildSourceDir=${APP_IMAGE_PATH}",
-//            "-dresourcesDir=${projectDir}/distribution"
-//    ]
-//}
-//
-//task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
-//    workingDir project.projectDir
-//    commandLine = [
-//            "${WIX_HOME}/bin/light.exe",
-//            "-sw", "-sice:ICE38", "-sice:ICE64",
-//            "-out", "${ARTIFACTS_PATH_MSI}/${DISTRIBUTION_NAME}.msi",
-//            "${buildDir}/wix/obj/*.wixobj",
-//            "-ext", "WixUtilExtension", "-ext", "WixUIExtension.dll"
-//    ]
-//    outputs.dir ARTIFACTS_PATH_MSI
-//}
-
 task wixAddUiExt(type: Exec, dependsOn: wixRunHeat) {
     commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
 }
@@ -810,7 +784,7 @@ task signPackageDistribution() {
 
 def isNonStable = { String version ->
     // Ignore javafx early access and glassfish beta
-    def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(alpha)|(b)|(m))[-\+]*[0-9.]+$/
+    def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(alpha)|(beta)|(b)|(m))[-\+]*[0-9.]+$/
     return (version ==~ regex)
 }
 
