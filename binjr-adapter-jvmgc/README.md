@@ -9,19 +9,19 @@ In the right hand side panel, select `Sources > New Source... > JVM > GC Logs` a
 After the file's been parsed successfully, the data series that the adapter could extract from it will appear in the source tree; drag the ones you are interested in onto the large chart icon in the right hand pane to plot the data in one or more charts.  
 You can then add new charts to an existing tab (a.k.a. "worksheet"), add series to existing charts, or add charts to a new worksheets by dragging data series from the source tree.  
 
-Check out the the binjr [user guide](https://binjr.eu/documentation/user_guide/main/) for more.
+Check out the binjr [user guide](https://binjr.eu/documentation/user_guide/main/) for more.
 
 
 ## Implemented data sources
 > **Please Note:**  
-> The available data series for a given GC log file will varies dependending on the options and verbosity settings passed to the jvm when producting it (i.e. a particular source binding will not appear in the source tree if there was no corresponding data in the log file), as well as the type of garbage collector used.  
-> For the time being, all of the above are availlable for the following collectors:
+> The available data series for a given GC log file will vary depending on the options and verbosity settings passed to the jvm when producting it (i.e. a particular source binding will not appear in the source tree if there was no corresponding data in the log file), as well as the type of garbage collector used.  
+> For the time being, all of the above are available for the following collectors:
 > * Serial
 > * Parallel
 > * CMS
 > * G1
 > 
-> Only the "Pause Time" series are availavle for ZGC and Shenandoah at the moment.
+> Only the "Pause Time" series are available for ZGC and Shenandoah at the moment.
 
 
 ### Pause Time
