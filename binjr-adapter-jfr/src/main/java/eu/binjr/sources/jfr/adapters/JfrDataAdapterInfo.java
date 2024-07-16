@@ -32,6 +32,7 @@ import eu.binjr.core.preferences.AppEnvironment;
  */
 @AdapterMetadata(
         name = "JFR",
+        category = "JVM",
         description = "JDK Flight Recorder Files Data Adapter (Events view)",
         copyright = AppEnvironment.COPYRIGHT_NOTICE,
         license = AppEnvironment.LICENSE,

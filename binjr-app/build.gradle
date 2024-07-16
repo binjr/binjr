@@ -19,6 +19,7 @@ dependencies {
     implementation project(':binjr-adapter-csv')
     implementation project(':binjr-adapter-jfr')
     implementation project(':binjr-adapter-jrds')
+    implementation project(':binjr-adapter-jvmgc')
     implementation project(':binjr-adapter-logs')
     implementation project(':binjr-adapter-netdata')
     implementation project(':binjr-adapter-rrd4j')
