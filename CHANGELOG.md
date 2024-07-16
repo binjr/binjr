@@ -1,83 +1,82 @@
 ## [binjr v3.18.0](https://github.com/binjr/binjr/releases/tag/v3.18.0)
 Released on Wed, 24 Apr 2024
 
-_[New]_ Added a new "System" UI theme that inherits the OS color scheme preferences.  
-_[New]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.1  
-_[New]_ Migrated Wix toolset config to version 5.0.0  
-_[New]_ Added an option to force using the embedded JVM certificate store instead of the host's on Windows and macOS.  
-_[Fixed]_ Broken parsing profile for unified JVM logs containing only elapsed time.  
-_[Fixed]_ Notification popup does not show if the text it contains is too long.  
+* _[New]_ Added a new "System" UI theme that inherits the OS color scheme preferences.  
+* _[New]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.1  
+* _[New]_ Migrated Wix toolset config to version 5.0.0  
+* _[New]_ Added an option to force using the embedded JVM certificate store instead of the host's on Windows and macOS.  
+* _[Fixed]_ Broken parsing profile for unified JVM logs containing only elapsed time.  
+* _[Fixed]_ Notification popup does not show if the text it contains is too long.  
 
 
 ## [binjr v3.17.0](https://github.com/binjr/binjr/releases/tag/v3.17.0)
 Released on Wed, 21 Mar 2024
 
-_[New]_ Updated the embedded runtimes for Java and JavaFX to version 22.  
-_[New]_ Support for new package managers: AUR for Archlinux and winget for Windows.  
-_[New]_ Added an option to override hardware acceleration support.  
-_[New]_ Added an option to change the user interface scaling factor.  
-_[New]_ Added an option to trim extraneous spaces in malformed CSV files in parsing profiles.  
-_[Fixed]_ Dead links for support pages in MSI installer metadata.
+* _[New]_ Updated the embedded runtimes for Java and JavaFX to version 22.  
+* _[New]_ Support for new package managers: AUR for Archlinux and winget for Windows.  
+* _[New]_ Added an option to override hardware acceleration support.  
+* _[New]_ Added an option to change the user interface scaling factor.  
+* _[New]_ Added an option to trim extraneous spaces in malformed CSV files in parsing profiles.  
+* _[Fixed]_ Dead links for support pages in MSI installer metadata.
 
 ## [binjr v3.16.0](https://github.com/binjr/binjr/releases/tag/v3.16.0)
 Released on Wed, 7 Feb 2024
 
-_[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.2  
-_[New]_ Added an option to allow Basic auth in tunneling over https.  
-_[Fixed]_ Source pane remains opened if a connection failed.  
-_[Fixed]_ Replace Apache http client by OpenJDK's built-in implementation.  
-_[Fixed]_ Use https instead of http when inferring missing protocol.
+* _[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.2  
+* _[New]_ Added an option to allow Basic auth in tunneling over https.  
+* _[Fixed]_ Source pane remains opened if a connection failed.  
+* _[Fixed]_ Replace Apache http client by OpenJDK's built-in implementation.  
+* _[Fixed]_ Use https instead of http when inferring missing protocol.
 
 ## [binjr v3.15.0](https://github.com/binjr/binjr/releases/tag/v3.15.0)
 Released on Tue, 5 Dec 2023
 
-_[New]_ Added an option to ignore samples with an undefined Y value instead of forcing them to zero ("Settings > Charts > Treat undefined Y values as 0").  
-_[New]_ A  notification popup now shows download progress when the app is being updated.  
-_[Fixed]_ `NaN` values produce duplicated samples after Largest-Triangle-Three-Buckets algorithm is applied.  
-_[Fixed]_ Pagination mechanism when fetching data from index does not honor forceNanToZero property.  
-_[Fixed]_ A race condition in TimeSeriesProcessor.   
-_[Fixed]_ Continuously clicking on "Check for update" results in queuing as many download task.
+* _[New]_ Added an option to ignore samples with an undefined Y value instead of forcing them to zero ("Settings > Charts > Treat undefined Y values as 0").  
+* _[New]_ A  notification popup now shows download progress when the app is being updated.  
+* _[Fixed]_ `NaN` values produce duplicated samples after Largest-Triangle-Three-Buckets algorithm is applied.  
+* _[Fixed]_ Pagination mechanism when fetching data from index does not honor forceNanToZero property.  
+* _[Fixed]_ A race condition in TimeSeriesProcessor.   
+* _[Fixed]_ Continuously clicking on "Check for update" results in queuing as many download task.
 
 ## [binjr v3.14.0](https://github.com/binjr/binjr/releases/tag/v3.14.0)
 Released on Mon, 30 Oct 2023
 
-_[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.1  
-_[New]_ Source and target compatibility level for binjr's artifacts have been updated to 21  
-_[New]_ It is now possible to set the default values for chart type and unit prefixes, used when these aren't defined by the source  
-_[New]_ Enhanced JVM logging parsing profiles to accept ISO timestamps  
-_[New]_ Clicking on the find or filter button in a log worksheet now sets focus on the relevant input field
+* _[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.1  
+* _[New]_ Source and target compatibility level for binjr's artifacts have been updated to 21  
+* _[New]_ It is now possible to set the default values for chart type and unit prefixes, used when these aren't defined by the source  
+* _[New]_ Enhanced JVM logging parsing profiles to accept ISO timestamps  
+* _[New]_ Clicking on the find or filter button in a log worksheet now sets focus on the relevant input field
 
 ## [binjr v3.13.0](https://github.com/binjr/binjr/releases/tag/v3.13.0)
 Released on Wed, 9 Aug 2023
 
-_[New]_ Added new JDK Flight Recorder data adapter.  
-_[New]_ Users can now choose a worksheet's type when creating a blank one.  
-_[New]_ Added new type of prefix formatting for charts axis: Percentage.  
-_[New]_ Added an icon representing the visualization type to   sources panes and worksheet tabs.  
-_[Fixed]_ When there are too many facet pills in an event worksheet, they now overflow to popup menu.  
-_[Fixed]_ The UI themes in the Settings panel are now listed in alphabetical order.  
-_[Fixed]_ LogWorksheetController instances cannot be loaded prior to an adapter acquiring Indexes.LOG_FILES  
-_[Fixed]_ UserInterfaceThemes services cannot be loaded from registered plugin path.
+* _[New]_ Added new JDK Flight Recorder data adapter.  
+* _[New]_ Users can now choose a worksheet's type when creating a blank one.  
+* _[New]_ Added new type of prefix formatting for charts axis: Percentage.  
+* _[New]_ Added an icon representing the visualization type to   sources panes and worksheet tabs.  
+* _[Fixed]_ When there are too many facet pills in an event worksheet, they now overflow to popup menu.  
+* _[Fixed]_ The UI themes in the Settings panel are now listed in alphabetical order.  
+* _[Fixed]_ LogWorksheetController instances cannot be loaded prior to an adapter acquiring Indexes.LOG_FILES  
+* _[Fixed]_ UserInterfaceThemes services cannot be loaded from registered plugin path.
 
 ## [binjr v3.12.0](https://github.com/binjr/binjr/releases/tag/v3.12.0)
 Released on Sat, 20 May 2023
 
-_[New]_ *binjr* now defaults to an indexing strategy for log files that is optimized for partial terms search and filtering. It allows for fast matching of arbitrary character sequences without the need for explicit syntax like wildcards.
+* _[New]_ *binjr* now defaults to an indexing strategy for log files that is optimized for partial terms search and filtering. It allows for fast matching of arbitrary character sequences without the need for explicit syntax like wildcards.
 > To revert back to the old behavior that favors searching for whole words, go to "Settings > Logs" and select "Optimize index for whole words search".
-
-_[New]_ Added the ability to open a single log file instead of a whole folder or a zip archive.  
-_[New]_ Inline help is now directly accessible for many options throughout the application's User Interface by clicking the `?`next to it.  
-_[New]_ Let users choose the date & time that serves as an anchor to construct timestamps for partial data.  
-_[New]_ Added an option for the user to toggle whether or not the Y axis should always include the origin (0) when auto-scale is enabled.  
-_[New]_ Updated embedded runtimes to OpenJDK 20.0.1 and OpenJFX 20.0.1  
-_[New]_ Added more built-in parsing profiles (Quarkus, Syslog).  
-_[Fixed]_ Removed unnecessary scoring computation in Log adapter queries to increase filtering performances.  
-_[Fixed]_ Settings panel is now wider and its content less cramped.  
-_[Fixed]_ Different outcome when typing the name of a capture group vs selecting it from the dropdown list in the  profile editor.  
-_[Fixed]_ Files selection on Linux do not show files with no extensions when "All files" filter is selected.  
-_[Fixed]_ Log file adapter does not list files without extensions.  
-_[Fixed]_ Log file view does not use a monotype font on macOS and Linux.  
-_[Fixed]_ Auto-update feature ignores alternative signing openPGP signature.
+* _[New]_ Added the ability to open a single log file instead of a whole folder or a zip archive.  
+* _[New]_ Inline help is now directly accessible for many options throughout the application's User Interface by clicking the `?`next to it.  
+* _[New]_ Let users choose the date & time that serves as an anchor to construct timestamps for partial data.  
+* _[New]_ Added an option for the user to toggle whether or not the Y axis should always include the origin (0) when auto-scale is enabled.  
+* _[New]_ Updated embedded runtimes to OpenJDK 20.0.1 and OpenJFX 20.0.1  
+* _[New]_ Added more built-in parsing profiles (Quarkus, Syslog).  
+* _[Fixed]_ Removed unnecessary scoring computation in Log adapter queries to increase filtering performances.  
+* _[Fixed]_ Settings panel is now wider and its content less cramped.  
+* _[Fixed]_ Different outcome when typing the name of a capture group vs selecting it from the dropdown list in the  profile editor.  
+* _[Fixed]_ Files selection on Linux do not show files with no extensions when "All files" filter is selected.  
+* _[Fixed]_ Log file adapter does not list files without extensions.  
+* _[Fixed]_ Log file view does not use a monotype font on macOS and Linux.  
+* _[Fixed]_ Auto-update feature ignores alternative signing openPGP signature.
 
 ## [binjr v3.11.0](https://github.com/binjr/binjr/releases/tag/v3.11.0)
 Released on Wed, 1 Feb 2023
