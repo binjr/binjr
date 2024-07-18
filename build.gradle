@@ -24,12 +24,24 @@ import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.time.Duration
 
+
 plugins {
     id "de.undercouch.download" version "5.6.0"
-    id 'org.kordamp.gradle.markdown' version '2.2.0'
     id "com.github.ben-manes.versions" version "0.51.0"
     id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
+}
+
+configurations {
+    commonmark
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    commonmark 'org.commonmark:commonmark:0.22.0'
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
@@ -353,52 +365,19 @@ task expandMdTemplates(type: Copy) {
             "releaseDate"   : "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}",
             "changeHistory" : "$changeHistory",
             "currentChanges": "$currentChanges",
-            "tagName"       : "v${BINJR_VERSION}"
+            "tagName"       : "v${BINJR_VERSION}",
+            "copyright"     : "${BINJR_COPYRIGHT}"
     ])
 }
 
 task copyInfo(type: Copy, dependsOn: expandMdTemplates) {
     from {
-        ["${buildDir}/tmp/expanded/CHANGELOG.md",
-         "${buildDir}/tmp/expanded/LICENSE.md",
-         "${buildDir}/tmp/expanded/NOTICE.md",
-         "${buildDir}/tmp/expanded/README.md"]
+        ["${buildDir}/tmp/expanded/CHANGELOG",
+         "${buildDir}/tmp/expanded/LICENSE",
+         "${buildDir}/tmp/expanded/NOTICE",
+         "${buildDir}/tmp/expanded/README"]
     }
-    into "${buildDir}/tmp/info"
-}
-
-markdownToHtml.dependsOn(copyInfo)
-
-markdownToHtml {
-    sourceDir = file("${buildDir}/tmp/info")
-    outputDir = file("$APP_IMAGE_PATH")
-    doLast {
-        ConfigurableFileTree tree = fileTree(dir: "$APP_IMAGE_PATH")
-        tree.include '**/*.html'
-        tree.each { File file ->
-            String path = file.path
-            File newFile = new File("${APP_IMAGE_PATH}/tmp_${file.name}")
-            newFile << "<html lang=\"en\">\n" +
-                    "<head>\n" +
-                    "    <title>" + (file.name - ".html") + "</title>\n" +
-                    "    <meta charset=\"utf-8\"/>\n" +
-                    "    <link rel=\"stylesheet\" href=\"./resources/css/plain.css\">\n" +
-                    "</head>"
-            newFile << file.getText("utf-8")
-            if (!file.name.startsWith("LICENSE")) {
-                newFile << "<footer>\n" +
-                        "    <br>\n" +
-                        "    <hr>\n" +
-                        "    <p style=\"text-align:left;\">\n" +
-                        "        ${BINJR_COPYRIGHT}\n" +
-                        "        <span style=\"float:right;\"><a href=\"https://binjr.eu\">https://binjr.eu</a></span>\n" +
-                        "    </p>\n" +
-                        "</footer>"
-            }
-            file.delete()
-            newFile.renameTo(path)
-        }
-    }
+    into "${APP_IMAGE_PATH}"
 }
 
 task downloadOpenJfxModules(type: Download) {
@@ -412,7 +391,6 @@ task downloadJlinkOpenJdk(type: Download) {
     src craftJlinkJdkUrl()
     dest new File(DL_CACHE_PATH, "openjdk_${BUNDLE_JDK_VERSION}${IS_WINDOWS ? '.zip' : '.tar.gz'}")
 }
-
 
 task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
     from zipTree(downloadOpenJfxModules.dest)
@@ -428,7 +406,6 @@ task untarJlinkOpenJdk(dependsOn: downloadJlinkOpenJdk, type: Copy) {
     from tarTree(downloadJlinkOpenJdk.dest)
     into "${buildDir}/jlinkOpenJDK/"
 }
-
 
 task createRuntimeImage(type: Exec) {
     if (!IS_JAVAFX_BUNDLED) {
@@ -464,7 +441,7 @@ task createRuntimeImage(type: Exec) {
     }
 }
 
-task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
+task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, copyInfo, createRuntimeImage]) {
     doFirst {
         mkdir ARTIFACTS_ROOT_PATH
     }

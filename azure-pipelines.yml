@@ -110,7 +110,7 @@ stages:
               python3 -m pip install mkdocs-material==9.*
               git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
               cd  build/tmp/binjr-site
-              cp ../expanded/CHANGELOG.md docs/download/CHANGELOG.md
+              cp ../expanded/CHANGELOG docs/download/CHANGELOG.md
               cp ../expanded/latest_release.md docs/download/latest_release.md
               echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
               git config credential.helper store
