@@ -191,7 +191,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                 try {
                     builder.sslContext(SSLContextUtils.withPlatformKeystore());
                 } catch (SSLCustomContextException e) {
-                    logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
+                    logger.error("Error creating SSL context for HttpDataAdapter: " + e.getMessage());
                     logger.debug("Stacktrace", e);
                 }
             }
