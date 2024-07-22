@@ -32,18 +32,6 @@ plugins {
     id "signing"
 }
 
-configurations {
-    commonmark
-}
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    commonmark 'org.commonmark:commonmark:0.22.0'
-}
-
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
 ext.IS_BETA = false
@@ -143,12 +131,12 @@ configure(subprojects) {
             options.tags = ["XmlJavaTypeAdapter", "XmlJavaTypeAdapters"]
         }
 
-        task javadocJar(type: Jar) {
+        tasks.register('javadocJar', Jar) {
             archiveClassifier = 'javadoc'
             from javadoc
         }
 
-        task sourcesJar(type: Jar) {
+        tasks.register('sourcesJar', Jar) {
             archiveClassifier = 'sources'
             from sourceSets.main.allSource
         }
@@ -165,7 +153,7 @@ configure(subprojects) {
     }
 
     repositories {
-//        mavenLocal()
+        mavenLocal()
         mavenCentral()
         if (!IS_RELEASE) {
             maven {
@@ -269,13 +257,14 @@ configure(subprojects) {
     }
 }
 
-task publishArtifacts(dependsOn: subprojects.publishToSonatype) {
+tasks.register('publishArtifacts') {
+    dependsOn subprojects.publishToSonatype
     doLast {
         System.out.println("Done publishing artifacts from subprojects.")
     }
 }
 
-task copyAppLibs(type: Copy) {
+tasks.register('copyAppLibs', Copy) {
     into "$APP_IMAGE_PATH/libs"
     from(project(":binjr-core").configurations.runtimeClasspath) {
         exclude "javafx-*.jar"
@@ -307,7 +296,7 @@ task copyAppLibs(type: Copy) {
     from project(":binjr-core").jar
 }
 
-task copyPluginLibs(type: Copy) {
+tasks.register('copyPluginLibs', Copy) {
     into IS_MAC ? "$APP_IMAGE_PATH/libs" : "$APP_IMAGE_PATH/plugins"
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
@@ -319,7 +308,7 @@ task copyPluginLibs(type: Copy) {
     from project(":binjr-adapter-logs").jar
 }
 
-task copyJpackageInputLibs(type: Copy) {
+tasks.register('copyJpackageInputLibs', Copy) {
     into "${buildDir}/tmp/input"
     from(project(":binjr-core").configurations.runtimeClasspath) {
         exclude "javafx-*.jar"
@@ -359,17 +348,17 @@ task copyJpackageInputLibs(type: Copy) {
     from project(":binjr-adapter-logs").jar
 }
 
-task copyPlatformSpecific(type: Copy) {
+tasks.register('copyPlatformSpecific', Copy) {
     into APP_IMAGE_PATH
     from "${projectDir}/distribution/platforms/${OS_FAMILY}"
 }
 
-task copyResources(type: Copy) {
+tasks.register('copyResources', Copy) {
     into "$APP_IMAGE_PATH/resources"
     from "${projectDir}/distribution/resources"
 }
 
-task expandMdTemplates(type: Copy) {
+tasks.register('expandMdTemplates', Copy) {
     from "${projectDir}/distribution/templates"
     into "${buildDir}/tmp/expanded"
     filteringCharset = 'UTF-8'
@@ -384,7 +373,8 @@ task expandMdTemplates(type: Copy) {
     ])
 }
 
-task copyInfo(type: Copy, dependsOn: expandMdTemplates) {
+tasks.register('copyInfo', Copy) {
+    dependsOn expandMdTemplates
     from {
         ["${buildDir}/tmp/expanded/CHANGELOG",
          "${buildDir}/tmp/expanded/LICENSE",
@@ -394,34 +384,37 @@ task copyInfo(type: Copy, dependsOn: expandMdTemplates) {
     into "${APP_IMAGE_PATH}"
 }
 
-task downloadOpenJfxModules(type: Download) {
+tasks.register('downloadOpenJfxModules', Download) {
     onlyIfModified true
     src craftOpenJfxModsUrl()
     dest new File(DL_CACHE_PATH, "openjfx-jmods_${OPENJFX_VERSION}.zip")
 }
 
-task downloadJlinkOpenJdk(type: Download) {
+tasks.register('downloadJlinkOpenJdk', Download) {
     onlyIfModified true
     src craftJlinkJdkUrl()
     dest new File(DL_CACHE_PATH, "openjdk_${BUNDLE_JDK_VERSION}${IS_WINDOWS ? '.zip' : '.tar.gz'}")
 }
 
-task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
+tasks.register('unzipOpenJfxModules', Copy) {
+    dependsOn downloadOpenJfxModules
     from zipTree(downloadOpenJfxModules.dest)
     into "${buildDir}/jmods/"
 }
 
-task unzipJlinkOpenJdk(dependsOn: downloadJlinkOpenJdk, type: Copy) {
+tasks.register('unzipJlinkOpenJdk', Copy) {
+    dependsOn downloadJlinkOpenJdk
     from zipTree(downloadJlinkOpenJdk.dest)
     into "${buildDir}/jlinkOpenJDK/"
 }
 
-task untarJlinkOpenJdk(dependsOn: downloadJlinkOpenJdk, type: Copy) {
+tasks.register('untarJlinkOpenJdk', Copy) {
+    dependsOn downloadJlinkOpenJdk
     from tarTree(downloadJlinkOpenJdk.dest)
     into "${buildDir}/jlinkOpenJDK/"
 }
 
-task createRuntimeImage(type: Exec) {
+tasks.register('createRuntimeImage', Exec) {
     if (!IS_JAVAFX_BUNDLED) {
         dependsOn unzipOpenJfxModules
     }
@@ -455,13 +448,15 @@ task createRuntimeImage(type: Exec) {
     }
 }
 
-task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, copyInfo, createRuntimeImage]) {
+tasks.register('prepareAppBundle') {
+    dependsOn copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, copyInfo, createRuntimeImage
     doFirst {
         mkdir ARTIFACTS_ROOT_PATH
     }
 }
 
-task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
+tasks.register('listPackageContent', Exec) {
+    dependsOn prepareAppBundle
     workingDir APP_IMAGE_PATH
     commandLine = [
             "sh", "-c",
@@ -469,7 +464,8 @@ task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
     ]
 }
 
-task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
+tasks.register('packageDistributionZip', Zip) {
+    dependsOn prepareAppBundle
     doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_zip/binjr.ini"),
                 Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
@@ -481,7 +477,8 @@ task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
     outputs.dir ARTIFACTS_PATH_ZIP
 }
 
-task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
+tasks.register('packageDistributionTar', Exec) {
+    dependsOn listPackageContent
     workingDir APP_IMAGE_ROOT
     commandLine = [
             "sh", "-c",
@@ -490,7 +487,8 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
     outputs.dir ARTIFACTS_PATH_TGZ
 }
 
-task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
+tasks.register('wixRunHeat', Exec) {
+    dependsOn prepareAppBundle
     doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
                 Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
@@ -508,15 +506,18 @@ task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     ]
 }
 
-task wixAddUiExt(type: Exec, dependsOn: wixRunHeat) {
+tasks.register('wixAddUiExt', Exec) {
+    dependsOn wixRunHeat
     commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
 }
 
-task wixAddUtilExt(type: Exec, dependsOn: wixAddUiExt) {
+tasks.register('wixAddUtilExt', Exec) {
+    dependsOn wixAddUiExt
     commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
 }
 
-task wixRunBuild(type: Exec, dependsOn: [wixAddUtilExt]) {
+tasks.register('wixRunBuild', Exec) {
+    dependsOn wixAddUtilExt
     workingDir project.projectDir
     commandLine = [
             "wix.exe", "build", "-arch", "${getArch()}",
@@ -533,7 +534,8 @@ task wixRunBuild(type: Exec, dependsOn: [wixAddUtilExt]) {
     outputs.dir ARTIFACTS_PATH_MSI
 }
 
-task jpackageDmg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+tasks.register('jpackageDmg', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir ARTIFACTS_PATH_DMG
     commandLine = [
             "jpackage",
@@ -566,7 +568,8 @@ task jpackageDmg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
     outputs.dir ARTIFACTS_PATH_DMG
 }
 
-task jpackagePkg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+tasks.register('jpackagePkg', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir ARTIFACTS_PATH_PKG
     commandLine = [
             "jpackage",
@@ -600,7 +603,8 @@ task jpackagePkg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
 }
 
 
-task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+tasks.register('jpackageDeb', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir ARTIFACTS_PATH_DEB
     commandLine = [
             "jpackage",
@@ -644,7 +648,8 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
     outputs.dir ARTIFACTS_PATH_DEB
 }
 
-task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+tasks.register('jpackageRpm', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir ARTIFACTS_PATH_RPM
     commandLine = [
             "jpackage",
@@ -687,43 +692,50 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
     outputs.dir ARTIFACTS_PATH_RPM
 }
 
-task packageAsZip(type: WrapTaskForSigning, dependsOn: [packageDistributionZip]) {
+tasks.register('packageAsZip', WrapTaskForSigning) {
+    dependsOn packageDistributionZip
     from "${ARTIFACTS_PATH_ZIP}/${DISTRIBUTION_NAME}.zip"
     destinationDirectory = ARTIFACTS_PATH_ZIP
     archiveFileName = "${DISTRIBUTION_NAME}.zip"
 }
 
-task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunBuild]) {
+tasks.register('packageAsMsi', WrapTaskForSigning) {
+    dependsOn wixRunBuild
     from "${ARTIFACTS_PATH_MSI}/${DISTRIBUTION_NAME}.msi"
     destinationDirectory = ARTIFACTS_PATH_MSI
     archiveFileName = "${DISTRIBUTION_NAME}.msi"
 }
 
-task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageDmg]) {
+tasks.register('packageAsDmg', WrapTaskForSigning) {
+    dependsOn jpackageDmg
     from "${ARTIFACTS_PATH_DMG}/${DISTRIBUTION_NAME}.dmg"
     destinationDirectory = ARTIFACTS_PATH_DMG
     archiveFileName = "${DISTRIBUTION_NAME}.dmg"
 }
 
-task packageAsPkg(type: WrapTaskForSigning, dependsOn: [jpackagePkg]) {
+tasks.register('packageAsPkg', WrapTaskForSigning) {
+    dependsOn jpackagePkg
     from "${ARTIFACTS_PATH_PKG}/${DISTRIBUTION_NAME}.pkg"
     destinationDirectory = ARTIFACTS_PATH_PKG
     archiveFileName = "${DISTRIBUTION_NAME}.pkg"
 }
 
-task packageAsTarGz(type: WrapTaskForSigning, dependsOn: [packageDistributionTar]) {
+tasks.register('packageAsTarGz', WrapTaskForSigning) {
+    dependsOn packageDistributionTar
     from "${ARTIFACTS_PATH_TGZ}/${DISTRIBUTION_NAME}.tar.gz"
     destinationDirectory = ARTIFACTS_PATH_TGZ
     archiveFileName = "${DISTRIBUTION_NAME}.tar.gz"
 }
 
-task packageAsRpm(type: WrapTaskForSigning, dependsOn: [jpackageRpm]) {
+tasks.register('packageAsRpm', WrapTaskForSigning) {
+    dependsOn jpackageRpm
     from "${ARTIFACTS_PATH_RPM}/${DISTRIBUTION_NAME}.rpm"
     destinationDirectory = ARTIFACTS_PATH_RPM
     archiveFileName = "${DISTRIBUTION_NAME}.rpm"
 }
 
-task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
+tasks.register('packageAsDeb', WrapTaskForSigning) {
+    dependsOn jpackageDeb
     from "${ARTIFACTS_PATH_DEB}/${DISTRIBUTION_NAME}.deb"
     destinationDirectory = ARTIFACTS_PATH_DEB
     archiveFileName = "${DISTRIBUTION_NAME}.deb"
@@ -738,7 +750,7 @@ signing {
     sign packageAsDeb
 }
 
-task packageDistribution() {
+tasks.register('packageDistribution') {
     if (IS_WINDOWS) {
         finalizedBy(packageAsMsi, packageAsZip)
     } else if (IS_MAC) {
@@ -748,7 +760,7 @@ task packageDistribution() {
     }
 }
 
-task signPackageDistribution() {
+tasks.register('signPackageDistribution') {
     if (IS_WINDOWS) {
         finalizedBy(signPackageAsMsi, signPackageAsZip)
     } else if (IS_MAC) {
