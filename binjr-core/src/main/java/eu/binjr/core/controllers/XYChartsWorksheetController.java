@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2023 Frederic Thevenet
+ *    Copyright 2016-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -313,6 +313,9 @@ public class XYChartsWorksheetController extends WorksheetController {
                 case NONE, UNDEFINED ->
                         new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
             };
+            getBindingManager().bind(yAxis.numMinorTickProperty(), (yAxis instanceof BinaryStableTicksAxis) ?
+                    userPrefs.numMinorTickBinary.property() : userPrefs.numMinorTickDecimal.property());
+            getBindingManager().bind(yAxis.singleMinTickThresholdProperty(), userPrefs.singleMinTickThreshold.property());
             getBindingManager().bindBidirectional(yAxis.autoRangingProperty(), currentChart.autoScaleYAxisProperty());
             getBindingManager().bindBidirectional(yAxis.forceZeroInRangeProperty(), currentChart.alwaysIncludeOriginInAutoScaleProperty());
             yAxis.setAnimated(false);

@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Jason Winnebeck
- * Copyright 2019-2022 Frederic Thevenet
+ * Copyright 2019-2024 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Side;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
 
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     private T dataMinValue = (T) Double.valueOf(0);
     private final double[] dividers;
     private final int base;
+    private static final Logger logger = LogManager.getLogger(StableTicksAxis.class);
 
     public static class SelectableRegion extends Pane {
         private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
@@ -84,7 +86,6 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     /**
      * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
      */
-    private static final int NUM_MINOR_TICKS = 3;
     public static final int BTN_WITDTH = 21;
     private final SelectableRegion selectionMarker = new SelectableRegion();
     private final BooleanProperty selectionMarkerVisible = selectionMarker.visibleProperty();
@@ -119,6 +120,34 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
      * If true, when auto-ranging, force 0 to be the min or max end of the range.
      */
     private final BooleanProperty forceZeroInRange = new SimpleBooleanProperty(true);
+
+    private final IntegerProperty numMinorTick = new SimpleIntegerProperty(5);
+
+    public int getNumMinorTick() {
+        return numMinorTick.get();
+    }
+
+    public IntegerProperty numMinorTickProperty() {
+        return numMinorTick;
+    }
+
+    public void setNumMinorTick(int numMinorTick) {
+        this.numMinorTick.set(numMinorTick);
+    }
+
+    private final DoubleProperty singleMinTickThreshold = new SimpleDoubleProperty(16);
+
+    public double getSingleMinTickThreshold() {
+        return singleMinTickThreshold.get();
+    }
+
+    public DoubleProperty singleMinTickThresholdProperty() {
+        return singleMinTickThreshold;
+    }
+
+    public void setSingleMinTickThreshold(double singleMinTickThreshold) {
+        this.singleMinTickThreshold.set(singleMinTickThreshold);
+    }
 
     /**
      * Initializes a new instance of the {@link StableTicksAxis} class.
@@ -417,13 +446,20 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
         //Generate one more tick than we expect, for "overlap" to get minor ticks on both sides of the
         //first and last major tick.
         int numTicks = (int) (rangeVal.getDelta() / rangeVal.tickSpacing) + 1;
+        // Reduce the number of minor ticks to one if spacing between majors ticks is below threshold.
+        int numMinTick = getNumMinorTick();
+        double numMinTickThreshold = Math.abs(length / numTicks);
+        logger.trace(() -> "numMinTickThreshold = " + numMinTickThreshold);
+        if (numMinTickThreshold < getSingleMinTickThreshold()) {
+            numMinTick = 1;
+        }
         List<T> ret = new ArrayList<>(numTicks + 1);
-        minorTicks = new ArrayList<>((numTicks + 2) * NUM_MINOR_TICKS);
-        double minorTickSpacing = rangeVal.tickSpacing / (NUM_MINOR_TICKS + 1);
+        minorTicks = new ArrayList<>((numTicks + 2) * numMinTick);
+        double minorTickSpacing = rangeVal.tickSpacing / (numMinTick + 1);
         for (int i = 0; i <= numTicks; ++i) {
             double majorTick = firstTick + rangeVal.tickSpacing * i;
             ret.add((T) Double.valueOf(majorTick));
-            for (int j = 1; j <= NUM_MINOR_TICKS; ++j) {
+            for (int j = 1; j <= numMinTick; ++j) {
                 minorTicks.add((T) Double.valueOf(majorTick + minorTickSpacing * j));
             }
         }
