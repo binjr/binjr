@@ -296,7 +296,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private void initChartViewPorts() throws IOException {
-        if (worksheet.getCharts().size() == 0) {
+        if (worksheet.getCharts().isEmpty()) {
             worksheet.getCharts().add(new Chart());
         }
 
@@ -372,34 +372,25 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.setOnDragDropped(getBindingManager().registerHandler(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-                    TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
-                    if (treeView != null) {
-                        TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
-                        if (item != null) {
-                            Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                            if (targetStage != null) {
-                                targetStage.requestFocus();
-                            }
-                            Chart targetChart = null;
-                            if (event.getSource() instanceof XYChart<?, ?>) {
-                                for (var v : viewPorts) {
-                                    if (v.getChart().equals(event.getSource())) {
-                                        targetChart = v.getDataStore();
-                                    }
+                    getSelectedTreeNodes().ifPresent(items -> {
+                        Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                        if (targetStage != null) {
+                            targetStage.requestFocus();
+                        }
+                        Chart targetChart = null;
+                        if (event.getSource() instanceof XYChart<?, ?>) {
+                            for (var v : viewPorts) {
+                                if (v.getChart().equals(event.getSource())) {
+                                    targetChart = v.getDataStore();
                                 }
                             }
-                            var items = treeView.getSelectionModel().getSelectedItems();
-                            if (targetChart == null) {
-                                getChartListContextMenu(items).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
-                            } else {
-                                addToCurrentWorksheet(items, targetChart);
-                            }
-                        } else {
-                            logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                         }
-                    } else {
-                        logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-                    }
+                        if (targetChart == null) {
+                            getChartListContextMenu(items).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+                        } else {
+                            addToCurrentWorksheet(items, targetChart);
+                        }
+                    });
                     event.consume();
                 } else if (db.hasContent(VIEWPORT_DRAG_FORMAT)) {
                     int draggedIndex = (Integer) db.getContent(VIEWPORT_DRAG_FORMAT);
@@ -528,7 +519,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 event.consume();
             }
         }));
-        if (viewPorts.size() > 0) {
+        if (!viewPorts.isEmpty()) {
             getBindingManager().attachListener(worksheet.selectedChartProperty(),
                     (ChangeListener<Integer>) (observable, oldValue, newValue) -> setSelectedChart(newValue));
         }
@@ -590,7 +581,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 chart.setHorizontalZeroLineVisible(false);
                 chart.setVerticalGridLinesVisible(false);
                 chart.setHorizontalGridLinesVisible(false);
-                getBindingManager().bind(chart.translateXProperty(), viewPorts.get(0).getChart().getYAxis().widthProperty());
+                getBindingManager().bind(chart.translateXProperty(), viewPorts.getFirst().getChart().getYAxis().widthProperty());
                 getBindingManager().bind(chart.getYAxis().translateXProperty(), Bindings.createDoubleBinding(
                         () -> viewPorts.stream()
                                 .filter(c -> viewPorts.indexOf(c) != 0 && viewPorts.indexOf(c) < viewPorts.indexOf(v))
@@ -653,14 +644,14 @@ public class XYChartsWorksheetController extends WorksheetController {
 
         // setup crosshair
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
-        map.put(viewPorts.get(0).getChart(), viewPorts.get(0).getPrefixFormatter()::format);
+        map.put(viewPorts.getFirst().getChart(), viewPorts.getFirst().getPrefixFormatter()::format);
         var crossHair = new XYChartCrosshair<>(map, chartParent,
                 dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
         var nbChartObs = new SimpleIntegerProperty(viewPorts.size());
         var crosshairHeightBinding = BooleanBinding.booleanExpression(userPrefs.fullHeightCrosshairMarker.property())
                 .and(Bindings.greaterThan(nbChartObs, 1));
         getBindingManager().bind(crossHair.displayFullHeightMarkerProperty(), crosshairHeightBinding);
-        viewPorts.get(0).setCrosshair(crossHair);
+        viewPorts.getFirst().setCrosshair(crossHair);
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
@@ -1046,7 +1037,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             chartProperties.expand();
         }
         splitPane.setDividerPositions(worksheet.getDividerPosition());
-        getBindingManager().bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+        getBindingManager().bind(worksheet.dividerPositionProperty(), splitPane.getDividers().getFirst().positionProperty());
     }
 
     @Override
@@ -1102,52 +1093,55 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
-            if (treeView != null) {
-                TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
-                if (item != null) {
-                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    if (targetStage != null) {
-                        targetStage.requestFocus();
-                    }
-                    try {
-                        TitledPane droppedPane = (TitledPane) event.getSource();
-                        ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
-                        addBindings(TreeViewUtils.flattenLeaves(item, true).stream()
-                                .filter(b -> b instanceof TimeSeriesBinding)
-                                .map(b -> (TimeSeriesBinding) b).collect(Collectors.toList()), viewPort.getDataStore());
-                    } catch (Exception e) {
-                        Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
-                    }
-                    logger.debug("dropped to " + event);
-                } else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+            getSelectedTreeNodes().ifPresent(selectedNodes -> {
+                Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                if (targetStage != null) {
+                    targetStage.requestFocus();
                 }
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-            }
+                try {
+                    TitledPane droppedPane = (TitledPane) event.getSource();
+                    ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
+                    var bindings = new LinkedHashSet<SourceBinding>();
+                    for (var item : selectedNodes) {
+                        bindings.addAll(TreeViewUtils.flattenLeaves(item, true).stream()
+                                .filter(b -> b instanceof TimeSeriesBinding)
+                                .map(b -> (TimeSeriesBinding) b).toList());
+                    }
+                    addBindings(bindings, viewPort.getDataStore());
+                } catch (Exception e) {
+                    Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
+                }
+                logger.debug("dropped to {}", event);
+            });
             event.consume();
         }
+    }
+
+    private Optional<ObservableList<TreeItem<SourceBinding>>> getSelectedTreeNodes() {
+        TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
+        if (treeView != null) {
+            ObservableList<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();
+            if (items != null && !items.isEmpty()) {
+                return Optional.of(items);
+            } else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeItem collection is null or empty");
+            }
+        } else {
+            logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+        }
+        return Optional.empty();
     }
 
     private void handleDragDroppedONewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
-            if (treeView != null) {
-                Collection<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();
-                if (items != null && !items.isEmpty()) {
-                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    if (targetStage != null) {
-                        targetStage.requestFocus();
-                    }
-                    addToNewChart(items);
-                } else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+            getSelectedTreeNodes().ifPresent(items -> {
+                Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                if (targetStage != null) {
+                    targetStage.requestFocus();
                 }
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-            }
+                addToNewChart(items);
+            });
             event.consume();
         }
     }
@@ -1256,7 +1250,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 if (c.wasAdded()) {
                     getParentController().getWorkspace().setPresentationMode(false);
                     List<? extends Chart> added = c.getAddedSubList();
-                    Chart chart = added.get(added.size() - 1);
+                    Chart chart = added.getLast();
                     int chartIndex = worksheet.getCharts().indexOf(chart);
                     worksheet.setSelectedChart(chartIndex);
                     reloadNeeded = true;
@@ -1299,7 +1293,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                         andAll &= t.isSelected();
                         orAll |= t.isSelected();
                     }
-                    CheckBox showAllCheckBox = (CheckBox) v.getSeriesTable().getColumns().get(0).getGraphic();
+                    CheckBox showAllCheckBox = (CheckBox) v.getSeriesTable().getColumns().getFirst().getGraphic();
                     showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
                     showAllCheckBox.setSelected(andAll);
                 });
@@ -1471,7 +1465,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                         switch (currentChart.getChartType()) {
                             case AREA, STACKED -> {
                                 ObservableList<Node> children = ((Group) newNode).getChildren();
-                                if (children != null && children.size() >= 1) {
+                                if (children != null && !children.isEmpty()) {
                                     Path stroke = (Path) children.get(1);
                                     Path fill = (Path) children.get(0);
                                     logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
