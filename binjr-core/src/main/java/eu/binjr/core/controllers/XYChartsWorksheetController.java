@@ -372,7 +372,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.setOnDragDropped(getBindingManager().registerHandler(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-                    getSelectedTreeNodes().ifPresent(items -> {
+                    getParentController().getSelectedTreeNodes().ifPresent(items -> {
                         Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                         if (targetStage != null) {
                             targetStage.requestFocus();
@@ -1093,7 +1093,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            getSelectedTreeNodes().ifPresent(selectedNodes -> {
+            getParentController().getSelectedTreeNodes().ifPresent(selectedNodes -> {
                 Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 if (targetStage != null) {
                     targetStage.requestFocus();
@@ -1117,25 +1117,10 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-    private Optional<ObservableList<TreeItem<SourceBinding>>> getSelectedTreeNodes() {
-        TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
-        if (treeView != null) {
-            ObservableList<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();
-            if (items != null && !items.isEmpty()) {
-                return Optional.of(items);
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeItem collection is null or empty");
-            }
-        } else {
-            logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-        }
-        return Optional.empty();
-    }
-
     private void handleDragDroppedONewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            getSelectedTreeNodes().ifPresent(items -> {
+            getParentController().getSelectedTreeNodes().ifPresent(items -> {
                 Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 if (targetStage != null) {
                     targetStage.requestFocus();

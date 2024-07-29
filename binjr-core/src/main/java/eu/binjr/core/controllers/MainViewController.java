@@ -1642,18 +1642,10 @@ public class MainViewController implements Initializable {
                 db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
                 db.hasContent(TEXT_FILES_BINDING_FORMAT) ||
                 db.hasContent(LOG_FILES_BINDING_FORMAT)) {
-            TreeView<SourceBinding> treeView = getSelectedTreeView();
-            if (treeView != null) {
-                var items = treeView.getSelectionModel().getSelectedItems();
-                if (items != null && !items.isEmpty()) {
-                    var currentTabPane = (TabPane) ((Node) event.getGestureTarget()).getScene().lookup("#tearableTabPane");
-                    addToNewWorksheet(currentTabPane != null ? currentTabPane : tearableTabPane.getSelectedTabPane(), items);
-                } else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
-                }
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-            }
+            getSelectedTreeNodes().ifPresent(items -> {
+                var currentTabPane = (TabPane) ((Node) event.getGestureTarget()).getScene().lookup("#tearableTabPane");
+                addToNewWorksheet(currentTabPane != null ? currentTabPane : tearableTabPane.getSelectedTabPane(), items);
+            });
             event.consume();
         }
     }
@@ -1673,6 +1665,21 @@ public class MainViewController implements Initializable {
             AppEnvironment.getInstance().processRestartRequest();
         }
         Platform.exit();
+    }
+
+    public Optional<ObservableList<TreeItem<SourceBinding>>> getSelectedTreeNodes() {
+        TreeView<SourceBinding> treeView = getSelectedTreeView();
+        if (treeView != null) {
+            ObservableList<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();
+            if (items != null && !items.isEmpty()) {
+                return Optional.of(items);
+            } else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeItem collection is null or empty");
+            }
+        } else {
+            logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+        }
+        return Optional.empty();
     }
 
     public Optional<WorksheetController> getSelectedWorksheetController() {

@@ -315,7 +315,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Wrap text
         getBindingManager().bind(logsTextOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         getBindingManager().attachListener(logsTextOutput.wrapTextProperty(), (ChangeListener<Boolean>) (obs, oldVal, newVal) -> {
-          // Workaround to force text wrapping (see: https://github.com/FXMisc/RichTextFX/issues/979#issuecomment-737229331)
+            // Workaround to force text wrapping (see: https://github.com/FXMisc/RichTextFX/issues/979#issuecomment-737229331)
             if (newVal) {
                 final int cp = logsTextOutput.getCaretPosition();
                 final int pi = logsTextOutput.firstVisibleParToAllParIndex();
@@ -868,22 +868,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(LogFilesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
-            if (treeView != null) {
-                TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
-                if (item != null) {
-                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    if (targetStage != null) {
-                        targetStage.requestFocus();
-                    }
-                    var items = treeView.getSelectionModel().getSelectedItems();
-                    addToCurrentWorksheet(items);
-                } else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+           getParentController().getSelectedTreeNodes().ifPresent(items -> {
+                Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                if (targetStage != null) {
+                    targetStage.requestFocus();
                 }
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-            }
+                addToCurrentWorksheet(items);
+            });
             event.consume();
         }
     }
