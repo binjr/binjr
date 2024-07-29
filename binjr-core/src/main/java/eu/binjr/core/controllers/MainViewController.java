@@ -113,7 +113,6 @@ public class MainViewController implements Initializable {
     private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
 
     private BooleanBinding noWorksheetPresent;
-    private BooleanBinding noSourcePresent;
 
     @FXML
     private MenuItem inlineHelpMenuItem;
@@ -231,7 +230,7 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
         noWorksheetPresent = Bindings.size(tearableTabPane.getTabs()).isEqualTo(0);
-        noSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
+        BooleanBinding noSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
 
         settingsPane.setMaxWidth(SETTINGS_PANE_WIDTH);
         settingsPane.setPrefWidth(SETTINGS_PANE_WIDTH);
@@ -405,7 +404,7 @@ public class MainViewController implements Initializable {
                 if (latestWorkspace.exists()) {
                     loadWorkspace(latestWorkspace);
                 } else {
-                    logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
+                    logger.warn("Cannot reopen workspace {}: file does not exists", latestWorkspace.getPath());
                 }
             });
         }
@@ -560,7 +559,7 @@ public class MainViewController implements Initializable {
         try {
             Dialogs.launchUrlInExternalBrowser(url);
         } catch (IOException | URISyntaxException e) {
-            logger.error("Failed to launch url in browser: " + url);
+            logger.error("Failed to launch url in browser: {}", url);
             logger.debug("Exception stack", e);
         }
     }
@@ -866,7 +865,7 @@ public class MainViewController implements Initializable {
             try {
                 loadWorksheet(w);
             } catch (CannotLoadWorksheetException e) {
-                logger.warn("Could not restore worksheet: " + e.getMessage());
+                logger.warn("Could not restore worksheet: {}", e.getMessage());
                 logger.debug(() -> "Could not restore worksheet", e);
             }
         });
@@ -1281,7 +1280,7 @@ public class MainViewController implements Initializable {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
                         .filter(tab1 -> !tab1.equals(tab))
-                        .collect(Collectors.toList())
+                        .toList()
                 );
             }
         }));
@@ -1380,7 +1379,7 @@ public class MainViewController implements Initializable {
             try {
                 dp.close();
             } catch (Throwable t) {
-                logger.warn("An error occurred while attempting to close DataAdapter " + dp.getId(), e);
+                logger.warn("An error occurred while attempting to close DataAdapter {}", dp.getId(), e);
             }
         }
         return Optional.empty();
@@ -1402,16 +1401,10 @@ public class MainViewController implements Initializable {
     }
 
     private ContextMenu getTreeViewContextMenu(final TreeView<SourceBinding> treeView) {
-
         var bindingManager = getWorkspace().getBindingManager();
         var selectionIsEmpty = Bindings.createBooleanBinding(
                 () -> treeView.getSelectionModel().getSelectedItems().isEmpty(),
                 treeView.getSelectionModel().getSelectedItems());
-        var selectionIsMono = Bindings.createBooleanBinding(
-                () -> treeView.getSelectionModel().getSelectedItems().size() < 2,
-                treeView.getSelectionModel().getSelectedItems());
-        var menu = new ContextMenu();
-
         var selectAllMenuItem = new MenuItem("Select All");
         selectAllMenuItem.setOnAction(bindingManager.registerHandler(e -> {
             treeView.getSelectionModel().selectAll();
@@ -1507,7 +1500,8 @@ public class MainViewController implements Initializable {
     }
 
     private void findNext() {
-        if (isNullOrEmpty(searchField.getText())) {
+        String textToFind = searchField.getText();
+        if ((textToFind == null || textToFind.trim().isEmpty())) {
             return;
         }
         TreeView<SourceBinding> selectedTreeView = getSelectedTreeView();
@@ -1520,9 +1514,9 @@ public class MainViewController implements Initializable {
                     return false;
                 }
                 if (searchCaseSensitiveToggle.isSelected()) {
-                    return i.getValue().getLegend().contains(searchField.getText());
+                    return i.getValue().getLegend().contains(textToFind);
                 } else {
-                    return i.getValue().getLegend().toLowerCase().contains(searchField.getText().toLowerCase());
+                    return i.getValue().getLegend().toLowerCase().contains(textToFind.toLowerCase());
                 }
             });
         }
@@ -1537,17 +1531,13 @@ public class MainViewController implements Initializable {
         } else {
             searchField.setStyle("-fx-background-color: #FF000040;");
         }
-        logger.trace(() -> "Search for " + searchField.getText() + " yielded " + searchResultSet.size() + " match(es)");
+        logger.trace("Search for {} yielded {} match(es)", textToFind, searchResultSet.size());
     }
 
     private void invalidateSearchResults() {
         logger.trace("Invalidating search result");
         this.searchResultSet = null;
         this.currentSearchHit = -1;
-    }
-
-    private boolean isNullOrEmpty(String s) {
-        return (s == null || s.trim().length() == 0);
     }
 
     private void onWorksheetTabChanged(ListChangeListener.Change<? extends Tab> c) {
@@ -1562,7 +1552,7 @@ public class MainViewController implements Initializable {
                                         seriesControllers.get(tab).getWorksheet(),
                                         seriesControllers.get(tab).getBindingManager()));
                     } else {
-                        logger.warn("Could not find a controller assigned to tab " + tab.getText());
+                        logger.warn("Could not find a controller assigned to tab {}", tab.getText());
                     }
                 });
             }
@@ -1583,7 +1573,7 @@ public class MainViewController implements Initializable {
                         seriesControllers.remove(tab);
                         ctlr.close();
                     } else {
-                        logger.warn("Could not find a controller assigned to tab " + tab.getText());
+                        logger.warn("Could not find a controller assigned to tab {}", tab.getText());
                     }
                 }));
             }
@@ -1605,10 +1595,10 @@ public class MainViewController implements Initializable {
                     Source removedSource = sourcesAdapters.remove(t);
                     if (removedSource != null) {
                         workspace.removeSource(removedSource);
-                        logger.debug("Closing Source " + removedSource.getName());
+                        logger.debug("Closing Source {}", removedSource.getName());
                         removedSource.close();
                     } else {
-                        logger.trace("No Source to close attached to tab " + t.getText());
+                        logger.trace("No Source to close attached to tab {}", t.getText());
                     }
                 } catch (Exception e) {
                     Dialogs.notifyException("On error occurred while closing Source", e);
