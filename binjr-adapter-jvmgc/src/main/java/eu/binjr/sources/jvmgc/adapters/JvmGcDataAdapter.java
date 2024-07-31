@@ -44,7 +44,6 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -131,7 +130,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                 FilterableTreeItem<SourceBinding> node = tree;
                 for (var category : m.category()) {
                     var nodecopy = node;
-                    node = poolDict.computeIfAbsent( category, k -> attachNode(k, nodecopy.getValue().getLabel(), k, m.unit(), m.prefix(), m.chartType(), m.color(), nodecopy));
+                    node = poolDict.computeIfAbsent(category, k -> attachNode(k, nodecopy.getValue().getLabel(), k, m.unit(), m.prefix(), m.chartType(), m.color(), nodecopy));
                 }
                 attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), m.color(), node);
 
@@ -231,9 +230,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[GC Logs] ")
-                .append(gcLogPath != null ? gcLogPath.getFileName() : "???")
-                .toString();
+        return "[GC Logs] " + (gcLogPath != null ? gcLogPath.getFileName() : "???");
     }
 
     @Override

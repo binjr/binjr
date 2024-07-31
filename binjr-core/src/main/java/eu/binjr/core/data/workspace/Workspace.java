@@ -155,7 +155,7 @@ public class Workspace implements Dirtyable {
             if (verStr == null) {
                 throw new CannotLoadWorkspaceException(
                         "Could not determine the workspace's schema version: it was probably produced with an older, incompatible version of binjr." +
-                                "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString() + ")");
+                                "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION + ")");
             }
             Version foundVersion = new Version(verStr);
             if (foundVersion.compareTo(SUPPORTED_SCHEMA_VERSION) > 0) {
@@ -163,14 +163,14 @@ public class Workspace implements Dirtyable {
                     // Only throw if major version is different, only warn otherwise.
                     throw new CannotLoadWorkspaceException(
                             "This workspace is not compatible with the current version of binjr. (Supported schema version="
-                                    + SUPPORTED_SCHEMA_VERSION.toString()
+                                    + SUPPORTED_SCHEMA_VERSION
                                     + ", found="
-                                    + foundVersion.toString() + ")");
+                                    + foundVersion + ")");
                 }
                 logger.warn("This workspace version is higher that the supported version; there may be incompatibilities (Supported schema version="
-                        + SUPPORTED_SCHEMA_VERSION.toString()
+                        + SUPPORTED_SCHEMA_VERSION
                         + ", found="
-                        + foundVersion.toString() + ")");
+                        + foundVersion + ")");
             }
             if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
                 // Returns true to signal workspace requires schema migration
@@ -351,12 +351,10 @@ public class Workspace implements Dirtyable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Workspace{");
-        sb.append("sources=").append(sources);
-        sb.append(", path='").append(path).append('\'');
-        sb.append(", worksheets=").append(worksheets);
-        sb.append('}');
-        return sb.toString();
+        return "Workspace{" + "sources=" + sources +
+                ", path='" + path + '\'' +
+                ", worksheets=" + worksheets +
+                '}';
     }
 
     /**
@@ -370,7 +368,7 @@ public class Workspace implements Dirtyable {
     }
 
     public void close() {
-        logger.debug("Closing Workspace " + this.toString());
+        logger.debug("Closing Workspace " + this);
         try {
             clear();
             this.status.close();

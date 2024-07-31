@@ -18,10 +18,8 @@ package eu.binjr.sources.jfr.adapters;
 
 
 import com.google.gson.Gson;
-import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
-import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -33,7 +31,6 @@ import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleLongProperty;
@@ -44,14 +41,11 @@ import org.apache.lucene.document.StringField;
 import org.apache.lucene.facet.FacetField;
 
 import java.io.IOException;
-import java.lang.annotation.Retention;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 

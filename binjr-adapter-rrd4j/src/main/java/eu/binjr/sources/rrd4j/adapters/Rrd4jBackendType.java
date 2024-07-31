@@ -36,5 +36,5 @@ public enum Rrd4jBackendType {
     /**
      *  Memory-oriented backend. RRD data is stored in memory, it gets lost as soon as JVM exits.
      */
-    MEMORY;
+    MEMORY
 }

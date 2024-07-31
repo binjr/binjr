@@ -31,7 +31,7 @@ import java.util.Map;
  */
 @Deprecated
 public class LRUMapSizeBound<K, V extends Cacheable> extends LinkedHashMap<K, V> {
-    private long maxSize;
+    private final long maxSize;
 
     /**
      * Initializes a new instance of the {@link LRUMapSizeBound} class with the specified capacity

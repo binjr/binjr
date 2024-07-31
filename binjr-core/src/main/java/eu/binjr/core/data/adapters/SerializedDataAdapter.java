@@ -16,7 +16,6 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.codec.Decoder;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -27,7 +26,6 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * Provides the means to access a data source to retrieve raw time series data while decoding that data into

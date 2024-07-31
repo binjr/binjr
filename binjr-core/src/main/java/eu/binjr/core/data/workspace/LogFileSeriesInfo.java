@@ -24,7 +24,6 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.indexes.IndexingStatus;
 import eu.binjr.core.data.indexes.SearchHit;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.Property;

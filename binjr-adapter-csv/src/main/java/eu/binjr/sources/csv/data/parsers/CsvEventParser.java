@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -94,7 +93,7 @@ public class CsvEventParser implements EventParser {
             }
             ZonedDateTime timestamp;
             if (format.getProfile().getTimestampColumn() == -1) {
-                timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve().plus(sequence.get(), ChronoUnit.SECONDS), format.getZoneId());
+                timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve().plusSeconds(sequence.get()), format.getZoneId());
             } else {
                 if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
                     throw new UnsupportedOperationException("Cannot extract time stamp in column #" +

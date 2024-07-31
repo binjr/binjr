@@ -58,7 +58,7 @@ public class ChartSummary {
 
         FREEBSD("freebsd");
 
-        private String value;
+        private final String value;
 
         OsEnum(String value) {
             this.value = value;
@@ -441,23 +441,22 @@ public class ChartSummary {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class ChartSummary {\n");
-        sb.append("    hostname: ").append(toIndentedString(hostname)).append("\n");
-        sb.append("    version: ").append(toIndentedString(version)).append("\n");
-        sb.append("    releaseChannel: ").append(toIndentedString(releaseChannel)).append("\n");
-        sb.append("    timezone: ").append(toIndentedString(timezone)).append("\n");
-        sb.append("    os: ").append(toIndentedString(os)).append("\n");
-        sb.append("    history: ").append(toIndentedString(history)).append("\n");
-        sb.append("    memoryMode: ").append(toIndentedString(memoryMode)).append("\n");
-        sb.append("    updateEvery: ").append(toIndentedString(updateEvery)).append("\n");
-        sb.append("    charts: ").append(toIndentedString(charts)).append("\n");
-        sb.append("    chartsCount: ").append(toIndentedString(chartsCount)).append("\n");
-        sb.append("    dimensionsCount: ").append(toIndentedString(dimensionsCount)).append("\n");
-        sb.append("    alarmsCount: ").append(toIndentedString(alarmsCount)).append("\n");
-        sb.append("    rrdMemoryBytes: ").append(toIndentedString(rrdMemoryBytes)).append("\n");
-        sb.append("}");
-        return sb.toString();
+        String sb = "class ChartSummary {\n" +
+                "    hostname: " + toIndentedString(hostname) + "\n" +
+                "    version: " + toIndentedString(version) + "\n" +
+                "    releaseChannel: " + toIndentedString(releaseChannel) + "\n" +
+                "    timezone: " + toIndentedString(timezone) + "\n" +
+                "    os: " + toIndentedString(os) + "\n" +
+                "    history: " + toIndentedString(history) + "\n" +
+                "    memoryMode: " + toIndentedString(memoryMode) + "\n" +
+                "    updateEvery: " + toIndentedString(updateEvery) + "\n" +
+                "    charts: " + toIndentedString(charts) + "\n" +
+                "    chartsCount: " + toIndentedString(chartsCount) + "\n" +
+                "    dimensionsCount: " + toIndentedString(dimensionsCount) + "\n" +
+                "    alarmsCount: " + toIndentedString(alarmsCount) + "\n" +
+                "    rrdMemoryBytes: " + toIndentedString(rrdMemoryBytes) + "\n" +
+                "}";
+        return sb;
     }
 
     /**

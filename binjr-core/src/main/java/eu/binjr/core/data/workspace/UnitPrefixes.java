@@ -19,7 +19,6 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.common.text.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An enumeration of the support unit prefixes

@@ -19,9 +19,7 @@ package eu.binjr.sources.csv.data.parsers;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
-import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;

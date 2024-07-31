@@ -51,12 +51,12 @@ public class LoggingOutputStream extends OutputStream {
     /**
      * The logger to write to.
      */
-    private Logger log;
+    private final Logger log;
 
     /**
      * The log level.
      */
-    private Level level;
+    private final Level level;
 
     /**
      * Creates the Logging instance to flush to the given logger.

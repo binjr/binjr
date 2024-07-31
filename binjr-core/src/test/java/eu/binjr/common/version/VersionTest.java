@@ -16,10 +16,7 @@
 
 package eu.binjr.common.version;
 
-import eu.binjr.common.version.Version;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class VersionTest {

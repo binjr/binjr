@@ -18,11 +18,9 @@ package eu.binjr.sources.csv.adapters;
 
 
 import com.google.gson.Gson;
-import eu.binjr.common.auth.JfxKrb5LoginModule;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;

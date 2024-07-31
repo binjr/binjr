@@ -62,7 +62,7 @@ public class AsyncTaskManager {
      * @return the result of the task
      */
     public <V> CompletableFuture<?> submit(Task<V> task) {
-        logger.trace(() -> "Task " + task.toString() + " submitted");
+        logger.trace("Task {} submitted", task);
         return CompletableFuture.runAsync(task, mainthreadPool);
     }
 
@@ -76,7 +76,7 @@ public class AsyncTaskManager {
      * @return the result of the task
      */
     public <V> CompletableFuture<?> submit(Callable<V> action, EventHandler<WorkerStateEvent> onSucceeded, EventHandler<WorkerStateEvent> onFailed) {
-        Task<V> t = new Task<V>() {
+        Task<V> t = new Task<>() {
             @Override
             protected V call() throws Exception {
                 return action.call();
@@ -84,12 +84,12 @@ public class AsyncTaskManager {
         };
         t.setOnSucceeded(onSucceeded);
         t.setOnFailed(onFailed);
-        logger.trace(() -> "Task " + t.toString() + " submitted");
+        logger.trace("Task {} submitted", t);
         return CompletableFuture.runAsync(t, mainthreadPool);
     }
 
     public CompletableFuture<?> submitSubTask(Runnable action) {
-        logger.trace(() -> "Submiting runnable directly on the thread pool");
+        logger.trace("Submitting runnable directly on the thread pool");
         return CompletableFuture.runAsync(action, subTaskThreadPool);
     }
 

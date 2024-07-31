@@ -17,7 +17,6 @@
 package eu.binjr.core.data.timeseries;
 
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 
 /**
  * A functional interface to be used as a factory for {@link TimeSeriesProcessor}

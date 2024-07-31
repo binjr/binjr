@@ -38,9 +38,9 @@ public class CloseableResourceManager<T extends Closeable> {
      * @param <U> Resource type
      */
     private final class ResourceHolder<U extends AutoCloseable> {
-        private AtomicInteger referenceCount = new AtomicInteger(0);
+        private final AtomicInteger referenceCount = new AtomicInteger(0);
         private volatile boolean closed;
-        private U instance;
+        private final U instance;
 
         /**
          * Constructor

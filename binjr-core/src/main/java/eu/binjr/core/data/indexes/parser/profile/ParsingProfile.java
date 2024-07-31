@@ -22,7 +22,6 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.preferences.TemporalAnchor;
 import eu.binjr.core.preferences.UserPreferences;
 
-import java.time.*;
 import java.util.Map;
 import java.util.regex.Pattern;
 

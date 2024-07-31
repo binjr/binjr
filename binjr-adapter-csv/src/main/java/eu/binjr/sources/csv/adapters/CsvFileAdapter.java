@@ -87,7 +87,6 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
     private List<String> headers;
-    private long sequence = 0;
 
 
     /**
@@ -205,12 +204,11 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[CSV] ")
-                .append(csvPath != null ? csvPath.getFileName() : "???")
-                .append(" (")
-                .append(zoneId != null ? zoneId : "???")
-                .append(")")
-                .toString();
+        return "[CSV] " +
+                (csvPath != null ? csvPath.getFileName() : "???") +
+                " (" +
+                (zoneId != null ? zoneId : "???") +
+                ")";
     }
 
     @Override

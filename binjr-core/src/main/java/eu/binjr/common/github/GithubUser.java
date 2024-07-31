@@ -282,32 +282,30 @@ public class GithubUser {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GithubUser{");
-        sb.append("hireable=").append(hireable);
-        sb.append(", createdAt=").append(createdAt);
-        sb.append(", collaborators=").append(collaborators);
-        sb.append(", diskUsage=").append(diskUsage);
-        sb.append(", followers=").append(followers);
-        sb.append(", following=").append(following);
-        sb.append(", id=").append(id);
-        sb.append(", ownedPrivateRepos=").append(ownedPrivateRepos);
-        sb.append(", privateGists=").append(privateGists);
-        sb.append(", publicGists=").append(publicGists);
-        sb.append(", publicRepos=").append(publicRepos);
-        sb.append(", totalPrivateRepos=").append(totalPrivateRepos);
-        sb.append(", avatarUrl='").append(avatarUrl).append('\'');
-        sb.append(", bio='").append(bio).append('\'');
-        sb.append(", blog='").append(blog).append('\'');
-        sb.append(", company='").append(company).append('\'');
-        sb.append(", email='").append(email).append('\'');
-        sb.append(", gravatarId='").append(gravatarId).append('\'');
-        sb.append(", htmlUrl='").append(htmlUrl).append('\'');
-        sb.append(", location='").append(location).append('\'');
-        sb.append(", login='").append(login).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", type='").append(type).append('\'');
-        sb.append(", url='").append(url).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "GithubUser{" + "hireable=" + hireable +
+                ", createdAt=" + createdAt +
+                ", collaborators=" + collaborators +
+                ", diskUsage=" + diskUsage +
+                ", followers=" + followers +
+                ", following=" + following +
+                ", id=" + id +
+                ", ownedPrivateRepos=" + ownedPrivateRepos +
+                ", privateGists=" + privateGists +
+                ", publicGists=" + publicGists +
+                ", publicRepos=" + publicRepos +
+                ", totalPrivateRepos=" + totalPrivateRepos +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                ", bio='" + bio + '\'' +
+                ", blog='" + blog + '\'' +
+                ", company='" + company + '\'' +
+                ", email='" + email + '\'' +
+                ", gravatarId='" + gravatarId + '\'' +
+                ", htmlUrl='" + htmlUrl + '\'' +
+                ", location='" + location + '\'' +
+                ", login='" + login + '\'' +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", url='" + url + '\'' +
+                '}';
     }
 }

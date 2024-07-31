@@ -30,8 +30,8 @@ import java.util.prefs.BackingStoreException;
 public class FilePreferences extends AbstractPreferences {
     private static final Logger logger = Logger.create(FilePreferences.class);
     private final File backingFile;
-    private Map<String, String> root;
-    private Map<String, FilePreferences> children;
+    private final Map<String, String> root;
+    private final Map<String, FilePreferences> children;
     private boolean isRemoved = false;
 
     public FilePreferences(File backingFile, AbstractPreferences parent, String name) {

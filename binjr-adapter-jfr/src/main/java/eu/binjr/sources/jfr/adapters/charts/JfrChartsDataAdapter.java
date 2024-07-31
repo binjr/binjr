@@ -132,8 +132,8 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                         addField(JfrEventFormat.GCREF_WEAK_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
                         addField(JfrEventFormat.GCREF_PHANTOM_REFERENCE, eventType.getField(JfrEventFormat.GCREF_COUNT_FIELD), leaf, 1);
                     }
-                    case JfrEventFormat.JDK_CPULOAD ->{
-                        var jvmBranch =new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
+                    case JfrEventFormat.JDK_CPULOAD -> {
+                        var jvmBranch = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
                                 .withLabel("JVM")
                                 .withPath(leaf.getValue().getPath())
                                 .withParent(leaf.getValue())
@@ -166,7 +166,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                                 .withAdapter(this)
                                 .build()));
 
-                        var machineBranch =new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
+                        var machineBranch = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
                                 .withLabel("Machine")
                                 .withPath(leaf.getValue().getPath())
                                 .withParent(leaf.getValue())
@@ -250,9 +250,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[JFR: Charts] ")
-                .append(jfrFilePath != null ? jfrFilePath.getFileName() : "???")
-                .toString();
+        return "[JFR: Charts] " + (jfrFilePath != null ? jfrFilePath.getFileName() : "???");
     }
 
     private Unit extractKnownUnit(ValueDescriptor field) {

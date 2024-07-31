@@ -28,7 +28,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.groupingBy;
 
 public interface Rangeable<T> {
-    static final Logger logger = Logger.create(Rangeable.class);
+    Logger logger = Logger.create(Rangeable.class);
     /**
      * Returns all the {@link TimeSeriesInfo} for this the {@link Rangeable}
      *

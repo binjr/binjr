@@ -28,7 +28,7 @@ import java.util.Map;
  */
 @Deprecated
 public class LRUMapCapacityBound<K, V> extends LinkedHashMap<K, V> {
-    private int cacheSize;
+    private final int cacheSize;
 
     /**
      * Initializes a new instance of the {@link LRUMapCapacityBound} class with the specified capacity

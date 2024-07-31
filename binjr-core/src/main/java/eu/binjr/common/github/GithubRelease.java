@@ -410,25 +410,23 @@ public class GithubRelease {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GithubRelease{");
-        sb.append("url='").append(url).append('\'');
-        sb.append(", htmlUrl='").append(htmlUrl).append('\'');
-        sb.append(", assetsUrl='").append(assetsUrl).append('\'');
-        sb.append(", uploadUrl='").append(uploadUrl).append('\'');
-        sb.append(", tarballUrl='").append(tarballUrl).append('\'');
-        sb.append(", zipballUrl='").append(zipballUrl).append('\'');
-        sb.append(", id=").append(id);
-        sb.append(", tagName='").append(tagName).append('\'');
-        sb.append(", targetCommitish='").append(targetCommitish).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", body='").append(body).append('\'');
-        sb.append(", isDraft=").append(isDraft);
-        sb.append(", isPrerelease=").append(isPrerelease);
-        sb.append(", createdAt=").append(createdAt);
-        sb.append(", publishedAt=").append(publishedAt);
-        sb.append(", author=").append(author);
-        sb.append('}');
-        return sb.toString();
+        return "GithubRelease{" + "url='" + url + '\'' +
+                ", htmlUrl='" + htmlUrl + '\'' +
+                ", assetsUrl='" + assetsUrl + '\'' +
+                ", uploadUrl='" + uploadUrl + '\'' +
+                ", tarballUrl='" + tarballUrl + '\'' +
+                ", zipballUrl='" + zipballUrl + '\'' +
+                ", id=" + id +
+                ", tagName='" + tagName + '\'' +
+                ", targetCommitish='" + targetCommitish + '\'' +
+                ", name='" + name + '\'' +
+                ", body='" + body + '\'' +
+                ", isDraft=" + isDraft +
+                ", isPrerelease=" + isPrerelease +
+                ", createdAt=" + createdAt +
+                ", publishedAt=" + publishedAt +
+                ", author=" + author +
+                '}';
     }
 
 

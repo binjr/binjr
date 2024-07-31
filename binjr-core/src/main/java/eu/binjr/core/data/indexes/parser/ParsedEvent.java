@@ -17,9 +17,7 @@
 package eu.binjr.core.data.indexes.parser;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class ParsedEvent {
     private final ZonedDateTime timestamp;

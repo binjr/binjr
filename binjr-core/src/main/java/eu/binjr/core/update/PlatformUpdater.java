@@ -18,8 +18,6 @@ package eu.binjr.core.update;
 
 import eu.binjr.common.version.Version;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 /**
@@ -34,7 +32,7 @@ public interface PlatformUpdater {
      *
      * @return true if "in-app" update is supported on the current platform, false otherwise.
      */
-    public boolean isInAppUpdateSupported();
+    boolean isInAppUpdateSupported();
 
     /**
      * Starts the update process
@@ -44,6 +42,6 @@ public interface PlatformUpdater {
      * @param restartRequested true if the app should be restarted once the update is complete, false otherwise.
      * @throws Exception if an error occurs during the update.
      */
-    public void launchUpdater(Path updatePackage, Version updateVersion, boolean restartRequested) throws Exception;
+    void launchUpdater(Path updatePackage, Version updateVersion, boolean restartRequested) throws Exception;
 
 }

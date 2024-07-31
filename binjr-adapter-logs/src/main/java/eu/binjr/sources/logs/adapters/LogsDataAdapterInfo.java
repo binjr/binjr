@@ -17,7 +17,6 @@
 package eu.binjr.sources.logs.adapters;
 
 
-import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;

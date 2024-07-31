@@ -114,12 +114,10 @@ public class TimeRange {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("TimeRange{");
-        sb.append("beginning=").append(beginning);
-        sb.append(", end=").append(end);
-        sb.append(", zoneId=").append(zoneId);
-        sb.append('}');
-        return sb.toString();
+        return "TimeRange{" + "beginning=" + beginning +
+                ", end=" + end +
+                ", zoneId=" + zoneId +
+                '}';
     }
 
     public static class Adapter extends TypeAdapter<TimeRange> {

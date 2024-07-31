@@ -297,7 +297,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 filenode = new FilterableTreeItem<>(
                         new LogFilesBinding.Builder()
                                 .withLabel(current.getFileName().toString())
-                                .withPath(getId() + "/" + path.toString())
+                                .withPath(getId() + "/" + path)
                                 .withParent(parent.getValue())
                                 .withParsingProfile(parsingProfile)
                                 .withAdapter(this)

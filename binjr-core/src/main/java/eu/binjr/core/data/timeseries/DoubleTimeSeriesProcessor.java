@@ -16,10 +16,7 @@
 
 package eu.binjr.core.data.timeseries;
 
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
-
-import java.util.OptionalDouble;
 
 /**
  * This class provides a full implementation of a {@link TimeSeriesProcessor} of {@link Double} values.

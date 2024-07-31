@@ -107,13 +107,11 @@ public abstract class ObservablePreference<T> implements ReloadableItemStore.Rel
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("ObservablePreference{");
-        sb.append("key='").append(key).append('\'');
-        sb.append(", defaultValue=").append(defaultValue);
-        sb.append(", value=").append(backingProperty.getValue());
-        sb.append(", innerType=").append(innerType);
-        sb.append('}');
-        return sb.toString();
+        return "ObservablePreference{" + "key='" + key + '\'' +
+                ", defaultValue=" + defaultValue +
+                ", value=" + backingProperty.getValue() +
+                ", innerType=" + innerType +
+                '}';
     }
 
     public PropertySheet.Item asPropertyItem() {

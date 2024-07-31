@@ -16,13 +16,8 @@
 
 package eu.binjr.common.javafx.controls;
 
-import eu.binjr.common.javafx.bindings.BindingManager;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
 
 /**
  * A {@link TableCell} implementation that shows an icon if the bound property is true

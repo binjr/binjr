@@ -21,7 +21,6 @@ import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.data.adapters.VisualizationType;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
-import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**

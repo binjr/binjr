@@ -131,7 +131,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @param msg the message string to be logged
      */
     public void perf(final Marker marker, final Message msg) {
-        logger.logIfEnabled(FQCN, PERF, marker, msg, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, marker, msg, null);
     }
 
     /**
@@ -152,7 +152,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @param message the message object to log.
      */
     public void perf(final Marker marker, final Object message) {
-        logger.logIfEnabled(FQCN, PERF, marker, message, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, marker, message, null);
     }
 
     /**
@@ -163,7 +163,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @since Log4j-2.6
      */
     public void perf(final Marker marker, final CharSequence message) {
-        logger.logIfEnabled(FQCN, PERF, marker, message, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, marker, message, null);
     }
 
     /**
@@ -416,7 +416,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @param msg the message string to be logged
      */
     public void perf(final Message msg) {
-        logger.logIfEnabled(FQCN, PERF, null, msg, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, null, msg, null);
     }
 
     /**
@@ -435,7 +435,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @param message the message object to log.
      */
     public void perf(final Object message) {
-        logger.logIfEnabled(FQCN, PERF, null, message, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, null, message, null);
     }
 
     /**
@@ -456,7 +456,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @since Log4j-2.6
      */
     public void perf(final CharSequence message) {
-        logger.logIfEnabled(FQCN, PERF, null, message, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, null, message, null);
     }
 
     /**
@@ -685,7 +685,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @since Log4j-2.4
      */
     public void perf(final Supplier<?> msgSupplier) {
-        logger.logIfEnabled(FQCN, PERF, null, msgSupplier, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, null, msgSupplier, null);
     }
 
     /**
@@ -711,7 +711,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @since Log4j-2.4
      */
     public void perf(final Marker marker, final Supplier<?> msgSupplier) {
-        logger.logIfEnabled(FQCN, PERF, marker, msgSupplier, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, marker, msgSupplier, null);
     }
 
     /**
@@ -764,7 +764,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @since Log4j-2.4
      */
     public void perf(final Marker marker, final MessageSupplier msgSupplier) {
-        logger.logIfEnabled(FQCN, PERF, marker, msgSupplier, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, marker, msgSupplier, null);
     }
 
     /**
@@ -791,7 +791,7 @@ public final class Logger extends ExtendedLoggerWrapper {
      * @since Log4j-2.4
      */
     public void perf(final MessageSupplier msgSupplier) {
-        logger.logIfEnabled(FQCN, PERF, null, msgSupplier, (Throwable) null);
+        logger.logIfEnabled(FQCN, PERF, null, msgSupplier, null);
     }
 
     /**

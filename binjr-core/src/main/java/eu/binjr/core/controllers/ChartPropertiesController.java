@@ -193,7 +193,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
     @Override
     public void close() {
         if (closing.compareAndSet(false, true)) {
-            logger.debug(() -> "Closing ChartPropertiesController " + this.toString());
+            logger.debug(() -> "Closing ChartPropertiesController " + this);
             bindingManager.close();
             closeButton.setOnAction(null);
         }

@@ -22,8 +22,6 @@ import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
-import java.util.Set;
-
 /**
  * Defines the preferences associated with the Text files adapter.
  */

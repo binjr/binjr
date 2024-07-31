@@ -20,7 +20,6 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 import java.nio.charset.Charset;
 import java.time.ZoneId;
-import java.util.function.Supplier;
 
 public interface EventFormat<T> {
     ParsingProfile getProfile();

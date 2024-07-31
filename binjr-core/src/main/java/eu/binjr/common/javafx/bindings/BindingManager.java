@@ -72,7 +72,7 @@ public class BindingManager implements AutoCloseable {
     public <T, U extends T> void bind(Property<T> property, ObservableValue<U> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
         Objects.requireNonNull(binding, "binding parameter cannot be null");
-        logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());
+        logger.trace(() -> "Binding " + binding + " to " + property);
         property.bind(binding);
         boundProperties.put(property, binding);
     }
@@ -98,7 +98,7 @@ public class BindingManager implements AutoCloseable {
     public <T> void bindBidirectional(Property<T> property, Property<T> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
         Objects.requireNonNull(binding, "binding parameter cannot be null");
-        logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());
+        logger.trace(() -> "Binding " + binding + " to " + property);
         property.bindBidirectional(binding);
         bidirectionallyBoundProperties.put(property, binding);
     }
@@ -106,7 +106,7 @@ public class BindingManager implements AutoCloseable {
     public <T> void unbindBidirectionnal(Property<T> property, Property<T> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
         Objects.requireNonNull(binding, "binding parameter cannot be null");
-        logger.trace(() -> "Unbinding " + binding.toString() + " from " + property.toString());
+        logger.trace(() -> "Unbinding " + binding + " from " + property);
         property.unbindBidirectional(binding);
         bidirectionallyBoundProperties.remove(property, binding);
     }
@@ -304,7 +304,7 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(map, "map parameter cannot be null");
         Objects.requireNonNull(attachAction, "attachAction parameter cannot be null");
         map.computeIfAbsent(observable, p -> new ArrayList<>()).add(listener);
-        logger.trace(() -> "Attaching listener " + listener.toString() + " to observable " + observable.toString());
+        logger.trace(() -> "Attaching listener " + listener + " to observable " + observable);
         attachAction.accept(observable, listener);
     }
 
@@ -315,11 +315,11 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
         List<U> listeners = map.get(key);
         if (listeners == null) {
-            logger.debug(() -> "Object " + key.toString() + " is not managed by this BindingManager instance");
+            logger.debug(() -> "Object " + key + " is not managed by this BindingManager instance");
             return;
         }
         listeners.stream().filter(l -> l.equals(value)).findFirst().ifPresent(found -> map.get(key).remove(found));
-        logger.trace(() -> "Unregistering " + value.toString() + " from " + key.toString());
+        logger.trace(() -> "Unregistering " + value + " from " + key);
         unregisterAction.accept(key, value);
     }
 
@@ -329,11 +329,11 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
         List<U> l = map.get(key);
         if (l == null) {
-            logger.debug(() -> "Object " + key.toString() + " is not managed by this BindingManager instance");
+            logger.debug(() -> "Object " + key + " is not managed by this BindingManager instance");
             return;
         }
         l.forEach(value -> {
-            logger.trace(() -> "Unregistering " + value.toString() + " from " + key.toString());
+            logger.trace(() -> "Unregistering " + value.toString() + " from " + key);
             unregisterAction.accept(key, value);
         });
         map.remove(key);

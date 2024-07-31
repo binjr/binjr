@@ -27,7 +27,6 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.sources.jfr.adapters.charts.JfrChartsDataAdapter;
-import eu.binjr.sources.jfr.adapters.charts.JfrChartsDataAdapterInfo;
 import javafx.scene.Node;
 import javafx.stage.FileChooser;
 

@@ -29,7 +29,7 @@ public interface NamedCaptureGroup {
 
     String name();
 
-   public class JsonAdapter extends TypeAdapter<NamedCaptureGroup> {
+   class JsonAdapter extends TypeAdapter<NamedCaptureGroup> {
         @Override
         public void write(JsonWriter out, NamedCaptureGroup value) throws IOException {
             out.value(value.name());

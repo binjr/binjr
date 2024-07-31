@@ -16,7 +16,6 @@
 
 package eu.binjr.core.data.indexes.parser.profile;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.JsonAdapter;
 import eu.binjr.common.json.adapters.PatternJsonAdapter;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;

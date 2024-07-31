@@ -115,7 +115,7 @@ public class ChartViewPort implements Closeable {
     @Override
     public void close() {
         if (closing.compareAndSet(false, true)) {
-            logger.debug(() -> "Closing ChartViewPort " + this.toString());
+            logger.debug(() -> "Closing ChartViewPort " + this);
             propertiesController.close();
             propertiesController = null;
             seriesTable.getColumns().forEach(c -> {

@@ -22,7 +22,6 @@ import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.LogParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
-import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;

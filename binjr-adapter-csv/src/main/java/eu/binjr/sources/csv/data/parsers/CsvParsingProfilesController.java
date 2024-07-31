@@ -17,7 +17,6 @@
 package eu.binjr.sources.csv.data.parsers;
 
 import com.google.gson.reflect.TypeToken;
-import eu.binjr.common.javafx.charts.StableTicksAxis;
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;

@@ -105,7 +105,7 @@ public class NaNStackedAreaChart<X, Y> extends StackedAreaChart<X, Y> {
                 }
                 // Now update all the keys that were in the previous series, but not in the new one
                 for (Map.Entry<Double, Double> e : prevAccum.entrySet()) {
-                    if (accum.keySet().contains(e.getKey())) {
+                    if (accum.containsKey(e.getKey())) {
                         continue;
                     }
                     Double k = e.getKey();

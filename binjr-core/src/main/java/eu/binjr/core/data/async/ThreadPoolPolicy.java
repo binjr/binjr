@@ -16,8 +16,6 @@
 
 package eu.binjr.core.data.async;
 
-import java.util.Objects;
-
 /**
  * Defines supported policies governing thread pools in {@link AsyncTaskManager}
  *
@@ -26,6 +24,6 @@ import java.util.Objects;
 public enum ThreadPoolPolicy {
     FIXED,
     CACHED,
-    WORK_STEALING;
+    WORK_STEALING
 
 }

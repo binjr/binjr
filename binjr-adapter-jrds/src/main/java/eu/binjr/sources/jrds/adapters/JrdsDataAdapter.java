@@ -149,15 +149,15 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[JRDS] ")
-                .append(getBaseAddress() != null ? getBaseAddress().getHost() : "???")
-                .append((getBaseAddress() != null && getBaseAddress().getPort() > 0) ? ":" + getBaseAddress().getPort() : "")
-                .append(" - ")
-                .append(treeViewTab != null ? treeViewTab : "???")
-                .append(filter != null ? filter : "")
-                .append(" (")
-                .append(zoneId != null ? zoneId : "???")
-                .append(")").toString();
+        return "[JRDS] " +
+                (getBaseAddress() != null ? getBaseAddress().getHost() : "???") +
+                ((getBaseAddress() != null && getBaseAddress().getPort() > 0) ? ":" + getBaseAddress().getPort() : "") +
+                " - " +
+                (treeViewTab != null ? treeViewTab : "???") +
+                (filter != null ? filter : "") +
+                " (" +
+                (zoneId != null ? zoneId : "???") +
+                ")";
     }
 
     @Override

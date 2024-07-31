@@ -142,7 +142,7 @@ public class NavigationHistory<T> {
          * @return the content of the stack as a string
          */
         private String dump() {
-            final StringBuilder sb = new StringBuilder("");
+            final StringBuilder sb = new StringBuilder();
             AtomicInteger pos = new AtomicInteger(0);
             if (this.isEmpty()) {
                 sb.append(" { empty }");

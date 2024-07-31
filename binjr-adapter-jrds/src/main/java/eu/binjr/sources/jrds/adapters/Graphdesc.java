@@ -17,6 +17,7 @@
 package eu.binjr.sources.jrds.adapters;
 
 import jakarta.xml.bind.annotation.*;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,20 +58,18 @@ class Graphdesc {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Graphdesc{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", graphName='").append(graphName).append('\'');
-        sb.append(", graphClass='").append(graphClass).append('\'');
-        sb.append(", graphTitle='").append(graphTitle).append('\'');
-        sb.append(", unit='").append(unit).append('\'');
-        sb.append(", verticalLabel='").append(verticalLabel).append('\'');
-        sb.append(", upperLimit='").append(upperLimit).append('\'');
-        sb.append(", lowerLimit='").append(lowerLimit).append('\'');
-        sb.append(", logarithmic='").append(logarithmic).append('\'');
-        sb.append(", seriesDescList=").append(seriesDescList.stream().map(SeriesDesc::toString).collect(Collectors.joining(";")));
-        sb.append(", trees=").append(trees.stream().map(Tree::toString).collect(Collectors.joining(";")));
-        sb.append('}');
-        return sb.toString();
+        return "Graphdesc{" + "name='" + name + '\'' +
+                ", graphName='" + graphName + '\'' +
+                ", graphClass='" + graphClass + '\'' +
+                ", graphTitle='" + graphTitle + '\'' +
+                ", unit='" + unit + '\'' +
+                ", verticalLabel='" + verticalLabel + '\'' +
+                ", upperLimit='" + upperLimit + '\'' +
+                ", lowerLimit='" + lowerLimit + '\'' +
+                ", logarithmic='" + logarithmic + '\'' +
+                ", seriesDescList=" + seriesDescList.stream().map(SeriesDesc::toString).collect(Collectors.joining(";")) +
+                ", trees=" + trees.stream().map(Tree::toString).collect(Collectors.joining(";")) +
+                '}';
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)
@@ -91,15 +90,12 @@ class Graphdesc {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("SeriesDesc{");
-            sb.append("name='").append(name).append('\'');
-            sb.append(", dsName='").append(dsName).append('\'');
-            sb.append(", graphType='").append(graphType).append('\'');
-            sb.append(", color='").append(color).append('\'');
-            sb.append(", legend='").append(legend).append('\'');
-            sb.append(", rpn='").append(rpn).append('\'');
-            sb.append('}');
-            return sb.toString();
+            return "SeriesDesc{" + "name='" + name + '\'' +
+                    ", dsName='" + dsName + '\'' +
+                    ", graphType='" + graphType + '\'' +
+                    ", color='" + color + '\'' +
+                    ", legend='" + legend + '\'' +
+                    ", rpn='" + rpn + "'}";
         }
     }
 
@@ -111,10 +107,7 @@ class Graphdesc {
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("Tree{");
-            sb.append("pathstring=").append(pathstring);
-            sb.append('}');
-            return sb.toString();
+            return "Tree{" + "pathstring=" + pathstring + '}';
         }
     }
 

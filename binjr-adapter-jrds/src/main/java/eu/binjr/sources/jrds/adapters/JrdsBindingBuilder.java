@@ -70,7 +70,7 @@ public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
                 c = Color.web(desc.color);
             }
         } catch (IllegalArgumentException e) {
-            logger.warn("Invalid color string for binding " + toString());
+            logger.warn("Invalid color string for binding " + this);
         }
         withColor(c);
         withLegend(isNullOrEmpty(desc.legend) ?

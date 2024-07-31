@@ -19,7 +19,6 @@ package eu.binjr.core.data.timeseries.transform;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -96,7 +95,7 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
         var lastIterator = data.listIterator(data.size());
         XYChart.Data<ZonedDateTime, Double> lastSample = lastIterator.previous();
         if (lastSample.getXValue().isBefore(endTime)) {
-            data.add(new XYChart.Data<>(lastSample.getXValue().plus(1, ChronoUnit.NANOS), substituteValue));
+            data.add(new XYChart.Data<>(lastSample.getXValue().plusNanos(1), substituteValue));
             data.add(new XYChart.Data<>(endTime, substituteValue));
         } else if (lastSample.getXValue().isAfter(endTime)) {
             var next = lastSample;

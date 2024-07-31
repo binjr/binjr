@@ -192,7 +192,7 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException if no registered adapter could be found for the specified key.
      */
     public DataAdapterPreferences getAdapterPreferences(String key) throws NoAdapterFoundException {
-        return (DataAdapterPreferences) getDataAdapterInfo(key).getPreferences();
+        return getDataAdapterInfo(key).getPreferences();
     }
 
     private static class DataAdapterFactoryHolder {

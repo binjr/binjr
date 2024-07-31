@@ -24,7 +24,7 @@ public class StringUtils {
     private static final Logger logger = LogManager.getLogger(StringUtils.class);
 
     private static int textWidth(String str) {
-        return (int) (str.length() - str.replaceAll(NON_THIN, "").length() / 2);
+        return str.length() - str.replaceAll(NON_THIN, "").length() / 2;
     }
 
     public static String ellipsize(String text, int max) {
@@ -94,7 +94,7 @@ public class StringUtils {
             case "\\t" -> {
                 return "\t";
             }
-            case "\'" -> {
+            case "'" -> {
                 return "'";
             }
             case "\\" -> {

@@ -34,7 +34,7 @@ public interface DataAdapterInfo {
      *
      * @return the name of the data adapter.
      */
-    public String getName();
+    String getName();
 
     /**
      * Returns the category of the data adapter.
@@ -50,91 +50,91 @@ public interface DataAdapterInfo {
      *
      * @return the description associated to the data adapter.
      */
-    public String getDescription();
+    String getDescription();
 
     /**
      * Returns the version of the adapter.
      *
      * @return the version of the adapter.
      */
-    public Version getVersion();
+    Version getVersion();
 
     /**
      * Returns the url of the website associated with the adapter.
      *
      * @return the url of the website associated with the adapter.
      */
-    public String getSiteUrl();
+    String getSiteUrl();
 
     /**
      * Returns the name of license under which the adapter is distributed.
      *
      * @return the name of license under which the adapter is distributed.
      */
-    public String getLicense();
+    String getLicense();
 
     /**
      * Returns the copyright notice associated with the adapter.
      *
      * @return the copyright notice associated with the adapter.
      */
-    public String getCopyright();
+    String getCopyright();
 
     /**
      * Returns the location of the JAR in which the adapter is packaged.
      *
      * @return the location of the JAR in which the adapter is packaged.
      */
-    public String getJarLocation();
+    String getJarLocation();
 
     /**
      * Returns the class that implements the data adapter.
      *
      * @return the class that implements the data adapter.
      */
-    public Class<? extends DataAdapter> getAdapterClass();
+    Class<? extends DataAdapter> getAdapterClass();
 
     /**
      * Returns a key to uniquely identify the adapter.
      *
      * @return a key to uniquely identify the adapter.
      */
-    public String getKey();
+    String getKey();
 
     /**
      * Returns the class that implements the dialog box used to gather the adapter's parameters from the end user.
      *
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    public Class<? extends Dialog<Collection<DataAdapter>>> getAdapterDialog();
+    Class<? extends Dialog<Collection<DataAdapter>>> getAdapterDialog();
 
     /**
      * The enabled property.
      *
      * @return The enabled property.
      */
-    public BooleanProperty enabledProperty();
+    BooleanProperty enabledProperty();
 
     /**
      * Returns true if the adapter is enabled, false otherwise.
      *
      * @return true if the adapter is enabled, false otherwise.
      */
-    public boolean isEnabled();
+    boolean isEnabled();
 
     /**
      * Set to true to enable the adapter, false otherwise.
      *
      * @param enabled true to enable the adapter, false otherwise.
      */
-    public void setEnabled(boolean enabled);
+    void setEnabled(boolean enabled);
 
     /**
      * Returns the {@link DataAdapterPreferences} instance associated with the adapter
      *
      * @return the {@link DataAdapterPreferences} instance associated with the adapter
      */
-    public DataAdapterPreferences getPreferences();
+    DataAdapterPreferences getPreferences();
 
     default Version getApiLevel() {
         return Version.emptyVersion;

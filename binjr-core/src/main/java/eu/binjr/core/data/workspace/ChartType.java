@@ -17,7 +17,6 @@
 package eu.binjr.core.data.workspace;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * An enumeration of the type of charts supported.

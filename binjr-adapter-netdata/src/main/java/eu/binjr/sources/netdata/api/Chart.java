@@ -76,7 +76,7 @@ public class Chart {
 
         STACKED("stacked");
 
-        private String value;
+        private final String value;
 
         ChartTypeEnum(String value) {
             this.value = value;
@@ -588,28 +588,27 @@ public class Chart {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("class Chart {\n");
-        sb.append("    id: ").append(toIndentedString(id)).append("\n");
-        sb.append("    name: ").append(toIndentedString(name)).append("\n");
-        sb.append("    type: ").append(toIndentedString(type)).append("\n");
-        sb.append("    family: ").append(toIndentedString(family)).append("\n");
-        sb.append("    title: ").append(toIndentedString(title)).append("\n");
-        sb.append("    priority: ").append(toIndentedString(priority)).append("\n");
-        sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
-        sb.append("    units: ").append(toIndentedString(units)).append("\n");
-        sb.append("    dataUrl: ").append(toIndentedString(dataUrl)).append("\n");
-        sb.append("    chartType: ").append(toIndentedString(chartType)).append("\n");
-        sb.append("    duration: ").append(toIndentedString(duration)).append("\n");
-        sb.append("    firstEntry: ").append(toIndentedString(firstEntry)).append("\n");
-        sb.append("    lastEntry: ").append(toIndentedString(lastEntry)).append("\n");
-        sb.append("    updateEvery: ").append(toIndentedString(updateEvery)).append("\n");
-        sb.append("    dimensions: ").append(toIndentedString(dimensions)).append("\n");
+        String sb = "class Chart {\n" +
+                "    id: " + toIndentedString(id) + "\n" +
+                "    name: " + toIndentedString(name) + "\n" +
+                "    type: " + toIndentedString(type) + "\n" +
+                "    family: " + toIndentedString(family) + "\n" +
+                "    title: " + toIndentedString(title) + "\n" +
+                "    priority: " + toIndentedString(priority) + "\n" +
+                "    enabled: " + toIndentedString(enabled) + "\n" +
+                "    units: " + toIndentedString(units) + "\n" +
+                "    dataUrl: " + toIndentedString(dataUrl) + "\n" +
+                "    chartType: " + toIndentedString(chartType) + "\n" +
+                "    duration: " + toIndentedString(duration) + "\n" +
+                "    firstEntry: " + toIndentedString(firstEntry) + "\n" +
+                "    lastEntry: " + toIndentedString(lastEntry) + "\n" +
+                "    updateEvery: " + toIndentedString(updateEvery) + "\n" +
+                "    dimensions: " + toIndentedString(dimensions) + "\n" +
 //        sb.append("    chartVariables: ").append(toIndentedString(chartVariables)).append("\n");
-        sb.append("    green: ").append(toIndentedString(green)).append("\n");
-        sb.append("    red: ").append(toIndentedString(red)).append("\n");
-        sb.append("}");
-        return sb.toString();
+                "    green: " + toIndentedString(green) + "\n" +
+                "    red: " + toIndentedString(red) + "\n" +
+                "}";
+        return sb;
     }
 
     /**

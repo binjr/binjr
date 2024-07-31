@@ -16,11 +16,8 @@
 
 package eu.binjr.sources.csv.data.parsers;
 
-import com.google.gson.annotations.JsonAdapter;
-import eu.binjr.common.json.adapters.PatternJsonAdapter;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
-import java.text.NumberFormat;
 import java.util.Locale;
 
 public interface CsvParsingProfile extends ParsingProfile {

@@ -51,10 +51,9 @@ public class CaptureGroup implements NamedCaptureGroup {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof NamedCaptureGroup)) {
+        if (!(obj instanceof NamedCaptureGroup other)) {
             return false;
         }
-        NamedCaptureGroup other = (NamedCaptureGroup) obj;
         return Objects.equals(name(), other.name());
     }
 }

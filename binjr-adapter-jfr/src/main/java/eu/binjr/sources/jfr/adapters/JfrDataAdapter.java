@@ -40,7 +40,6 @@ import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -153,8 +152,6 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Pro
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[JFR: Events] ")
-                .append(jfrFilePath != null ? jfrFilePath.getFileName() : "???")
-                .toString();
+        return "[JFR: Events] " + (jfrFilePath != null ? jfrFilePath.getFileName() : "???");
     }
 }

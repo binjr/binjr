@@ -22,5 +22,5 @@ package eu.binjr.core.preferences;
 public enum JvmImplementation {
     HOTSPOT,
     OPENJ9,
-    UNSUPPORTED;
+    UNSUPPORTED
 }

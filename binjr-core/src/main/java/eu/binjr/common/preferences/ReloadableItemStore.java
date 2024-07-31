@@ -44,7 +44,7 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     private static final Logger logger = Logger.create(ObservablePreferenceFactory.class);
     protected final Preferences backingStore;
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
-    private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);
+    private final ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);
 
     ReloadableItemStore(String backingStoreKey) {
         this.backingStore = getBackingPreference(backingStoreKey);

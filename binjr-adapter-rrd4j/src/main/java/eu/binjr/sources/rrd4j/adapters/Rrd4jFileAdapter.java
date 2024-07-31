@@ -54,7 +54,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     private final Rrd4jFileAdapterPreferences prefs = (Rrd4jFileAdapterPreferences) this.getAdapterInfo().getPreferences();
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
     private List<Path> rrdPaths;
-    private List<Path> tempPathToCollect = new ArrayList<>();
+    private final List<Path> tempPathToCollect = new ArrayList<>();
 
     /**
      * Initialises a new instance of the {@link Rrd4jFileAdapter} class.
@@ -221,7 +221,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                     .setBackendFactory(factory)
                     .setPath(temp.toUri())
                     .setReadOnly(true)
-                    .setExternalPath(RrdDb.PREFIX_XML + rrdPath.toString())
+                    .setExternalPath(RrdDb.PREFIX_XML + rrdPath)
                     .build();
         }
         try {
@@ -240,7 +240,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                     .setBackendFactory(factory)
                     .setPath(temp.toUri())
                     .setReadOnly(true)
-                    .setExternalPath(RrdDb.PREFIX_RRDTool + rrdPath.toString())
+                    .setExternalPath(RrdDb.PREFIX_RRDTool + rrdPath)
                     .build();
         }
     }

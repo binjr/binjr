@@ -17,17 +17,14 @@
 package eu.binjr.common.javafx.controls;
 
 import eu.binjr.core.preferences.UserPreferences;
-import javafx.animation.PauseTransition;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.util.Duration;
 
 public class LabelWithInlineHelp extends HBox {
 

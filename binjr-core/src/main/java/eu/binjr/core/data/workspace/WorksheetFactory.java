@@ -19,12 +19,8 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import javafx.collections.FXCollections;
 
 import java.lang.reflect.InvocationTargetException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class WorksheetFactory {

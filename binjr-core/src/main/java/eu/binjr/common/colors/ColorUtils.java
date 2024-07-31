@@ -49,7 +49,7 @@ public class ColorUtils {
                 .append(alpha)
                 .append(")");
 
-        logger.debug(() -> "RGBA representation = " + sb.toString());
+        logger.debug(() -> "RGBA representation = " + sb);
         return sb.toString();
     }
 

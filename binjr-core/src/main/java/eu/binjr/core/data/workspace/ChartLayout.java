@@ -25,7 +25,7 @@ public enum ChartLayout {
     OVERLAID("Overlay"),
     STACKED("Stacked");
 
-    private String label;
+    private final String label;
 
     ChartLayout(String label) {
         this.label = label;

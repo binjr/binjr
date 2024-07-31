@@ -37,7 +37,6 @@ import javafx.collections.ObservableList;
 import java.beans.Transient;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -81,7 +80,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
                 FXCollections.observableList(new LinkedList<>()),
                 ZoneId.systemDefault(),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS),
+                ZonedDateTime.now().minusHours(24),
                 ZonedDateTime.now());
     }
 
@@ -503,7 +502,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
     // region Closeable
     @Override
     public void close() {
-        logger.debug(() -> "Closing Worksheet " + this.toString());
+        logger.debug(() -> "Closing Worksheet " + this);
         IOUtils.closeAll(charts);
         this.status.close();
     }

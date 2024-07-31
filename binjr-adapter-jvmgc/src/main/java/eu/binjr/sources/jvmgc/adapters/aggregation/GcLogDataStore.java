@@ -132,18 +132,18 @@ public class GcLogDataStore extends GcAggregation {
         }
     }
 
-    public static record TsSample(ZonedDateTime timestamp, double value){
+    public record TsSample(ZonedDateTime timestamp, double value){
 
     }
 
-    public static record AggregationInfo(List<String> category,
-                                         String name,
-                                         String label,
-                                         String unit,
-                                         UnitPrefixes prefix,
-                                         ChartType chartType,
-                                         Color color,
-                                         ConcurrentNavigableMap<Long, TsSample> data) {
+    public record AggregationInfo(List<String> category,
+                                  String name,
+                                  String label,
+                                  String unit,
+                                  UnitPrefixes prefix,
+                                  ChartType chartType,
+                                  Color color,
+                                  ConcurrentNavigableMap<Long, TsSample> data) {
         public AggregationInfo(String category,
                                String name,
                                String label,

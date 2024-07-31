@@ -25,8 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
  * @author Frederic Thevenet
  */
 public class SysInfoProperty {
-    private Property<String> key;
-    private Property<String> value;
+    private final Property<String> key;
+    private final Property<String> value;
 
     public SysInfoProperty(String key, String value) {
         this.key = new SimpleStringProperty(key);

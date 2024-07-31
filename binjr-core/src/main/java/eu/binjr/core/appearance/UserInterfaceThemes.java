@@ -81,7 +81,7 @@ public interface UserInterfaceThemes {
      * @param defaultValue the default to return is no entry matches the provided name.
      * @return the enum entry corresponding to the provided string is it exists, otherwise returns the specified default.
      */
-    public static UserInterfaceThemes valueOf(String name, UserInterfaceThemes defaultValue) {
+    static UserInterfaceThemes valueOf(String name, UserInterfaceThemes defaultValue) {
         Objects.requireNonNull(defaultValue, "Default value cannot be null.");
         try {
             return BuiltInUserInterfaceThemes.valueOf(name);

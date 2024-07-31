@@ -42,7 +42,7 @@ import java.util.Optional;
 public class ChartViewportsState implements AutoCloseable {
     private final XYChartsWorksheetController parent;
     private static final Logger logger = Logger.create(ChartViewportsState.class);
-    private HashMap<Chart, AxisState> axisStates = new HashMap<>();
+    private final HashMap<Chart, AxisState> axisStates = new HashMap<>();
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;

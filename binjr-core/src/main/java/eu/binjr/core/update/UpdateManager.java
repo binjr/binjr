@@ -51,7 +51,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.Security;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -161,7 +160,7 @@ public class UpdateManager {
             }
             return;
         }
-        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore(userPrefs.lastCheckForUpdate.get())) {
+        if (!forceCheck && LocalDateTime.now().minusHours(1).isBefore(userPrefs.lastCheckForUpdate.get())) {
             logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
             if (onFailure != null) {
                 onFailure.run();

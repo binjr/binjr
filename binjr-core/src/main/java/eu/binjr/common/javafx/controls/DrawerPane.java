@@ -30,16 +30,16 @@ import javafx.util.Duration;
  * @author Frederic Thevenet
  */
 public class DrawerPane extends AnchorPane {
-    private static PseudoClass EXPANDED_PSEUDO_CLASS = PseudoClass.getPseudoClass("expanded");
-    private DoubleProperty collapsedWidth = new SimpleDoubleProperty(48);
-    private DoubleProperty expandedWidth = new SimpleDoubleProperty(200);
-    private IntegerProperty animationDuration = new SimpleIntegerProperty(50);
-    private Property<PaneAnimation> animation = new SimpleObjectProperty<>(PaneAnimation.NONE);
+    private static final PseudoClass EXPANDED_PSEUDO_CLASS = PseudoClass.getPseudoClass("expanded");
+    private final DoubleProperty collapsedWidth = new SimpleDoubleProperty(48);
+    private final DoubleProperty expandedWidth = new SimpleDoubleProperty(200);
+    private final IntegerProperty animationDuration = new SimpleIntegerProperty(50);
+    private final Property<PaneAnimation> animation = new SimpleObjectProperty<>(PaneAnimation.NONE);
     private Timeline showTimeline;
     private Timeline hideTimeline;
-    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
-    private Property<Side> side = new SimpleObjectProperty<>(Side.LEFT);
-    private Property<Node> sibling = new SimpleObjectProperty<>();
+    private final DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+    private final Property<Side> side = new SimpleObjectProperty<>(Side.LEFT);
+    private final Property<Node> sibling = new SimpleObjectProperty<>();
 
     public enum PaneAnimation {
         NONE,
@@ -47,7 +47,7 @@ public class DrawerPane extends AnchorPane {
         SLIDE
     }
 
-    private BooleanProperty expanded = new BooleanPropertyBase(false) {
+    private final BooleanProperty expanded = new BooleanPropertyBase(false) {
         public void invalidated() {
             pseudoClassStateChanged(EXPANDED_PSEUDO_CLASS, get());
         }
