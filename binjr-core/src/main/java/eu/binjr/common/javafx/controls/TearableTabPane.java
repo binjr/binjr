@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -30,29 +29,24 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 import javafx.css.PseudoClass;
 import javafx.css.Styleable;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 
 /**
@@ -64,25 +58,125 @@ import java.util.function.Function;
 public class TearableTabPane extends TabPane implements AutoCloseable {
     private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private static final Logger logger = Logger.create(TearableTabPane.class);
+
     private boolean tearable;
     private boolean reorderable;
-    private Function<ActionEvent, Optional<Tab>> newTabFactory = (e) -> Optional.of(new Tab());
+    private Supplier<Optional<Tab>> newTabFactory = () -> Optional.of(new Tab());
     private final Map<Tab, TabState> tearableTabMap = new HashMap<>();
     private final TabPaneManager manager;
-    private EventHandler<ActionEvent> onAddNewTab;
+
     private EventHandler<WindowEvent> onOpenNewWindow;
     private EventHandler<WindowEvent> onClosingWindow;
+
+    private EventHandler<DragEvent> onDragDroppedOnTabArea;
+    private EventHandler<DragEvent> onDragOverOnTabArea;
+    private EventHandler<DragEvent> onDragExitedTabArea;
+    private EventHandler<DragEvent> onDragEnteredTabArea;
+
     private final BindingManager bindingManager = new BindingManager();
     private final Property<StageStyle> detachedStageStyle;
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper(true);
     private ContextMenu newTabContextMenu;
 
+    private final BooleanProperty dragAndDropInProgress = new SimpleBooleanProperty();
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
      */
     public TearableTabPane() {
         this(new TabPaneManager(), false, false, StageStyle.DECORATED, (Tab[]) null);
+    }
+
+    @Override
+    protected Skin<?> createDefaultSkin() {
+        var skin = new TearableTabPaneSkin(this);
+        if (newTabContextMenu != null) {
+            skin.newTabButton.setContextMenu(newTabContextMenu);
+        }
+        skin.newTabButton.setOnAction(bindingManager.registerHandler(event -> newTabFactory.get().ifPresent(newTab -> {
+            getTabs().add(newTab);
+            this.getSelectionModel().select(newTab);
+        })));
+        skin.closeSplitPane.setOnAction(bindingManager.registerHandler(event -> {
+            var tearableTabPane = findParentTearableTabPane((Button) event.getSource());
+            if (tearableTabPane != null) {
+                var splitPane = findParentSplitPane(tearableTabPane);
+                if (splitPane == null) {
+                    return;
+                }
+                final TearableTabPane sibling = findSibling(splitPane, tearableTabPane);
+                if (sibling == null) {
+                    return;
+                }
+                splitPane.getItems().remove(tearableTabPane);
+                reduceSplitPane(splitPane);
+                balanceSplitPanesDividers(splitPane);
+            }
+            event.consume();
+        }));
+        skin.splitRightButton.setOnAction(bindingManager.registerHandler(event -> {
+            split(Orientation.HORIZONTAL);
+            event.consume();
+        }));
+        skin.splitDownButton.setOnMouseClicked(bindingManager.registerHandler(event -> {
+            split(Orientation.VERTICAL);
+            event.consume();
+        }));
+        skin.dropZone.setOnDragDropped(bindingManager.registerHandler(onDragDroppedOnTabArea));
+        skin.dropZone.setOnDragOver(bindingManager.registerHandler(onDragOverOnTabArea));
+        skin.dropZone.setOnDragExited(bindingManager.registerHandler(onDragExitedTabArea));
+        skin.dropZone.setOnDragEntered(bindingManager.registerHandler(onDragEnteredTabArea));
+        skin.newPaneDropZone.managedProperty().bind(dragAndDropInProgress);
+        skin.newPaneDropZone.visibleProperty().bind(dragAndDropInProgress);
+
+        skin.addWorksheetLabel.setOnMouseClicked(bindingManager.registerHandler(event -> newTabFactory.get().ifPresent(newTab -> {
+            getTabs().add(newTab);
+            this.getSelectionModel().select(newTab);
+        })));
+        skin.addWorksheetLabel.setOnDragDropped(bindingManager.registerHandler(onDragDroppedOnTabArea));
+        skin.addWorksheetLabel.setOnDragOver(bindingManager.registerHandler(onDragOverOnTabArea));
+
+        skin.addWorksheetLabel.getGraphic().setOnDragExited(bindingManager.registerHandler(onDragExitedTabArea));
+        skin.addWorksheetLabel.getGraphic().setOnDragEntered(bindingManager.registerHandler(onDragEnteredTabArea));
+        this.getScene().addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.ALT)
+                skin.splitRightButton.setVisible(false);
+            e.consume();
+        }));
+        this.getScene().addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.ALT)
+                skin.splitRightButton.setVisible(true);
+            e.consume();
+        }));
+        return skin;
+    }
+
+    private TearableTabPane findSibling(SplitPane sp, TearableTabPane tabPaneToRemove) {
+        for (final Node sibling : sp.getItems()) {
+            if (tabPaneToRemove != sibling && sibling instanceof TearableTabPane siblingSplitPane) {
+                return siblingSplitPane;
+            }
+        }
+        for (final Node sibling : sp.getItems()) {
+            if (sibling instanceof SplitPane siblingSplitPane) {
+                return findSibling(siblingSplitPane, tabPaneToRemove);
+            }
+        }
+        return null;
+    }
+
+    private void reduceSplitPane(SplitPane sp) {
+        if (sp.getItems().size() != 1) {
+            return;
+        }
+        final Node content = sp.getItems().get(0);
+        final SplitPane parent = findParentSplitPane(sp);
+        if (parent != null) {
+            int index = parent.getItems().indexOf(sp);
+            parent.getItems().remove(sp);
+            parent.getItems().add(index, content);
+            reduceSplitPane(parent);
+        }
     }
 
     /**
@@ -103,7 +197,6 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>)
                 (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue)
         );
-
 
         bindingManager.attachListener(this.getTabs(), (ListChangeListener<Tab>) c -> {
             while (c.next()) {
@@ -252,40 +345,44 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                 event.consume();
             }
         }));
+
         Platform.runLater(() -> {
-            positionNewTabButton();
-            Stage stage = (Stage) this.getScene().getWindow();
-            bindingManager.attachListener(stage.focusedProperty(),
-                    (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                        if (newValue) {
-                            manager.setSelectedTab(this.getSelectionModel().getSelectedItem());
-                        }
-                    });
+            var scene = this.getScene();
+            if (scene != null) {
+                if (scene.getWindow() instanceof Stage stage) {
+                    bindingManager.attachListener(stage.focusedProperty(),
+                            (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                                if (newValue) {
+                                    manager.setSelectedTab(this.getSelectionModel().getSelectedItem());
+                                }
+                            });
+                }
+            }
         });
 
-        // Prepare to change the button on screen position if the tearableTabMap side changes
-        bindingManager.attachListener(sideProperty(),
-                (observable, oldValue, newValue) -> {
-                    if (newValue != null) {
-                        positionNewTabButton();
-                    }
-                });
-
         bindingManager.attachListener(this.getTabs(), ((InvalidationListener) observable -> {
-            empty.setValue(this.getTabs().size() == 0);
+            empty.setValue(this.getTabs().isEmpty());
         }));
     }
 
-
     public void detachTab(Tab t) {
+        detachTab(t, null);
+    }
+
+    public void detachTab(Tab t, Orientation orientation) {
         Objects.requireNonNull(t, "Tab to detach cannot be null");
         logger.trace(() -> "Detaching tab " + t.getId() + " " + t.getText());
         manager.setMovingTab(true);
         try {
-            tearOffTab(t);
+            tearOffTab(t, orientation);
         } finally {
             manager.setMovingTab(false);
         }
+    }
+
+    public void split(Orientation orientation) {
+        logger.trace(() -> "Split tab pane " + orientation);
+        tearOffTab(null, orientation);
     }
 
     /**
@@ -293,7 +390,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      *
      * @return the factory for creating new tabs
      */
-    public Function<ActionEvent, Optional<Tab>> getNewTabFactory() {
+    public Supplier<Optional<Tab>> getNewTabFactory() {
         return newTabFactory;
     }
 
@@ -302,7 +399,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      *
      * @param newTabFactory the factory for creating new tabs
      */
-    public void setNewTabFactory(Function<ActionEvent, Optional<Tab>> newTabFactory) {
+    public void setNewTabFactory(Supplier<Optional<Tab>> newTabFactory) {
         this.newTabFactory = newTabFactory;
     }
 
@@ -311,18 +408,9 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     }
 
     /**
-     * Sets the action that should be fired on the addition of a tab to the pane.
-     *
-     * @param onAddNewTab the actions that should be fired on the addition of a tab to the pane.
-     */
-    public void setOnAddNewTab(EventHandler<ActionEvent> onAddNewTab) {
-        this.onAddNewTab = onAddNewTab;
-    }
-
-    /**
      * Returns true if tabs can be teared away from the pane, false otherwise.
      *
-     * @return true true if tabs can be teared away from the pane, false otherwise.
+     * @return true if tabs can be teared away from the pane, false otherwise.
      */
     public boolean isTearable() {
         return tearable;
@@ -410,6 +498,22 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.onClosingWindow = action;
     }
 
+    public void setOnDragDroppedOnTabArea(EventHandler<DragEvent> onDragDroppedOnTabArea) {
+        this.onDragDroppedOnTabArea = onDragDroppedOnTabArea;
+    }
+
+    public void setOnDragOverOnTabArea(EventHandler<DragEvent> onDragOverOnTabArea) {
+        this.onDragOverOnTabArea = onDragOverOnTabArea;
+    }
+
+    public void setOnDragExitedTabArea(EventHandler<DragEvent> onDragExitedTabArea) {
+        this.onDragExitedTabArea = onDragExitedTabArea;
+    }
+
+    public void setOnDragEnteredTabArea(EventHandler<DragEvent> onDragEnteredTabArea) {
+        this.onDragEnteredTabArea = onDragEnteredTabArea;
+    }
+
     /**
      * Returns the generated {@link DataFormat} used to identify drag and drop operations across panes sharing the same {@link TabPaneManager}
      *
@@ -427,64 +531,18 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         return empty.getReadOnlyProperty();
     }
 
-    private void positionNewTabButton() {
-        Pane tabHeaderBg = (Pane) this.lookup(".tab-header-background");
-        if (tabHeaderBg == null) {
-            // TabPane is not ready
-            return;
-        }
-        Pane tabHeaderArea = (Pane) this.lookup(".tab-header-area");
-        logger.debug("tabHeaderArea.getHeight() = " + tabHeaderArea.getHeight());
-        Button newTabButton = (Button) tabHeaderBg.lookup("#newTabButton");
-
-        // Remove the button if it was already present
-        if (newTabButton != null) {
-            tabHeaderBg.getChildren().remove(newTabButton);
-        }
-        newTabButton = new Button();
-        newTabButton.visibleProperty().bind(manager.newTabButtonVisible);
-        newTabButton.setId("newTabButton");
-        newTabButton.setFocusTraversable(false);
-        Pane headersRegion = (Pane) this.lookup(".headers-region");
-        Region headerArea = (Region) this.lookup(".tab-header-area");
-
-        logger.debug("headersRegion.getHeight() = " + headersRegion.getHeight());
-        logger.debug("headersRegion.getPrefHeight = " + headersRegion.getPrefHeight());
-        newTabButton.getStyleClass().add("add-tab-button");
-        SVGPath icon = new SVGPath();
-        icon.setContent("m 31.25,54.09375 0,2.4375 -2.46875,0 0,0.375 2.46875,0 0,2.46875 0.375,0 0,-2.46875 2.46875,0 0,-0.375 -2.46875,0 0,-2.4375 -0.375,0 z");
-        icon.getStyleClass().add("add-tab-button-icon");
-        newTabButton.setGraphic(icon);
-        newTabButton.setAlignment(Pos.CENTER);
-        if (newTabContextMenu != null) {
-            newTabButton.setContextMenu(newTabContextMenu);
-        }
-        if (onAddNewTab != null) {
-            newTabButton.setOnAction(bindingManager.registerHandler(onAddNewTab));
-        } else {
-            newTabButton.setOnAction(bindingManager.registerHandler(event -> {
-                newTabFactory.apply(event).ifPresent(newTab -> {
-                    getTabs().add(newTab);
-                    this.getSelectionModel().select(newTab);
-                });
-            }));
-        }
-        tabHeaderBg.getChildren().add(newTabButton);
-        StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
-        switch (getSide()) {
-            case TOP, BOTTOM -> newTabButton.translateXProperty().bind(
-                    headersRegion.widthProperty()
-                            .add(Bindings.createDoubleBinding(() -> headerArea.getInsets().getLeft(), headerArea.insetsProperty()))
-            );
-            case LEFT, RIGHT -> newTabButton.translateXProperty().bind(
-                    tabHeaderBg.widthProperty()
-                            .subtract(headersRegion.widthProperty())
-                            .subtract(newTabButton.widthProperty())
-                            .subtract(Bindings.createDoubleBinding(() -> headerArea.getInsets().getTop(), headerArea.insetsProperty()))
-            );
-            default -> throw new IllegalStateException("Invalid value for side enum");
-        }
+    public boolean getDragAndDropInProgress() {
+        return dragAndDropInProgress.get();
     }
+
+    public void setDragAndDropInProgress(boolean dragAndDropInProgress) {
+        this.dragAndDropInProgress.set(dragAndDropInProgress);
+    }
+
+    public BooleanProperty dragAndDropInProgressProperty() {
+        return dragAndDropInProgress;
+    }
+
 
     private void bringStageToFront() {
         if (this.getScene() != null) {
@@ -507,42 +565,138 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
     }
 
+
+    public enum TabPosition {
+        INSIDE,
+        DETACHED,
+        UP,
+        RIGHT,
+        BOTTOM,
+        LEFT
+    }
+
     private void tearOffTab(Tab tab) {
+        tearOffTab(tab, null);
+    }
+
+    private void tearOffTab(@Nullable Tab tab, @Nullable Orientation orientation) {
         TearableTabPane detachedTabPane = new TearableTabPane(this.manager, isReorderable(), true, this.getDetachedStageStyle());
         detachedTabPane.setId("tearableTabPane");
-        detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
+        detachedTabPane.setOnDragDroppedOnTabArea(this.onDragDroppedOnTabArea);
+        detachedTabPane.setOnDragOverOnTabArea(this.onDragOverOnTabArea);
+        detachedTabPane.setOnDragExitedTabArea(this.onDragExitedTabArea);
+        detachedTabPane.setOnDragEnteredTabArea(this.onDragEnteredTabArea);
+        detachedTabPane.dragAndDropInProgressProperty().bind(this.dragAndDropInProgress);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
-        this.getTabs().remove(tab);
-        detachedTabPane.getTabs().add(tab);
-        Pane root = new AnchorPane(detachedTabPane);
-        AnchorPane.setBottomAnchor(detachedTabPane, 0.0);
-        AnchorPane.setLeftAnchor(detachedTabPane, 0.0);
-        AnchorPane.setRightAnchor(detachedTabPane, 0.0);
-        AnchorPane.setTopAnchor(detachedTabPane, 0.0);
-        final Scene scene = new Scene(root, root.getPrefWidth(), root.getPrefHeight());
-        Stage stage = new Stage();
-        stage.setScene(scene);
-        Point p = MouseInfo.getPointerInfo().getLocation();
-        stage.setX(p.getX());
-        stage.setY(p.getY());
-        detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
-            if (c.getList().size() == 0) {
-                if (onClosingWindow != null) {
-                    onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+        if (orientation == null) {
+            detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
+
+            Pane root = new AnchorPane(detachedTabPane);
+            AnchorPane.setBottomAnchor(detachedTabPane, 0.0);
+            AnchorPane.setLeftAnchor(detachedTabPane, 0.0);
+            AnchorPane.setRightAnchor(detachedTabPane, 0.0);
+            AnchorPane.setTopAnchor(detachedTabPane, 0.0);
+            final Scene scene = new Scene(root, root.getPrefWidth(), root.getPrefHeight());
+            Stage stage = new Stage();
+            stage.setScene(scene);
+            Point p = MouseInfo.getPointerInfo().getLocation();
+            stage.setX(p.getX());
+            stage.setY(p.getY());
+            detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
+                if (c.getList().isEmpty()) {
+                    if (onClosingWindow != null) {
+                        onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                    }
+                    stage.close();
+                    detachedTabPane.close();
                 }
-                stage.close();
-                detachedTabPane.close();
+            });
+            if (onOpenNewWindow != null) {
+                onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
             }
-        });
-        if (onOpenNewWindow != null) {
-            onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
+            stage.initStyle(this.getDetachedStageStyle());
+            stage.show();
+
+
+            stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
+                detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
+            }));
+        } else {
+            var splitPane = findParentSplitPane(this);
+            if (splitPane != null) {
+                if (splitPane.getItems().size() == 1) {
+                    splitPane.setOrientation(orientation);
+                }
+                if (splitPane.getOrientation() == orientation) {
+                    splitPane.getItems().add(detachedTabPane);
+                    balanceSplitPanesDividers(splitPane);
+                } else {
+                    int indexTabPane = splitPane.getItems().indexOf(TearableTabPane.this);
+                    splitPane.getItems().remove(TearableTabPane.this);
+                    SplitPane innerSplitpane = new SplitPane();
+                    splitPane.getItems().add(indexTabPane, innerSplitpane);
+                    innerSplitpane.setOrientation(orientation);
+                    innerSplitpane.getItems().add(TearableTabPane.this);
+                    innerSplitpane.getItems().add(detachedTabPane);
+                }
+                detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
+                    if (c.getList().isEmpty()) {
+                        //      splitPane.getItems().remove(newPane);
+                    }
+                });
+            } else {
+                logger.error("Parent control is not a SplitPane");
+                // throw new UnsupportedOperationException("Parent control is not a SplitPane");
+            }
+
+
         }
-        stage.initStyle(this.getDetachedStageStyle());
-        stage.show();
-        detachedTabPane.getSelectionModel().select(tab);
-        stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
-            detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
-        }));
+        if (tab != null) {
+            this.getTabs().remove(tab);
+            detachedTabPane.getTabs().add(tab);
+            detachedTabPane.getSelectionModel().select(tab);
+        }
+    }
+
+
+    private SplitPane findParentSplitPane(Node node) {
+        if (node == null) {
+            return null;
+        }
+        var parent = node.getParent();
+        if (parent == null) {
+            return null;
+        }
+        if (parent instanceof SplitPane splitPane) {
+            return splitPane;
+        } else {
+            return findParentSplitPane(parent);
+        }
+    }
+
+    private TearableTabPane findParentTearableTabPane(Node node) {
+        if (node == null) {
+            return null;
+        }
+        var parent = node.getParent();
+        if (parent == null) {
+            return null;
+        }
+        if (parent instanceof TearableTabPane splitTearableTabPanePane) {
+            return splitTearableTabPanePane;
+        } else {
+            return findParentTearableTabPane(parent);
+        }
+    }
+
+    private void balanceSplitPanesDividers(SplitPane splitPane) {
+        int itemCount = splitPane.getItems().size();
+        double[] positions = new double[itemCount];
+        var divFactor = 1d / itemCount;
+        for (int i = 0; i < positions.length; i++) {
+            positions[i] = (i + 1) * divFactor;
+        }
+        splitPane.setDividerPositions(positions);
     }
 
     @Override
@@ -581,6 +735,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      */
     private record TabState(boolean attached) {
     }
+
 
     /**
      * A class that represents the state of the tabs across all TabPane windows

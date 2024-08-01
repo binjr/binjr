@@ -95,54 +95,22 @@
             </HBox>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
-            <TearableTabPane fx:id="tearableTabPane"
-                             tearable="true"
-                             reorderable="true"
-                             prefHeight="200.0"
-                             prefWidth="200.0"
-                             AnchorPane.bottomAnchor="0.0"
-                             AnchorPane.leftAnchor="0.0"
-                             AnchorPane.rightAnchor="0.0"
-                             AnchorPane.topAnchor="0.0">
-            </TearableTabPane>
-            <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet"
-                   onDragDropped="#handleDragDroppedOnWorksheetArea"
-                   onDragOver="#worksheetAreaOnDragOver"
-                   styleClass="add-worksheet-background-icon" visible="false" wrapText="true">
-                <graphic>
-                    <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon"
-                            onDragExited="#handleOnDragExitedNewWorksheet"
-                            onDragEntered="#handleOnDragEnteredNewWorksheet"/>
-                </graphic>
-                <tooltip>
-                    <Tooltip showDelay="500ms" text="Click to add a new worksheet"/>
-                </tooltip>
-            </Label>
-            <StackPane fx:id="newWorksheetDropTarget" styleClass="chart-viewport-parent"
-                       minHeight="34"
-                       maxHeight="34"
-                       prefHeight="34"
-                       maxWidth="Infinity"
-                       visible="false"
-                       managed="false"
-                       StackPane.alignment="TOP_CENTER">
-                <StackPane styleClass="drop-zone"
-                           onDragDropped="#handleDragDroppedOnWorksheetArea"
-                           onDragOver="#worksheetAreaOnDragOver"
-                           onDragExited="#handleOnDragExitedNewWorksheet"
-                           onDragEntered="#handleOnDragEnteredNewWorksheet">
-                    <Label text="New chart" graphicTextGap="18" contentDisplay="GRAPHIC_ONLY">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="new-tab-icon"/>
-                            </HBox>
-                        </graphic>
-                    </Label>
-                </StackPane>
-            </StackPane>
+            <SplitPane fx:id="dockingArea">
+                <TearableTabPane  fx:id="tearableTabPane"
+                                 tearable="true"
+                                 reorderable="true"
+                                 prefHeight="200.0"
+                                 prefWidth="200.0"
+                                 AnchorPane.bottomAnchor="0.0"
+                                 AnchorPane.leftAnchor="0.0"
+                                 AnchorPane.rightAnchor="0.0"
+                                 AnchorPane.topAnchor="0.0">
+                </TearableTabPane>
+            </SplitPane>
             <BinjrLoadingPane fx:id="worksheetMaskerPane" targetFps="2" animationSize="LARGE" visible="false"/>
         </StackPane>
     </SplitPane>
+
     <DrawerPane fx:id="commandBar" cache="true" cacheHint="SPEED"
                 animation="GROW"
                 collapsedWidth="48"
@@ -316,7 +284,7 @@
                 <Tooltip showDelay="500ms" text="Help"/>
             </tooltip>
             <items>
-                <MenuItem fx:id="inlineHelpMenuItem" accelerator="F1" mnemonicParsing="false"  text="Inline Help">
+                <MenuItem fx:id="inlineHelpMenuItem" accelerator="F1" mnemonicParsing="false" text="Inline Help">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="help-icon"/>

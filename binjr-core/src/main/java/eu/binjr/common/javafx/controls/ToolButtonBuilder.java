@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2023 Frederic Thevenet
+ *    Copyright 2019-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
     private boolean focusTraversable = true;
     private ContentDisplay contentDisplay = ContentDisplay.GRAPHIC_ONLY;
     private String iconColorString = null;
+    private String id = null;
 
     public ToolButtonBuilder() {
         this(null);
@@ -76,6 +77,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         btn.setMaxWidth(width);
         btn.setMinWidth(width);
         btn.setFocusTraversable(focusTraversable);
+        btn.setId(id);
         if (styleClass != null) {
             btn.getStyleClass().addAll(styleClass);
         }
@@ -106,6 +108,11 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     public ToolButtonBuilder<T> setWidth(double width) {
         this.width = width;
+        return this;
+    }
+
+    public ToolButtonBuilder<T> setId(String id){
+        this.id = id;
         return this;
     }
 

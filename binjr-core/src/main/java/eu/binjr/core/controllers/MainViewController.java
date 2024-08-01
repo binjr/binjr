@@ -111,6 +111,7 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
     private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
+    public SplitPane dockingArea;
 
     private BooleanBinding noWorksheetPresent;
 
@@ -123,13 +124,10 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem hideSourcePaneMenu;
     @FXML
-    private StackPane newWorksheetDropTarget;
-    @FXML
     private DrawerPane commandBar;
     @FXML
     private AnchorPane root;
-    @FXML
-    private Label addWorksheetLabel;
+
     @FXML
     private BinjrLoadingPane sourceMaskerPane;
     @FXML
@@ -271,7 +269,6 @@ public class MainViewController implements Initializable {
                         }
                     }
                 });
-        addWorksheetLabel.visibleProperty().bind(noWorksheetPresent);
         tearableTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         tearableTabPane.setNewTabFactory(this::worksheetTabFactory);
 
@@ -288,29 +285,19 @@ public class MainViewController implements Initializable {
             Stage stage = (Stage) event.getSource();
             stage.setTitle(AppEnvironment.APP_NAME);
             registerStageKeyEvents(stage);
-
-            StackPane dropZone = new StackPane(ToolButtonBuilder.makeIconNode(Pos.CENTER, 0, 0, "new-tab-icon"));
-            dropZone.getStyleClass().add("drop-zone");
-            dropZone.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
-            dropZone.setOnDragOver(this::worksheetAreaOnDragOver);
-            dropZone.setOnDragExited(this::handleOnDragExitedNewWorksheet);
-            dropZone.setOnDragEntered(this::handleOnDragEnteredNewWorksheet);
-            var newPaneDropZone = new StackPane(dropZone);
-            newPaneDropZone.getStyleClass().add("chart-viewport-parent");
-            AnchorPane.setTopAnchor(newPaneDropZone, 0.0);
-            AnchorPane.setLeftAnchor(newPaneDropZone, 0.0);
-            AnchorPane.setRightAnchor(newPaneDropZone, 0.0);
-            newPaneDropZone.setPrefHeight(34);
-            newPaneDropZone.setMaxHeight(34);
-            newPaneDropZone.managedProperty().bind(treeItemDragAndDropInProgressProperty());
-            newPaneDropZone.visibleProperty().bind(treeItemDragAndDropInProgressProperty());
-            ((Pane) stage.getScene().getRoot()).getChildren().add(newPaneDropZone);
             StageAppearanceManager.getInstance().register(stage);
         });
         tearableTabPane.setOnClosingWindow(event -> {
             StageAppearanceManager.getInstance().unregister((Stage) event.getSource());
             unregisterStageKeyEvents((Stage) event.getSource());
         });
+
+        tearableTabPane.setOnDragDroppedOnTabArea(this::handleDragDroppedOnWorksheetArea);
+        tearableTabPane.setOnDragOverOnTabArea(this::worksheetAreaOnDragOver);
+        tearableTabPane.setOnDragExitedTabArea(this::handleOnDragExitedNewWorksheet);
+        tearableTabPane.setOnDragEnteredTabArea(this::handleOnDragEnteredNewWorksheet);
+        tearableTabPane.dragAndDropInProgressProperty().bind(treeItemDragAndDropInProgressProperty());
+
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         sourcesPane.addEventFilter(KeyEvent.KEY_PRESSED, (e -> {
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
@@ -346,10 +333,6 @@ public class MainViewController implements Initializable {
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
         this.addSourceMenu.setOnShowing(event -> addSourceMenu.getItems().setAll(populateSourceMenu()));
-        newWorksheetDropTarget.managedProperty()
-                .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
-        newWorksheetDropTarget.visibleProperty()
-                .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         this.restoreClosedWorksheetMenu.disableProperty().bind(workspace.closedWorksheetQueueEmptyProperty());
         this.inlineHelpMenuItem.textProperty().bind(Bindings.createStringBinding(
                 () -> UserPreferences.getInstance().showInlineHelpButtons.get() ? "Dismiss Inline Help" : "Show Inline Help",
@@ -1299,6 +1282,16 @@ public class MainViewController implements Initializable {
             TearableTabPane pane = (TearableTabPane) tab.getTabPane();
             pane.detachTab(tab);
         }));
+        MenuItem splitHorizontal = new MenuItem("Split Right");
+        splitHorizontal.setOnAction(manager.registerHandler(event -> {
+            TearableTabPane pane = (TearableTabPane) tab.getTabPane();
+            pane.detachTab(tab, Orientation.HORIZONTAL);
+        }));
+        MenuItem splitVertical = new MenuItem("Split Down");
+        splitVertical.setOnAction(manager.registerHandler(event -> {
+            TearableTabPane pane = (TearableTabPane) tab.getTabPane();
+            pane.detachTab(tab, Orientation.VERTICAL);
+        }));
         var items = FXCollections.observableArrayList(
                 close,
                 closeOthers,
@@ -1306,7 +1299,10 @@ public class MainViewController implements Initializable {
                 edit,
                 duplicate,
                 new SeparatorMenuItem(),
-                detach
+                detach,
+                splitHorizontal,
+                splitVertical,
+                new SeparatorMenuItem()
         );
         if (worksheet instanceof Syncable syncable) {
             MenuItem link = new MenuItem();
@@ -1620,7 +1616,7 @@ public class MainViewController implements Initializable {
     }
 
 
-    private Optional<Tab> worksheetTabFactory(ActionEvent event) {
+    private Optional<Tab> worksheetTabFactory() {
         try {
             return Optional.of(loadWorksheetInTab(new XYChartsWorksheet(), true));
         } catch (CannotLoadWorksheetException e) {
@@ -1636,11 +1632,25 @@ public class MainViewController implements Initializable {
                 db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
                 db.hasContent(TEXT_FILES_BINDING_FORMAT) ||
                 db.hasContent(LOG_FILES_BINDING_FORMAT)) {
-            getSelectedTreeNodes().ifPresent(items -> {
-                var currentTabPane = (TabPane) ((Node) event.getGestureTarget()).getScene().lookup("#tearableTabPane");
-                addToNewWorksheet(currentTabPane != null ? currentTabPane : tearableTabPane.getSelectedTabPane(), items);
-            });
+            getSelectedTreeNodes().ifPresent(items ->
+                    findParentTearablePane((Node) event.getGestureTarget()).ifPresent(t ->
+                            addToNewWorksheet(t, items)));
             event.consume();
+        }
+    }
+
+    private Optional<TearableTabPane> findParentTearablePane(Node node) {
+        if (node == null) {
+            return Optional.empty();
+        }
+        var parent = node.getParent();
+        if (parent == null) {
+            return Optional.empty();
+        }
+        if (parent instanceof TearableTabPane t) {
+            return Optional.of(t);
+        } else {
+            return findParentTearablePane(parent);
         }
     }
 
