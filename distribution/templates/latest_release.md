@@ -34,7 +34,7 @@ binjr can be installed and updated using various package managers, depending on 
 
 | Version          | Operating System                        | Architecture | Package manager                                              |
 |------------------|-----------------------------------------|--------------|--------------------------------------------------------------|
-| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+) | x84 64-bit   | [binjr APT epository](https://repos.binjr.eu/apt)            |
+| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+) | x84 64-bit   | [binjr APT Repository](https://repos.binjr.eu/apt)           |
 | binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)        | x84 64-bit   | [binjr RPM Repository](https://repos.binjr.eu/rpm)           |
 | binjr ${tagName} | **ArchLinux**                           | x84 64-bit   | [Arch User Repository](https://repos.binjr.eu/aur)           |
 | binjr ${tagName} | **Windows** (10[^2] or 11)              | x84 64-bit   | [Winget Community Repository](https://repos.binjr.eu/winget) |
