@@ -432,6 +432,10 @@ public class MainViewController implements Initializable {
                 getSelectedWorksheetController().ifPresent(w -> w.refresh(e.isControlDown()));
                 e.consume();
             }
+            if (e.getCode() == KeyCode.F9) {
+                getSelectedWorksheetController().ifPresent(WorksheetController::resetTimeRange);
+                e.consume();
+            }
             if (e.getCode() == KeyCode.M && e.isControlDown()) {
                 handleTogglePresentationMode();
                 e.consume();

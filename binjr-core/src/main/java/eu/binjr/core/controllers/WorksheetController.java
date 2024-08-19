@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.workspace.Rangeable;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
@@ -89,6 +90,12 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public void refresh(boolean force) {
         refresh();
+    }
+
+    public void resetTimeRange() {
+        if (getWorksheet() instanceof Rangeable<?> worksheet) {
+            selectedRangeProperty().setValue(worksheet.getInitialTimeRange());
+        }
     }
 
     protected Image captureSnapshot() {
