@@ -681,7 +681,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(progressIndicator.progressProperty(), worksheet.progressProperty());
 
         getBindingManager().bind(cancelIndexButton.visibleProperty(), Bindings.createBooleanBinding(() -> (progressIndicator.getProgress() >= 0), progressIndicator.progressProperty()));
-        cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.indexingStatusProperty().setValue(IndexingStatus.CANCELED)));
+        cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.indexingStatusProperty().setValue(ReloadStatus.CANCELED)));
 
         getBindingManager().bind(progressPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() >= 0), controllerBusy, worksheet.progressProperty()));
         getBindingManager().bind(loadingPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() < 0), controllerBusy, worksheet.progressProperty()));
@@ -1169,14 +1169,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 t -> t.getTableView().getItems().get(
                         t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
         );
-        TableColumn<LogFileSeriesInfo, IndexingStatus> incompleteLoad = new TableColumn<>();
+        TableColumn<LogFileSeriesInfo, ReloadStatus> incompleteLoad = new TableColumn<>();
         incompleteLoad.setEditable(false);
         incompleteLoad.setSortable(false);
         incompleteLoad.setResizable(false);
         incompleteLoad.setPrefWidth(40);
         incompleteLoad.setCellValueFactory(p -> p.getValue().indexingStatusProperty());
         incompleteLoad.setCellFactory(param -> new StatusIconTableCell<>(Map.of(
-                        IndexingStatus.CANCELED,
+                        ReloadStatus.CANCELED,
                         new ToolButtonBuilder<Button>(getBindingManager())
                                 .setText("warning")
                                 .setTooltip("This series was not completely loaded. Click here to reload.")
@@ -1186,7 +1186,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 .setIconColor(Color.ORANGE)
                                 .setAction(event -> invalidate(false, false, ReloadPolicy.INCOMPLETE, true))
                                 .build(Button::new),
-                        IndexingStatus.NO_RESULTS,
+                        ReloadStatus.NO_RESULTS,
                         new ToolButtonBuilder<Button>(getBindingManager())
                                 .setText("error")
                                 .setTooltip("Parsing source yielded no results. Please check parsing rules")
@@ -1195,7 +1195,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 .setFocusTraversable(false)
                                 .setIconColor(Color.RED)
                                 .build(Button::new),
-                        IndexingStatus.ABORTED,
+                        ReloadStatus.ABORTED,
                         new ToolButtonBuilder<Button>(getBindingManager())
                                 .setText("warning")
                                 .setTooltip("Indexing was aborted.")
@@ -1373,11 +1373,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
+            if (byAdapterEntry.getKey() instanceof Reloadable<SearchHit> adapter) {
                 // Group all queries with the same adapter and path
                 var bindingsByPath =
                         byAdapterEntry.getValue().stream().collect(groupingBy(LogFileSeriesInfo::getPathFacetValue));
-                adapter.loadSeries(queryArgs,
+                adapter.reload(queryArgs,
                         bindingsByPath.values().stream()
                                 .flatMap(Collection::stream)
                                 .filter(TimeSeriesInfo::isSelected)

@@ -29,7 +29,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
-import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
@@ -57,7 +57,7 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     private static final Logger logger = Logger.create(BaseJfrDataAdapter.class);
     protected static final Gson gson = new Gson();
-    protected static final Property<IndexingStatus> INDEXING_OK = new SimpleObjectProperty<>(IndexingStatus.OK);
+    protected static final Property<ReloadStatus> INDEXING_OK = new SimpleObjectProperty<>(ReloadStatus.OK);
     protected static final String ZONE_ID = "zoneId";
     protected static final String ENCODING = "encoding";
     protected static final String PARSING_PROFILE = "parsingProfile";
@@ -158,7 +158,7 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
                 var eventType = a[1];
                 filterMap.computeIfAbsent(filePath, p -> new HashSet<>()).add(eventType);
                 isCommitNecessary = true;
-                index.getIndexedFiles().put(binding, IndexingStatus.OK);
+                index.getIndexedFiles().put(binding, ReloadStatus.OK);
             }
         }
         for (Map.Entry<Path, HashSet<String>> entry : filterMap.entrySet()) {

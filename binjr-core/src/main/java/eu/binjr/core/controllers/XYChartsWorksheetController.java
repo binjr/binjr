@@ -25,6 +25,7 @@ import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.text.NoopPrefixFormatter;
 import eu.binjr.common.text.PercentagePrefixFormatter;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.ReloadPolicy;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -717,7 +718,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void initNavigationPane() {
         backButton.setOnAction(getBindingManager().registerHandler(this::handleHistoryBack));
         forwardButton.setOnAction(getBindingManager().registerHandler(this::handleHistoryForward));
-        refreshButton.setOnAction(getBindingManager().registerHandler(this::handleRefresh));
+        refreshButton.setOnMouseClicked(getBindingManager().registerHandler(event -> refresh(event.isControlDown())));
         snapshotButton.setOnAction(getBindingManager().registerHandler(event -> saveSnapshot()));
         getBindingManager().bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
         getBindingManager().bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
@@ -1315,7 +1316,12 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public void refresh() {
-        invalidate(false, false, true);
+        refresh(false);
+    }
+
+    @Override
+    public void refresh(boolean force) {
+        invalidate(false, false, true, force ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED);
     }
 
     @Override
@@ -1338,16 +1344,17 @@ public class XYChartsWorksheetController extends WorksheetController {
         navigateForward();
     }
 
-    @FXML
-    private void handleRefresh(ActionEvent actionEvent) {
-        this.refresh();
-    }
 
     public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
+        return invalidate(saveToHistory, dontPlotChart, forceRefresh, ReloadPolicy.UNLOADED);
+    }
+
+    public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh, ReloadPolicy reloadPolicy) {
         var p = Profiler.start("Invalidate worksheet: " + getWorksheet().getName() +
                 " [saveToHistory=" + saveToHistory + ", " +
                 "dontPlotChart=" + dontPlotChart + ", " +
-                "forceRefresh=" + forceRefresh + "]", logger::perf);
+                "forceRefresh=" + forceRefresh +
+                "reloadPolicy=" + reloadPolicy + "]", logger::perf);
         worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
         logger.debug(() -> worksheet.getHistory().dump());
         if (dontPlotChart) {
@@ -1355,12 +1362,16 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
         CompletableFuture<?>[] futurePlots = new CompletableFuture<?>[viewPorts.size()];
         for (int i = 0; i < viewPorts.size(); i++) {
-            futurePlots[i] = plotChart(viewPorts.get(i), forceRefresh);
+            futurePlots[i] = plotChart(viewPorts.get(i), forceRefresh, reloadPolicy);
         }
         return CompletableFuture.allOf(futurePlots).whenComplete((o, throwable) -> p.close());
     }
 
     public CompletableFuture<?> plotChart(ChartViewPort viewPort, boolean forceRefresh) {
+        return plotChart(viewPort, forceRefresh, ReloadPolicy.UNLOADED);
+    }
+
+    public CompletableFuture<?> plotChart(ChartViewPort viewPort, boolean forceRefresh, ReloadPolicy reloadPolicy) {
         if (currentState.get(viewPort.getDataStore()).isEmpty()) {
             logger.warn(() -> "Empty state!");
             return CompletableFuture.completedFuture(null);
@@ -1369,7 +1380,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
         nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
         return AsyncTaskManager.getInstance().submit(() -> {
-                    viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
+                    viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh, reloadPolicy);
                     return viewPort.getDataStore().getSeries()
                             .stream()
                             .filter(series -> {

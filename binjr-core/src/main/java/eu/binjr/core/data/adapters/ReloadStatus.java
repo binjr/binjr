@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.indexes;
+package eu.binjr.core.data.adapters;
 
-public enum IndexingStatus {
+public enum ReloadStatus {
     OK,
     CANCELED,
     NO_RESULTS,

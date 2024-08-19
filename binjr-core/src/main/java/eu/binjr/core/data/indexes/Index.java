@@ -25,6 +25,7 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.indexes.parser.*;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.FacetEntry;
@@ -107,7 +108,7 @@ public class Index implements Indexable {
     protected final ExecutorService parsingThreadPool;
     protected final int parsingThreadsNumber;
     private final UserPreferences userPref = UserPreferences.getInstance();
-    private final Map<String, IndexingStatus> indexedFiles = new ConcurrentHashMap<>();
+    private final Map<String, ReloadStatus> indexedFiles = new ConcurrentHashMap<>();
 
     private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
     protected DirectoryReader indexReader;
@@ -449,7 +450,7 @@ public class Index implements Indexable {
                         EventFormat<T> eventFormat,
                         EnrichDocumentFunction enrichDocumentFunction,
                         LongProperty progress,
-                        Property<IndexingStatus> cancellationRequested) throws IOException {
+                        Property<ReloadStatus> cancellationRequested) throws IOException {
         add(path, source, commit, eventFormat, enrichDocumentFunction, progress, cancellationRequested, (root, event) -> path, (ignore) -> List.of(path));
     }
 
@@ -459,7 +460,7 @@ public class Index implements Indexable {
                         EventFormat<T> eventFormat,
                         EnrichDocumentFunction enrichDocumentFunction,
                         LongProperty progress,
-                        Property<IndexingStatus> cancellationRequested,
+                        Property<ReloadStatus> cancellationRequested,
                         BiFunction<String, ParsedEvent, String> computePathFacetValue,
                         Function<T, List<String>> computeDeletePaths) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
@@ -517,14 +518,14 @@ public class Index implements Indexable {
                     progress.bind(aggregator.progressIndicator());
                     for (var event : aggregator) {
                         if (taskAborted.get()) {
-                            cancellationRequested.setValue(IndexingStatus.ABORTED);
+                            cancellationRequested.setValue(ReloadStatus.ABORTED);
                             break;
                         }
-                        if (cancellationRequested.getValue() == IndexingStatus.CANCELED) {
+                        if (cancellationRequested.getValue() == ReloadStatus.CANCELED) {
                             break;
                         }
                         if (event == null) {
-                            cancellationRequested.setValue(IndexingStatus.NO_RESULTS);
+                            cancellationRequested.setValue(ReloadStatus.NO_RESULTS);
                             break;
                         }
                         queue.put(event);
@@ -798,7 +799,7 @@ public class Index implements Indexable {
 
 
     @Override
-    public Map<String, IndexingStatus> getIndexedFiles() {
+    public Map<String, ReloadStatus> getIndexedFiles() {
         return indexedFiles;
     }
 }

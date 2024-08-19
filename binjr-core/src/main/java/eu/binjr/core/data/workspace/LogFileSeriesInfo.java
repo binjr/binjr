@@ -22,7 +22,7 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
-import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import jakarta.xml.bind.annotation.*;
@@ -42,7 +42,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     @IsDirtyable
     private final Property<ParsingProfile> parsingProfile;
 
-    private final Property<IndexingStatus> indexingStatus = new SimpleObjectProperty<>(IndexingStatus.OK);
+    private final Property<ReloadStatus> indexingStatus = new SimpleObjectProperty<>(ReloadStatus.OK);
 
     @XmlTransient
     private final ChangeWatcher status;
@@ -158,15 +158,15 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     }
 
     @XmlTransient
-    public IndexingStatus isLoadComplete() {
+    public ReloadStatus isLoadComplete() {
         return indexingStatus.getValue();
     }
 
-    public Property<IndexingStatus> indexingStatusProperty() {
+    public Property<ReloadStatus> indexingStatusProperty() {
         return indexingStatus;
     }
 
-    public void setIndexingStatus(IndexingStatus status) {
+    public void setIndexingStatus(ReloadStatus status) {
         this.indexingStatus.setValue(status);
     }
 }

@@ -19,11 +19,14 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.Reloadable;
+import eu.binjr.core.data.adapters.ReloadPolicy;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
@@ -180,7 +183,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
      * @param bypassCache set to true to forcefully bypass any cache on the adapter.
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */
-    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache)
+    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache, ReloadPolicy reloadPolicy)
             throws DataAdapterException {
         // prune series from closed adapters
         series.removeIf(seriesInfo -> {
@@ -223,6 +226,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                                 // Get data from the adapter
                                 Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> data;
                                 try {
+                                    if (adapter instanceof Reloadable<Double> reloadable) {
+                                        reloadable.reload(path, byPathEntry.getValue(), reloadPolicy, null, new SimpleObjectProperty<>(ReloadStatus.OK));
+                                    }
                                     data = adapter.fetchData(
                                             path,
                                             startTime.toInstant(),

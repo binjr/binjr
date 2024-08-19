@@ -17,6 +17,7 @@
 package eu.binjr.core.data.indexes;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.indexes.parser.EventFormat;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import javafx.beans.property.LongProperty;
@@ -38,7 +39,7 @@ public interface Indexable extends Closeable {
                  EventFormat<T> eventFormat,
                  EnrichDocumentFunction enrichDocumentFunction,
                  LongProperty progress,
-                 Property<IndexingStatus> cancellationRequested) throws IOException;
+                 Property<ReloadStatus> cancellationRequested) throws IOException;
 
     <T> void add(String path,
                  T source,
@@ -46,12 +47,12 @@ public interface Indexable extends Closeable {
                  EventFormat<T> eventFormat,
                  EnrichDocumentFunction enrichDocumentFunction,
                  LongProperty progress,
-                 Property<IndexingStatus> cancellationRequested,
+                 Property<ReloadStatus> cancellationRequested,
                  BiFunction<String, ParsedEvent, String> computePathFacetValue,
                  Function<T, List<String>> computeDeletePaths) throws IOException;
 
     TimeRange getTimeRangeBoundaries(List<String> files, ZoneId zoneId) throws IOException;
 
-    Map<String, IndexingStatus> getIndexedFiles();
+    Map<String, ReloadStatus> getIndexedFiles();
 
 }

@@ -25,7 +25,7 @@ import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.*;
@@ -66,7 +66,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     private transient final DoubleProperty progress = new SimpleDoubleProperty(-1);
 
-    private transient final  Property<IndexingStatus> indexingStatus = new SimpleObjectProperty<>(IndexingStatus.OK);
+    private transient final  Property<ReloadStatus> indexingStatus = new SimpleObjectProperty<>(ReloadStatus.OK);
 
     public LogWorksheet() {
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
@@ -280,7 +280,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         Map<DataAdapter<SearchHit>, List<TimeSeriesInfo<SearchHit>>> bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
+            if (byAdapterEntry.getKey() instanceof Reloadable<SearchHit> adapter) {
                 TimeRange timeRange = null;
                 try {
                     timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue());
@@ -315,11 +315,11 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         return progress;
     }
 
-    public IndexingStatus getIndexingStatus() {
+    public ReloadStatus getIndexingStatus() {
         return indexingStatus.getValue();
     }
 
-    public Property<IndexingStatus> indexingStatusProperty() {
+    public Property<ReloadStatus> indexingStatusProperty() {
         return indexingStatus;
     }
 

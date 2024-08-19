@@ -69,7 +69,7 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
  *
  * @author Frederic Thevenet
  */
-public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
+public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloadable<SearchHit> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
     private static final String DEFAULT_PREFIX = "[Logs]";
@@ -79,10 +79,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private static final String EXTENSIONS_FILTERS_PARAM_NAME = "fileExtensionsFilters";
     private static final String PARSING_PROFILE_PARAM_NAME = "parsingProfile";
     private static final String LOG_FILE_ENCODING = "LOG_FILE_ENCODING";
-    private static final Property<IndexingStatus> INDEXING_OK = new ReadOnlyObjectWrapper(new SimpleObjectProperty<>(IndexingStatus.OK));
+    private static final Property<ReloadStatus> INDEXING_OK = new ReadOnlyObjectWrapper(new SimpleObjectProperty<>(ReloadStatus.OK));
 
     private final String sourceNamePrefix;
-    private final Map<String, IndexingStatus> indexedFiles = new HashMap<>();
+    private final Map<String, ReloadStatus> indexedFiles = new HashMap<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private final MostRecentlyUsedList<String> defaultParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("defaultParsingProfiles", 100);
@@ -328,16 +328,16 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                                                                     Instant end,
                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                                                                     boolean bypassCache) throws DataAdapterException {
-        return loadSeries(path, seriesInfo, bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED, null, INDEXING_OK);
+        reload(path, seriesInfo, bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED, null, INDEXING_OK);
+        return new HashMap<>();
     }
 
     @Override
-    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> loadSeries(String path,
-                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                                                                     ReloadPolicy reloadPolicy,
-                                                                                     DoubleProperty progress,
-                                                                                     Property<IndexingStatus> indexingStatus) throws DataAdapterException {
-        Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
+    public void reload(String path,
+                       List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                       ReloadPolicy reloadPolicy,
+                       DoubleProperty progress,
+                       Property<ReloadStatus> reloadStatus) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo.stream()
                             .filter(s -> s instanceof LogFileSeriesInfo)
@@ -345,23 +345,22 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                             .toList(),
                     progress,
                     reloadPolicy,
-                    indexingStatus);
+                    reloadStatus);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
-        return data;
     }
 
     private synchronized void ensureIndexed(List<LogFileSeriesInfo> seriesInfo,
                                             DoubleProperty progress,
                                             ReloadPolicy reloadPolicy,
-                                            Property<IndexingStatus> indexingStatus) throws IOException {
+                                            Property<ReloadStatus> indexingStatus) throws IOException {
         final var toDo = seriesInfo.stream()
                 .filter(p -> switch (reloadPolicy) {
                     case ALL -> true;
                     case UNLOADED -> !indexedFiles.containsKey(getPathFacetValue(p));
                     case INCOMPLETE ->
-                            indexedFiles.getOrDefault(getPathFacetValue(p), IndexingStatus.CANCELED) == IndexingStatus.CANCELED;
+                            indexedFiles.getOrDefault(getPathFacetValue(p), ReloadStatus.CANCELED) == ReloadStatus.CANCELED;
                 })
                 .toList();
         if (toDo.size() > 0) {
@@ -413,7 +412,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                     Dialogs.runOnFXThread(() -> progress.setValue(-1));
                 }
                 // reset cancellation request
-                indexingStatus.setValue(IndexingStatus.OK);
+                indexingStatus.setValue(ReloadStatus.OK);
             }
         }
         // Update loading status for series

@@ -29,7 +29,7 @@ import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
-import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -38,10 +38,7 @@ import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CustomCsvParsingProfile;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.scene.control.TreeItem;
 import org.apache.lucene.document.StoredField;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
@@ -66,10 +63,10 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class CsvFileAdapter extends BaseDataAdapter<Double> {
+public class CsvFileAdapter extends BaseDataAdapter<Double> implements Reloadable<Double> {
     private static final Logger logger = Logger.create(CsvFileAdapter.class);
     private static final Gson gson = new Gson();
-    private static final Property<IndexingStatus> INDEXING_OK = new SimpleObjectProperty<>(IndexingStatus.OK);
+    private static final Property<ReloadStatus> INDEXING_OK = new SimpleObjectProperty<>(ReloadStatus.OK);
     private static final String ZONE_ID = "zoneId";
     private static final String ENCODING = "encoding";
     private static final String DELIMITER = "delimiter";
@@ -81,7 +78,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private Path csvPath;
     private ZoneId zoneId;
     private String encoding;
-    private final Map<String, IndexingStatus> indexedFiles = new HashMap<>();
+    private final Map<String, ReloadStatus> indexedFiles = new HashMap<>();
     private Index index;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
@@ -304,12 +301,21 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
                             },
                             charRead,
                             INDEXING_OK);
-                    return IndexingStatus.OK;
+                    return ReloadStatus.OK;
                 } finally {
                     formatters.remove();
                 }
             }));
         }
 
+    }
+
+    @Override
+    public void reload(String path, List<TimeSeriesInfo<Double>> seriesInfo, ReloadPolicy reloadPolicy, DoubleProperty progress, Property<ReloadStatus> reloadStatus) throws DataAdapterException {
+        try {
+            ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), reloadPolicy);
+        } catch (Exception e) {
+            throw new DataAdapterException("Error fetching logs from " + path, e);
+        }
     }
 }

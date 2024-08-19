@@ -22,7 +22,7 @@ import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
+public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Reloadable<SearchHit> {
     private static final Logger logger = Logger.create(JfrDataAdapter.class);
 
     /**
@@ -132,22 +132,21 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Pro
                                                                                     Instant end,
                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                                                                     boolean bypassCache) throws DataAdapterException {
-        return loadSeries(path, seriesInfo, bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED, null, INDEXING_OK);
+        reload(path, seriesInfo, bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED, null, INDEXING_OK);
+        return new HashMap<>();
     }
 
     @Override
-    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> loadSeries(String path,
-                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                                                                     ReloadPolicy reloadPolicy,
-                                                                                     DoubleProperty progress,
-                                                                                     Property<IndexingStatus> indexingStatus) throws DataAdapterException {
-        Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
+    public void reload(String path,
+                       List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                       ReloadPolicy reloadPolicy,
+                       DoubleProperty progress,
+                       Property<ReloadStatus> reloadStatus) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo.stream().map(info -> BuiltInParsingProfile.NONE.getProfileId() + "/" + info.getBinding().getPath()).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
-        return data;
     }
 
     @Override

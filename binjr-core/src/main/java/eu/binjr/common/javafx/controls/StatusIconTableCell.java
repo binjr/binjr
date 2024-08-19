@@ -16,7 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
-import eu.binjr.core.data.indexes.IndexingStatus;
+import eu.binjr.core.data.adapters.ReloadStatus;
 import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.TableCell;
@@ -29,16 +29,16 @@ import java.util.Map;
  * @param <T> The type of the TableView generic type
  * @author Frederic Thevenet
  */
-public class StatusIconTableCell<T> extends TableCell<T, IndexingStatus> {
-    private final Map<IndexingStatus, Node> iconMap;
+public class StatusIconTableCell<T> extends TableCell<T, ReloadStatus> {
+    private final Map<ReloadStatus, Node> iconMap;
 
-    public StatusIconTableCell(Map<IndexingStatus, Node> icons) {
+    public StatusIconTableCell(Map<ReloadStatus, Node> icons) {
         this.iconMap = icons;
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 
     @Override
-    protected void updateItem(IndexingStatus item, boolean empty) {
+    protected void updateItem(ReloadStatus item, boolean empty) {
         super.updateItem(item, empty);
         setText(null);
         if (empty || item == null) {
