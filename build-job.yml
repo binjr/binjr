@@ -50,7 +50,7 @@ jobs:
         inputs:
           secureFile: 'binjr.package.signing.keys.asc'
 
-      - task: Gradle@2
+      - task: gradle@3
         condition: succeeded()
         env:
           GPG_KEY_NAME: $(gpg.keyname)
@@ -70,7 +70,7 @@ jobs:
           publishJUnitResults: false
           tasks: 'signPackageDistribution'
 
-      - task: GithubRelease@0
+      - task: GithubRelease@1
         condition: and(succeeded(), eq(variables['isTag'], 'true'))
         inputs:
           gitHubConnection: binjr-bot

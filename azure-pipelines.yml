@@ -83,7 +83,7 @@ stages:
             inputs:
               secureFile: 'keyring.gpg'
 
-          - task: Gradle@2
+          - task: gradle@3
             env:
               IS_TAG: 'true'
               REPO_TAG_NAME: $(Build.SourceBranchName)
@@ -231,7 +231,7 @@ stages:
             inputs:
               secureFile: 'keyring.gpg'
 
-          - task: Gradle@2
+          - task: gradle@3
             env:
               IS_TAG: $(isTag)
               REPO_TAG_NAME: $(Build.SourceBranchName)
