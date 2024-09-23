@@ -93,8 +93,8 @@ jobs:
             $(System.DefaultWorkingDirectory)/build/artifacts/tgz/*.tar.gz
             $(System.DefaultWorkingDirectory)/build/artifacts/tgz/*.tar.gz.asc
           assetUploadMode: 'replace'
-          releaseNotesSource: 'file'
-          releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
+          releaseNotesSource: 'filePath'
+          releaseNotesFilePath: $(System.DefaultWorkingDirectory)/UNRELEASED.md
           addChangeLog: false
           isPreRelease: $(isSnapshot)
 
