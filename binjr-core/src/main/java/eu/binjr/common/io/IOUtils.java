@@ -224,15 +224,15 @@ public class IOUtils {
         return c;
     }
 
-    public static byteArrayTuple split(byte[] array, int len) {
+    public static ByteArrayTuple split(byte[] array, int len) {
         byte[] first = new byte[len];
         byte[] second = new byte[array.length - len];
         System.arraycopy(array, 0, first, 0, len);
         System.arraycopy(array, len, second, 0, second.length);
-        return new byteArrayTuple(first, second);
+        return new ByteArrayTuple(first, second);
     }
 
-    public record byteArrayTuple(byte[] first, byte[] second) {
+    public record ByteArrayTuple(byte[] first, byte[] second) {
     }
 
     public static String sha256(String input) throws NoSuchAlgorithmException {
