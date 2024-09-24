@@ -33,7 +33,8 @@ public class SSLContextUtils {
         NONE("none"),
         WINDOWS_ROOT("Windows-ROOT"),
         WINDOWS_MY("Windows-MY"),
-        MACOS_KEYCHAIN("KeychainStore");
+        MACOS_KEYCHAIN("KeychainStore"),
+        MACOS_KEYCHAIN_ROOT("KeychainStore-ROOT");
 
         private final String name;
 
@@ -52,7 +53,7 @@ public class SSLContextUtils {
             return withKeystore(PlatformKeyStore.WINDOWS_ROOT);
         }
         if (OS_NAME.startsWith("mac")) {
-            return withKeystore(PlatformKeyStore.MACOS_KEYCHAIN);
+            return withKeystore(PlatformKeyStore.MACOS_KEYCHAIN_ROOT);
         }
         return withKeystore(PlatformKeyStore.NONE);
     }
