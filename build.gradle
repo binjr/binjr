@@ -88,8 +88,7 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
-ext.WIX_HOME = System.getenv("WIX")
-ext.WIX_HEAT_HOME = System.getenv("WIX_HEAT_HOME")
+ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX5")
 ext.ARTIFACTS_ROOT_PATH = "${buildDir}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")
@@ -496,7 +495,7 @@ tasks.register('wixRunHeat', Exec) {
     }
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HEAT_HOME}/heat.exe",
+            "${WIX_HOME}/x64/heat.exe",
             "dir", "${APP_IMAGE_PATH}",
             "-cg", "binjrFiles",
             "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
@@ -508,19 +507,19 @@ tasks.register('wixRunHeat', Exec) {
 
 tasks.register('wixAddUiExt', Exec) {
     dependsOn wixRunHeat
-    commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
+    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
 }
 
 tasks.register('wixAddUtilExt', Exec) {
     dependsOn wixAddUiExt
-    commandLine = ["wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
+    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
 }
 
 tasks.register('wixRunBuild', Exec) {
     dependsOn wixAddUtilExt
     workingDir project.projectDir
     commandLine = [
-            "wix.exe", "build", "-arch", "${getArch()}",
+            "${WIX_HOME}/wix.exe", "build", "-arch", "${getArch()}",
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "${buildDir}/wix/binjrFiles.wxs",
             "-ext", "WixToolset.UI.wixext",

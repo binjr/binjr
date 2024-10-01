@@ -30,9 +30,8 @@ jobs:
           cleanDestinationDirectory: true
 
       - script: |
-          mkdir "%TOOL_DIR%/WixToolSet.Heat/"
-          nuget install WixToolSet.Heat -Version %WIX_VERSION% -OutputDirectory "%TOOL_DIR%"
-          dotnet tool install --global wix --version %WIX_VERSION%
+          curl -LO https://github.com/wixtoolset/wix/releases/download/v%WIX_VERSION%/wix-cli-x64.msi
+          msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="%TOOL_DIR%\wix-cli"
         condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
         env:
           TOOL_DIR: $(Agent.ToolsDirectory)
@@ -59,8 +58,8 @@ jobs:
           BINJR_BUILD_NUMBER: $(Build.BuildNumber)
           IS_TAG: $(isTag)
           REPO_TAG_NAME: $(Build.SourceBranchName)
-          WIX_HEAT_HOME: $(Agent.ToolsDirectory)/wixtoolset.heat.${{ parameters.wixVersion }}/tools/net472/${{ parameters.arch }}
           GH_PKG_TOKEN: $(gh.pkg.token)
+          WIX_HOME: $(Agent.ToolsDirectory)\wix-cli\bin\
         inputs:
           options: '--stacktrace --info'
           gradleWrapperFile: 'gradlew'
