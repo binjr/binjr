@@ -67,7 +67,6 @@ import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.MMapDirectory;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -148,18 +147,15 @@ public class Index implements Indexable {
             case MEMORY:
                 indexDirectory = new ByteBuffersDirectory();
                 taxonomyDirectory = new ByteBuffersDirectory();
-                logger.debug("Lucene index directory stored on the Java Heap");
+                logger.warn("[Deprecated] Lucene index directory stored on the Java Heap");
                 indexDirectoryPath = null;
                 break;
-            default:
             case FILES_SYSTEM:
-                if (!MMapDirectory.UNMAP_SUPPORTED) {
-                    logger.debug("Unmap not supported: " + MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
-                }
+            default:
                 indexDirectoryPath = Files.createTempDirectory(prefs.temporaryFilesRoot.get(), "binjr-index_");
                 indexDirectory = FSDirectory.open(indexDirectoryPath.resolve("index"));
                 taxonomyDirectory = FSDirectory.open(indexDirectoryPath.resolve("taxonomy"));
-                logger.debug("Lucene index directory stored at " + indexDirectoryPath);
+                logger.debug(() -> "Lucene index directory stored at " + indexDirectoryPath);
         }
         logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                 " using " + parsingThreadsNumber + " parsing indexing threads");
@@ -213,34 +209,32 @@ public class Index implements Indexable {
         };
     }
 
-
     private void rewriteQuery(Query query, BooleanQuery.Builder accQuery, BooleanClause.Occur occur) throws IOException {
         if (query instanceof BooleanQuery booleanQuery) {
             for (BooleanClause booleanClause : booleanQuery) {
-                rewriteQuery(booleanClause.getQuery(), accQuery, booleanClause.getOccur());
+                rewriteQuery(booleanClause.query(), accQuery, booleanClause.occur());
             }
         } else if (query instanceof TermQuery termQuery) {
             accQuery.add(splitTermToNGrams(termQuery.getTerm()), occur);
         } else {
             int ngramSize = prefs.logIndexNGramSize.get().intValue();
-            if (query instanceof PrefixQuery prefixQuery &&
-                    prefixQuery.getPrefix().text().length() > ngramSize) {
-                accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
-            } else if (query instanceof WildcardQuery wildcardQuery &&
-                    wildcardQuery.getTerm().text().replace("*", "").replace("?", "").length() > ngramSize) {
-                var subBuilder = new BooleanQuery.Builder();
-                for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
-                    subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt), true), BooleanClause.Occur.FILTER);
+            switch (query) {
+                case PrefixQuery prefixQuery when prefixQuery.getPrefix().text().length() > ngramSize ->
+                        accQuery.add(splitTermToNGrams(prefixQuery.getPrefix()), occur);
+                case WildcardQuery wildcardQuery when wildcardQuery.getTerm().text().replace("*", "").replace("?", "").length() > ngramSize -> {
+                    var subBuilder = new BooleanQuery.Builder();
+                    for (var txt : wildcardQuery.getTerm().text().split("[?*]")) {
+                        subBuilder.add(splitTermToNGrams(new Term(wildcardQuery.getTerm().field(), txt), true), BooleanClause.Occur.FILTER);
+                    }
+                    accQuery.add(subBuilder.build(), occur);
                 }
-                accQuery.add(subBuilder.build(), occur);
-            } else if (query instanceof PhraseQuery phraseQuery) {
-                var text = Arrays.stream(phraseQuery.getTerms()).map(Term::text).collect(Collectors.joining(" "));
-                accQuery.add(splitTermToNGrams(new Term(phraseQuery.getField(), text)), occur);
-            } else {
-                accQuery.add(query, occur);
+                case PhraseQuery phraseQuery -> {
+                    var text = Arrays.stream(phraseQuery.getTerms()).map(Term::text).collect(Collectors.joining(" "));
+                    accQuery.add(splitTermToNGrams(new Term(phraseQuery.getField(), text)), occur);
+                }
+                case null, default -> accQuery.add(query, occur);
             }
         }
-
     }
 
     private Query splitTermToNGrams(Term term) throws IOException {
@@ -284,7 +278,7 @@ public class Index implements Indexable {
             Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
             final Query filterQuery;
             if (query != null && !query.isBlank()) {
-                logger.trace("Query text=" + query);
+                logger.trace(() -> "Query text=" + query);
                 Query userQuery;
                 if (prefs.indexingTokenizer.get() == IndexingTokenizer.NGRAMS) {
                     var builder = new BooleanQuery.Builder();
@@ -330,14 +324,14 @@ public class Index implements Indexable {
             var skip = page * pageSize;
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
-            TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
+            var collectorManager = new TopFieldCollectorManager(sort, skip + pageSize, Integer.MAX_VALUE);
             logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
             String facetCacheKey = drillDownQuery.toString(FIELD_CONTENT);
             String hitCacheKey = facetCacheKey + "_" + page;
             Function<String, SearchHitsProcessor> fillHitResultCache = CheckedLambdas.wrap(k -> {
-                DrillSideways.DrillSidewaysResult results;
+                DrillSideways.ConcurrentDrillSidewaysResult<TopFieldDocs> results;
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                    results = drill.search(drillDownQuery, collector);
+                    results = drill.search(drillDownQuery, collectorManager);
                 }
                 try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
                     logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Hit cache was explicitly bypassed" : "Hit cache miss", k));
@@ -345,10 +339,8 @@ public class Index implements Indexable {
                     var samples = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
                     var severityFacet = makeFacetResult(SEVERITY, results.facets, facets);
                     var pathFacet = makeFacetResult(PATH, results.facets, facets);
-                    var topDocs = collector.topDocs(skip, pageSize);
-                    logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
-                    for (int i = 0; i < topDocs.scoreDocs.length; i++) {
-                        var hit = topDocs.scoreDocs[i];
+                    var topDocs = TopDocs.merge(skip, pageSize, new TopDocs[]{results.collectorResult});
+                    for (var hit : topDocs.scoreDocs) {
                         var doc = searcher.storedFields().document(hit.doc, Set.of(TIMESTAMP, SEVERITY, PATH, FIELD_CONTENT));
                         var severity = severityFacet.get(doc.get(SEVERITY));
                         var path = pathFacet.get(doc.get(PATH));
@@ -368,7 +360,7 @@ public class Index implements Indexable {
                                     .stream()
                                     .sorted(Comparator.comparingInt(FacetEntry::occurrences).reversed())
                                     .toList());
-                    proc.setTotalHits(collector.getTotalHits());
+                    proc.setTotalHits(results.collectorResult.totalHits.value());
                     proc.setHitsPerPage(pageSize);
                     proc.setData(samples);
                     return proc;
@@ -426,9 +418,9 @@ public class Index implements Indexable {
                     }
                 }
             }
-            FacetsCollector fc = new FacetsCollector();
-            FacetsCollector.search(searcher, q, 0, fc);
-            Facets facets = new LongRangeFacetCounts(TIMESTAMP, fc, ranges);
+            var fcm = new FacetsCollectorManager();
+            var result = FacetsCollectorManager.search(searcher, q, 0, fcm);
+            Facets facets = new LongRangeFacetCounts(TIMESTAMP, result.facetsCollector(), ranges);
             proc.addFacetResults(TIMESTAMP + "_" + severityLabel,
                     makeFacetResult(TIMESTAMP, facets, params).values());
         }
@@ -482,7 +474,7 @@ public class Index implements Indexable {
                         do {
                             List<ParsedEvent> todo = new ArrayList<>();
                             var drained = queue.drainTo(todo, prefs.parsingThreadDrainSize.get().intValue());
-                            if (drained == 0 && queue.size() == 0) {
+                            if (drained == 0 && queue.isEmpty()) {
                                 // Park the thread for a while before polling again
                                 // as is it likely that producer is done.
                                 LockSupport.parkNanos(PARK_TIME_NANO);
@@ -530,7 +522,7 @@ public class Index implements Indexable {
                         }
                         queue.put(event);
                     }
-                    while (!taskAborted.get() && queue.size() > 0) {
+                    while (!taskAborted.get() && !queue.isEmpty()) {
                         LockSupport.parkNanos(PARK_TIME_NANO);
                     }
                 } catch (InterruptedException e) {
@@ -543,7 +535,9 @@ public class Index implements Indexable {
                 for (Future<Integer> f : results) {
                     //signal exceptions that may have happened on thread pool
                     try {
-                        logger.trace("Thread added " + f.get() + " log event to index");
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Thread added " + f.get() + " log event to index");
+                        }
                         nbLogEvents.addAndGet(f.get());
                     } catch (InterruptedException e) {
                         logger.error("Getting result from worker was interrupted", e);
@@ -683,9 +677,9 @@ public class Index implements Indexable {
         return getIndexMonitor().read().lock(() -> {
             var parser = new StandardQueryParser();
             try (Profiler p = Profiler.start(() -> "Retrieved all paths", logger::perf)) {
-                FacetsCollector fc = new FacetsCollector();
-                FacetsCollector.search(searcher, parser.parse(query, FIELD_CONTENT), 0, fc);
-                Facets facets = new FastTaxonomyFacetCounts(taxonomyReader, facetsConfig, fc);
+                var fcm = new FacetsCollectorManager();
+                var result = FacetsCollectorManager.search(searcher, parser.parse(query, FIELD_CONTENT), 0, fcm);
+                Facets facets = new FastTaxonomyFacetCounts(taxonomyReader, facetsConfig, result.facetsCollector());
                 return makeFacetResult(PATH, facets, Map.of(), min);
             }
         });
@@ -694,9 +688,9 @@ public class Index implements Indexable {
     public Map<String, FacetEntry> getPaths(int min, Query query) throws IOException {
         return getIndexMonitor().read().lock(() -> {
             try (Profiler p = Profiler.start(() -> "Retrieved all paths", logger::perf)) {
-                FacetsCollector fc = new FacetsCollector();
-                FacetsCollector.search(searcher, query, 0, fc);
-                Facets facets = new FastTaxonomyFacetCounts(taxonomyReader, facetsConfig, fc);
+                var fcm = new FacetsCollectorManager();
+                var result = FacetsCollectorManager.search(searcher, query, 0, fcm);
+                Facets facets = new FastTaxonomyFacetCounts(taxonomyReader, facetsConfig, result.facetsCollector());
                 return makeFacetResult(PATH, facets, Map.of(), min);
             }
         });
@@ -724,12 +718,13 @@ public class Index implements Indexable {
             FieldDoc lastHit = null;
             try (Profiler p = Profiler.start(() -> "Retrieved " + hitsCollected.get() + " samples for " + seriesToFill.size() + " series", logger::perf)) {
                 for (int pageNumber = 0; true; pageNumber++) {
-                    TopFieldCollector collector = (lastHit == null) ?
-                            TopFieldCollector.create(sort, pageSize, Integer.MAX_VALUE) :
-                            TopFieldCollector.create(sort, pageSize, lastHit, Integer.MAX_VALUE);
+                    var collectorManager = (lastHit == null) ?
+                            new TopFieldCollectorManager(sort, pageSize, Integer.MAX_VALUE) :
+                            new TopFieldCollectorManager(sort, pageSize, lastHit, Integer.MAX_VALUE);
                     logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
+                    DrillSideways.ConcurrentDrillSidewaysResult<TopFieldDocs> result;
                     try (Profiler ignored = Profiler.start("Executing query for page " + pageNumber, logger::debug)) {
-                        drill.search(drillDownQuery, collector);
+                        result = drill.search(drillDownQuery, collectorManager);
                     }
                     var fieldsToLoad = seriesToFill.keySet()
                             .stream()
@@ -737,10 +732,9 @@ public class Index implements Indexable {
                             .collect(Collectors.toSet());
                     fieldsToLoad.add(TIMESTAMP);
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new HashMap<>();
-                    var topDocs = collector.topDocs(0, pageSize);
                     // fill the buffer with data for the current page
-                    for (int i = 0; i < topDocs.scoreDocs.length; i++) {
-                        lastHit = (FieldDoc) topDocs.scoreDocs[i];
+                    for (int i = 0; i < result.collectorResult.scoreDocs.length; i++) {
+                        lastHit = (FieldDoc) result.collectorResult.scoreDocs[i];
                         var doc = searcher.storedFields().document(lastHit.doc, fieldsToLoad);
                         seriesToFill.forEach((info, proc) -> {
                             var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId);
@@ -763,9 +757,9 @@ public class Index implements Indexable {
                             fullQueryProc.appendData(pageProc);
                         }
                     });
-                    hitsCollected.accumulateAndGet(topDocs.scoreDocs.length, Long::sum);
+                    hitsCollected.accumulateAndGet(result.collectorResult.scoreDocs.length, Long::sum);
                     // End the loop once all hits have been collected
-                    if (hitsCollected.get() >= collector.getTotalHits()) {
+                    if (hitsCollected.get() >= result.collectorResult.totalHits.value()) {
                         break;
                     }
                 }
