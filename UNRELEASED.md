@@ -3,5 +3,6 @@
 * _[New]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.  
 * _[New]_ Added a keyboard shortcut (F9) to reset the time range of a worksheet to its default value.  
 * _[New]_ Updated embedded OpenJDK and JavaFX runtimes to 23
+* _[New]_ Updated to Lucene 10  
 * _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.  
 * _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.  
