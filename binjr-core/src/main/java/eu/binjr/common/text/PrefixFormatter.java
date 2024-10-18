@@ -29,6 +29,7 @@ public abstract class PrefixFormatter {
     private static final String DEFAULT_PATTERN = "###,###.##";
     private final NavigableMap<Double, String> suffixMap;
     private final DecimalFormat formatter;
+    private final int base;
 
     /**
      * Initializes a new instance of {@link PrefixFormatter} with the arithmetical base and a
@@ -36,8 +37,8 @@ public abstract class PrefixFormatter {
      *
      * @param suffixMap a map of the suffix labels and the associated divider as the key.
      */
-    protected PrefixFormatter(NavigableMap<Double, String> suffixMap) {
-        this(suffixMap, DEFAULT_PATTERN);
+    protected PrefixFormatter(NavigableMap<Double, String> suffixMap, int base) {
+        this(suffixMap, DEFAULT_PATTERN, base);
     }
 
     /**
@@ -47,9 +48,10 @@ public abstract class PrefixFormatter {
      * @param suffixMap a map of the suffix labels and the associated divider as the key.
      * @param pattern   a non-localized pattern string.
      */
-    protected PrefixFormatter(NavigableMap<Double, String> suffixMap, String pattern) {
+    protected PrefixFormatter(NavigableMap<Double, String> suffixMap, String pattern, int base) {
         this.suffixMap = suffixMap;
         this.formatter = new DecimalFormat(pattern);
+        this.base = base;
     }
 
     /**
@@ -78,5 +80,9 @@ public abstract class PrefixFormatter {
         Double divideBy = e.getKey();
         String suffix = e.getValue();
         return formatter.format(value / divideBy) + suffix;
+    }
+
+    public int getBase() {
+        return base;
     }
 }

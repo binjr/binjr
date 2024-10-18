@@ -19,6 +19,7 @@ package eu.binjr.core.controllers;
 
 import com.google.gson.Gson;
 import eu.binjr.common.colors.ColorUtils;
+//import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
 import eu.binjr.common.javafx.charts.XYChartCrosshair;
@@ -30,6 +31,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
+import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -748,7 +750,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         timeAxis.setMaxHeight(AXIS_HEIGHT);
         timeAxis.setMinHeight(AXIS_HEIGHT);
 
-        StableTicksAxis<Double> timelineY = new MetricStableTicksAxis<>();
+        StableTicksAxis<Double> timelineY = new StableTicksAxis<>(new MetricPrefixFormatter());
         timelineY.setAutoRanging(false);
         timelineY.setAnimated(false);
         timelineY.setTickLabelsVisible(false);

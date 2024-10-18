@@ -47,7 +47,6 @@ import java.util.List;
 public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     private T dataMaxValue = (T) Double.valueOf(0);
     private T dataMinValue = (T) Double.valueOf(0);
-    private final double[] dividers;
     private final int base;
     private static final Logger logger = LogManager.getLogger(StableTicksAxis.class);
 
@@ -83,13 +82,9 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
 
     }
 
-    /**
-     * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
-     */
-    public static final int BTN_WITDTH = 21;
     private final SelectableRegion selectionMarker = new SelectableRegion();
     private final BooleanProperty selectionMarkerVisible = selectionMarker.visibleProperty();
-    private final BooleanProperty selected = selectionMarker.selectedProperty(); //new SimpleBooleanProperty(false);
+    private final BooleanProperty selected = selectionMarker.selectedProperty();
 
     private final Timeline animationTimeline = new Timeline();
     private final WritableValue<Double> scaleValue = new WritableValue<>() {
@@ -112,7 +107,7 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     private List<T> minorTicks;
 
     /**
-     * Amount of padding to add on the each end of the axis when auto ranging.
+     * Amount of padding to add on each end of the axis when auto ranging.
      */
     private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0.1);
 
@@ -135,6 +130,20 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
         this.numMinorTick.set(numMinorTick);
     }
 
+    private final ObjectProperty<double[]> majorTickDividers = new SimpleObjectProperty<>(new double[]{1.0, 5.0});
+
+    public double[] getMajorTickDividers() {
+        return majorTickDividers.get();
+    }
+
+    public Property<double[]> majorTickDividersProperty() {
+        return majorTickDividers;
+    }
+
+    public void setMajorTickDividers(double[] majorTickDividers) {
+        this.majorTickDividers.set(majorTickDividers);
+    }
+
     private final DoubleProperty singleMinTickThreshold = new SimpleDoubleProperty(16);
 
     public double getSingleMinTickThreshold() {
@@ -153,13 +162,10 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
      * Initializes a new instance of the {@link StableTicksAxis} class.
      *
      * @param prefixFormatter the {@link PrefixFormatter} instance to use.
-     * @param base            the numerical base used to determine tick positions.
-     * @param dividers        a list of divider candidates.
      */
-    public StableTicksAxis(PrefixFormatter prefixFormatter, int base, double[] dividers) {
+    public StableTicksAxis(PrefixFormatter prefixFormatter) {
         super();
-        this.base = base;
-        this.dividers = dividers != null ? dividers : new double[]{1.0, 2.5, 5.0};
+        this.base = prefixFormatter.getBase();
         getStyleClass().setAll("axis");
 
         selectionMarker.getStyleClass().addAll("selection-marker", "drop-target");
@@ -361,7 +367,7 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
         }
         int divider = 0;
         int factor = (int) (Math.log(delta) / Math.log(base));
-        double numTicks = delta / (dividers[divider] * Math.pow(base, factor));
+        double numTicks = delta / (majorTickDividers.getValue()[divider] * Math.pow(base, factor));
         //We don't have enough ticks, so increase ticks until we're over the limit, then back off once.
         if (numTicks < maxTicks) {
             while (numTicks < maxTicks) {
@@ -369,17 +375,17 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
                 --divider;
                 if (divider < 0) {
                     --factor;
-                    divider = dividers.length - 1;
+                    divider = majorTickDividers.getValue().length - 1;
                 }
 
-                numTicks = delta / (dividers[divider] * Math.pow(base, factor));
+                numTicks = delta / (majorTickDividers.getValue()[divider] * Math.pow(base, factor));
             }
 
             //Now back off once unless we hit exactly
             //noinspection FloatingPointEquality
             if (numTicks != maxTicks) {
                 ++divider;
-                if (divider >= dividers.length) {
+                if (divider >= majorTickDividers.getValue().length) {
                     ++factor;
                     divider = 0;
                 }
@@ -388,15 +394,15 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
             //We have too many ticks or exactly max, so decrease until we're just under (or at) the limit.
             while (numTicks > maxTicks) {
                 ++divider;
-                if (divider >= dividers.length) {
+                if (divider >= majorTickDividers.getValue().length) {
                     ++factor;
                     divider = 0;
                 }
 
-                numTicks = delta / (dividers[divider] * Math.pow(base, factor));
+                numTicks = delta / (majorTickDividers.getValue()[divider] * Math.pow(base, factor));
             }
         }
-        return dividers[divider] * Math.pow(base, factor);
+        return majorTickDividers.getValue()[divider] * Math.pow(base, factor);
     }
 
 

@@ -31,7 +31,7 @@ public class NoopPrefixFormatter extends PrefixFormatter {
      * Initializes a new instance of the {@link NoopPrefixFormatter} class
      */
     public NoopPrefixFormatter() {
-        super(SUFFIX_MAP);
+        super(SUFFIX_MAP, 10);
     }
 
     /**
@@ -40,6 +40,6 @@ public class NoopPrefixFormatter extends PrefixFormatter {
      * @param pattern a non-localized pattern string
      */
     public NoopPrefixFormatter(String pattern) {
-        super(SUFFIX_MAP, pattern);
+        super(SUFFIX_MAP, pattern, 10);
     }
 }

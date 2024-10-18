@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import eu.binjr.common.text.MetricPrefixFormatter;
  *
  * @author Frederic Thevenet
  */
+@Deprecated
 public class MetricStableTicksAxis<T extends Number> extends StableTicksAxis<T> {
     public MetricStableTicksAxis() {
-        super(new MetricPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
+        super(new MetricPrefixFormatter());
     }
 }

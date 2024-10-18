@@ -29,10 +29,10 @@ public class PercentagePrefixFormatter extends PrefixFormatter {
 
 
     public PercentagePrefixFormatter() {
-        super(SUFFIX_MAP);
+        super(SUFFIX_MAP, 10);
     }
 
     public PercentagePrefixFormatter(String pattern) {
-        super(SUFFIX_MAP, pattern);
+        super(SUFFIX_MAP, pattern, 10);
     }
 }

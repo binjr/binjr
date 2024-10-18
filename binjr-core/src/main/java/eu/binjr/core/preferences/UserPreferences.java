@@ -412,13 +412,29 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<HardwareAccelerationSupport> hardwareAcceleration = enumPreference(HardwareAccelerationSupport.class, "hardwareAcceleration", HardwareAccelerationSupport.AUTO);
 
-    public final ObservablePreference<String> colorNamesHashingAlgorithm =  stringPreference("colorNamesHashingAlgorithm", "MD5");
+    public final ObservablePreference<String> colorNamesHashingAlgorithm = stringPreference("colorNamesHashingAlgorithm", "MD5");
 
     public ObservablePreference<Number> numMinorTickDecimal = integerPreference("numMinorTickDecimal", 4);
 
     public ObservablePreference<Number> numMinorTickBinary = integerPreference("numMinorTickBinary", 3);
 
     public ObservablePreference<Number> singleMinTickThreshold = doublePreference("singleMinTickThreshold", 36.0);
+
+    public final ObservablePreference<double[]> decimalAxisTickDividers = objectPreference(
+            double[].class,
+            "decimalAxisTickDividers",
+            new double[]{1.0, 2.5, 5.0},
+            gson::toJson,
+            s -> gson.fromJson(s, double[].class)
+    );
+
+    public ObservablePreference<double[]> binaryAxisTickDividers = objectPreference(
+            double[].class,
+            "binaryAxisTickDividers",
+            new double[]{1.0, 2.0, 4.0, 8.0},
+            gson::toJson,
+            s -> gson.fromJson(s, double[].class)
+    );
 
     public static class UserFavorites extends MruFactory {
 

@@ -22,8 +22,7 @@ import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
-import eu.binjr.common.text.NoopPrefixFormatter;
-import eu.binjr.common.text.PercentagePrefixFormatter;
+import eu.binjr.common.text.*;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.ReloadPolicy;
 import eu.binjr.core.data.adapters.SourceBinding;
@@ -307,15 +306,31 @@ public class XYChartsWorksheetController extends WorksheetController {
             ZonedDateTimeAxis xAxis;
             xAxis = buildTimeAxis();
             StableTicksAxis<Double> yAxis = switch (currentChart.getUnitPrefixes()) {
-                case BINARY -> new BinaryStableTicksAxis<>();
-                case METRIC -> new MetricStableTicksAxis<>();
-                case PERCENTAGE ->
-                        new StableTicksAxis<>(new PercentagePrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
-                case NONE, UNDEFINED ->
-                        new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
+                case BINARY -> {
+                    var axis = new StableTicksAxis<Double>(new BinaryPrefixFormatter());
+                    axis.majorTickDividersProperty().bind(userPrefs.binaryAxisTickDividers.property());
+                    axis.numMinorTickProperty().bind(userPrefs.numMinorTickBinary.property());
+                    yield axis;
+                }
+                case METRIC -> {
+                    var axis = new StableTicksAxis<Double>(new MetricPrefixFormatter());
+                    axis.majorTickDividersProperty().bind(userPrefs.decimalAxisTickDividers.property());
+                    axis.numMinorTickProperty().bind(userPrefs.numMinorTickDecimal.property());
+                    yield axis;
+                }
+                case PERCENTAGE -> {
+                    var axis = new StableTicksAxis<Double>(new PercentagePrefixFormatter());
+                    axis.majorTickDividersProperty().bind(userPrefs.decimalAxisTickDividers.property());
+                    axis.numMinorTickProperty().bind(userPrefs.numMinorTickDecimal.property());
+                    yield axis;
+                }
+                case NONE, UNDEFINED -> {
+                    var axis = new StableTicksAxis<Double>(new NoopPrefixFormatter());
+                    axis.majorTickDividersProperty().bind(userPrefs.decimalAxisTickDividers.property());
+                    axis.numMinorTickProperty().bind(userPrefs.numMinorTickDecimal.property());
+                    yield axis;
+                }
             };
-            getBindingManager().bind(yAxis.numMinorTickProperty(), (yAxis instanceof BinaryStableTicksAxis) ?
-                    userPrefs.numMinorTickBinary.property() : userPrefs.numMinorTickDecimal.property());
             getBindingManager().bind(yAxis.singleMinTickThresholdProperty(), userPrefs.singleMinTickThreshold.property());
             getBindingManager().bindBidirectional(yAxis.autoRangingProperty(), currentChart.autoScaleYAxisProperty());
             getBindingManager().bindBidirectional(yAxis.forceZeroInRangeProperty(), currentChart.alwaysIncludeOriginInAutoScaleProperty());

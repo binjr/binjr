@@ -44,7 +44,7 @@ public class BinaryPrefixFormatter extends PrefixFormatter {
      * Initializes a new instance of the {@link BinaryPrefixFormatter} class
      */
     public BinaryPrefixFormatter() {
-        super(SUFFIX_MAP);
+        super(SUFFIX_MAP, 2);
     }
 
     /**
@@ -53,6 +53,6 @@ public class BinaryPrefixFormatter extends PrefixFormatter {
      * @param pattern a non-localized pattern string
      */
     public BinaryPrefixFormatter(String pattern) {
-        super(SUFFIX_MAP, pattern);
+        super(SUFFIX_MAP, pattern, 2);
     }
 }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2023 Frederic Thevenet
+ *    Copyright 2019-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -111,6 +111,25 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                     var res = gson.fromJson(string, String[].class);
                     return res != null ? res : new String[0];
                 }
+            }));
+        }
+
+        if (double[].class.isAssignableFrom(item.getType())) {
+            return new FormattedPropertyEditor<double[]>(item, new TextFormatter<>(new StringConverter<>() {
+                @Override
+                public String toString(double[] object) {
+                    if (object == null) {
+                        object = new double[0];
+                    }
+                    return gson.toJson(object);
+                }
+
+                @Override
+                public double[] fromString(String string) {
+                    var res = gson.fromJson(string, double[].class);
+                    return res != null ? res : new double[0];
+                }
+
             }));
         }
 
