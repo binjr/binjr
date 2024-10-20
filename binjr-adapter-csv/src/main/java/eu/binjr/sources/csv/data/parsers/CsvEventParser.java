@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2023 Frederic Thevenet
+ *    Copyright 2022-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -84,6 +84,8 @@ public class CsvEventParser implements EventParser {
     }
 
     public class CsvEventIterator implements Iterator<ParsedEvent> {
+        private static final int MAX_TIMESTAMP_ERRORS = 1000;
+        private int timestampParsingErrors = 0;
 
         @Override
         public ParsedEvent next() {
@@ -93,7 +95,9 @@ public class CsvEventParser implements EventParser {
             }
             ZonedDateTime timestamp;
             if (format.getProfile().getTimestampColumn() == -1) {
-                timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve().plusSeconds(sequence.get()), format.getZoneId());
+                timestamp = ZonedDateTime.of(
+                        format.getProfile().getTemporalAnchor().resolve().plusSeconds(sequence.get()),
+                        format.getZoneId());
             } else {
                 if (format.getProfile().getTimestampColumn() > csvRecord.size() - 1) {
                     throw new UnsupportedOperationException("Cannot extract time stamp in column #" +
@@ -102,11 +106,24 @@ public class CsvEventParser implements EventParser {
                 }
                 String dateString = csvRecord.get(format.getProfile().getTimestampColumn());
                 timestamp = parseDateTime(dateString);
-            }
-
-            if (timestamp == null) {
-                throw new UnsupportedOperationException("Failed to parse time stamp in column #" +
-                        (format.getProfile().getTimestampColumn() + 1));
+                if (timestamp == null) {
+                    if (++timestampParsingErrors >= MAX_TIMESTAMP_ERRORS) {
+                        // If number of parsing errors is above max threshold,
+                        // interrupt processing to avoid stack overflow
+                        throw new UnsupportedOperationException("Too many time stamp parsing errors (>" +
+                                MAX_TIMESTAMP_ERRORS + "): Aborting processing.");
+                    }
+                    var errMessage = "Failed to parse \"" + StringUtils.ellipsize(dateString, 100) +
+                            "\" as a valid time stamp in column #" + (format.getProfile().getTimestampColumn() + 1) +
+                            ", line #" + csvRecord.getRecordNumber() + ".";
+                    if (format.getProfile().isContinueOnTimestampParsingFailure()) {
+                        logger.warn(errMessage);
+                        // Ignore the current csv record and jump to the next
+                        return this.next();
+                    } else {
+                        throw new UnsupportedOperationException(errMessage);
+                    }
+                }
             }
             Map<String, String> values = new LinkedHashMap<>(csvRecord.size());
             for (int i = 0; i < csvRecord.size(); i++) {

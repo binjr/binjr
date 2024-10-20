@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,9 +35,10 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     @JsonAdapter(LocaleJsonAdapter.class)
     private final Locale formattingLocale;
     private final boolean trimCellValues;
+    private final boolean continueOnTimestampParsingFailure;
 
     public CustomCsvParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false);
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false, false);
     }
 
 
@@ -52,7 +53,9 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.getExcludedColumns(),
                 parsingProfile.isReadColumnNames(),
                 parsingProfile.getNumberFormattingLocale(),
-                parsingProfile.isTrimCellValues());
+                parsingProfile.isTrimCellValues(),
+                parsingProfile.isContinueOnTimestampParsingFailure()
+        );
     }
 
 
@@ -63,7 +66,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    String delimiter,
                                    char quoteCharacter, int timestampColumn,
                                    int[] excludedColumns, boolean readColumnNames,
-                                   Locale formattingLocale, boolean trimCellValues) {
+                                   Locale formattingLocale, boolean trimCellValues,
+                                   boolean continueOnTimestampParsingFailure) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
         this.delimiter = delimiter;
         this.quoteCharacter = quoteCharacter;
@@ -72,6 +76,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         this.readColumnNames = readColumnNames;
         this.formattingLocale = formattingLocale;
         this.trimCellValues = trimCellValues;
+        this.continueOnTimestampParsingFailure = continueOnTimestampParsingFailure;
     }
 
     @Override
@@ -107,5 +112,10 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     @Override
     public boolean isTrimCellValues() {
         return trimCellValues;
+    }
+
+    @Override
+    public boolean isContinueOnTimestampParsingFailure() {
+        return this.continueOnTimestampParsingFailure;
     }
 }

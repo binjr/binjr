@@ -1,9 +1,11 @@
-* _[New]_ Added a new data adaptor to plot metrics extracted from JVM GC logs.  
-* _[New]_ The number of ticks between two graduations the Y axis now automatically adapts to best fit based on the available space and unit types.  
-* _[New]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.  
-* _[New]_ Added a keyboard shortcut (F9) to reset the time range of a worksheet to its default value.  
-* _[New]_ Updated embedded OpenJDK and JavaFX runtimes to 23
-* _[New]_ Updated to Lucene 10  
+* _[New] [GC logs Adapter]_ Added a new data adaptor to plot metrics extracted from JVM GC logs.  
+* _[New] [UI]_ The number of ticks between two graduations the Y axis now automatically adapts to best fit based on the available space and unit types.
+* _[New] [UI]_ Added a keyboard shortcut (F9) to reset the time range of a worksheet to its default value.  
+* _[New] [CSV Adapter]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.
+* _[New] [CSV Adapter]_ Added an option to ignore lines with unparsable time stamps.  
+* _[New] [CSV Adapter]_ Better error message when failing to parse a time stamp (provides column and line numbers).  
+* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.  
+* _[New] [Dependencies]_ Updated to Lucene 10.  
 * _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.  
 * _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.  
 * _[Fixed]_ User preference for "Treat undefined Y values as 0" is ignored.  

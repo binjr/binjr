@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2022 Frederic Thevenet
+  ~    Copyright 2022-2024 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -132,39 +132,36 @@
                                 </children>
                             </HBox>
                             <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                <children>
-                                    <LabelWithInlineHelp minWidth="115.0" text="Get timestamps from"
-                                                         inlineHelp="Indicates in which column of the CSV file to look for timestamps data.&#xD;If your CSV file does not contain any timestamps info, you may select &quot;line number&quot;, in which case &#xD;binjr will infer a timestamp for each line, starting at the temporal reference point and &#xD;increasing by 1 second for every new line."
-                                                         alignment="CENTER_RIGHT"/>
+                                <LabelWithInlineHelp minWidth="115.0" text="Get timestamps from"
+                                                     inlineHelp="Indicates in which column of the CSV file to look for timestamps data.&#xD;If your CSV file does not contain any timestamps info, you may select &quot;line number&quot;, in which case &#xD;binjr will infer a timestamp for each line, starting at the temporal reference point and &#xD;increasing by 1 second for every new line."
+                                                     alignment="CENTER_RIGHT"/>
 
-                                    <Spinner fx:id="timeColumnTextField" editable="false"
-                                             minHeight="-Infinity" prefHeight="24.0" prefWidth="120.0"/>
-                                    <Separator orientation="VERTICAL" prefHeight="20.0"/>
-                                    <CheckBox fx:id="readColumnNameCheckBox"
-                                              text="Use values from first line as column names"/>
-                                    <CheckBox fx:id="trimCellsCheckbox"
-                                              text="Trim cell values "/>
-                                </children>
+                                <Spinner fx:id="timeColumnTextField" editable="false"
+                                         minHeight="-Infinity" prefHeight="24.0" prefWidth="120.0"/>
+                                <Separator orientation="VERTICAL" prefHeight="20.0"/>
+                                <LabelWithInlineHelp minWidth="115.0" text="Delimiting character"
+                                                     inlineHelp="The character used to delimit the columns of the CSV file."
+                                                     alignment="CENTER_RIGHT"/>
+                                <TextField fx:id="delimiterTextField" maxWidth="35" minHeight="-Infinity"
+                                           prefHeight="24.0" prefWidth="35.0"/>
+                                <Separator orientation="VERTICAL" prefHeight="20.0"/>
+                                <LabelWithInlineHelp text="Quote character"
+                                                     inlineHelp="The character used to encapsulate the content of a column so that it is not split even if it contains instances of the delimiting character."
+                                                     alignment="CENTER_RIGHT"/>
+                                <TextField fx:id="quoteCharacterTextField" maxWidth="35" minHeight="-Infinity"
+                                           prefHeight="24.0" prefWidth="35.0"/>
                             </HBox>
-                            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                <children>
-                                    <LabelWithInlineHelp minWidth="115.0" text="Delimiting character"
-                                                         inlineHelp="The character used to delimit the columns of the CSV file."
-                                                         alignment="CENTER_RIGHT"/>
-                                    <TextField fx:id="delimiterTextField" maxWidth="35" minHeight="-Infinity"
-                                               prefHeight="24.0" prefWidth="35.0"/>
-                                    <Separator orientation="VERTICAL" prefHeight="20.0"/>
-                                    <LabelWithInlineHelp text="Quote character"
-                                                         inlineHelp="The character used to encapsulate the content of a column so that it is not split even if it contains instances of the delimiting character."
-                                                         alignment="CENTER_RIGHT"/>
-                                    <TextField fx:id="quoteCharacterTextField" maxWidth="35" minHeight="-Infinity"
-                                               prefHeight="24.0" prefWidth="35.0"/>
-                                    <Separator orientation="VERTICAL" prefHeight="20.0"/>
-                                    <LabelWithInlineHelp text="Locale for parsing numbers"
-                                                         inlineHelp="Indicates which regional settings should be applied when parsing column content as numbers."
-                                                         alignment="CENTER_RIGHT"/>
-                                    <TextField fx:id="parsingLocaleTextField" maxWidth="120.0" prefHeight="24.0"/>
-                                </children>
+                            <CheckBox fx:id="readColumnNameCheckBox"
+                                      text="Use values from first line as column names"/>
+                            <CheckBox fx:id="trimCellsCheckbox"
+                                      text="Trim cell values"/>
+                            <CheckBox fx:id="continueOnTSErrorCheckbox"
+                                      text="Ignore lines with unparsable time stamps"/>
+                            <HBox spacing="10.0">
+                                <LabelWithInlineHelp text="Locale for parsing numbers"
+                                                     inlineHelp="Indicates which regional settings should be applied when parsing column content as numbers."
+                                                     alignment="CENTER_RIGHT"/>
+                                <TextField fx:id="parsingLocaleTextField" maxWidth="120.0" prefHeight="24.0"/>
                             </HBox>
                         </VBox>
                     </TitledPane>

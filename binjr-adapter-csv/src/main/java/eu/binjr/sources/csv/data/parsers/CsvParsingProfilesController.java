@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -70,6 +70,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private TextField parsingLocaleTextField;
     @FXML
     private CheckBox trimCellsCheckbox;
+    @FXML
+    private CheckBox continueOnTSErrorCheckbox;
 
     private final UnaryOperator<TextFormatter.Change> clampToSingleChar = c -> {
         if (c.isContentChange()) {
@@ -94,6 +96,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         timeColumnTextField.valueProperty().addListener(observable -> resetTest());
         readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
         trimCellsCheckbox.selectedProperty().addListener(observable -> resetTest());
+        continueOnTSErrorCheckbox.selectedProperty().addListener(observable -> resetTest());
         TextFields.bindAutoCompletion(parsingLocaleTextField,
                 Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
         delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
@@ -109,6 +112,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
         this.trimCellsCheckbox.setSelected(profile.isTrimCellValues());
+        this.continueOnTSErrorCheckbox.setSelected(profile.isContinueOnTimestampParsingFailure());
     }
 
     public record ColumnPosition(int index) {
@@ -308,7 +312,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         } catch (IllformedLocaleException e) {
             errors.add("The locale for number parsing is invalid: " + e.getMessage());
         }
-        if (errors.size() > 0) {
+        if (!errors.isEmpty()) {
             notifyError(String.join("\n", errors));
             return Optional.empty();
         }
@@ -323,7 +327,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.forLanguageTag(parsingLocaleTextField.getText()),
-                this.trimCellsCheckbox.isSelected()));
+                this.trimCellsCheckbox.isSelected(),
+                this.continueOnTSErrorCheckbox.isSelected()));
     }
 
     private String formatToDouble(String value) {

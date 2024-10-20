@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             new int[0],
             true,
             Locale.US,
+            false,
             false),
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
@@ -53,6 +54,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             new int[0],
             true,
             Locale.US,
+            false,
             false),
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
@@ -65,6 +67,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             new int[0],
             true,
             Locale.US,
+            false,
             false);
 
     private final String profileName;
@@ -79,6 +82,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final boolean readColumnNames;
     private final char quoteCharacter;
     private final boolean trimCellValues;
+    private final boolean abortOnTimestampParsingFailure;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
@@ -90,7 +94,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                              int[] excludedColumns,
                              boolean readColumnNames,
                              Locale numberFormattingLocale,
-                             boolean trimCellValues) {
+                             boolean trimCellValues,
+                             boolean abortOnTimestampParsingFailure) {
         this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
@@ -103,6 +108,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
         this.readColumnNames = readColumnNames;
         this.numberFormattingLocale = numberFormattingLocale;
         this.trimCellValues = trimCellValues;
+        this.abortOnTimestampParsingFailure = abortOnTimestampParsingFailure;
     }
 
     @Override
@@ -173,5 +179,10 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     @Override
     public boolean isTrimCellValues() {
         return trimCellValues;
+    }
+
+    @Override
+    public boolean isContinueOnTimestampParsingFailure() {
+        return this.abortOnTimestampParsingFailure;
     }
 }
