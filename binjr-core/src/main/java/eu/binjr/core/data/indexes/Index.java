@@ -711,7 +711,6 @@ public class Index implements Indexable {
                     .forEach(path -> drillDownQuery.add(PATH, path));
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
-            var clean = new NanToZeroTransform(userPref.forceNanToZero.get());
             var reduce = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
             AtomicLong hitsCollected = new AtomicLong(0);
             int pageSize = prefs.numIdxMaxPageSize.get().intValue();
@@ -753,7 +752,7 @@ public class Index implements Indexable {
                         var pageProc = pageDataBuffer.get(entry.getKey());
                         if (pageProc != null) {
                             var fullQueryProc = entry.getValue();
-                            pageProc.applyTransforms(clean, reduce);
+                            pageProc.applyTransforms(reduce);
                             fullQueryProc.appendData(pageProc);
                         }
                     });

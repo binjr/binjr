@@ -195,12 +195,12 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
             return false;
         });
 
-        final var isNotStackedChart = this.chartType.getValue() != ChartType.STACKED;
-        final var isNotScatterChart = this.chartType.getValue() != ChartType.SCATTER;
-        var align = new AlignBoundariesTransform(startTime, endTime, isNotStackedChart, isNotScatterChart);
+        final var isStackedChart = this.chartType.getValue() == ChartType.STACKED;
+        final var isScatterChart = this.chartType.getValue() == ChartType.SCATTER;
+        var align = new AlignBoundariesTransform(startTime, endTime, !isStackedChart, !isScatterChart);
         // Stacked area charts in javaFX do not properly support NaN values,
         // so NanToZeroTransform is always enabled for such charts
-        var clean = new NanToZeroTransform(userPref.forceNanToZero.get() || isNotStackedChart);
+        var clean = new NanToZeroTransform(userPref.forceNanToZero.get() || isStackedChart);
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream()
                 .collect(groupingBy(o -> o.getBinding().getAdapter()));

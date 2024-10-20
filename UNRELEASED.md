@@ -6,3 +6,4 @@
 * _[New]_ Updated to Lucene 10  
 * _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.  
 * _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.  
+* _[Fixed]_ User preference for "Treat undefined Y values as 0" is ignored.  
