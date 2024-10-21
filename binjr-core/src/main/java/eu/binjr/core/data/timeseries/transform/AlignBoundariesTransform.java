@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
 
-    private double substituteValue = Double.NaN;
+    private final double substituteValue;
     private final ZonedDateTime startTime;
     private final ZonedDateTime endTime;
     private final boolean interpolateBoundaries;
@@ -55,9 +55,7 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
         this.startTime = startTime;
         this.endTime = endTime;
         this.interpolateBoundaries = interpolateBoundaries;
-        if (!chartSupportsNaN) {
-            substituteValue = 0.0;
-        }
+        this.substituteValue = chartSupportsNaN ? Double.NaN : 0.0;
     }
 
     @Override
@@ -88,7 +86,7 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
             }
             // use the known sample right before start time to interpolate the value of inserted sample
             var lowerBound = new XYChart.Data<>(startTime, interpolate(previous, firstSample, startTime));
-            data.add(0, lowerBound);
+            data.addFirst(lowerBound);
         }
 
         // Align the higher (later) boundary of the series
@@ -115,17 +113,14 @@ public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
     }
 
     private Double interpolate(XYChart.Data<ZonedDateTime, Double> val1, XYChart.Data<ZonedDateTime, Double> val2, ZonedDateTime time) {
-        if (!interpolateBoundaries) {
-            return substituteValue;
-        }
-        var x3 = (double) time.toInstant().toEpochMilli();
-        var x1 = (double) val1.getXValue().toInstant().toEpochMilli();
         var y1 = val1.getYValue();
-        var x2 = (double) val2.getXValue().toInstant().toEpochMilli();
         var y2 = val2.getYValue();
-        if (y1 == null || y2 == null) {
+        if (!interpolateBoundaries || y1 == null || y2 == null) {
             return substituteValue;
         }
+        var x1 = (double) val1.getXValue().toInstant().toEpochMilli();
+        var x2 = (double) val2.getXValue().toInstant().toEpochMilli();
+        var x3 = (double) time.toInstant().toEpochMilli();
         return (y2 - y1) / (x2 - x1) * (x3 - x1) + y1;
     }
 }
