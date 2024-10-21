@@ -4,7 +4,7 @@
 * _[New] [CSV Adapter]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.
 * _[New] [CSV Adapter]_ Added an option to ignore lines with unparsable time stamps.  
 * _[New] [CSV Adapter]_ Better error message when failing to parse a time stamp (provides column and line numbers).  
-* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.  
+* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.0.1  
 * _[New] [Dependencies]_ Updated to Lucene 10.  
 * _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.  
 * _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.  
