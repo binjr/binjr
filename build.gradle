@@ -155,9 +155,16 @@ configure(subprojects) {
         mavenLocal()
         mavenCentral()
         if (!IS_RELEASE) {
-            maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-            maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
-            maven { url 'https://repository.apache.org/snapshots/' }
+            maven {
+                url 'https://maven.pkg.github.com/fthevenet/*'
+                credentials {
+                    username = ""
+                    password = System.getenv('GH_PKG_TOKEN')
+                }
+            }
+//            maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+//            maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
+//            maven { url 'https://repository.apache.org/snapshots/' }
         }
     }
 
@@ -270,7 +277,9 @@ tasks.register('copyAppLibs', Copy) {
     from project(":binjr-adapter-jfr").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
-
+    from project(":binjr-adapter-jvmgc").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
     from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
@@ -291,6 +300,7 @@ tasks.register('copyPluginLibs', Copy) {
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-jfr").jar
+    from project(":binjr-adapter-jvmgc").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
 //    from project(":binjr-adapter-text").jar
@@ -306,6 +316,9 @@ tasks.register('copyJpackageInputLibs', Copy) {
         exclude "javafx-*.jar"
     }
     from project(":binjr-adapter-jfr").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-jvmgc").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
     from project(":binjr-adapter-csv").configurations.runtimeClasspath {
@@ -326,6 +339,7 @@ tasks.register('copyJpackageInputLibs', Copy) {
     from project(":binjr-core").jar
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-jfr").jar
+    from project(":binjr-adapter-jvmgc").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
