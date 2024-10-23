@@ -1,4 +1,3 @@
-* _[New] [GC logs Adapter]_ Added a new data adaptor to plot metrics extracted from JVM GC logs.  
 * _[New] [UI]_ The number of ticks between two graduations the Y axis now automatically adapts to best fit based on the available space and unit types.
 * _[New] [UI]_ Added a keyboard shortcut (F9) to reset the time range of a worksheet to its default value.  
 * _[New] [CSV Adapter]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.
