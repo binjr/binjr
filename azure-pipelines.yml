@@ -41,7 +41,7 @@ stages:
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
           javaVersion: $(javaVersion)
           pool:
-            vmImage: 'macOS-12'
+            vmImage: 'macOS-13'
 
       # Windows app bundle job
       - template: build-job.yml
