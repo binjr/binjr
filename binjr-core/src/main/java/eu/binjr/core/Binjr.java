@@ -28,10 +28,12 @@ import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -181,26 +183,33 @@ public class Binjr extends Application {
         primaryStage.setTitle(AppEnvironment.APP_NAME);
 
         try (Profiler p = Profiler.start("Set scene", logger::perf)) {
-            var lastWindowPosition = prefs.windowLastPosition.get();
-            if (!Screen.getScreensForRectangle(
-                    lastWindowPosition.getMinX(),
-                    lastWindowPosition.getMinY(),
-                    10, 10).isEmpty()) {
-                primaryStage.setX(lastWindowPosition.getMinX());
-                primaryStage.setY(lastWindowPosition.getMinY());
-                primaryStage.setWidth(lastWindowPosition.getWidth());
-                primaryStage.setHeight(lastWindowPosition.getHeight());
-            }
+            // Set the last window position while the window is not visible to avoid glitches.
+            setStagePosition(primaryStage, prefs.windowLastPosition.get());
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);
         }
         try (Profiler p = Profiler.start("show", logger::perf)) {
             primaryStage.initStyle(env.getWindowsStyle());
             primaryStage.show();
+            // Set the last window position *another time* to override any rounding issue
+            // that may have been caused by assuming the wrong screen scaling factor when
+            // making it visible.
+            setStagePosition(primaryStage, prefs.windowLastPosition.get());
         }
         SplashScreen splash = SplashScreen.getSplashScreen();
         if (splash != null) {
             splash.close();
+        }
+    }
+    private void setStagePosition(Stage stage, Rectangle2D stagePosition){
+        if (!Screen.getScreensForRectangle(
+                stagePosition.getMinX(),
+                stagePosition.getMinY(),
+                10, 10).isEmpty()) {
+            stage.setX(stagePosition.getMinX());
+            stage.setY(stagePosition.getMinY());
+            stage.setWidth(stagePosition.getWidth());
+            stage.setHeight(stagePosition.getHeight());
         }
     }
 }
