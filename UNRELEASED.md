@@ -9,3 +9,5 @@
 * _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.  
 * _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.  
 * _[Fixed]_ User preference for "Treat undefined Y values as 0" is ignored.  
+* _[Fixed]_ The title bar for the binjr window is larger (or smaller) than it should be when using multiple monitors on Windows.  
+* _[Fixed]_ Closing and reopening the application causes the main window to slightly grow (or shrink) each time when using multiple monitors on Windows.  
