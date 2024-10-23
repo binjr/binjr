@@ -1,7 +1,24 @@
+## [binjr v3.20.0](https://github.com/binjr/binjr/releases/tag/v3.20.0)
+Released on Wed, 23 Oct 2024
+
+* _[New] [UI]_ The number of ticks between two graduations the Y axis now automatically adapts to best fit based on the available space and unit types.
+* _[New] [UI]_ Added a keyboard shortcut (F9) to reset the time range of a worksheet to its default value.
+* _[New] [CSV Adapter]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.
+* _[New] [CSV Adapter]_ Added an option to ignore lines with unparsable time stamps.
+* _[New] [CSV Adapter]_ Better error message when failing to parse a time stamp (provides column and line numbers).
+* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.0.1
+* _[New] [Dependencies]_ Updated to Lucene 10.
+* _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.
+* _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.
+* _[Fixed]_ User preference for "Treat undefined Y values as 0" is ignored.
+* _[Fixed]_ The title bar for the binjr window is larger (or smaller) than it should be when using multiple monitors on Windows.
+* _[Fixed]_ Closing and reopening the application causes the main window to slightly grow (or shrink) each time when using multiple monitors on Windows.
+
 ## [binjr v3.19.0](https://github.com/binjr/binjr/releases/tag/v3.19.0)
 Released on Fri, 19 Jul 2024
 
 * _[New]_ It is now possible for the user to configure a default value for the stroke width used in different types of charts.
+* _[New]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.2
 * _[Fixed]_  Event heatmap in log worksheet shows wrong data when displaying events older than 1970/01/01 00:00:00 UTC.
 * _[Fixed]_ Do not interpolate Y values at interval boundaries for scatter point charts.
 * _[Fixed]_ Wrapping text in log view does not always work when selecting the option.

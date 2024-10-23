@@ -79,7 +79,8 @@ binjr can consume time series data provided by the following data sources:
 * RRD Files: Round-Robin Database files produced by RRDtool and RRD4J. 
 * CSV Files: Comma Separated Values files. 
 * Log Files: Text based, semi-structured log files. 
-* JDK Flight Recoder: Low-overhead data collection framework for troubleshooting Java applications and the HotSpot JVM. 
+* JDK Flight Recorder: Low-overhead data collection framework for troubleshooting Java applications and the HotSpot JVM.
+* JVM GC Logs: Java Virtual Machine Garbage Collection log files.
 * Demo Adapte: A plugin for binjr that provides data sources for demonstration purposes.
 
 
