@@ -139,14 +139,14 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         skin.addWorksheetLabel.getGraphic().setOnDragExited(bindingManager.registerHandler(onDragExitedTabArea));
         skin.addWorksheetLabel.getGraphic().setOnDragEntered(bindingManager.registerHandler(onDragEnteredTabArea));
         this.getScene().addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(e -> {
-            if (e.getCode() == KeyCode.ALT)
+            if (e.getCode() == KeyCode.ALT) {
                 skin.splitRightButton.setVisible(false);
-            e.consume();
+            }
         }));
         this.getScene().addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
-            if (e.getCode() == KeyCode.ALT)
+            if (e.getCode() == KeyCode.ALT) {
                 skin.splitRightButton.setVisible(true);
-            e.consume();
+            }
         }));
         return skin;
     }
