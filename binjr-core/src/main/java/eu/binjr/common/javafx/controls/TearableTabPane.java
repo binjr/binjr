@@ -616,8 +616,6 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             }
             stage.initStyle(this.getDetachedStageStyle());
             stage.show();
-
-
             stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
                 detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
             }));
@@ -639,17 +637,24 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     innerSplitpane.getItems().add(TearableTabPane.this);
                     innerSplitpane.getItems().add(detachedTabPane);
                 }
-                detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
-                    if (c.getList().isEmpty()) {
-                        //      splitPane.getItems().remove(newPane);
-                    }
-                });
             } else {
-                logger.error("Parent control is not a SplitPane");
-                // throw new UnsupportedOperationException("Parent control is not a SplitPane");
+                if (this.getParent() instanceof Pane pane) {
+                    splitPane = new SplitPane();
+                    splitPane.setOrientation(orientation);
+                    int index = pane.getChildren().indexOf(TearableTabPane.this);
+                    pane.getChildren().remove(TearableTabPane.this);
+                    pane.getChildren().add(index, splitPane);
+                    splitPane.getItems().add(TearableTabPane.this);
+                    splitPane.getItems().add(detachedTabPane);
+                    AnchorPane.setTopAnchor(splitPane, 0.0);
+                    AnchorPane.setRightAnchor(splitPane, 0.0);
+                    AnchorPane.setBottomAnchor(splitPane, 0.0);
+                    AnchorPane.setLeftAnchor(splitPane, 0.0);
+                } else {
+                    logger.error("Parent control is not a Pane");
+                    // throw new UnsupportedOperationException("Parent control is not a SplitPane");
+                }
             }
-
-
         }
         if (tab != null) {
             this.getTabs().remove(tab);
