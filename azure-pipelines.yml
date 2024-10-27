@@ -108,6 +108,7 @@ stages:
               python3 -m pip install --upgrade pip setuptools
               python3 -m pip install mkdocs
               python3 -m pip install mkdocs-material==9.*
+              python3 -m pip install mkdocs-rss-plugin
               git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
               cd  build/tmp/binjr-site
               cp ../expanded/CHANGELOG docs/download/CHANGELOG.md
