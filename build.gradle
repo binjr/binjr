@@ -279,6 +279,7 @@ tasks.register('copyAppLibs', Copy) {
     }
     from project(":binjr-adapter-jvmgc").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
+        exclude "binjr-adapter-logs-*.jar"
     }
     from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
