@@ -76,6 +76,6 @@ Portable bundles can be unpacked to and used from a detachable drive or a file s
     To ensure that your download has not been tempered with,
     [you should verify its OpenPGP signature](/documentation/verify-signature).
 
-[^1]: [How to verify the integrity of the downloaded file?](/documentation/verify-signature/)
+[^1]: [How to verify the integrity of the downloaded file?](../documentation/verify-signature.md)
 [^2]: The winget command line tool is only supported on Windows 10 1709 (build 16299) or later
 
