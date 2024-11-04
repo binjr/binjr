@@ -1,8 +1,8 @@
 ---
-draft: false
+draft: ${isDraft}
 date:
-  created: ${releaseDate}
-  updated: ${releaseDate}
+  created: ${releaseDateIso}
+  updated: ${releaseDateIso}
 image: assets/images/binjr_card.png
 tags:
   - News
@@ -15,9 +15,14 @@ categories:
   - New release
 comments: true
 ---
-# binjr [binjr ${tagName}](https://github.com/binjr/binjr/releases/tag/${tagName}) is now available! 🎉
+# [binjr ${tagName}](https://github.com/binjr/binjr/releases/tag/${tagName}) is now available! 🎉
 Released on ${releaseDate}
+<!-- more -->
 
+### What's new?
 ${currentChanges}
 
-[Download](https://binjr.eu/download/latest_release/)
+### Links
+* [Download]( https://binjr.eu/download/latest_release/)
+* [Getting starting](https://binjr.eu/documentation/getting-started/)
+* [Report an issue](https://github.com/binjr/binjr/issues)
