@@ -366,10 +366,12 @@ tasks.register('expandMdTemplates', Copy) {
     def currentChanges = new File("${project.projectDir}/UNRELEASED.md").getText("UTF-8")
     expand(["version"       : "$BINJR_VERSION",
             "releaseDate"   : "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}",
+            "releaseDateIso": "${new SimpleDateFormat("yyyy-MM-dd").format(new Date())}",
             "changeHistory" : "$changeHistory",
             "currentChanges": "$currentChanges",
             "tagName"       : "v${BINJR_VERSION}",
-            "copyright"     : "${BINJR_COPYRIGHT}"
+            "copyright"     : "${BINJR_COPYRIGHT}",
+            "isDraft"       : "${IS_RELEASE ? "false" : "true"}"
     ])
 }
 

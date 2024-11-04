@@ -113,6 +113,7 @@ stages:
               cd  build/tmp/binjr-site
               cp ../expanded/CHANGELOG docs/download/CHANGELOG.md
               cp ../expanded/latest_release.md docs/download/latest_release.md
+              cp ../expanded/binjr-tagName-is-now-available!.md blog/posts/binjr-$REPO_TAG_NAME-is-now-available!.md
               echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
               git config credential.helper store
               git config user.email "binjr.bot@free.fr"
