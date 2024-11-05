@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,6 +44,10 @@ public abstract class TimeSeriesProcessor<T> {
      */
     public TimeSeriesProcessor() {
         this.data = new ArrayList<>();
+    }
+
+    public TimeSeriesProcessor(int initialCapacity) {
+        this.data = new ArrayList<>(initialCapacity);
     }
 
     /**
