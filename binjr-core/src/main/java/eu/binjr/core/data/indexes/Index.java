@@ -735,8 +735,8 @@ public class Index implements Indexable {
                     for (int i = 0; i < result.collectorResult.scoreDocs.length; i++) {
                         lastHit = (FieldDoc) result.collectorResult.scoreDocs[i];
                         var doc = searcher.storedFields().document(lastHit.doc, fieldsToLoad);
+                        var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(doc.getField(TIMESTAMP).numericValue().longValue()), zoneId);
                         seriesToFill.forEach((info, proc) -> {
-                            var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId);
                             var field = doc.getField(info.getBinding().getLabel());
                             if (field != null) {
                                 var value = field.numericValue();
