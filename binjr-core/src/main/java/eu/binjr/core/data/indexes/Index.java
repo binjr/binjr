@@ -31,7 +31,6 @@ import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
-import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.IndexingTokenizer;
 import eu.binjr.core.preferences.UserPreferences;
@@ -335,8 +334,9 @@ public class Index implements Indexable {
                 }
                 try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
                     logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Hit cache was explicitly bypassed" : "Hit cache miss", k));
+                    int procCapacity = (int) Math.min(results.collectorResult.totalHits.value(), pageSize);
                     var proc = new SearchHitsProcessor();
-                    var samples = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
+                    var samples = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>(procCapacity);
                     var severityFacet = makeFacetResult(SEVERITY, results.facets, facets);
                     var pathFacet = makeFacetResult(PATH, results.facets, facets);
                     var topDocs = TopDocs.merge(skip, pageSize, new TopDocs[]{results.collectorResult});
@@ -732,7 +732,8 @@ public class Index implements Indexable {
                     fieldsToLoad.add(TIMESTAMP);
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new HashMap<>();
                     // fill the buffer with data for the current page
-                    for (int i = 0; i < result.collectorResult.scoreDocs.length; i++) {
+                    var nbHits = result.collectorResult.scoreDocs.length;
+                    for (int i = 0; i < nbHits; i++) {
                         lastHit = (FieldDoc) result.collectorResult.scoreDocs[i];
                         var doc = searcher.storedFields().document(lastHit.doc, fieldsToLoad);
                         var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(doc.getField(TIMESTAMP).numericValue().longValue()), zoneId);
@@ -741,7 +742,7 @@ public class Index implements Indexable {
                             if (field != null) {
                                 var value = field.numericValue();
                                 if (value != null) {
-                                    pageDataBuffer.computeIfAbsent(info, doubleTimeSeriesInfo -> new DoubleTimeSeriesProcessor())
+                                    pageDataBuffer.computeIfAbsent(info, doubleTimeSeriesInfo -> new DoubleTimeSeriesProcessor(nbHits))
                                             .addSample(timestamp, value.doubleValue());
                                 }
                             }

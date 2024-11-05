@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2024 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,9 +30,17 @@ public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
     private long totalHits = 0;
     private int hitsPerPage = 0;
 
+    public SearchHitsProcessor() {
+        super();
+    }
+
+    public SearchHitsProcessor(int initialCapacity) {
+        super(initialCapacity);
+    }
+
     @Override
     protected SearchHit computeMinValue() {
-        return (data != null && data.size() > 0) ? data.get(0).getYValue() : null;
+        return (data != null && !data.isEmpty()) ? data.getFirst().getYValue() : null;
     }
 
     @Override
@@ -42,7 +50,7 @@ public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
 
     @Override
     protected SearchHit computeMaxValue() {
-        return (data != null && data.size() > 0) ? data.get(data.size() - 1).getYValue() : null;
+        return (data != null && !data.isEmpty()) ? data.getLast().getYValue() : null;
     }
 
     public Map<String, Collection<FacetEntry>> getFacetResults() {
