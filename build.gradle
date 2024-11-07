@@ -429,7 +429,7 @@ tasks.register('createRuntimeImage', Exec) {
         } else {
             dependsOn untarJlinkOpenJdk
         }
-        jlinkJdkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home' : ''}"
+        jlinkJdkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home' : ''}".replace("-ea-beta", "")
     }
 
     workingDir project.projectDir
