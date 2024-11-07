@@ -708,6 +708,7 @@ public class Index implements Indexable {
             seriesToFill.keySet()
                     .stream()
                     .map(ts -> ts.getBinding().getPath())
+                    .distinct()
                     .forEach(path -> drillDownQuery.add(PATH, path));
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
