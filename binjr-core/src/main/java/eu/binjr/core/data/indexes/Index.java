@@ -31,6 +31,7 @@ import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
+import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.IndexingTokenizer;
 import eu.binjr.core.preferences.UserPreferences;
@@ -84,6 +85,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
@@ -712,7 +715,8 @@ public class Index implements Indexable {
                     .forEach(path -> drillDownQuery.add(PATH, path));
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
-            var reduce = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
+            var reduceTransform = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
+            var sortTransform = new SortTransform<Double>();
             AtomicLong hitsCollected = new AtomicLong(0);
             int pageSize = prefs.numIdxMaxPageSize.get().intValue();
             FieldDoc lastHit = null;
@@ -731,13 +735,22 @@ public class Index implements Indexable {
                             .map(k -> k.getBinding().getLabel())
                             .collect(Collectors.toSet());
                     fieldsToLoad.add(TIMESTAMP);
-                    Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new HashMap<>();
+                    Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new ConcurrentHashMap<>();
                     // fill the buffer with data for the current page
                     var nbHits = result.collectorResult.scoreDocs.length;
-                    for (int i = 0; i < nbHits; i++) {
-                        lastHit = (FieldDoc) result.collectorResult.scoreDocs[i];
-                        var doc = searcher.storedFields().document(lastHit.doc, fieldsToLoad);
+                    var lastHitAcc = new FieldDoc[1];
+                    var timestampAcc = new ZonedDateTime[]{ZonedDateTime.of(-999999999, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())};
+                    Stream<ScoreDoc> scoreDocStream = Arrays.stream(result.collectorResult.scoreDocs);
+                    if (prefs.useParallelIndexFetch.get()) {
+                        scoreDocStream = scoreDocStream.parallel();
+                    }
+                    scoreDocStream.forEach(CheckedLambdas.wrap(scoreDoc -> {
+                        var doc = searcher.storedFields().document(scoreDoc.doc, fieldsToLoad);
                         var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(doc.getField(TIMESTAMP).numericValue().longValue()), zoneId);
+                        if (timestamp.isAfter(timestampAcc[0])) {
+                            lastHitAcc[0] = (FieldDoc) scoreDoc;
+                            timestampAcc[0] = timestamp;
+                        }
                         seriesToFill.forEach((info, proc) -> {
                             var field = doc.getField(info.getBinding().getLabel());
                             if (field != null) {
@@ -748,13 +761,18 @@ public class Index implements Indexable {
                                 }
                             }
                         });
-                    }
+                    }));
+                    lastHit = lastHitAcc[0];
                     // Apply downsampling to buffered data and append reduced dataset to processor
-                    seriesToFill.entrySet().parallelStream().forEach(entry -> {
+                    var entryStream = seriesToFill.entrySet().stream();
+                    if (prefs.useParallelIndexFetch.get()) {
+                        entryStream = entryStream.parallel();
+                    }
+                    entryStream.forEach(entry -> {
                         var pageProc = pageDataBuffer.get(entry.getKey());
                         if (pageProc != null) {
                             var fullQueryProc = entry.getValue();
-                            pageProc.applyTransforms(reduce);
+                            pageProc.applyTransforms(sortTransform, reduceTransform);
                             fullQueryProc.appendData(pageProc);
                         }
                     });
