@@ -24,6 +24,7 @@ import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
+import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.workspace.ChartType;
@@ -414,11 +415,13 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<String> colorNamesHashingAlgorithm = stringPreference("colorNamesHashingAlgorithm", "MD5");
 
-    public ObservablePreference<Number> numMinorTickDecimal = integerPreference("numMinorTickDecimal", 4);
+    public final ObservablePreference<Number> numMinorTickDecimal = integerPreference("numMinorTickDecimal", 4);
 
-    public ObservablePreference<Number> numMinorTickBinary = integerPreference("numMinorTickBinary", 3);
+    public final ObservablePreference<Number> numMinorTickBinary = integerPreference("numMinorTickBinary", 3);
 
-    public ObservablePreference<Number> singleMinTickThreshold = doublePreference("singleMinTickThreshold", 36.0);
+    public final ObservablePreference<Number> singleMinTickThreshold = doublePreference("singleMinTickThreshold", 36.0);
+
+    public final ObservablePreference<Boolean> useParallelIndexFetch = booleanPreference("useParallelIndexFetch", true);
 
     public final ObservablePreference<double[]> decimalAxisTickDividers = objectPreference(
             double[].class,
