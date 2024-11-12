@@ -12,7 +12,7 @@ authors:
   - binjr
 categories:
   - binjr
-  - New release
+  - New releases
 comments: true
 ---
 # [binjr ${tagName}](https://github.com/binjr/binjr/releases/tag/${tagName}) is now available! 🎉
