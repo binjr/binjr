@@ -42,7 +42,7 @@ public class TearableTabPaneSkin extends TabPaneSkin {
         Pane tabHeaderBg = (Pane) tabPane.lookup(".tab-header-background");
         Side tabPosition = tabPane.getSide();
         Pane headersRegion = (Pane) tabPane.lookup(".headers-region");
-        Region headerArea = (Region) tabPane.lookup(".tab-header-area");
+        Pane headerArea = (Pane) tabPane.lookup(".tab-header-area");
 
         closeSplitPane = new ToolButtonBuilder<Button>()
                 .setText("Close")
@@ -87,9 +87,7 @@ public class TearableTabPaneSkin extends TabPaneSkin {
         dropZone.getStyleClass().add("drop-zone");
         newPaneDropZone = new StackPane(dropZone);
         newPaneDropZone.getStyleClass().add("chart-viewport-parent");
-        newPaneDropZone.setPrefHeight(34);
-        newPaneDropZone.setMaxHeight(34);
-        newPaneDropZone.setAlignment(Pos.CENTER);
+        newPaneDropZone.prefHeightProperty().bind(headerArea.heightProperty());
 
         StackPane.setAlignment(toolbar, Pos.CENTER_LEFT);
         switch (tabPosition) {
@@ -122,7 +120,8 @@ public class TearableTabPaneSkin extends TabPaneSkin {
         graphic.setScaleY(20);
         addWorksheetLabel.setGraphic(graphic);
         addWorksheetLabel.visibleProperty().bind(headerArea.visibleProperty().not());
-        tabHeaderBg.getChildren().addAll(toolbar, newPaneDropZone);
+        tabHeaderBg.getChildren().add(toolbar);
+        headerArea.getChildren().add(newPaneDropZone);
         var pane =  new StackPane();
         pane.getChildren().addAll(closeSplitPane, addWorksheetLabel );
 
@@ -137,5 +136,6 @@ public class TearableTabPaneSkin extends TabPaneSkin {
         closeSplitPane.setTranslateY(closeSplitPane.getHeight() );
         addWorksheetLabel.setTranslateX(w / 2);
         addWorksheetLabel.setTranslateY(h / 2);
+        newPaneDropZone.resize(w, newPaneDropZone.getPrefHeight());
     }
 }
