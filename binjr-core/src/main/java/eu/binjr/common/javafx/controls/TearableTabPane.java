@@ -588,9 +588,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         detachedTabPane.setOnDragEnteredTabArea(this.onDragEnteredTabArea);
         detachedTabPane.dragAndDropInProgressProperty().bind(this.dragAndDropInProgress);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
+        detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
         if (orientation == null) {
-            detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
-
             Pane root = new AnchorPane(detachedTabPane);
             AnchorPane.setBottomAnchor(detachedTabPane, 0.0);
             AnchorPane.setLeftAnchor(detachedTabPane, 0.0);
