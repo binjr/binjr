@@ -596,7 +596,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             AnchorPane.setLeftAnchor(detachedTabPane, 0.0);
             AnchorPane.setRightAnchor(detachedTabPane, 0.0);
             AnchorPane.setTopAnchor(detachedTabPane, 0.0);
-            final Scene scene = new Scene(root, root.getPrefWidth(), root.getPrefHeight());
+            final Scene scene = new Scene(root, this.getWidth(), this.getHeight());
             Stage stage = new Stage();
             stage.setScene(scene);
             Point p = MouseInfo.getPointerInfo().getLocation();
