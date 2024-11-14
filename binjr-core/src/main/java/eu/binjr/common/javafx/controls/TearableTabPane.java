@@ -623,22 +623,19 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             Point p = MouseInfo.getPointerInfo().getLocation();
             stage.setX(p.getX());
             stage.setY(p.getY());
-//            detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
-//                if (c.getList().isEmpty() && !detachedTabPane.getHasSibling()) {
-//                    if (onClosingWindow != null) {
-//                        onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-//                    }
-//                    stage.close();
-//                    detachedTabPane.close();
-//                }
-//            });
             if (onOpenNewWindow != null) {
                 onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
             }
             stage.initStyle(this.getDetachedStageStyle());
             stage.show();
             stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
-                detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
+                var panesToClose = manager.tabToPaneMap.values().stream()
+                        .distinct()
+                        .filter(tabPane -> stage.equals(NodeUtils.getStage(tabPane))).toList();
+                panesToClose.forEach(TearableTabPane::close);
+                if (onClosingWindow != null) {
+                    onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                }
             }));
         } else {
             var splitPane = findParentSplitPane(this);
@@ -742,8 +739,9 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
 
     @Override
     public void close() {
+        logger.debug(() -> "Closing down TearableTabPane instance");
         getTabs().forEach(tab -> tab.setContextMenu(null));
-        logger.trace(() -> "Closing down TearableTabPane instance");
+        this.getTabs().clear();
         bindingManager.close();
     }
 

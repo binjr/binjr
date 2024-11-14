@@ -288,6 +288,7 @@ public class MainViewController implements Initializable {
             StageAppearanceManager.getInstance().register(stage);
         });
         tearableTabPane.setOnClosingWindow(event -> {
+            logger.debug(() -> "Closing detached tab pane window: " + event.getSource());
             StageAppearanceManager.getInstance().unregister((Stage) event.getSource());
             unregisterStageKeyEvents((Stage) event.getSource());
         });
@@ -1391,7 +1392,8 @@ public class MainViewController implements Initializable {
                 AppEnvironment.getInstance().setShiftPressed(pressed);
                 event.consume();
             }
-            case CONTROL, META, SHORTCUT -> { // shortcut does not seem to register as Control on Windows here, so check them all.
+            case CONTROL, META,
+                 SHORTCUT -> { // shortcut does not seem to register as Control on Windows here, so check them all.
                 AppEnvironment.getInstance().setCtrlPressed(pressed);
                 event.consume();
             }
