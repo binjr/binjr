@@ -52,8 +52,8 @@ public class TearableTabPaneSkin extends TabPaneSkin {
                 .setStyleClass("exit")
                 .setIconStyleClass("cross-icon", "small-icon")
                 .build(Button::new);
-        closeSplitPane.visibleProperty().bind(headerArea.visibleProperty().not());
-        closeSplitPane.managedProperty().bind(headerArea.visibleProperty().not());
+        closeSplitPane.visibleProperty().bind(tabPane.hasSiblingProperty().and(headerArea.visibleProperty().not()));
+        closeSplitPane.managedProperty().bind(tabPane.hasSiblingProperty().and(headerArea.visibleProperty().not()));
 
         newTabButton = new ToolButtonBuilder<Button>()
                 .setTooltip("Add a new tab")

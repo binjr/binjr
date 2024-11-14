@@ -79,6 +79,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private ContextMenu newTabContextMenu;
 
     private final BooleanProperty dragAndDropInProgress = new SimpleBooleanProperty();
+    private final ReadOnlyBooleanWrapper hasSibling = new ReadOnlyBooleanWrapper(false);
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
@@ -106,6 +107,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                 }
                 final TearableTabPane sibling = findSibling(splitPane, tearableTabPane);
                 if (sibling == null) {
+                    tearableTabPane.hasSibling.set(false);
                     return;
                 }
                 splitPane.getItems().remove(tearableTabPane);
@@ -169,13 +171,17 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         if (sp.getItems().size() != 1) {
             return;
         }
-        final Node content = sp.getItems().get(0);
+        final Node content = sp.getItems().getFirst();
         final SplitPane parent = findParentSplitPane(sp);
-        if (parent != null) {
+        if (parent != null && parent.getItems().contains(sp)) {
             int index = parent.getItems().indexOf(sp);
             parent.getItems().remove(sp);
             parent.getItems().add(index, content);
             reduceSplitPane(parent);
+        } else {
+            if (sp.getItems().getFirst() instanceof TearableTabPane p) {
+                p.hasSibling.set(false);
+            }
         }
     }
 
@@ -465,6 +471,15 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     }
 
     /**
+     * Returns the stage containing the tab currently selected.
+     *
+     * @return the stage containing the tab currently selected.
+     */
+    public Stage getSelectedTabStage() {
+        return NodeUtils.getStage(getSelectedTabPane());
+    }
+
+    /**
      * Returns a list of all tabs, across of panes sharing the same {@link TabPaneManager}
      *
      * @return a list of all tabs, across of panes sharing the same {@link TabPaneManager}
@@ -543,6 +558,13 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         return dragAndDropInProgress;
     }
 
+    public boolean getHasSibling() {
+        return hasSibling.get();
+    }
+
+    public ReadOnlyBooleanProperty hasSiblingProperty() {
+        return hasSibling.getReadOnlyProperty();
+    }
 
     private void bringStageToFront() {
         if (this.getScene() != null) {
@@ -601,15 +623,15 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             Point p = MouseInfo.getPointerInfo().getLocation();
             stage.setX(p.getX());
             stage.setY(p.getY());
-            detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
-                if (c.getList().isEmpty()) {
-                    if (onClosingWindow != null) {
-                        onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-                    }
-                    stage.close();
-                    detachedTabPane.close();
-                }
-            });
+//            detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
+//                if (c.getList().isEmpty() && !detachedTabPane.getHasSibling()) {
+//                    if (onClosingWindow != null) {
+//                        onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+//                    }
+//                    stage.close();
+//                    detachedTabPane.close();
+//                }
+//            });
             if (onOpenNewWindow != null) {
                 onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
             }
@@ -635,7 +657,17 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     innerSplitpane.setOrientation(orientation);
                     innerSplitpane.getItems().add(TearableTabPane.this);
                     innerSplitpane.getItems().add(detachedTabPane);
+                    innerSplitpane.getItems().forEach(n -> {
+                        if (n instanceof TearableTabPane p) {
+                            p.hasSibling.set(true);
+                        }
+                    });
                 }
+                splitPane.getItems().forEach(n -> {
+                    if (n instanceof TearableTabPane p) {
+                        p.hasSibling.set(true);
+                    }
+                });
             } else {
                 if (this.getParent() instanceof Pane pane) {
                     splitPane = new SplitPane();
@@ -649,6 +681,11 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     AnchorPane.setRightAnchor(splitPane, 0.0);
                     AnchorPane.setBottomAnchor(splitPane, 0.0);
                     AnchorPane.setLeftAnchor(splitPane, 0.0);
+                    splitPane.getItems().forEach(n -> {
+                        if (n instanceof TearableTabPane p) {
+                            p.hasSibling.set(true);
+                        }
+                    });
                 } else {
                     logger.error("Parent control is not a Pane");
                     // throw new UnsupportedOperationException("Parent control is not a SplitPane");
@@ -745,7 +782,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      * A class that represents the state of the tabs across all TabPane windows
      */
     protected static class TabPaneManager {
-        private final ObservableMap<Tab, TabPane> tabToPaneMap;
+        private final ObservableMap<Tab, TearableTabPane> tabToPaneMap;
         private final Map<String, Tab> idToTabMap;
         private final ObservableList<Tab> globalTabList;
         private final DataFormat dragAndDropFormat;
@@ -772,7 +809,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             return dndComplete.compareAndSet(false, true);
         }
 
-        public void addTab(Tab tab, TabPane pane) {
+        public void addTab(Tab tab, TearableTabPane pane) {
             idToTabMap.put(getId(tab), tab);
             tabToPaneMap.put(tab, pane);
             if (!movingTab) {
@@ -815,7 +852,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
 
         public void setSelectedTab(Tab selectedTab) {
             this.selectedTab = selectedTab;
-            logger.trace(() -> "Selected Tab: " + ((selectedTab == null) ? "null" : selectedTab + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab)));
+            logger.trace(() -> "Selected Tab: " +
+                    ((selectedTab == null) ? "null" : selectedTab + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab)));
         }
 
         public void setMovingTab(boolean movingTab) {
@@ -826,7 +864,6 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             tabToPaneMap.values()
                     .stream()
                     .distinct()
-                    .toList()
                     .forEach(p -> p.getTabs().clear());
         }
 
