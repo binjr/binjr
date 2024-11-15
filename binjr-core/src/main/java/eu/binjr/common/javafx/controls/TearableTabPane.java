@@ -58,6 +58,12 @@ import java.util.function.Supplier;
 public class TearableTabPane extends TabPane implements AutoCloseable {
     private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private static final Logger logger = Logger.create(TearableTabPane.class);
+    public static final Object DETACHED_STAGE_MARKER = new Object() {
+        @Override
+        public String toString() {
+            return "DETACHED_STAGE_MARKER";
+        }
+    };
 
     private boolean tearable;
     private boolean reorderable;
@@ -78,8 +84,10 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper(true);
     private ContextMenu newTabContextMenu;
 
-    private final BooleanProperty dragAndDropInProgress = new SimpleBooleanProperty();
+    private final BooleanProperty dragAndDropInProgress = new SimpleBooleanProperty(false);
     private final ReadOnlyBooleanWrapper hasSibling = new ReadOnlyBooleanWrapper(false);
+    static private final BooleanProperty closeIfEmpty = new SimpleBooleanProperty(true);
+    ;
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
@@ -101,18 +109,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         skin.closeSplitPane.setOnAction(bindingManager.registerHandler(event -> {
             var tearableTabPane = findParentTearableTabPane((Button) event.getSource());
             if (tearableTabPane != null) {
-                var splitPane = findParentSplitPane(tearableTabPane);
-                if (splitPane == null) {
-                    return;
-                }
-                final TearableTabPane sibling = findSibling(splitPane, tearableTabPane);
-                if (sibling == null) {
-                    tearableTabPane.hasSibling.set(false);
-                    return;
-                }
-                splitPane.getItems().remove(tearableTabPane);
-                reduceSplitPane(splitPane);
-                balanceSplitPanesDividers(splitPane);
+                tearableTabPane.closePane();
             }
             event.consume();
         }));
@@ -151,6 +148,21 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             }
         }));
         return skin;
+    }
+
+    private void closePane() {
+        var splitPane = findParentSplitPane(this);
+        if (splitPane == null) {
+            return;
+        }
+        final TearableTabPane sibling = findSibling(splitPane, this);
+        if (sibling == null) {
+            this.hasSibling.set(false);
+            return;
+        }
+        splitPane.getItems().remove(this);
+        reduceSplitPane(splitPane);
+        balanceSplitPanesDividers(splitPane);
     }
 
     private TearableTabPane findSibling(SplitPane sp, TearableTabPane tabPaneToRemove) {
@@ -587,6 +599,17 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
     }
 
+    public static boolean isCloseIfEmpty() {
+        return closeIfEmpty.get();
+    }
+
+    public static void setCloseIfEmpty(boolean val) {
+        closeIfEmpty.set(val);
+    }
+
+    public static BooleanProperty closeIfEmptyProperty() {
+        return closeIfEmpty;
+    }
 
     public enum TabPosition {
         INSIDE,
@@ -611,6 +634,15 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         detachedTabPane.dragAndDropInProgressProperty().bind(this.dragAndDropInProgress);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
         detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
+        bindingManager.attachListener(detachedTabPane.getTabs(), ((ListChangeListener<Tab>) c -> {
+            if (c.getList().isEmpty()) {
+                if (TearableTabPane.isCloseIfEmpty() && detachedTabPane.getHasSibling()) {
+                    detachedTabPane.closePane();
+                } else if (NodeUtils.getStage(detachedTabPane) instanceof TabPaneDetachedStage paneStage) {
+                    paneStage.close();
+                }
+            }
+        }));
         if (orientation == null) {
             Pane root = new AnchorPane(detachedTabPane);
             AnchorPane.setBottomAnchor(detachedTabPane, 0.0);
@@ -618,7 +650,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             AnchorPane.setRightAnchor(detachedTabPane, 0.0);
             AnchorPane.setTopAnchor(detachedTabPane, 0.0);
             final Scene scene = new Scene(root, this.getWidth(), this.getHeight());
-            Stage stage = new Stage();
+            Stage stage = new TabPaneDetachedStage();
             stage.setScene(scene);
             Point p = MouseInfo.getPointerInfo().getLocation();
             stage.setX(p.getX());
@@ -866,5 +898,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
 
 
+    }
+
+    private static class TabPaneDetachedStage extends Stage {
     }
 }

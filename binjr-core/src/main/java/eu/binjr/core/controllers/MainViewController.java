@@ -269,6 +269,8 @@ public class MainViewController implements Initializable {
                         }
                     }
                 });
+        TearableTabPane.closeIfEmptyProperty().bind(UserPreferences.getInstance().closeEmptyTabPanes.property());
+
         tearableTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         tearableTabPane.setNewTabFactory(this::worksheetTabFactory);
 

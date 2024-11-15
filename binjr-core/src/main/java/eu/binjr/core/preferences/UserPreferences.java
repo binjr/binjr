@@ -53,6 +53,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
 
+
     private static class LocalKeyring extends AesKeyring {
         private LocalKeyring() {
             super("binjr/local");
@@ -410,6 +411,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Boolean> forceTunnelingDisabledSchemes = booleanPreference("forceTunnelingDisabledSchemes", false);
 
     public final ObservablePreference<Boolean> keepFailedConnectionSourcePaneOpen = booleanPreference("keepFailedConnectionSourcePaneOpen", false);
+
+    public final ObservablePreference<Boolean> closeEmptyTabPanes = booleanPreference("closeEmptyTabPanes", true);
 
     public final ObservablePreference<HardwareAccelerationSupport> hardwareAcceleration = enumPreference(HardwareAccelerationSupport.class, "hardwareAcceleration", HardwareAccelerationSupport.AUTO);
 
