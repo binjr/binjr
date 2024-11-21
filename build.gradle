@@ -58,7 +58,8 @@ ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : '
 ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "23.0.1"
 ext.USE_BUILD_JDK_IN_BUNDLE = false
-ext.BUNDLE_JDK_VERSION = "jdk-23.0.1+11"
+ext.BUNDLE_JDK_VERSION = "jdk-21.0.5+11"
+ext.BUNDLE_JDK_PATH = null
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
@@ -422,7 +423,9 @@ tasks.register('createRuntimeImage', Exec) {
     }
     def jlinkJdkDir
     if (USE_BUILD_JDK_IN_BUNDLE) {
-        jlinkJdkDir = "${JDK_HOME}"
+        jlinkJdkDir = JDK_HOME
+    } else if (Files.exists(Paths.get("${BUNDLE_JDK_PATH}/bin/jlink${IS_WINDOWS ? ".exe" : ""}"))) {
+        jlinkJdkDir = BUNDLE_JDK_PATH
     } else {
         if (IS_WINDOWS) {
             dependsOn unzipJlinkOpenJdk
@@ -431,6 +434,7 @@ tasks.register('createRuntimeImage', Exec) {
         }
         jlinkJdkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home' : ''}".replace("-ea-beta", "")
     }
+
 
     workingDir project.projectDir
     commandLine = [
