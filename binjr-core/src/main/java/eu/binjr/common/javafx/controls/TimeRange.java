@@ -25,9 +25,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import javafx.scene.input.DataFormat;
 
 import java.io.IOException;
-import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -35,6 +33,8 @@ import java.util.Objects;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class TimeRange {
     public static final DataFormat TIME_RANGE_DATA_FORMAT = new DataFormat(TimeRange.class.getCanonicalName());
+    public static final TimeRange EMPTY = TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC),
+            ZonedDateTime.ofInstant(Instant.EPOCH, ZoneOffset.UTC));;
     private static final String DELIMITER = " ";
     private final ZonedDateTime beginning;
     private final ZonedDateTime end;

@@ -105,6 +105,7 @@ public class MainViewController implements Initializable {
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat(TimeSeriesBinding.MIME_TYPE);
     private static final DataFormat TEXT_FILES_BINDING_FORMAT = new DataFormat(TextFilesBinding.MIME_TYPE);
     private static final DataFormat LOG_FILES_BINDING_FORMAT = new DataFormat(LogFilesBinding.MIME_TYPE);
+    private static TimeRange LINKED_TIME_RANGE_UPDATE = TimeRange.EMPTY;
 
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
@@ -1128,7 +1129,8 @@ public class MainViewController implements Initializable {
         loadWorksheet(worksheet, tab, false);
     }
 
-    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode) throws CannotLoadWorksheetException {
+    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode)
+            throws CannotLoadWorksheetException {
         try {
             WorksheetController current = worksheet.getControllerClass()
                     .getDeclaredConstructor(this.getClass(),
@@ -1154,8 +1156,12 @@ public class MainViewController implements Initializable {
             if (current.getWorksheet() instanceof Syncable syncableWorksheet) {
                 current.getBindingManager().attachListener(current.selectedRangeProperty(),
                         (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
-                            getSelectedWorksheetController().ifPresent(worksheetController -> {
-                                if (worksheetController.equals(current) && syncableWorksheet.isTimeRangeLinked()) {
+                            if (syncableWorksheet.isTimeRangeLinked()) {
+                                // ensure we only set the linked time range once for a given update
+                                if (!LINKED_TIME_RANGE_UPDATE.equals(newValue)) {
+                                    LINKED_TIME_RANGE_UPDATE = newValue;
+                                    logger.debug(() -> "Apply time range change detected in controller: " +
+                                            current.getWorksheet().getName());
                                     seriesControllers.values().stream()
                                             .filter(c -> c.getWorksheet() instanceof Syncable)
                                             .forEach(i -> {
@@ -1164,9 +1170,8 @@ public class MainViewController implements Initializable {
                                                 }
                                             });
                                 }
-                            });
-                        }
-                );
+                            }
+                        });
                 current.getBindingManager().attachListener(syncableWorksheet.timeRangeLinkedProperty(),
                         (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                             if (newValue) {
