@@ -45,6 +45,7 @@ import javafx.stage.WindowEvent;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -661,10 +662,11 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             stage.initStyle(this.getDetachedStageStyle());
             stage.show();
             stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
-                var panesToClose = manager.tabToPaneMap.values().stream()
+                manager.tabToPaneMap.values().stream()
                         .distinct()
-                        .filter(tabPane -> stage.equals(NodeUtils.getStage(tabPane))).toList();
-                panesToClose.forEach(TearableTabPane::close);
+                        .filter(tabPane -> stage.equals(NodeUtils.getStage(tabPane)))
+                        .toList()
+                        .forEach(TearableTabPane::close);
                 if (onClosingWindow != null) {
                     onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
                 }
@@ -880,10 +882,11 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             return selectedTab;
         }
 
-        public void setSelectedTab(Tab selectedTab) {
-            this.selectedTab = selectedTab;
-            logger.trace(() -> "Selected Tab: " +
-                    ((selectedTab == null) ? "null" : selectedTab + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab)));
+        public void setSelectedTab(Tab selected) {
+            this.selectedTab = selected;
+            logger.debug(() -> "Selected Tab: " + (selected == null ? "null" :
+                    (selected instanceof EditableTab editable ? editable.getName() :
+                            selected.getText())));
         }
 
         public void setMovingTab(boolean movingTab) {
@@ -894,6 +897,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             tabToPaneMap.values()
                     .stream()
                     .distinct()
+                    .toList()
                     .forEach(p -> p.getTabs().clear());
         }
 
