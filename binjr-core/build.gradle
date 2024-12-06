@@ -27,7 +27,7 @@ dependencies {
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
     implementation 'org.bouncycastle:bcpg-jdk18on:1.79'
     implementation 'org.reflections:reflections:0.10.2'
-    api('org.fxmisc.richtext:richtextfx:0.11.0') {
+    api('org.fxmisc.richtext:richtextfx:0.11.4') {
         exclude group: 'org.openjfx'
     }
     api 'org.apache.lucene:lucene-core:10.0.0'

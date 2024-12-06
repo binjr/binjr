@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-ext.GCTOOLKIT_VERSION = "3.0.5-SNAPSHOT"
+ext.GCTOOLKIT_VERSION = "3.1.2"
 
 dependencies {
     implementation project(path: ':binjr-adapter-logs')
