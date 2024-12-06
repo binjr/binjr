@@ -156,13 +156,6 @@ configure(subprojects) {
         mavenLocal()
         mavenCentral()
         if (!IS_RELEASE) {
-            maven {
-                url 'https://maven.pkg.github.com/fthevenet/*'
-                credentials {
-                    username = ""
-                    password = System.getenv('GH_PKG_TOKEN')
-                }
-            }
 //            maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
 //            maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
 //            maven { url 'https://repository.apache.org/snapshots/' }
