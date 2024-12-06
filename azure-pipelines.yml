@@ -49,7 +49,7 @@ stages:
           name: app_bundle_windows
           platform: win
           arch: x64
-          wixVersion: '5.0.1'
+          wixVersion: '5.0.2'
           jdkDownloadUrl: https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/windows/x64/jdk/hotspot/normal/eclipse
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           javaVersion: $(javaVersion)
