@@ -365,6 +365,20 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             }
         }));
 
+        bindingManager.attachListener(this.getTabs(), ((InvalidationListener) observable -> {
+            empty.setValue(this.getTabs().isEmpty());
+        }));
+
+        bindingManager.attachListener(this.getTabs(), ((ListChangeListener<Tab>) c -> {
+            if (c.getList().isEmpty()) {
+                if (TearableTabPane.isCloseIfEmpty() && this.getHasSibling()) {
+                    this.closePane();
+                } else if (NodeUtils.getStage(this) instanceof TabPaneDetachedStage paneStage) {
+                    paneStage.close();
+                }
+            }
+        }));
+
         Platform.runLater(() -> {
             var scene = this.getScene();
             if (scene != null) {
@@ -378,10 +392,6 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                 }
             }
         });
-
-        bindingManager.attachListener(this.getTabs(), ((InvalidationListener) observable -> {
-            empty.setValue(this.getTabs().isEmpty());
-        }));
     }
 
     public void detachTab(Tab t) {
@@ -635,15 +645,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         detachedTabPane.dragAndDropInProgressProperty().bind(this.dragAndDropInProgress);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
         detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
-        bindingManager.attachListener(detachedTabPane.getTabs(), ((ListChangeListener<Tab>) c -> {
-            if (c.getList().isEmpty()) {
-                if (TearableTabPane.isCloseIfEmpty() && detachedTabPane.getHasSibling()) {
-                    detachedTabPane.closePane();
-                } else if (NodeUtils.getStage(detachedTabPane) instanceof TabPaneDetachedStage paneStage) {
-                    paneStage.close();
-                }
-            }
-        }));
+
         if (orientation == null) {
             Pane root = new AnchorPane(detachedTabPane);
             AnchorPane.setBottomAnchor(detachedTabPane, 0.0);
