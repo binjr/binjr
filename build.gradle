@@ -98,6 +98,7 @@ ext.ARTIFACTS_PATH_PKG = file("${ARTIFACTS_ROOT_PATH}/pkg/")
 ext.ARTIFACTS_PATH_RPM = file("${ARTIFACTS_ROOT_PATH}/rpm/")
 ext.ARTIFACTS_PATH_DEB = file("${ARTIFACTS_ROOT_PATH}/deb/")
 ext.ARTIFACTS_PATH_TGZ = file("${ARTIFACTS_ROOT_PATH}/tgz/")
+ext.ARTIFACTS_PATH_WIN = file("${ARTIFACTS_ROOT_PATH}/win/")
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = System.getenv('GPG_KEYRING_PATH')
@@ -531,6 +532,34 @@ tasks.register('wixRunBuild', Exec) {
             "-pdbtype", "none"
     ]
     outputs.dir ARTIFACTS_PATH_MSI
+}
+
+tasks.register('jpackageWin', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
+    workingDir ARTIFACTS_PATH_WIN
+    commandLine = [
+            "jpackage",
+            "--name", project.name,
+            "--input", "${buildDir}/tmp/input",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
+            "--main-class", "eu.binjr.core.Bootstrap",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
+            "--type", "app-image",
+            "--copyright", BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
+            "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.ico",
+            "--arguments", "--packaging=WIN_ZIP",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
+            "--java-options", "-XX:+UnlockExperimentalVMOptions",
+            "--java-options", "-XX:+UseShenandoahGC",
+            "--java-options", "-XX:ShenandoahGCHeuristics=compact",
+            "--java-options", "-XX:ShenandoahAllocationThreshold=20",
+            "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
+            "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
+    ]
+    outputs.dir ARTIFACTS_PATH_WIN
 }
 
 tasks.register('jpackageDmg', Exec) {
