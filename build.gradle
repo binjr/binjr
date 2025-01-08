@@ -906,17 +906,13 @@ dependencyUpdates {
  * NB: No copy/move/archiving will actually take place.
  */
 class WrapTaskForSigning extends AbstractArchiveTask {
-
     @Override
     protected CopyAction createCopyAction() {
-        return new noopCopyAction();
-    }
-
-    class noopCopyAction implements CopyAction {
-
-        @Override
-        WorkResult execute(CopyActionProcessingStream stream) {
-            return WorkResults.didWork(true);
+        return new CopyAction() {
+            @Override
+            WorkResult execute(CopyActionProcessingStream stream) {
+                return WorkResults.didWork(true);
+            }
         }
     }
 }
