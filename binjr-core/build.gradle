@@ -22,10 +22,10 @@ dependencies {
     api 'org.controlsfx:controlsfx:11.2.1'
     implementation 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.11.0'
-    api 'org.apache.commons:commons-csv:1.12.0'
+    api 'org.apache.commons:commons-csv:1.13.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
-    implementation 'org.bouncycastle:bcpg-jdk18on:1.79'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.80'
     implementation 'org.reflections:reflections:0.10.2'
     api('org.fxmisc.richtext:richtextfx:0.11.4') {
         exclude group: 'org.openjfx'
@@ -34,7 +34,7 @@ dependencies {
     api 'org.apache.lucene:lucene-facet:10.1.0'
     implementation 'org.apache.lucene:lucene-queryparser:10.1.0'
     implementation 'org.apache.lucene:lucene-analysis-common:10.1.0'
-    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
     compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"
