@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2023 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -80,14 +80,18 @@ public class ObfuscatedString {
             return fromObfuscatedText(obfuscateString(plainText));
         }
 
+        public ObfuscatedString fromPlainText(char[] plainText) {
+            return fromObfuscatedText(obfuscateString(new String(plainText)));
+        }
+
         public ObfuscatedString fromObfuscatedText(String obfuscated) {
             return new ObfuscatedString(obfuscated, this);
         }
 
 
-        protected abstract String deObfuscateString(String obfuscated);
+        public abstract String deObfuscateString(String obfuscated);
 
-        protected abstract String obfuscateString(String clearText);
+        public abstract String obfuscateString(String clearText);
 
     }
 }

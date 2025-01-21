@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,15 +16,19 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.concurrent.BlockingPromise;
 import eu.binjr.common.javafx.controls.NodeUtils;
+import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.preferences.ObservablePreference;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -38,6 +42,9 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
+import org.controlsfx.control.textfield.CustomPasswordField;
+import org.controlsfx.control.textfield.CustomTextField;
+import org.controlsfx.control.textfield.TextFields;
 import org.controlsfx.dialog.ExceptionDialog;
 
 import java.awt.*;
@@ -48,6 +55,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -417,6 +425,78 @@ public class Dialogs {
         }
 
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
+    }
+
+    public static Optional<LoginDialogResult> getCredentials() throws InterruptedException {
+        return getCredentials(null, null, null, null);
+    }
+
+
+    public static Optional<LoginDialogResult> getCredentials(Node owner, String title, String headerText, LoginDialogResult initCredentials) throws InterruptedException {
+        if (Platform.isFxApplicationThread()) {
+            return showCredentialDialog(owner, title, headerText, initCredentials);
+        } else {
+            var promise = new BlockingPromise<Optional<LoginDialogResult>>();
+            Platform.runLater(() -> {
+                promise.put(showCredentialDialog(owner, title, headerText, initCredentials));
+            });
+            return promise.get();
+        }
+    }
+
+    private static Optional<LoginDialogResult> showCredentialDialog(Node owner, String title, String headerText, LoginDialogResult init) {
+        Dialog<LoginDialogResult> dlg = new Dialog<>();
+        dlg.initOwner(owner == null ? StageAppearanceManager.getInstance().getRegisteredStages().getFirst().getScene().getWindow() : NodeUtils.getStage(owner));
+        setAlwaysOnTop(dlg);
+        dlg.setTitle(AppEnvironment.APP_NAME);
+        dlg.setHeaderText(headerText);
+        dlg.setTitle(title);
+        var content = new VBox();
+        content.setSpacing(10);
+        var txtUserName = (CustomTextField) TextFields.createClearableTextField();
+        txtUserName.setPromptText("User Name");
+        txtUserName.setPrefWidth(100);
+        var txtPassword = (CustomPasswordField) TextFields.createClearablePasswordField();
+        txtPassword.setPromptText("Password");
+        txtPassword.setPrefWidth(100);
+        var chkRemember = new CheckBox("Remember me");
+        var labelFailedLogin = new Label("  Wrong user name or password  ");
+        labelFailedLogin.setVisible(false);
+        labelFailedLogin.setManaged(false);
+        labelFailedLogin.getStyleClass().add("notification-error");
+
+        ChangeListener<String> invalideErrorMessage = (observableValue, newVal, oldVal) -> {
+            if (!newVal.equals(oldVal)){
+                labelFailedLogin.setVisible(false);
+                labelFailedLogin.setManaged(false);
+            }
+        };
+
+        txtUserName.textProperty().addListener(invalideErrorMessage);
+        txtPassword.textProperty().addListener(invalideErrorMessage);
+        if (init != null) {
+            txtUserName.setText(init.userName());
+            txtPassword.setText(init.password());
+            chkRemember.setSelected(init.remember());
+            labelFailedLogin.setVisible(init.retry());
+            labelFailedLogin.setManaged(init.retry());
+        }
+        content.getChildren().addAll(txtUserName, txtPassword, chkRemember, labelFailedLogin);
+        dlg.getDialogPane().setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "padlock-icon", "dialog-icon"));
+        var loginButtonType = new ButtonType("Login", ButtonBar.ButtonData.OK_DONE);
+        dlg.getDialogPane().getButtonTypes().addAll(loginButtonType, ButtonType.CANCEL);
+        dlg.getDialogPane().setContent(content);
+        dlg.setResultConverter((dialogButton) -> dialogButton == loginButtonType ? new LoginDialogResult(txtUserName.getText(), txtPassword.getText(), chkRemember.isSelected(), false) : null);
+        return dlg.showAndWait();
+    }
+
+    public record LoginDialogResult(String userName, String password, boolean remember, boolean retry) {
+        public LoginDialogResult(String userName, String password, boolean remember, boolean retry) {
+            this.userName = Objects.requireNonNull(userName);
+            this.password = Objects.requireNonNull(password);
+            this.remember = remember;
+            this.retry = retry;
+        }
     }
 
     /**

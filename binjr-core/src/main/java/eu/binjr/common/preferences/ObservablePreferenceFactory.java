@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2023 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -325,12 +326,103 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
     }
 
     @SuppressWarnings("unchecked")
-    public <U> Optional<ObservablePreference<U>> getByName(String name, Class<U> type) {
+    public <U> Optional<ObservablePreference<U>> getByName(String name, U type) {
         var p = storedItems.get(name);
-        if (p == null || !type.isAssignableFrom(p.getInnerType())) {
+        if (p == null || !type.getClass().isAssignableFrom(p.getInnerType())) {
             return Optional.empty();
         }
         return Optional.of((ObservablePreference<U>) p);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> Optional<ObservablePreference<U>> lookup(String name, U defaultValue) {
+        var loadedPref = getByName(name, defaultValue);
+        if (loadedPref.isPresent()) {
+            return loadedPref;
+        }
+        try {
+            if (!arraysContains(backingStore.keys(), name)) {
+                return Optional.empty();
+            }
+        } catch (BackingStoreException e) {
+            logger.error("Error loading preference from backing store: " + e.getMessage());
+            logger.debug("Stack trace", e);
+            return Optional.empty();
+        }
+
+        return switch (defaultValue) {
+            case String s ->
+                    Optional.of((ObservablePreference<U>) stringPreference(name, this.backingStore.get(name, s)));
+            case Integer i ->
+                    Optional.of((ObservablePreference<U>) integerPreference(name, this.backingStore.getInt(name, i)));
+            case Long l ->
+                    Optional.of((ObservablePreference<U>) longPreference(name, this.backingStore.getLong(name, l)));
+            case Double d ->
+                    Optional.of((ObservablePreference<U>) doublePreference(name, this.backingStore.getDouble(name, d)));
+            case Boolean b ->
+                    Optional.of((ObservablePreference<U>) booleanPreference(name, this.backingStore.getBoolean(name, b)));
+            case null, default -> Optional.empty();
+        };
+
+    }
+
+    public void remove(String name){
+        storedItems.remove(name);
+        backingStore.remove(name);
+    }
+
+    private boolean arraysContains(String[] array, String value) {
+        for (var key : array) {
+            if (key.equals(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void put(String name, String value) {
+        getByName(name, "").ifPresentOrElse(
+                p -> p.set(value),
+                () -> {
+                    var p = stringPreference(name, value);
+                    p.saveToBackend(value);
+                });
+    }
+
+    public void put(String name, Integer value) {
+        getByName(name, 1).ifPresentOrElse(
+                p -> p.set(value),
+                () -> {
+                    var p = integerPreference(name, value);
+                    p.saveToBackend(value);
+                });
+    }
+
+    public void put(String name, Double value) {
+        getByName(name, 1.0).ifPresentOrElse(
+                p -> p.set(value),
+                () -> {
+                    var p = doublePreference(name, value);
+                    p.saveToBackend(value);
+                });
+    }
+
+    public void put(String name, Long value) {
+        getByName(name, 1L).ifPresentOrElse(
+                p -> p.set(value),
+                () -> {
+                    var p = longPreference(name, value);
+                    p.saveToBackend(value);
+                });
+    }
+
+    public void put(String name, Boolean value) {
+        getByName(name, true).ifPresentOrElse(
+                p -> p.set(value),
+                () -> {
+                    var p = booleanPreference(name, value);
+                    p.saveToBackend(value);
+                });
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2024 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,8 +21,11 @@ import eu.binjr.common.io.SSLContextUtils;
 import eu.binjr.common.io.SSLCustomContextException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.preferences.ObfuscatedString;
 import eu.binjr.core.data.exceptions.*;
+import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -49,14 +52,24 @@ import static java.net.http.HttpResponse.BodySubscribers;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
+    protected static final String BASIC_AUTH_USER_NAME = "basicAuthUserName";
+    protected static final String BASIC_AUTH_PASSWORD = "basicAuthPassword";
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private static final Logger logger = Logger.create(HttpDataAdapter.class);
     public static final String APPLICATION_JSON = "application/json";
     public static final String USER_AGENT_STRING = AppEnvironment.APP_NAME +
             "/" + AppEnvironment.getInstance().getVersion() +
             " (Authenticates like: Firefox/Safari/Internet Explorer)";
+    public static final String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
+    public static final String AUTH_SCHEME_BASIC = "Basic ";
+    public static final String HEADER_AUTHORIZATION = "Authorization";
+    public static final String HEADER_USER_AGENT = "User-Agent";
     private final HttpClient httpClient;
+    private final UserPreferences userPreferences = UserPreferences.getInstance();
+    private String basicAuthUserName;
+    private ObfuscatedString basicAuthPassword;
     private URL baseAddress;
+    private final UserHistory.CredentialStore savedCredentials = UserHistory.getInstance().getSavedCredentials();
 
     /**
      * Creates a new instance of the {@link HttpDataAdapter} class.
@@ -64,8 +77,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
      * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
     public HttpDataAdapter() throws CannotInitializeDataAdapterException {
-        super();
-        httpClient = httpClientFactory();
+        this(null, null, null);
     }
 
     /**
@@ -75,8 +87,14 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
      * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
     public HttpDataAdapter(URL baseAddress) throws CannotInitializeDataAdapterException {
+        this(baseAddress, null, null);
+    }
+
+    public HttpDataAdapter(URL baseAddress, String basicAuthUserName, ObfuscatedString basicAuthPassword) throws CannotInitializeDataAdapterException {
         super();
         this.baseAddress = baseAddress;
+        this.basicAuthUserName = basicAuthUserName;
+        this.basicAuthPassword = basicAuthPassword;
         httpClient = httpClientFactory();
     }
 
@@ -89,6 +107,12 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>();
         params.put(BASE_ADDRESS_PARAM_NAME, baseAddress.toString());
+        if (basicAuthUserName != null) {
+            params.put(BASIC_AUTH_USER_NAME, basicAuthUserName);
+        }
+        if (basicAuthPassword != null) {
+            params.put(BASIC_AUTH_PASSWORD, basicAuthPassword.getObfuscated());
+        }
         return params;
     }
 
@@ -110,6 +134,12 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                                 BASE_ADDRESS_PARAM_NAME + " is not valid in adapter " + getSourceName(), e);
                     }
                 });
+        basicAuthUserName = params.get(BASIC_AUTH_USER_NAME);
+        var obfPwd = params.get(BASIC_AUTH_PASSWORD);
+        if (obfPwd != null) {
+            basicAuthPassword = userPreferences.getObfuscator().fromObfuscatedText(obfPwd);
+        }
+
     }
 
     @Override
@@ -133,20 +163,53 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                             .orElseThrow(() -> new RuntimeException("No content type specified")).split(";")[0].trim();
 
                     if (!APPLICATION_JSON.equalsIgnoreCase(contentType)) {
-                        throw new RuntimeException("Invalid content type: received: '" + contentType + "', expected: '" + APPLICATION_JSON );
+                        throw new RuntimeException("Invalid content type: received: '" + contentType + "', expected: '" + APPLICATION_JSON);
                     }
                     return s;
                 }));
     }
 
     protected <R> R doHttpGet(URI url, HttpResponse.BodyHandler<R> bodyHandler) throws DataAdapterException {
+        return doHttpGet(url, bodyHandler, false);
+    }
+
+    protected <R> R doHttpGet(URI url, HttpResponse.BodyHandler<R> bodyHandler, boolean retry) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + url.toString() + "]", logger::perf)) {
             var httpGet = HttpRequest.newBuilder()
                     .GET()
-                    .setHeader("User-Agent", USER_AGENT_STRING)
-                    .uri(url).build();
+                    .setHeader(HEADER_USER_AGENT, USER_AGENT_STRING)
+                    .uri(url);
             logger.debug(() -> "requestUri = " + url);
-            HttpResponse<R> response = httpClient.send(httpGet, bodyHandler);
+            if (basicAuthUserName != null && basicAuthPassword != null) {
+                var authString = basicAuthUserName + ":" + basicAuthPassword.toPlainText();
+                httpGet.header(HEADER_AUTHORIZATION, AUTH_SCHEME_BASIC + Base64.getEncoder().encodeToString(authString.getBytes()));
+            }
+            HttpResponse<R> response = httpClient.send(httpGet.build(), bodyHandler);
+            if (userPreferences.autoAttemptBasicAuth.get() &&
+                    response.statusCode() == 401 &&
+                    response.headers().allValues(HEADER_WWW_AUTHENTICATE).stream().anyMatch(s -> s.startsWith(AUTH_SCHEME_BASIC))) {
+                logger.warn("Authentication required for \"" + url + "\": attempting basic authentication");
+                Dialogs.LoginDialogResult init = new Dialogs.LoginDialogResult("", "", false, retry);
+                if (savedCredentials.getUserName(url.getHost()).isPresent() &&
+                        savedCredentials.getPassword(url.getHost()).isPresent()) {
+                    init = new Dialogs.LoginDialogResult(
+                            savedCredentials.getUserName(url.getHost()).get(),
+                            savedCredentials.getPassword(url.getHost()).get(),
+                            true,
+                            retry);
+                }
+                var credentials = Dialogs.getCredentials(null, url.getHost(), null, init);
+                if (credentials.isPresent()) {
+                    this.basicAuthUserName = credentials.get().userName();
+                    this.basicAuthPassword = userPreferences.getObfuscator().fromPlainText(credentials.get().password());
+                    if (credentials.get().remember()) {
+                        savedCredentials.putUserName(url.getHost(), basicAuthUserName, basicAuthPassword.toPlainText());
+                    } else {
+                        savedCredentials.clearCredentials(url.getHost());
+                    }
+                    return doHttpGet(url, bodyHandler, true);
+                }
+            }
             if (response.statusCode() >= 300) {
                 String msg = switch (response.statusCode()) {
                     case 401 -> "Authentication failed while trying to access \"" + url + "\"";
@@ -183,7 +246,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
 
     protected HttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
         try {
-            var userPrefs = UserPreferences.getInstance();
+            var userPrefs = userPreferences;
             var builder = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
@@ -223,6 +286,14 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                     logger.debug(() -> "Stack", e);
                 }
             }
+//            if (basicAuthUserName != null && basicAuthPassword != null) {
+//                builder.authenticator(new Authenticator() {
+//                    @Override
+//                    protected PasswordAuthentication getPasswordAuthentication() {
+//                        return new PasswordAuthentication(basicAuthUserName, basicAuthPassword.toPlainText().toCharArray());
+//                    }
+//                });
+//            }
             return builder.build();
         } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" +

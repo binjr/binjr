@@ -278,7 +278,7 @@
     -fx-background-color: #8f8f8f, -binjr-button-background-color;
     -fx-background-insets: 0, 1;
     -fx-text-fill: -fx-text-background-color;
-    /* -fx-prompt-text-fill: -binjr-blue-color;*/
+     -fx-prompt-text-fill: #9a9a9a;
 
     /* -fx-highlight-fill: #008287; TODO: this probably is the "active" color" */
     -fx-highlight-text-fill: -fx-text-background-color;
@@ -1697,7 +1697,7 @@
     -fx-background-color: -binjr-pane-background-color;
 }
 
-.dialog-pane .header-panel .graphic-container .dialog-icon {
+ .dialog-icon {
     -icon-color: -fx-text-background-color;
 }
 

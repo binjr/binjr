@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2024 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -369,6 +369,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<ScalingFactor> uiScalingFactor = enumPreference(ScalingFactor.class, "uiScalingFactor", ScalingFactor.AUTO);
 
     public final ObservablePreference<Boolean> javaFxVerbose = booleanPreference("javaFxVerbose", false);
+
+    public final  ObservablePreference<Boolean> autoAttemptBasicAuth = booleanPreference("autoAttemptBasicAuth", true);
 
     /**
      * A list of user defined {@link ParsingProfile} for parsing log events

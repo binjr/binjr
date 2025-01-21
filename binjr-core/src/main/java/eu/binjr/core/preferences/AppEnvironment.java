@@ -27,6 +27,7 @@ import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.scene.Node;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.Level;

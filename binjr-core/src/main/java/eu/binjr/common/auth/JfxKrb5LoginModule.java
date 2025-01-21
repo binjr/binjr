@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.common.auth;
 
 import com.sun.security.auth.module.Krb5LoginModule;
+import eu.binjr.common.concurrent.BlockingPromise;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.application.Platform;
@@ -28,8 +29,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.*;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -69,12 +68,13 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
         if (credentialsEntry.isFilled()) {
             return credentialsEntry;
         }
-        AsyncResult<CredentialsEntry> future = new AsyncResult<>();
+        BlockingPromise<CredentialsEntry> future = new BlockingPromise<>();
         Platform.runLater(() -> {
             LoginDialog dlg = new LoginDialog(null, null);
             dlg.setHeaderText("Enter login credentials");
             dlg.setTitle("Login");
             dlg.initStyle(StageStyle.UTILITY);
+
             Dialogs.setAlwaysOnTop(dlg);
             Optional<Pair<String, String>> res = dlg.showAndWait();
             if (res.isPresent()) {
@@ -87,30 +87,4 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
         return future.get();
     }
 
-    private class AsyncResult<F> {
-        private final CountDownLatch latch = new CountDownLatch(1);
-        private F value;
-
-        public boolean isDone() {
-            return latch.getCount() == 0;
-        }
-
-        public F get() throws InterruptedException {
-            latch.await();
-            return value;
-        }
-
-        public F get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
-            if (latch.await(timeout, unit)) {
-                return value;
-            } else {
-                throw new TimeoutException();
-            }
-        }
-
-        private void put(F result) {
-            value = result;
-            latch.countDown();
-        }
-    }
 }

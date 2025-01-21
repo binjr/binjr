@@ -81,7 +81,7 @@ public class StageAppearanceManager {
         private final static StageAppearanceManager instance = new StageAppearanceManager();
     }
 
-    private final Map<Stage, Set<AppearanceOptions>> registeredStages = new WeakHashMap<>();
+    private final Map<Stage, Set<AppearanceOptions>> registeredStages = new LinkedHashMap<>();
 
     /**
      * Initializes a new instance of the {@link StageAppearanceManager} class.
@@ -228,15 +228,27 @@ public class StageAppearanceManager {
         Dialogs.runOnFXThread(() -> {
             scene.getStylesheets().clear();
             Application.setUserAgentStylesheet(null);
-            scene.getStylesheets().addAll(
-                    getClass().getResource(getFontFamilyCssPath()).toExternalForm(),
-                    getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
-                    theme.getClass().getResource(theme.getCssPath()).toExternalForm(),
-                    getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
+            scene.getStylesheets().addAll(getStyleSheets(theme));
             if (extraCss != null && extraCss.length > 0) {
                 scene.getStylesheets().addAll(extraCss);
             }
         });
+    }
+
+    public List<String> getStyleSheets() {
+        var theme = UserInterfaceThemes.valueOf(UserPreferences.getInstance().userInterfaceTheme.get(), BuiltInUserInterfaceThemes.SYSTEM);
+        return getStyleSheets(theme);
+    }
+
+    public List<String> getStyleSheets(UserInterfaceThemes theme) {
+        return List.of(getClass().getResource(getFontFamilyCssPath()).toExternalForm(),
+                getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
+                theme.getClass().getResource(theme.getCssPath()).toExternalForm(),
+                getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
+    }
+
+    public List<Stage> getRegisteredStages() {
+        return List.of(registeredStages.keySet().toArray(Stage[]::new));
     }
 
     public static String getFontFamilyCssPath() {

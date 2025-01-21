@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Frederic Thevenet
+ * Copyright 2023-2025 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public class AesStringObfuscator extends ObfuscatedString.Obfuscator {
         this.secretKey = secretKey;
     }
 
-    protected String deObfuscateString(String obfuscated) {
+    public String deObfuscateString(String obfuscated) {
         try {
             if (obfuscated.isEmpty()) {
                 return obfuscated;
@@ -43,7 +43,7 @@ public class AesStringObfuscator extends ObfuscatedString.Obfuscator {
         }
     }
 
-    protected String obfuscateString(String clearText) {
+    public String obfuscateString(String clearText) {
         try {
             if (clearText.isEmpty()) {
                 return clearText;
