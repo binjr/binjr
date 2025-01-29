@@ -119,7 +119,8 @@ stages:
               git config user.email "binjr.bot@free.fr"
               git config user.name "binjr-bot"
               wget https://api.github.com/repos/binjr/binjr/releases/latest -O docs/repos/binjr/binjr/releases/latest
-              git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
+              git add docs/blog/posts/binjr-$REPO_TAG_NAME-is-now-available!.md
+              git commit -am "Release $REPO_TAG_NAME"
               git push
               python3 -m mkdocs gh-deploy --no-history --remote-branch master
               git config credential.helper cache
