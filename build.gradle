@@ -36,7 +36,7 @@ ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true"
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
 ext.IS_BETA = false
 ext.BINJR_BETA_VERSION = "0.0.0"
-ext.BINJR_VERSION_STEM = "3.21.0"
+ext.BINJR_VERSION_STEM = "3.21.1"
 ext.LINUX_APP_RELEASE = "1"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
