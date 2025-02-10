@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2024 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package eu.binjr.core.controllers;
 
 import com.google.gson.Gson;
 import eu.binjr.common.colors.ColorUtils;
-//import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
 import eu.binjr.common.javafx.charts.XYChartCrosshair;
@@ -117,7 +116,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public static final String PSEUDOCLASS_FAVORITES = "favorites";
     public static final String PSEUDOCLASS_HISTORY = "history";
     public static final String PSEUDOCLASS_CATEGORY = "category";
-    public static final double AXIS_WIDTH = 15.0;
+    public static final double AXIS_WIDTH = 60.0;
     public static final double AXIS_HEIGHT = 15.0;
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -712,11 +711,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
         heatmapY.setAutoRanging(true);
         heatmapY.setAnimated(false);
         heatmapY.setTickLabelsVisible(true);
-        heatmapY.setTickMarkVisible(false);
+        heatmapY.setTickMarkVisible(true);
         heatmapY.setMinorTickVisible(false);
         heatmapY.setPrefWidth(AXIS_WIDTH);
         heatmapY.setMinWidth(AXIS_WIDTH);
         heatmapY.setMaxWidth(AXIS_WIDTH);
+        heatmapY.setLabel("No. Events");
 
         heatmap = new StackedBarChart<>(categoryAxis, heatmapY);
         heatmap.setCategoryGap(0.5);

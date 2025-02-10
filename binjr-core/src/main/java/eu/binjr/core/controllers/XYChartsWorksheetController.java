@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2024 Frederic Thevenet
+ *    Copyright 2016-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -93,6 +93,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private static final Logger logger = Logger.create(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
     private static final PseudoClass DRAGGED_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("draggedover");
+    public static final double Y_AXIS_WIDTH = 60.0;
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
@@ -649,9 +650,9 @@ public class XYChartsWorksheetController extends WorksheetController {
             ));
             VBox.setVgrow(chart, Priority.ALWAYS);
             chart.getYAxis().setSide(Side.LEFT);
-            chart.getYAxis().setPrefWidth(60.0);
-            chart.getYAxis().setMinWidth(60.0);
-            chart.getYAxis().setMaxWidth(60.0);
+            chart.getYAxis().setPrefWidth(Y_AXIS_WIDTH);
+            chart.getYAxis().setMinWidth(Y_AXIS_WIDTH);
+            chart.getYAxis().setMaxWidth(Y_AXIS_WIDTH);
         }
         var scrollPane = new ScrollPane(vBox);
         scrollPane.setFitToWidth(true);
