@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2024 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -644,6 +644,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         detachedTabPane.setOnDragEnteredTabArea(this.onDragEnteredTabArea);
         detachedTabPane.dragAndDropInProgressProperty().bind(this.dragAndDropInProgress);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
+        detachedTabPane.setNewTabContextMenu(this.newTabContextMenu);
         detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
 
         if (orientation == null) {
