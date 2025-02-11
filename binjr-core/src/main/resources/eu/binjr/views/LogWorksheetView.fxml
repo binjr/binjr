@@ -248,6 +248,7 @@
 
             </VBox>
             <AnchorPane fx:id="heatmapArea"
+                        styleClass="skinnable-pane-border"
                         cache="true"
                         cacheHint="SPEED"
                         depthTest="DISABLE"
