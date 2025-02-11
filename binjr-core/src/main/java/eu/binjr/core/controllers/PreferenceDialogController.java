@@ -72,6 +72,8 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private  ToggleSwitch closeEmptyTabPaneCheckbox;
+    @FXML
     private ChoiceBox<ScalingFactor> uiScaleChoiceBox;
     @FXML
     private LabelWithInlineHelp uiScaleLabel;
@@ -177,6 +179,8 @@ public class PreferenceDialogController implements Initializable {
     private Slider areaChartOpacitySlider = new Slider();
     @FXML
     private Label areaChartsOpacityText = new Label();
+    
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -190,7 +194,7 @@ public class PreferenceDialogController implements Initializable {
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutlineAreaCharts != null : "fx:id\"showOutline\" was not injected!";
         assert areaChartOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
-        UserPreferences userPrefs = UserPreferences.getInstance();
+
         areaChartOpacitySlider.valueProperty()
                 .bindBidirectional(userPrefs.defaultOpacityAreaCharts.property());
         areaChartsOpacityText.textProperty()
@@ -225,11 +229,11 @@ public class PreferenceDialogController implements Initializable {
             maxSampleLabel.setDisable(!newValue);
         });
         enableDownSampling.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().downSamplingEnabled.property());
+                .bindBidirectional(userPrefs.downSamplingEnabled.property());
         alwaysIncludeOriginInAutoScale.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.property());
+                .bindBidirectional(userPrefs.defaultForceZeroInYAxisAutoRange.property());
         forceNaNtoZeroSwitch.selectedProperty()
-                .bindBidirectional(UserPreferences.getInstance().forceNanToZero.property());
+                .bindBidirectional(userPrefs.forceNanToZero.property());
         fullHeightCrosshair.selectedProperty()
                 .bindBidirectional(userPrefs.fullHeightCrosshairMarker.property());
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {
@@ -317,12 +321,13 @@ public class PreferenceDialogController implements Initializable {
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
         showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
-        filterBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFilterBarVisible.property());
-        findBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
-        heatmapVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
+        filterBarVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logFilterBarVisible.property());
+        findBarVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logFindBarVisible.property());
+        heatmapVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logHeatmapVisible.property());
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
-        dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
-        dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
+        dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(userPrefs.doNotWarnOnTabClose.property());
+        dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(userPrefs.doNotWarnOnChartClose.property());
+        closeEmptyTabPaneCheckbox.selectedProperty().bindBidirectional(userPrefs.closeEmptyTabPanes.property());
         proxyHostnameTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         proxyPortTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
         useProxyAuthToggle.disableProperty().bind(enableProxyToggle.selectedProperty().not());
@@ -465,7 +470,7 @@ public class PreferenceDialogController implements Initializable {
     public void handleResetSettings(ActionEvent actionEvent) {
         try {
             if (Dialogs.confirmDialog(root, "Restore all settings to their default value.", "Are you sure?") == ButtonType.YES) {
-                UserPreferences.getInstance().reset();
+                userPrefs.reset();
                 logger.info("User settings successfully reset to default");
             }
         } catch (BackingStoreException e) {
@@ -504,7 +509,7 @@ public class PreferenceDialogController implements Initializable {
             try {
                 Files.deleteIfExists(exportPath.toPath());
                 UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
-                UserPreferences.getInstance().exportToFile(exportPath.toPath());
+                userPrefs.exportToFile(exportPath.toPath());
                 logger.info("User settings successfully exported to " + exportPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while exporting settings: " + e.getMessage(), e, root);
@@ -520,7 +525,7 @@ public class PreferenceDialogController implements Initializable {
         File importPath = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (importPath != null) {
             try {
-                UserPreferences.getInstance().importFromFile(importPath.toPath());
+                userPrefs.importFromFile(importPath.toPath());
                 logger.info("User settings successfully imported from " + importPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while importing settings: " + e.getMessage(), e, root);

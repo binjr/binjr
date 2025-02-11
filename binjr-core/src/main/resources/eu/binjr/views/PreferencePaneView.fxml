@@ -90,6 +90,7 @@
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
+
                             <LabelWithInlineHelp text="Don't ask before removing chart"
                                                  inlineHelp="Check this option if you do not want a warning popup to show before removing a chart from a worksheet."/>
                             <VBox fillWidth="false">
@@ -99,6 +100,17 @@
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
+
+                            <LabelWithInlineHelp text="Close empty tab panes automatically"
+                                                 inlineHelp="Check this option if you want to detached or split worksheet panes to be closed automatically when they no longer contain any worksheets."/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="closeEmptyTabPaneCheckbox" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
+
                             <LabelWithInlineHelp text="Anchor for incomplete timestamps"
                                                  inlineHelp="This is the point it time that is used as a reference to automatically complete timestamps when some components are missing from the data sources."/>
                             <ChoiceBox fx:id="dateTimeAnchorChoiceBox" maxWidth="1.7976931348623157E308"/>
@@ -153,7 +165,8 @@
                                     <Label fx:id="stackedAreaChartsOpacityText" text="100%"/>
                                 </HBox>
                             </VBox>
-                            <LabelWithInlineHelp text="Default line stroke width" inlineHelp="The default stroke width for line and area charts."/>
+                            <LabelWithInlineHelp text="Default line stroke width"
+                                                 inlineHelp="The default stroke width for line and area charts."/>
                             <VBox>
                                 <HBox alignment="CENTER_LEFT">
                                     <Slider fx:id="lineStrokeWidthSlider" blockIncrement="0.1" min="0.1" max="20.0"/>
