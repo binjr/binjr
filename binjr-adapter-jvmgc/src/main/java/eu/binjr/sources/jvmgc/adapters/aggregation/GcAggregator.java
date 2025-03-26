@@ -26,7 +26,9 @@ import com.microsoft.gctoolkit.event.ReferenceGCSummary;
 import com.microsoft.gctoolkit.event.g1gc.G1GCPauseEvent;
 import com.microsoft.gctoolkit.event.generational.GenerationalGCPauseEvent;
 import com.microsoft.gctoolkit.event.shenandoah.ShenandoahCycle;
-import com.microsoft.gctoolkit.event.zgc.ZGCCycle;
+import com.microsoft.gctoolkit.event.zgc.FullZGCCycle;
+import com.microsoft.gctoolkit.event.zgc.MajorZGCCycle;
+import com.microsoft.gctoolkit.event.zgc.MinorZGCCycle;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
@@ -94,7 +96,9 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         super(results);
         register(GenerationalGCPauseEvent.class, this::processEvent);
         register(G1GCPauseEvent.class, this::processEvent);
-        register(ZGCCycle.class, this::processEvent);
+        register(FullZGCCycle.class, this::recordGcPauseEvent);
+        register(MinorZGCCycle.class, this::recordGcPauseEvent);
+        register(MajorZGCCycle.class, this::recordGcPauseEvent);
         register(ShenandoahCycle.class, this::processEvent);
     }
 
@@ -335,11 +339,6 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         recordMemPoolStats(POOL_EDEN, event.getEden(), event, Color.GOLD);
         recordCpuStats(event, event.getCpuSummary());
         recordReferenceStats(event, event.getReferenceGCSummary());
-    }
-
-    private void processEvent(ZGCCycle event) {
-        recordGcPauseEvent(event);
-
     }
 
     private void processEvent(ShenandoahCycle event) {
