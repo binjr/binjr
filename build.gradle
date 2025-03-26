@@ -56,9 +56,9 @@ ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "23.0.2"
+ext.OPENJFX_VERSION = "24"
 ext.USE_BUILD_JDK_IN_BUNDLE = false
-ext.BUNDLE_JDK_VERSION = "jdk-23.0.2+7"
+ext.BUNDLE_JDK_VERSION = "jdk-24+36"
 ext.BUNDLE_JDK_PATH = null
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
@@ -90,6 +90,7 @@ ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX5")
+ext.WIX_VERSION = "5.0.2"
 ext.ARTIFACTS_ROOT_PATH = "${buildDir}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")
@@ -121,8 +122,8 @@ configure(subprojects) {
     apply plugin: "signing"
     group GROUP_ID
     version BINJR_VERSION
-    sourceCompatibility = 21
-    targetCompatibility = 21
+    sourceCompatibility = 22
+    targetCompatibility = 22
     description BINJR_DESCRIPTION
     compileJava.options.encoding = 'UTF-8'
 
@@ -143,8 +144,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:5.11.4')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.11.4')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:5.12.1')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.12.1')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
@@ -505,15 +506,23 @@ tasks.register('wixRunHeat', Exec) {
             "-out", "${buildDir}/wix/binjrFiles.wxs"
     ]
 }
+tasks.register('getWixVer', Exec) {
+    dependsOn wixRunHeat
+    commandLine = ["${WIX_HOME}/wix.exe", "--version"]
+    standardOutput = new ByteArrayOutputStream()
+    doLast {
+        WIX_VERSION = standardOutput.toString()
+    }
+}
 
 tasks.register('wixAddUiExt', Exec) {
-    dependsOn wixRunHeat
-    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
+    dependsOn getWixVer
+    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext/${WIX_VERSION}"]
 }
 
 tasks.register('wixAddUtilExt', Exec) {
     dependsOn wixAddUiExt
-    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
+    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext/${WIX_VERSION}"]
 }
 
 tasks.register('wixRunBuild', Exec) {
