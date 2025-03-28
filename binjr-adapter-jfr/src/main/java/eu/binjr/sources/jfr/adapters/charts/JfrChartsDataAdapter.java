@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Frederic Thevenet
+ * Copyright 2023-2025 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                     }
                 }
                 var leaf = new FilterableTreeItem<>((SourceBinding) new TimeSeriesBinding.Builder()
-                        .withLabel(eventType.getLabel())
-                        .withLegend(eventType.getLabel())
+                        .withLabel(sanitizeEventTypeLabel(eventType))
                         .withPath(rootPath + eventType.getName())
                         .withParent(branch.getValue())
                         .withGraphType(ChartType.LINE)
@@ -145,7 +144,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                         leaf.getInternalChildren().add(jvmBranch);
 
                         jvmBranch.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
-                                .withLabel(eventType.getField(JfrEventFormat.JVM_SYSTEM).getLabel())
+                                .withLabel(sanitizeEventTypeLabel(eventType, e -> e.getField(JfrEventFormat.JVM_SYSTEM).getLabel()))
                                 .withPath(jvmBranch.getValue().getPath())
                                 .withParent(jvmBranch.getValue())
                                 .withUnitName("%")
@@ -156,7 +155,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                                 .build()));
 
                         jvmBranch.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
-                                .withLabel(eventType.getField(JfrEventFormat.JVM_USER).getLabel())
+                                .withLabel(sanitizeEventTypeLabel(eventType, e -> e.getField(JfrEventFormat.JVM_USER).getLabel()))
                                 .withPath(jvmBranch.getValue().getPath())
                                 .withParent(jvmBranch.getValue())
                                 .withUnitName("%")
@@ -177,7 +176,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
                                 .build());
                         leaf.getInternalChildren().add(machineBranch);
                         machineBranch.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
-                                .withLabel(eventType.getField(JfrEventFormat.MACHINE_TOTAL).getLabel())
+                                .withLabel(sanitizeEventTypeLabel(eventType, e -> e.getField(JfrEventFormat.MACHINE_TOTAL).getLabel()))
                                 .withPath(machineBranch.getValue().getPath())
                                 .withParent(machineBranch.getValue())
                                 .withUnitName("%")
@@ -203,7 +202,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
         if (JfrEventFormat.includeField(field)) {
             var unit = extractKnownUnit(field);
             leaf.getInternalChildren().add(new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
-                    .withLabel(String.join(" ", parentName, field.getLabel()).trim())
+                    .withLabel(String.join(" ", parentName, (field.getLabel() != null ? field.getLabel() : field.getName())).trim())
                     .withPath(leaf.getValue().getPath())
                     .withParent(leaf.getValue())
                     .withUnitName(unit.name())
@@ -216,7 +215,7 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
             if (!field.getTypeName().equals(JfrEventFormat.JDK_TYPES_THREAD_GROUP) &&
                     !field.getTypeName().equals(JfrEventFormat.JDK_TYPES_STACK_TRACE) &&
                     depth <= RECURSE_MAX_DEPTH) {
-                addField(field.getLabel(), nestedField, leaf, depth + 1);
+                addField((field.getLabel() != null ? field.getLabel() : field.getName()), nestedField, leaf, depth + 1);
             }
         }
     }

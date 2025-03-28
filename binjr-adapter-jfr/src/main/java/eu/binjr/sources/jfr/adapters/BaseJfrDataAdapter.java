@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Frederic Thevenet
+ * Copyright 2023-2025 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import jdk.jfr.EventType;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
@@ -46,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Function;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
@@ -142,6 +144,23 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
         }
         IOUtils.close(fileBrowser);
         super.close();
+    }
+
+    public String sanitizeEventTypeLabel(EventType eventType) {
+        return sanitizeEventTypeLabel(eventType, null);
+    }
+
+    public String sanitizeEventTypeLabel(EventType eventType, Function<EventType, String> supplier) {
+        String label;
+        if (supplier != null) {
+            label = supplier.apply(eventType);
+        } else {
+            label = eventType.getLabel();
+        }
+        if (label == null) {
+            return eventType.getName();
+        }
+        return label;
     }
 
     public synchronized void ensureIndexed(Set<String> sources, ReloadPolicy reloadPolicy) throws IOException {

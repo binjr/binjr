@@ -117,10 +117,12 @@ public class JfrEventParser implements EventParser {
         private void addField(String parentLabel, RecordedObject jfrEvent, Map<String, Number> numFields) {
             for (var field : jfrEvent.getFields()) {
                 if (JfrEventFormat.includeField(field)) {
-                    numFields.put(String.join(" ", parentLabel, field.getLabel()).trim(), jfrEvent.getValue(field.getName()));
+                    numFields.put(
+                            String.join(" ", parentLabel, (field.getLabel() != null ? field.getLabel() : field.getName())).trim(),
+                            jfrEvent.getValue(field.getName()));
                 }
                 if (!field.getFields().isEmpty() && jfrEvent.getValue(field.getName()) instanceof RecordedObject nestedEvent) {
-                    addField(field.getLabel(), nestedEvent, numFields);
+                    addField((field.getLabel() != null ? field.getLabel() : field.getName()), nestedEvent, numFields);
                 }
             }
         }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -211,11 +211,11 @@ public abstract class SourceBinding<T> {
     private long getHashValue(final String value) {
         long hashVal;
         var md = threadLocalMessageDigest.get();
-        if (md== null){
+        if (md == null) {
             return value.hashCode();
         }
         md.update((value).getBytes(StandardCharsets.UTF_8));
-        hashVal = new BigInteger(1,md.digest()).longValue();
+        hashVal = new BigInteger(1, md.digest()).longValue();
         return hashVal;
     }
 
@@ -236,11 +236,13 @@ public abstract class SourceBinding<T> {
         }
 
         public B withLabel(String label) {
+            Objects.requireNonNull(label);
             this.label = label;
             return self();
         }
 
         public B withPath(String path) {
+            Objects.requireNonNull(path);
             this.path = path;
             return self();
         }
@@ -255,8 +257,8 @@ public abstract class SourceBinding<T> {
             return self();
         }
 
-
         public B withParent(SourceBinding<T> parent) {
+            Objects.requireNonNull(parent);
             this.parent = parent.getTreeHierarchy();
             return self();
         }

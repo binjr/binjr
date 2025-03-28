@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Frederic Thevenet
+ * Copyright 2023-2025 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -110,8 +110,7 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Rel
                     }
                 }
                 var leaf = new FilterableTreeItem<>((SourceBinding) new LogFilesBinding.Builder()
-                        .withLabel(eventType.getLabel())
-                        .withLegend(eventType.getLabel())
+                        .withLabel(sanitizeEventTypeLabel(eventType))
                         .withPath(rootPath + eventType.getName())
                         .withParent(branch.getValue())
                         .withAdapter(this)
