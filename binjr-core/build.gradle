@@ -28,7 +28,7 @@ dependencies {
     implementation 'org.bouncycastle:bcpg-jdk18on:1.80'
     implementation 'org.bouncycastle:bcutil-jdk18on:1.80'
     implementation 'org.reflections:reflections:0.10.2'
-    api('org.fxmisc.richtext:richtextfx:0.11.4') {
+    api('org.fxmisc.richtext:richtextfx:0.11.5') {
         exclude group: 'org.openjfx'
     }
     api 'org.apache.lucene:lucene-core:10.1.0'
