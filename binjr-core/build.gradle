@@ -21,7 +21,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.24.3'
     api 'org.controlsfx:controlsfx:11.2.2'
     implementation 'org.gillius:jfxutils:1.0'
-    api 'com.google.code.gson:gson:2.13.0'
+    api 'com.google.code.gson:gson:2.13.1'
     api 'org.apache.commons:commons-csv:1.14.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
@@ -31,10 +31,10 @@ dependencies {
     api('org.fxmisc.richtext:richtextfx:0.11.5') {
         exclude group: 'org.openjfx'
     }
-    api 'org.apache.lucene:lucene-core:10.2.0'
-    api 'org.apache.lucene:lucene-facet:10.2.0'
-    implementation 'org.apache.lucene:lucene-queryparser:10.2.0'
-    implementation 'org.apache.lucene:lucene-analysis-common:10.2.0'
+    api 'org.apache.lucene:lucene-core:10.2.1'
+    api 'org.apache.lucene:lucene-facet:10.2.1'
+    implementation 'org.apache.lucene:lucene-queryparser:10.2.1'
+    implementation 'org.apache.lucene:lucene-analysis-common:10.2.1'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.0'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
