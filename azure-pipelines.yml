@@ -90,8 +90,8 @@ stages:
               GPG_KEY_NAME: $(gpg.keyname)
               GPG_PASSPHRASE: $(gpg.passphrase)
               GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
-              OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
-              OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
+              ORG_GRADLE_PROJECT_sonatypePassword: $(mcr.auth.password)
+              ORG_GRADLE_PROJECT_sonatypeUsername: $(mcr.auth.username)
               GH_PKG_TOKEN: $(gh.pkg.token)
               GH_PKG_USERNAME: $(gh.pkg.username)
             inputs:
@@ -243,8 +243,8 @@ stages:
               GPG_KEY_NAME: $(gpg.package.keyname)
               GPG_PASSPHRASE: $(gpg.package.passphrase)
               GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
-              OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
-              OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
+              MCR_AUTH_PASSWORD: $(mcr.auth.password)
+              MCR_AUTH_USERNAME: $(mcr.auth.username)
               GH_PKG_TOKEN: $(gh.pkg.token)
               GH_PKG_USERNAME: $(gh.pkg.username)
             inputs:
