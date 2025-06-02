@@ -16,6 +16,13 @@ Released on Wed, 29 Jan 2025
 * _[Fixed] [Log files Adapter]_ JVM unified logs parsing rules sometime fail to capture log severity.
 * _[Fixed] [Packaging]_ Cannot install .deb on Debian bookworm (unmet dependencies for libffi)
 
+## [binjr v3.20.1](https://github.com/binjr/binjr/releases/tag/v3.20.1)
+Released on Sun, 10 Nov 2024
+
+* _[Dependencies]_ Rolled back embedded OpenJDK runtime to 21.0.5
+* _[Fixed]_ Bad performances when using the CSV and Logs adapters caused by a regression in OpenJDK 23.0.1 when using Shenandoah GC.
+* _[Fixed]_ An error is raised in the installer when clicking on the 'back' button on the install verification dialog.
+
 ## [binjr v3.20.0](https://github.com/binjr/binjr/releases/tag/v3.20.0)
 Released on Wed, 23 Oct 2024
 
