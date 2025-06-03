@@ -162,6 +162,10 @@ configure(subprojects) {
             name = 'ossrh-staging-api'
             url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
         }
+        maven {
+            name = 'Central Portal Snapshots'
+            url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        }
     }
 
     publishing {
@@ -569,7 +573,8 @@ tasks.register('jpackageWin', Exec) {
             "--java-options", "-XX:+UseCompactObjectHeaders",
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
-            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics"
     ]
     outputs.dir ARTIFACTS_PATH_WIN
 }
@@ -600,6 +605,7 @@ tasks.register('jpackageDmg', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
@@ -635,6 +641,7 @@ tasks.register('jpackagePkg', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
@@ -672,6 +679,7 @@ tasks.register('jpackageDeb', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_DEB",
             "--linux-package-name", "binjr",
@@ -718,6 +726,7 @@ tasks.register('jpackageRpm', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_RPM",
             "--linux-package-name", "binjr",
