@@ -32,6 +32,7 @@ exec $JAVACMD \
   --add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED \
   --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED \
   --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED \
+  --enable-native-access=javafx.graphics \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
