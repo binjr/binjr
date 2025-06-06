@@ -21,7 +21,8 @@ import eu.binjr.core.data.adapters.VisualizationType;
 public enum BuiltinWorksheetType implements WorksheetType {
     CHART_WORKSHEET(XYChartsWorksheet.class, "Charts Worksheet", VisualizationType.CHARTS, true),
     EVENTS_WORKSHEET(LogWorksheet.class, "Events Worksheet", VisualizationType.EVENTS, true),
-    TEXT_WORKSHEET(TextFilesWorksheet.class, "Text Worksheet", VisualizationType.TEXT, false);
+    TEXT_WORKSHEET(TextFilesWorksheet.class, "Text Worksheet", VisualizationType.TEXT, true),
+    TERMINAL_WORKSHEET(TerminalWorksheet.class, "Terminal", VisualizationType.TERMINAL, true);
 
     private final Class<? extends Worksheet<?>> type;
     private final String label;

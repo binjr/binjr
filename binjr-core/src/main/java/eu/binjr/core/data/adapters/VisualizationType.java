@@ -23,6 +23,7 @@ public enum VisualizationType {
     FLAME_GRAPHS("flame-graph-icon"),
     PIE_CHARTS("pie-chart-icon"),
     EVENTS("event-list-icon"),
+    TERMINAL("text-size-icon"),
     TEXT("text-size-icon");
 
     private final String iconStyleClass;

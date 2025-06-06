@@ -166,6 +166,10 @@ configure(subprojects) {
             name = 'Central Portal Snapshots'
             url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
+        maven {
+            name= "JetBrains"
+            url ="https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
+        }
     }
 
     publishing {
