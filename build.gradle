@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2024 Frederic Thevenet
+ *    Copyright 2018-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 
+
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 
@@ -22,8 +23,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
-import java.time.Duration
-
 
 plugins {
     id "de.undercouch.download" version "5.6.0"
@@ -279,6 +278,9 @@ tasks.register('copyAppLibs', Copy) {
     from project(":binjr-adapter-jfr").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
+    from project(":binjr-adapter-json").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
     from project(":binjr-adapter-jvmgc").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
         exclude "binjr-adapter-logs-*.jar"
@@ -303,6 +305,7 @@ tasks.register('copyPluginLibs', Copy) {
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-jfr").jar
+    from project(":binjr-adapter-json").jar
     from project(":binjr-adapter-jvmgc").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
@@ -327,6 +330,9 @@ tasks.register('copyJpackageInputLibs', Copy) {
     from project(":binjr-adapter-csv").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
+    from project(":binjr-adapter-json").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
     from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
@@ -344,6 +350,7 @@ tasks.register('copyJpackageInputLibs', Copy) {
     from project(":binjr-adapter-jfr").jar
     from project(":binjr-adapter-jvmgc").jar
     from project(":binjr-adapter-csv").jar
+    from project(":binjr-adapter-json").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
 //    from project(":binjr-adapter-text").jar

@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~    Copyright 2025 Frederic Thevenet
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.fxmisc.flowless.*?>
+<?import org.fxmisc.richtext.*?>
+
+<?import eu.binjr.common.javafx.controls.LabelWithInlineHelp?>
+<DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
+            xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <content>
+        <AnchorPane fx:id="root" prefHeight="777.0" prefWidth="853.0">
+            <children>
+                <VBox fx:id="expressions" spacing="10.0"
+                      AnchorPane.bottomAnchor="4.0"
+                      AnchorPane.leftAnchor="4.0"
+                      AnchorPane.rightAnchor="4.0"
+                      AnchorPane.topAnchor="40.0">
+                    <TitledPane fx:id="setupTitledPane" animated="false" maxWidth="Infinity"
+                                maxHeight="Infinity"
+                                contentDisplay="GRAPHIC_ONLY"
+                                VBox.vgrow="SOMETIMES">
+                        <graphic>
+                            <LabelWithInlineHelp text="Setup"
+                                                 inlineHelp="Setup parsing rules&#xD;&#xD;Note: The settings below are greyed out when a built-in profile is selected. If you need to customize a built-in profile, click on &quot;Duplicate profile&quot; to create a copy that you can modify."
+                                                 alignment="CENTER_RIGHT"/>
+                        </graphic>
+                        <VBox fx:id="setupPane" spacing="10.0">
+                            <padding>
+                                <Insets top="0" right="0" bottom="0" left="0"/>
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT">
+                                <Region HBox.hgrow="ALWAYS"/>
+                            </HBox>
+                            <TableView fx:id="captureGroupTable" prefHeight="220.0" prefWidth="762.0"
+                                       styleClass="search-field-outer">
+                                <columns>
+                                    <TableColumn fx:id="nameColumn" prefWidth="220.0" sortable="false"
+                                                 text="Group Name">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="name"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn fx:id="expressionColumn" minWidth="0.0" prefWidth="550.0"
+                                                 sortable="false" text="Capture Expression">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="expression"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn editable="false" maxWidth="56" minWidth="56" prefWidth="56.0"
+                                                 resizable="false" sortable="false">
+                                        <graphic>
+                                            <HBox>
+                                                <Button fx:id="addGroupButton" cache="true"
+                                                        contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                                                        minWidth="-Infinity" mnemonicParsing="false"
+                                                        onAction="#handleOnAddGroup" prefHeight="25.0"
+                                                        prefWidth="25.0"
+                                                        styleClass="dialog-button" text="Add">
+                                                    <graphic>
+                                                        <Region>
+                                                            <styleClass>
+                                                                <String fx:value="icon-container"/>
+                                                                <String fx:value="plus-icon"/>
+                                                                <String fx:value="medium-icon"/>
+                                                            </styleClass>
+                                                        </Region>
+                                                    </graphic>
+                                                    <tooltip>
+                                                        <Tooltip showDelay="500ms" text="Add new capture group"/>
+                                                    </tooltip>
+                                                </Button>
+                                                <Button fx:id="deleteGroupButton" contentDisplay="GRAPHIC_ONLY"
+                                                        maxHeight="-Infinity" maxWidth="-Infinity"
+                                                        minHeight="-Infinity"
+                                                        minWidth="-Infinity" mnemonicParsing="false"
+                                                        onAction="#handleOnDeleteGroup" prefHeight="25.0"
+                                                        prefWidth="25.0" styleClass="dialog-button" text="Delete">
+                                                    <graphic>
+                                                        <Region>
+                                                            <styleClass>
+                                                                <String fx:value="icon-container"/>
+                                                                <String fx:value="minus-icon"/>
+                                                                <String fx:value="medium-icon"/>
+                                                            </styleClass>
+                                                        </Region>
+                                                    </graphic>
+                                                    <tooltip>
+                                                        <Tooltip showDelay="500ms" text="Delete capture group"/>
+                                                    </tooltip>
+                                                </Button>
+                                            </HBox>
+                                        </graphic>
+                                    </TableColumn>
+                                </columns>
+                            </TableView>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <children>
+                                    <LabelWithInlineHelp minWidth="115.0" text="Timestamp pattern" inlineHelp="The regular expression pattern be used to parse timestamps.
+&#xD;Use the capture groups defined in the table above to identify the individual components of a timestamp event (e.g. day, hour, second, etc...).
+&#xD;Use Java regular expression to model how these components can be recognized in the particular syntax of a file."
+                                                         alignment="CENTER_RIGHT"/>
+                                    <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" minHeight="26.0"
+                                              prefHeight="26.0"
+                                              styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                                        <padding>
+                                            <Insets top="2.0" right="2.0" bottom="2.0" left="2.0"/>
+                                        </padding>
+                                    </CodeArea>
+                                </children>
+                            </HBox>
+                            <CheckBox fx:id="continueOnTSErrorCheckbox"
+                                      text="Don't interrupt loading on unparsable time stamps"/>
+                            <HBox spacing="10.0">
+                                <LabelWithInlineHelp text="Locale for parsing numbers"
+                                                     inlineHelp="Indicates which regional settings should be applied when parsing column content as numbers."
+                                                     alignment="CENTER_RIGHT"/>
+                                <TextField fx:id="parsingLocaleTextField" maxWidth="120.0" prefHeight="24.0"/>
+                            </HBox>
+                        </VBox>
+                    </TitledPane>
+                    <TitledPane fx:id="testTitledPane" animated="false" maxWidth="Infinity"
+                                maxHeight="Infinity"
+                                contentDisplay="GRAPHIC_ONLY"
+                                VBox.vgrow="ALWAYS">
+                        <graphic>
+                            <LabelWithInlineHelp text="Test"
+                                                 inlineHelp="Test data extraction&#xD;&#xD;
+You can enter text (or paste from clipboard/load it from a file) in the &quot;input&quot; tab below to&#xD;
+and see the results of your parsing rules in the &quot;result&quot; tab.&#xD;&#xD;"
+                                                 alignment="CENTER_RIGHT"/>
+                        </graphic>
+                        <VBox fx:id="testPane" spacing="10.0">
+                            <padding>
+                                <Insets top="0" right="0" bottom="0" left="0"/>
+                            </padding>
+                            <HBox alignment="CENTER">
+                                <Button fx:id="runTestButton" contentDisplay="LEFT" maxHeight="-Infinity"
+                                        maxWidth="-Infinity"
+                                        minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                        onAction="#handleOnRunTest" text="Test data extraction">
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" top="6.0"/>
+                                    </HBox.margin>
+                                    <graphic>
+                                        <Region>
+                                            <styleClass>
+                                                <String fx:value="icon-container"/>
+                                                <String fx:value="test-icon"/>
+                                                <String fx:value="medium-icon"/>
+                                            </styleClass>
+                                            <padding>
+                                                <Insets right="25.0"/>
+                                            </padding>
+                                        </Region>
+                                    </graphic>
+                                    <padding>
+                                        <Insets bottom="5.0" left="40.0" right="45.0" top="5.0"/>
+                                    </padding>
+                                    <tooltip>
+                                        <Tooltip showDelay="500ms" text="Test data extraction"/>
+                                    </tooltip>
+                                </Button>
+                            </HBox>
+                            <Label fx:id="notificationLabel" managed="false" maxHeight="1.7976931348623157E308"
+                                   maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                   styleClass="notification-info"
+                                   text="" visible="false" wrapText="true" VBox.vgrow="NEVER">
+                                <padding>
+                                    <Insets bottom="4.0" left="4.0" right="4.0" top="4.0"/>
+                                </padding>
+                            </Label>
+                            <HBox styleClass="search-field-outer" VBox.vgrow="ALWAYS">
+                                <children>
+                                    <TabPane fx:id="testTabPane" maxHeight="Infinity" maxWidth="Infinity" side="TOP"
+                                             HBox.hgrow="ALWAYS">
+                                        <Tab fx:id="inputTab" closable="false" text="Input">
+                                            <graphic>
+                                                <Region prefWidth="20">
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="edit-icon"/>
+                                                        <String fx:value="small-icon"/>
+                                                    </styleClass>
+                                                </Region>
+                                            </graphic>
+                                            <VirtualizedScrollPane>
+                                                <content>
+                                                    <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308"
+                                                              maxWidth="1.7976931348623157E308" prefHeight="201.0"
+                                                              prefWidth="795.0" HBox.hgrow="ALWAYS"/>
+                                                </content>
+                                            </VirtualizedScrollPane>
+                                        </Tab>
+                                        <Tab fx:id="resultTab" closable="false" text="Results">
+                                            <graphic>
+                                                <Region prefWidth="20">
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="eye-icon"/>
+                                                        <String fx:value="small-icon"/>
+                                                    </styleClass>
+                                                </Region>
+                                            </graphic>
+                                            <TableView fx:id="testResultTable" prefHeight="200.0" prefWidth="200.0"
+                                                       HBox.hgrow="ALWAYS"/>
+                                        </Tab>
+                                    </TabPane>
+                                    <VBox>
+                                        <children>
+                                            <Button fx:id="clearTestAreaButton" cache="true"
+                                                    contentDisplay="GRAPHIC_ONLY"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnClearTestArea" prefHeight="30.0" prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Clear">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="trash-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear test area"/>
+                                                </tooltip>
+                                            </Button>
+
+                                            <Button fx:id="copyTestAreaButton" cache="true"
+                                                    contentDisplay="GRAPHIC_ONLY"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnCopyTestArea" prefHeight="30.0" prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Copy">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="copy-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Copy test area"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="pasteTestAreaButton" contentDisplay="GRAPHIC_ONLY"
+                                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                                    minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnPasteToTestArea" prefHeight="30.0"
+                                                    prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Paste">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="clipboard-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Paste to test area"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="openFileButton" contentDisplay="GRAPHIC_ONLY"
+                                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                                    minWidth="-Infinity" mnemonicParsing="false"
+                                                    onAction="#handleOnOpenFileToTestArea" prefHeight="30.0"
+                                                    prefWidth="30.0"
+                                                    styleClass="dialog-button" text="Open File">
+                                                <graphic>
+                                                    <Region>
+                                                        <styleClass>
+                                                            <String fx:value="icon-container"/>
+                                                            <String fx:value="fileOpen-icon"/>
+                                                            <String fx:value="medium-icon"/>
+                                                        </styleClass>
+                                                    </Region>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms"
+                                                             text="Preview the first few lines of a file into test area"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Region maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS"/>
+                                        </children>
+                                    </VBox>
+                                </children>
+                            </HBox>
+                        </VBox>
+                    </TitledPane>
+                </VBox>
+                <HBox alignment="CENTER_LEFT" spacing="2.0"
+                      AnchorPane.leftAnchor="4.0"
+                      AnchorPane.rightAnchor="4.0"
+                      AnchorPane.topAnchor="4.0">
+                    <children>
+                        <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                              styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                            <Region fx:id="builtinIcon" prefHeight="12" prefWidth="12" minWidth="12">
+                                <styleClass>
+                                    <String fx:value="icon-container"/>
+                                    <String fx:value="padlock-icon"/>
+                                    <String fx:value="medium-icon"/>
+                                </styleClass>
+                                <HBox.margin>
+                                    <Insets left="6.0" right="0.0"/>
+                                </HBox.margin>
+                            </Region>
+                            <ComboBox fx:id="profileComboBox" editable="true" maxHeight="1.7976931348623157E308"
+                                      maxWidth="1.7976931348623157E308" styleClass="search-field-inner"
+                                      HBox.hgrow="ALWAYS">
+                            </ComboBox>
+                            <padding>
+                                <Insets left="1.0" right="1.0"/>
+                            </padding>
+                        </HBox>
+                        <Button fx:id="addProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY"
+                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                onAction="#handleOnAddProfile" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="Add">
+                            <graphic>
+                                <Region>
+                                    <styleClass>
+                                        <String fx:value="icon-container"/>
+                                        <String fx:value="plus-icon"/>
+                                    </styleClass>
+                                </Region>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Create a new profile"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="deleteProfileButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                onAction="#handleOnDeleteProfile" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="delete" HBox.hgrow="NEVER">
+                            <graphic>
+                                <Region>
+                                    <styleClass>
+                                        <String fx:value="icon-container"/>
+                                        <String fx:value="minus-icon"/>
+                                    </styleClass>
+                                </Region>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Delete profile"/>
+                            </tooltip>
+                            <font>
+                                <Font size="16.0"/>
+                            </font>
+                        </Button>
+                        <Button fx:id="cloneProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY"
+                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                onAction="#handleOnCloneProfile" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="Duplicate">
+                            <graphic>
+                                <Region>
+                                    <styleClass>
+                                        <String fx:value="icon-container"/>
+                                        <String fx:value="copy-icon"/>
+                                    </styleClass>
+                                </Region>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Duplicate profile"/>
+                            </tooltip>
+                        </Button>
+
+                        <Button fx:id="importProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY"
+                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                onAction="#handleOnImportProfile" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="Import" HBox.hgrow="NEVER">
+                            <graphic>
+                                <Region>
+                                    <styleClass>
+                                        <String fx:value="icon-container"/>
+                                        <String fx:value="upload-icon"/>
+                                    </styleClass>
+                                </Region>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Import profiles"/>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="exportProfileButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                onAction="#handleOnExportProfile" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="Export" HBox.hgrow="NEVER">
+                            <graphic>
+                                <Region>
+                                    <styleClass>
+                                        <String fx:value="icon-container"/>
+                                        <String fx:value="download-icon"/>
+                                    </styleClass>
+                                </Region>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Export profiles"/>
+                            </tooltip>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+        </AnchorPane>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:constant="CANCEL"/>
+        <ButtonType fx:constant="OK"/>
+    </buttonTypes>
+</DialogPane>
