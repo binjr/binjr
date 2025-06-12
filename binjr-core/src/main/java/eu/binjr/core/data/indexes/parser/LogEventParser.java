@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2023 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,15 +29,15 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class LogEventParser implements EventParser {
+    public static final int CHAR_READ_PROGRESS_STEP = 10240;
     private final BufferedReader reader;
     private final AtomicLong sequence;
     private final LogEventFormat format;
     private final LogEventIterator logEventIterator;
-    private ParsedEvent buffered;
+
 
     private final LongProperty progress = new SimpleLongProperty(0);
     private long charRead = 0;
@@ -67,19 +67,23 @@ public class LogEventParser implements EventParser {
 
     public class LogEventIterator implements Iterator<ParsedEvent> {
         private boolean hasNext = true;
+        private ParsedEvent buffered;
 
         @Override
-
         public ParsedEvent next() {
+            // The first call to yieldNextEvent will always yield
+            // a null event; it is only there to prime the buffer.
             var event = yieldNextEvent();
             while (event == null && hasNext) {
+                // we loop to concatenate lines that cannot be parsed as an event
+                // to the text of the last successfully parsed event.
                 event = yieldNextEvent();
             }
             return event;
         }
 
         private ParsedEvent yieldNextEvent() {
-            String line = null;
+            String line;
             try {
                 line = reader.readLine();
             } catch (IOException e) {
@@ -87,20 +91,24 @@ public class LogEventParser implements EventParser {
             }
             if (line == null) {
                 this.hasNext = false;
-                return buffered != null ? buffered : null;
+                return (buffered != null) ? buffered : null;
             }
             charRead += line.length();
-            if (charRead >= 10240) {
+            if (charRead >= CHAR_READ_PROGRESS_STEP) {
                 progress.set(progress.get() + charRead);
                 charRead = 0;
             }
             var parsed = parse(sequence.incrementAndGet(), line);
-            if (parsed.isPresent()) {
+            if (parsed != null) {
                 var yield = buffered;
-                buffered = parsed.get();
+                buffered = parsed;
                 return yield;
             } else {
                 if (buffered != null) {
+                    // Having to create a new event object each time we need to mutate the buffer's
+                    // content isn't ideal performance-wise, but based on the assumption that most
+                    // logs events should fit on a single line, it's probably not worth changing the
+                    // buffer to a mutable structure. Something to keep in mind, though.
                     buffered = ParsedEvent.withTextFields(
                             buffered.getSequence(),
                             buffered.getTimestamp(),
@@ -117,7 +125,7 @@ public class LogEventParser implements EventParser {
         }
     }
 
-    private Optional<ParsedEvent> parse(long lineNumber, String text) {
+    private ParsedEvent parse(long lineNumber, String text) {
         var m = format.getProfile().getParsingRegex().matcher(text);
         if (m.find()) {
             ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve(), format.getZoneId());
@@ -133,9 +141,9 @@ public class LogEventParser implements EventParser {
                     }
                 }
             }
-            return Optional.of(ParsedEvent.withTextFields(lineNumber, timestamp, text, sections));
+            return ParsedEvent.withTextFields(lineNumber, timestamp, text, sections);
         }
-        return Optional.empty();
+        return null;
     }
 }
 
