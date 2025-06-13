@@ -21,7 +21,6 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
-import javafx.scene.paint.Color;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,23 +28,39 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
-    ISO("ISO timestamps",
-            "BUILTIN_ISO",
-            List.of(new JsonSeriesDefinition("foo", "path", ChartType.STACKED,"bytes", UnitPrefixes.BINARY,
-                            List.of(new JsonSamplesDefinition("yule", "path", Color.RED),
-                                    new JsonSamplesDefinition("romi", "path", Color.BLUEVIOLET),
-                                    new JsonSamplesDefinition("pote", "path", Color.GREEN),
-                                new JsonSamplesDefinition("marm", "path", Color.YELLOW))),
-                    new JsonSeriesDefinition("bar", "path", ChartType.LINE, "meters", UnitPrefixes.METRIC,
-                            List.of(new JsonSamplesDefinition("olar", "path", null),
-                                    new JsonSamplesDefinition("piri", "path", null),
-                                    new JsonSamplesDefinition("ulto", "path", null),
-                                    new JsonSamplesDefinition("nuga", "path", null))),
-                    new JsonSeriesDefinition("baz", "path", ChartType.SCATTER, "", UnitPrefixes.NONE,
-                            List.of(new JsonSamplesDefinition("vipo", "path", null),
-                                    new JsonSamplesDefinition("sari", "path", null),
-                                    new JsonSamplesDefinition("xobi", "path", null),
-                                    new JsonSamplesDefinition("zemu", "path", null)))),
+    ISO("[TEST] Collector",
+            "BUILTIN_COLLECTOR",
+            new JsonDefinition("root", "$[*]", "/created_at",
+                    List.of(new JsonSeriesDefinition("/total_classes_stats/classes", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/total_classes_stats/fields", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/total_classes_stats/methods", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+
+                            new JsonSeriesDefinition("/image_size_stats/total_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/image_size_stats/code_cache_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/image_size_stats/heap_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/image_size_stats/resources_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/image_size_stats/other_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/image_size_stats/debuginfo_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/image_size_stats/resources_count", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+
+                            new JsonSeriesDefinition("/reflection_stats/classes", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/reflection_stats/fields", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/reflection_stats/methods", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+
+                            new JsonSeriesDefinition("/build_perf_stats/total_build_time_sec", null, "seconds", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/build_perf_stats/gc_time_sec", null, "seconds", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/build_perf_stats/num_cpu_cores", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/build_perf_stats/total_machine_memory", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/build_perf_stats/peak_rss_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/build_perf_stats/cpu_load", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+
+                            new JsonSeriesDefinition("/reachability_stats/classes", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/reachability_stats/fields", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+                            new JsonSeriesDefinition("/reachability_stats/methods", null, "#", UnitPrefixes.METRIC, ChartType.LINE),
+
+                            new JsonSeriesDefinition("/runner_info/memory_size_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA),
+                            new JsonSeriesDefinition("/runner_info/memory_available_bytes", null, "bytes", UnitPrefixes.BINARY, ChartType.AREA)
+                    )),
             Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
                     TemporalCaptureGroup.MONTH, "\\d{2}",
                     TemporalCaptureGroup.DAY, "\\d{2}",
@@ -57,16 +72,18 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
             "$YEAR[\\s\\/-]$MONTH[\\s\\/-]$DAY([-\\sT]$HOUR:$MINUTE:$SECOND)?([\\.,]$MILLI)?$TIMEZONE?",
             Locale.US,
             false),
+
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
-            List.of(),
+            null,
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
             "$EPOCH",
             Locale.US,
             false),
+
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
-            List.of(),
+            null,
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
                     TemporalCaptureGroup.MILLI, "\\d{3}"),
             "$EPOCH$MILLI",
@@ -79,12 +96,12 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     private final String profileId;
     private final Pattern regex;
     private final Locale numberFormattingLocale;
-    private final List<JsonSeriesDefinition> definitions;
+    private final JsonDefinition definitions;
     private final boolean abortOnTimestampParsingFailure;
 
     BuiltInJsonParsingProfile(String profileName,
                               String id,
-                              List<JsonSeriesDefinition> definitions,
+                              JsonDefinition definitions,
                               Map<NamedCaptureGroup, String> groups,
                               String lineTemplateExpression,
                               Locale numberFormattingLocale,
@@ -135,7 +152,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     }
 
     @Override
-    public List<JsonSeriesDefinition> getSeriesDefinitions() {
+    public JsonDefinition getJsonDefinition() {
         return this.definitions;
     }
 

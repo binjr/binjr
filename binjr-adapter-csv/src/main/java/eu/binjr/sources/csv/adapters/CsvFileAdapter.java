@@ -290,9 +290,9 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> implements Reloadabl
             indexedFiles.computeIfAbsent(path, CheckedLambdas.wrap(p -> {
                 ThreadLocal<NumberFormat> formatters =
                         ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(csvParsingProfile.getNumberFormattingLocale()));
-                try {
+                try (var inputString = fileBrowser.getData(path.replace(getId() + "/", ""))) {
                     index.add(p,
-                            fileBrowser.getData(path.replace(getId() + "/", "")),
+                            inputString,
                             true,
                             parser,
                             (doc, event) -> {

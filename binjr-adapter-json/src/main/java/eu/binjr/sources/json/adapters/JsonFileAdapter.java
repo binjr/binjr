@@ -20,12 +20,13 @@ import com.google.gson.Gson;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.io.JarFsPathResolver;
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
@@ -39,14 +40,11 @@ import eu.binjr.sources.json.data.parsers.JsonEventFormat;
 import eu.binjr.sources.json.data.parsers.JsonParsingProfile;
 import eu.binjr.sources.json.data.parsers.CustomJsonParsingProfile;
 import javafx.beans.property.*;
-import javafx.scene.control.TreeItem;
 import org.apache.lucene.document.StoredField;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.time.Instant;
@@ -72,7 +70,7 @@ public class JsonFileAdapter extends BaseDataAdapter<Double> implements Reloadab
     private static final String PARSING_PROFILE = "parsingProfile";
     private static final String PATH = "jsonPath";
     private JsonEventFormat parser;
-    private JsonParsingProfile JsonParsingProfile;
+    private JsonParsingProfile parsingProfile;
     private Path jsonPath;
     private ZoneId zoneId;
     private String encoding;
@@ -105,19 +103,19 @@ public class JsonFileAdapter extends BaseDataAdapter<Double> implements Reloadab
     /**
      * Initializes a new instance of the {@link JsonFileAdapter} class with the provided parameters.
      *
-     * @param jsonPath           the path to the json file.
-     * @param zoneId             the time zone to used.
-     * @param encoding           the encoding for the json file.
-     * @param JsonParsingProfile a pattern to decode time stamps.
+     * @param jsonPath       the path to the json file.
+     * @param zoneId         the time zone to used.
+     * @param encoding       the encoding for the json file.
+     * @param parsingProfile a pattern to decode time stamps.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public JsonFileAdapter(String jsonPath,
                            ZoneId zoneId,
                            String encoding,
-                           JsonParsingProfile JsonParsingProfile)
+                           JsonParsingProfile parsingProfile)
             throws DataAdapterException {
         super();
-        initParams(zoneId, jsonPath, encoding, JsonParsingProfile);
+        initParams(zoneId, jsonPath, encoding, parsingProfile);
     }
 
     @Override
@@ -128,31 +126,31 @@ public class JsonFileAdapter extends BaseDataAdapter<Double> implements Reloadab
                         .withPath("/")
                         .withAdapter(this)
                         .build());
-        for (var defs : JsonParsingProfile.getSeriesDefinitions()) {
-            var newBranch = new TimeSeriesBinding.Builder()
-                    .withLabel(defs.name())
-                    .withPath(getId() + "/" + jsonPath.toString())
-                    .withLegend(defs.name())
-                    .withParent(tree.getValue())
-                    .withGraphType(defs.graphType())
-                    .withUnitName(defs.unit())
-                    .withPrefix(defs.prefix())
-                    .withAdapter(this)
-                    .build();
-            FilterableTreeItem<SourceBinding> seriesBranch = new FilterableTreeItem<>(newBranch);
-            tree.getInternalChildren().add(seriesBranch);
-            for (var samples : defs.samples()) {
-                var newLeaf = new TimeSeriesBinding.Builder()
-                        .withLabel(samples.name())
-                        .withPath(newBranch.getPath())
-                        .withLegend(samples.name())
-                        .withParent(newBranch)
-                        .withUnitName(defs.unit())
-                        .withPrefix(defs.prefix())
-                        .withColor(samples.color())
-                        .withAdapter(this)
-                        .build();
-                seriesBranch.getInternalChildren().add(new TreeItem<>(newLeaf));
+        int i = 0;
+        for (var defs : parsingProfile.getJsonDefinition().series()) {
+            Path index = JarFsPathResolver.get(defs.path());
+            var currentBranch = tree;
+            for (int j = 0; j < index.getNameCount(); j++) {
+                var currentName = index.getName(j);
+                Path subpath = index.getRoot().resolve(index.subpath(0, j + 1));
+                FilterableTreeItem<SourceBinding> finalCurrentBranch = currentBranch;
+                FilterableTreeItem<SourceBinding> branchNode = (FilterableTreeItem<SourceBinding>) TreeViewUtils.findFirstInTree(
+                        tree, t -> JarFsPathResolver.get(t.getValue().getLabel()).equals(subpath)).orElseGet(() -> {
+                    final var newBranch = new TimeSeriesBinding.Builder()
+                            .withLabel(subpath.toString())
+                            .withPath(getId() + "/" + jsonPath.toString())
+                            .withLegend(currentName.toString())
+                            .withParent(tree.getValue())
+                            .withGraphType(defs.graphType())
+                            .withUnitName(defs.unit())
+                            .withPrefix(defs.prefix())
+                            .withAdapter(this)
+                            .build();
+                    final FilterableTreeItem<SourceBinding> parentBranch = new FilterableTreeItem<>(newBranch);
+                    finalCurrentBranch.getInternalChildren().add(parentBranch);
+                    return parentBranch;
+                });
+                currentBranch = branchNode;
             }
         }
         return tree;
@@ -217,7 +215,7 @@ public class JsonFileAdapter extends BaseDataAdapter<Double> implements Reloadab
         Map<String, String> params = new HashMap<>();
         params.put(ZONE_ID, zoneId.toString());
         params.put(ENCODING, encoding);
-        params.put(PARSING_PROFILE, gson.toJson(CustomJsonParsingProfile.of(JsonParsingProfile)));
+        params.put(PARSING_PROFILE, gson.toJson(CustomJsonParsingProfile.of(parsingProfile)));
         params.put(PATH, jsonPath.toString());
         return params;
     }
@@ -246,7 +244,7 @@ public class JsonFileAdapter extends BaseDataAdapter<Double> implements Reloadab
         this.zoneId = zoneId;
         this.jsonPath = Path.of(jsonPath);
         this.encoding = encoding;
-        this.JsonParsingProfile = parsingProfile;
+        this.parsingProfile = parsingProfile;
         this.parser = new JsonEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
     }
 
@@ -293,10 +291,10 @@ public class JsonFileAdapter extends BaseDataAdapter<Double> implements Reloadab
             String path = binding.getPath();
             indexedFiles.computeIfAbsent(path, CheckedLambdas.wrap(p -> {
                 ThreadLocal<NumberFormat> formatters =
-                        ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(JsonParsingProfile.getNumberFormattingLocale()));
-                try {
+                        ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale()));
+                try (var inputStream = fileBrowser.getData(path.replace(getId() + "/", ""))) {
                     index.add(p,
-                            fileBrowser.getData(path.replace(getId() + "/", "")),
+                            inputStream,
                             true,
                             parser,
                             (doc, event) -> {

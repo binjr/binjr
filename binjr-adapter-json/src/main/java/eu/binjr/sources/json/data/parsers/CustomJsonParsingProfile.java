@@ -28,9 +28,10 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
     @JsonAdapter(LocaleJsonAdapter.class)
     private final Locale formattingLocale;
     private final boolean continueOnTimestampParsingFailure;
+    private final JsonDefinition jsonDefinition;
 
     public CustomJsonParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", Locale.getDefault(), false);
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", Locale.getDefault(), false, null);
     }
 
 
@@ -40,7 +41,8 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
                 parsingProfile.getCaptureGroups(),
                 parsingProfile.getLineTemplateExpression(),
                 parsingProfile.getNumberFormattingLocale(),
-                parsingProfile.isContinueOnTimestampParsingFailure()
+                parsingProfile.isContinueOnTimestampParsingFailure(),
+                parsingProfile.getJsonDefinition()
         );
     }
 
@@ -50,16 +52,18 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
                                     Map<NamedCaptureGroup, String> captureGroups,
                                     String lineTemplateExpression,
                                     Locale formattingLocale,
-                                    boolean continueOnTimestampParsingFailure) {
+                                    boolean continueOnTimestampParsingFailure,
+                                    JsonDefinition jsonDefinition) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
         this.formattingLocale = formattingLocale;
         this.continueOnTimestampParsingFailure = continueOnTimestampParsingFailure;
+        this.jsonDefinition = jsonDefinition;
     }
 
 
     @Override
-    public List<JsonSeriesDefinition> getSeriesDefinitions() {
-        return List.of();
+    public JsonDefinition getJsonDefinition() {
+        return this.jsonDefinition;
     }
 
     @Override

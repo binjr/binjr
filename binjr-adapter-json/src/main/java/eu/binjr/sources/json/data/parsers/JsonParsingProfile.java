@@ -26,21 +26,23 @@ import java.util.Locale;
 
 public interface JsonParsingProfile extends ParsingProfile {
 
-    List<JsonSeriesDefinition> getSeriesDefinitions();
+    JsonDefinition getJsonDefinition();
 
     Locale getNumberFormattingLocale();
 
     boolean isContinueOnTimestampParsingFailure();
 
-    record JsonSamplesDefinition(String name, String path, Color color) {
-    }
-
-    record JsonSeriesDefinition(String name,
-                                String timeStampsPath,
-                                ChartType graphType,
+    record JsonSeriesDefinition(String path,
+                                Color color,
                                 String unit,
                                 UnitPrefixes prefix,
-                                List<JsonSamplesDefinition> samples) {
+                                ChartType graphType) {
+    }
+
+    record JsonDefinition(String name,
+                          String objectPath,
+                          String timeStampsPointer,
+                          List<JsonSeriesDefinition> series) {
 
     }
 }

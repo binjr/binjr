@@ -243,7 +243,8 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
                 groups,
                 lineExpression,
                 Locale.forLanguageTag(parsingLocaleTextField.getText()),
-                this.continueOnTSErrorCheckbox.isSelected()));
+                this.continueOnTSErrorCheckbox.isSelected(),
+                null));
     }
 
     private String formatToDouble(String value) {
