@@ -286,14 +286,6 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                     logger.debug(() -> "Stack", e);
                 }
             }
-//            if (basicAuthUserName != null && basicAuthPassword != null) {
-//                builder.authenticator(new Authenticator() {
-//                    @Override
-//                    protected PasswordAuthentication getPasswordAuthentication() {
-//                        return new PasswordAuthentication(basicAuthUserName, basicAuthPassword.toPlainText().toCharArray());
-//                    }
-//                });
-//            }
             return builder.build();
         } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" +

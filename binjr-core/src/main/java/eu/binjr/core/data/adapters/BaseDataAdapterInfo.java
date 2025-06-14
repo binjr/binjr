@@ -27,7 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 /**
- * An immutable representation of a {@link SerializedDataAdapter}'s metadata
+ * An immutable representation of a {@link BaseDataAdapter}'s metadata
  *
  * @author Frederic Thevenet
  */

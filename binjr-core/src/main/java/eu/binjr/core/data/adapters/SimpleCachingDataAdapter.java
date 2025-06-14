@@ -31,8 +31,6 @@ import java.time.Instant;
 /**
  * An abstract implementation of {@link SerializedDataAdapter} that manages a cache in between the adapter and the data source.
  * <p>This is an on-heap memory cache  with a finite capacity and an LRU eviction policy</p>
- * <p>Furthermore, values uses {@link java.lang.ref.SoftReference} to give the GC a chance to collect the cached elements
- * if the memory pressure becomes too high.</p>
  *
  * @author Frederic Thevenet
  */
