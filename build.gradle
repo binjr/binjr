@@ -15,7 +15,6 @@
  */
 
 
-
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 
@@ -252,7 +251,7 @@ nexusPublishing {
 
 tasks.register('publishArtifacts') {
     dependsOn publishToSonatype
-    if (IS_RELEASE){
+    if (IS_RELEASE) {
         finalizedBy(closeSonatypeStagingRepository)
     }
     doLast {
@@ -577,6 +576,9 @@ tasks.register('jpackageWin', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics"
     ]
     outputs.dir ARTIFACTS_PATH_WIN
@@ -608,6 +610,9 @@ tasks.register('jpackageDmg', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
@@ -644,6 +649,9 @@ tasks.register('jpackagePkg', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
@@ -682,6 +690,9 @@ tasks.register('jpackageDeb', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_DEB",
@@ -729,6 +740,9 @@ tasks.register('jpackageRpm', Exec) {
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_RPM",
