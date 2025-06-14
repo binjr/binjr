@@ -16,9 +16,7 @@
 
 dependencies {
     compileOnly project(':binjr-core')
-    implementation('com.jayway.jsonpath:json-path:2.9.0')
-    //implementation('com.github.jsurfer:jsurfer-gson:1.6.3')
-    implementation 'com.github.jsurfer:jsurfer-jackson:1.6.3'
+    implementation 'com.github.jsurfer:jsurfer-jackson:1.6.5'
 }
 
 jar {
