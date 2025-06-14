@@ -1,0 +1,1 @@
+* _[New] [JSON Adapter]_ Added a new data adaptor to plot metrics extracted from JSON files.
