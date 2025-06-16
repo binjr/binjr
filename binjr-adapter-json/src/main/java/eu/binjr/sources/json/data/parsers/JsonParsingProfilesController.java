@@ -18,33 +18,25 @@ package eu.binjr.sources.json.data.parsers;
 
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
-import eu.binjr.common.javafx.controls.TextFieldValidator;
-import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.sources.json.adapters.JsonAdapterPreferences;
 import eu.binjr.sources.json.adapters.JsonFileAdapter;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
-import org.controlsfx.control.textfield.TextFields;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.UnaryOperator;
 
@@ -59,10 +51,6 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
     private Tab inputTab;
     @FXML
     private Tab resultTab;
-
-    @FXML
-    private TextField parsingLocaleTextField;
-
     @FXML
     private CheckBox continueOnTSErrorCheckbox;
 
@@ -87,14 +75,11 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
         super.initialize(location, resources);
 
         continueOnTSErrorCheckbox.selectedProperty().addListener(observable -> resetTest());
-        TextFields.bindAutoCompletion(parsingLocaleTextField,
-                Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
     }
 
     @Override
     protected void loadParserParameters(JsonParsingProfile profile) {
         super.loadParserParameters(profile);
-        this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
         this.continueOnTSErrorCheckbox.setSelected(profile.isContinueOnTimestampParsingFailure());
     }
 
@@ -225,37 +210,12 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
     protected Optional<JsonParsingProfile> updateProfile(String profileName, String profileId, Map<NamedCaptureGroup, String> groups, String lineExpression) {
         List<String> errors = new ArrayList<>();
 
-        try {
-            var bld = new Locale.Builder();
-            bld.setLanguageTag(parsingLocaleTextField.getText());
-            var parsingLocale = bld.build();
-            this.numberFormat = NumberFormat.getNumberInstance(parsingLocale);
-        } catch (IllformedLocaleException e) {
-            errors.add("The locale for number parsing is invalid: " + e.getMessage());
-        }
-        if (!errors.isEmpty()) {
-            notifyError(String.join("\n", errors));
-            return Optional.empty();
-        }
-
         return Optional.of(new CustomJsonParsingProfile(profileName,
                 profileId,
                 groups,
                 lineExpression,
-                Locale.forLanguageTag(parsingLocaleTextField.getText()),
                 this.continueOnTSErrorCheckbox.isSelected(),
                 null));
-    }
-
-    private String formatToDouble(String value) {
-        if (value != null) {
-            try {
-                return numberFormat.format(numberFormat.parse(value));
-            } catch (Exception e) {
-                // Do nothing
-            }
-        }
-        return "NaN";
     }
 
 }

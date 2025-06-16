@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,6 +23,6 @@ import org.apache.lucene.document.Document;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface EnrichDocumentFunction {
+public interface EventToDocumentMapper {
      Document apply(Document doc, ParsedEvent event) throws IOException;
 }

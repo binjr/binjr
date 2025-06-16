@@ -105,7 +105,7 @@ public class CsvEventParser implements EventParser {
                             ": CSV record only has " + csvRecord.size() + " fields.");
                 }
                 String dateString = csvRecord.get(format.getProfile().getTimestampColumn());
-                timestamp = parseDateTime(dateString);
+                timestamp = format.getProfile().parseDateTime(dateString, format.getZoneId());
                 if (timestamp == null) {
                     if (++timestampParsingErrors >= MAX_TIMESTAMP_ERRORS) {
                         // If number of parsing errors is above max threshold,
@@ -138,24 +138,6 @@ public class CsvEventParser implements EventParser {
         @Override
         public boolean hasNext() {
             return csvParser.iterator().hasNext();
-        }
-
-        private ZonedDateTime parseDateTime(String text) {
-            var m = format.getProfile().getParsingRegex().matcher(text);
-            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve(), format.getZoneId());
-            if (m.find()) {
-                for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
-                    var captureGroup = entry.getKey();
-                    var parsed = m.group(captureGroup.name());
-                    if (parsed != null && !parsed.isBlank()) {
-                        if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
-                        }
-                    }
-                }
-                return timestamp;
-            }
-            return null;
         }
     }
 

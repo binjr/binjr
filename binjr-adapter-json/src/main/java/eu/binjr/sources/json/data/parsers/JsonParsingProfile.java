@@ -22,13 +22,10 @@ import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 
 import java.util.List;
-import java.util.Locale;
 
 public interface JsonParsingProfile extends ParsingProfile {
 
     JsonDefinition getJsonDefinition();
-
-    Locale getNumberFormattingLocale();
 
     boolean isContinueOnTimestampParsingFailure();
 

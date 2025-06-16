@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ package eu.binjr.core.data.indexes.parser.profile;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.preferences.TemporalAnchor;
 import eu.binjr.core.preferences.UserPreferences;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -53,6 +56,24 @@ public interface ParsingProfile {
         }
         logger.trace(() -> "Regex string for profile " + getProfileName() + ": " + regexString[0]);
         return regexString[0];
+    }
+
+    default ZonedDateTime parseDateTime(String text, ZoneId zoneId) {
+        var m = getParsingRegex().matcher(text);
+        ZonedDateTime timestamp = ZonedDateTime.of(getTemporalAnchor().resolve(), zoneId);
+        if (m.find()) {
+            for (Map.Entry<NamedCaptureGroup, String> entry : getCaptureGroups().entrySet()) {
+                var captureGroup = entry.getKey();
+                var parsed = m.group(captureGroup.name());
+                if (parsed != null && !parsed.isBlank()) {
+                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+                        timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                    }
+                }
+            }
+            return timestamp;
+        }
+        return null;
     }
 
     default TemporalAnchor getTemporalAnchor() {

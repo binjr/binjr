@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public interface Indexable extends Closeable {
                  T source,
                  boolean commit,
                  EventFormat<T> eventFormat,
-                 EnrichDocumentFunction enrichDocumentFunction,
+                 EventToDocumentMapper eventToDocumentMapper,
                  LongProperty progress,
                  Property<ReloadStatus> cancellationRequested) throws IOException;
 
@@ -45,7 +45,7 @@ public interface Indexable extends Closeable {
                  T source,
                  boolean commit,
                  EventFormat<T> eventFormat,
-                 EnrichDocumentFunction enrichDocumentFunction,
+                 EventToDocumentMapper eventToDocumentMapper,
                  LongProperty progress,
                  Property<ReloadStatus> cancellationRequested,
                  BiFunction<String, ParsedEvent, String> computePathFacetValue,

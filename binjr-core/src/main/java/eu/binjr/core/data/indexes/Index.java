@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2024 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -86,7 +86,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
@@ -443,17 +442,17 @@ public class Index implements Indexable {
                         T source,
                         boolean commit,
                         EventFormat<T> eventFormat,
-                        EnrichDocumentFunction enrichDocumentFunction,
+                        EventToDocumentMapper eventToDocumentMapper,
                         LongProperty progress,
                         Property<ReloadStatus> cancellationRequested) throws IOException {
-        add(path, source, commit, eventFormat, enrichDocumentFunction, progress, cancellationRequested, (root, event) -> path, (ignore) -> List.of(path));
+        add(path, source, commit, eventFormat, eventToDocumentMapper, progress, cancellationRequested, (root, event) -> path, (ignore) -> List.of(path));
     }
 
     public <T> void add(String path,
                         T source,
                         boolean commit,
                         EventFormat<T> eventFormat,
-                        EnrichDocumentFunction enrichDocumentFunction,
+                        EventToDocumentMapper eventToDocumentMapper,
                         LongProperty progress,
                         Property<ReloadStatus> cancellationRequested,
                         BiFunction<String, ParsedEvent, String> computePathFacetValue,
@@ -495,7 +494,7 @@ public class Index implements Indexable {
                                     doc.add(new StoredField(TIMESTAMP, millis));
                                     doc.add(new FacetField(PATH, pathFacetValue));
                                     doc.add(new StoredField(PATH, pathFacetValue));
-                                    indexWriter.addDocument(facetsConfig.build(taxonomyWriter, enrichDocumentFunction.apply(doc, logEvent)));
+                                    indexWriter.addDocument(facetsConfig.build(taxonomyWriter, eventToDocumentMapper.apply(doc, logEvent)));
                                     nbEventProcessed++;
                                 }
                             } catch (Throwable t) {

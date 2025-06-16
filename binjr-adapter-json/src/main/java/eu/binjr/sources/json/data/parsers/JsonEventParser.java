@@ -21,8 +21,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
-import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import org.jsfr.json.JacksonParser;
@@ -83,7 +81,7 @@ public class JsonEventParser implements EventParser {
                 return null;
             }
             String dateString = jsonObject.at(format.getProfile().getJsonDefinition().timeStampsPointer()).toString();
-            ZonedDateTime timestamp = parseDateTime(dateString);
+            ZonedDateTime timestamp = format.getProfile().parseDateTime(dateString, format.getZoneId());
             if (timestamp == null) {
                 if (++timestampParsingErrors >= MAX_TIMESTAMP_ERRORS) {
                     // If number of parsing errors is above max threshold,
@@ -103,34 +101,16 @@ public class JsonEventParser implements EventParser {
                 }
             }
 
-            Map<String, String> values = new LinkedHashMap<>(format.getProfile().getJsonDefinition().series().size());
+            Map<String, Number> values = new LinkedHashMap<>(format.getProfile().getJsonDefinition().series().size());
             for (var series : format.getProfile().getJsonDefinition().series()) {
-                values.put(series.path(), jsonObject.at(series.path()).asText());
+                values.put(series.path(), jsonObject.at(series.path()).asDouble());
             }
-            return ParsedEvent.withTextFields(sequence.incrementAndGet(), timestamp, " ", values);
+            return ParsedEvent.withNumberFields(sequence.incrementAndGet(), timestamp, " ", values);
         }
 
         @Override
         public boolean hasNext() {
             return jsonIterator.hasNext();
-        }
-
-        private ZonedDateTime parseDateTime(String text) {
-            var m = format.getProfile().getParsingRegex().matcher(text);
-            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve(), format.getZoneId());
-            if (m.find()) {
-                for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
-                    var captureGroup = entry.getKey();
-                    var parsed = m.group(captureGroup.name());
-                    if (parsed != null && !parsed.isBlank()) {
-                        if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
-                        }
-                    }
-                }
-                return timestamp;
-            }
-            return null;
         }
     }
 

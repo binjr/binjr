@@ -157,11 +157,6 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     }
 
     @Override
-    public Locale getNumberFormattingLocale() {
-        return numberFormattingLocale;
-    }
-
-    @Override
     public boolean isContinueOnTimestampParsingFailure() {
         return this.abortOnTimestampParsingFailure;
     }

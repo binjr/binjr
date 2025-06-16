@@ -16,22 +16,17 @@
 
 package eu.binjr.sources.json.data.parsers;
 
-import com.google.gson.annotations.JsonAdapter;
-import eu.binjr.common.json.adapters.LocaleJsonAdapter;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 
 import java.util.*;
 
 public class CustomJsonParsingProfile extends CustomParsingProfile implements JsonParsingProfile {
-
-    @JsonAdapter(LocaleJsonAdapter.class)
-    private final Locale formattingLocale;
     private final boolean continueOnTimestampParsingFailure;
     private final JsonDefinition jsonDefinition;
 
     public CustomJsonParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", Locale.getDefault(), false, null);
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", false, null);
     }
 
 
@@ -40,7 +35,6 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
                 parsingProfile.getProfileId(),
                 parsingProfile.getCaptureGroups(),
                 parsingProfile.getLineTemplateExpression(),
-                parsingProfile.getNumberFormattingLocale(),
                 parsingProfile.isContinueOnTimestampParsingFailure(),
                 parsingProfile.getJsonDefinition()
         );
@@ -51,11 +45,9 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
                                     String profileId,
                                     Map<NamedCaptureGroup, String> captureGroups,
                                     String lineTemplateExpression,
-                                    Locale formattingLocale,
                                     boolean continueOnTimestampParsingFailure,
                                     JsonDefinition jsonDefinition) {
         super(profileName, profileId, captureGroups, lineTemplateExpression);
-        this.formattingLocale = formattingLocale;
         this.continueOnTimestampParsingFailure = continueOnTimestampParsingFailure;
         this.jsonDefinition = jsonDefinition;
     }
@@ -65,12 +57,6 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
     public JsonDefinition getJsonDefinition() {
         return this.jsonDefinition;
     }
-
-    @Override
-    public Locale getNumberFormattingLocale() {
-        return formattingLocale;
-    }
-
 
     @Override
     public boolean isContinueOnTimestampParsingFailure() {
