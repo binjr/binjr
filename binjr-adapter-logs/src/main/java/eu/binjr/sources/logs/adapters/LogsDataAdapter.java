@@ -185,7 +185,6 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
         this.sourceNamePrefix = sourcePrefix;
         this.rootPath = rootPath;
         this.encoding = encoding;
-        Map<String, String> params = new HashMap<>();
         initParams(rootPath, zoneId, folderFilters, fileExtensionsFilters, profile);
     }
 
@@ -202,23 +201,20 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
     }
 
     @Override
-    public void loadParams(Map<String, String> params) throws DataAdapterException {
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
         if (logger.isDebugEnabled()) {
             logger.debug(() -> "LogsDataAdapter params:");
             params.forEach((s, s2) -> logger.debug(() -> "key=" + s + ", value=" + s2));
         }
-        initParams(Paths.get(validateParameterNullity(params, ROOT_PATH_PARAM_NAME)),
-                validateParameter(params, ZONE_ID_PARAM_NAME,
-                        s -> {
-                            if (s == null) {
-                                logger.warn("Parameter " + ZONE_ID_PARAM_NAME + " is missing in adapter " + getSourceName());
-                                return ZoneId.systemDefault();
-                            }
-                            return ZoneId.of(s);
-                        }),
-                gson.fromJson(validateParameterNullity(params, FOLDER_FILTERS_PARAM_NAME), String[].class),
-                gson.fromJson(validateParameterNullity(params, EXTENSIONS_FILTERS_PARAM_NAME), String[].class),
-                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE_PARAM_NAME), CustomParsingProfile.class));
+        initParams(Paths.get(mapParameter(params, ROOT_PATH_PARAM_NAME)),
+                mapParameter(params, ZONE_ID_PARAM_NAME, ZoneId::of, Optional.of(ZoneId.systemDefault())),
+                mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> gson.fromJson(p, String[].class)),
+                mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> gson.fromJson(p, String[].class)),
+                mapParameter(params, PARSING_PROFILE_PARAM_NAME, p -> gson.fromJson(p, CustomParsingProfile.class)));
+        var workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.rootPath.getRoot();
+        if (workspaceRootPath != null) {
+            this.rootPath = workspaceRootPath.resolve(rootPath);
+        }
     }
 
     private void initParams(Path rootPath,
@@ -232,6 +228,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
         this.fileExtensionsFilters = fileExtensionsFilters;
         this.parsingProfile = parsingProfile;
         this.defaultEventFormat = new LogEventFormat(parsingProfile, getTimeZoneId(), encoding);
+
     }
 
     @Override
