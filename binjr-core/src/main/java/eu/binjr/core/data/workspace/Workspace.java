@@ -53,9 +53,8 @@ import java.util.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "3.1";
-    public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("3.0");
-    public static final Version SUPPORTED_SCHEMA_VERSION = new Version(WORKSPACE_SCHEMA_VERSION);
+    public static final Version WORKSPACE_SCHEMA_VERSION = new Version("3.2");
+    public static final Version MINIMUM_WORKSPACE_SCHEMA_VERSION = new Version("3.0");
 
     @XmlTransient
     private static final Logger logger = Logger.create(Workspace.class);
@@ -74,7 +73,7 @@ public class Workspace implements Dirtyable {
     @XmlTransient
     private final ChangeWatcher status;
     @XmlAttribute(name = "schemaVersion", required = false)
-    private final Version schemaVersion = new Version(WORKSPACE_SCHEMA_VERSION);
+    private final Version schemaVersion = WORKSPACE_SCHEMA_VERSION;
     @XmlAttribute(name = "producerInfo", required = false)
     private final String producerInfo;
     private transient final BindingManager bindingManager = new BindingManager();
@@ -142,7 +141,13 @@ public class Workspace implements Dirtyable {
         return workspace;
     }
 
-
+    /**
+     * Returns true to signal workspace requires schema migration, false otherwise
+     * @param file the workspace to check
+     * @return true to signal workspace requires schema migration, false otherwise
+     * @throws IOException if an IO error occurs
+     * @throws CannotLoadWorkspaceException if the workspace cannot be deserialized
+     */
     private static boolean sanityCheck(File file) throws IOException, CannotLoadWorkspaceException {
         if (file == null) {
             throw new IllegalArgumentException("File cannot be null");
@@ -155,24 +160,24 @@ public class Workspace implements Dirtyable {
             if (verStr == null) {
                 throw new CannotLoadWorkspaceException(
                         "Could not determine the workspace's schema version: it was probably produced with an older, incompatible version of binjr." +
-                                "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION + ")");
+                                "\n (Minimum supported schema version=" + MINIMUM_WORKSPACE_SCHEMA_VERSION + ")");
             }
             Version foundVersion = new Version(verStr);
-            if (foundVersion.compareTo(SUPPORTED_SCHEMA_VERSION) > 0) {
-                if (foundVersion.getMajor() != SUPPORTED_SCHEMA_VERSION.getMajor()) {
+            if (foundVersion.compareTo(WORKSPACE_SCHEMA_VERSION) > 0) {
+                if (foundVersion.getMajor() != WORKSPACE_SCHEMA_VERSION.getMajor()) {
                     // Only throw if major version is different, only warn otherwise.
                     throw new CannotLoadWorkspaceException(
                             "This workspace is not compatible with the current version of binjr. (Supported schema version="
-                                    + SUPPORTED_SCHEMA_VERSION
+                                    + WORKSPACE_SCHEMA_VERSION
                                     + ", found="
                                     + foundVersion + ")");
                 }
-                logger.warn("This workspace version is higher that the supported version; there may be incompatibilities (Supported schema version="
-                        + SUPPORTED_SCHEMA_VERSION
+                Dialogs.notifyWarning("Warning", "This workspace version is higher that the supported version; there may be incompatibilities (Supported schema version="
+                        + WORKSPACE_SCHEMA_VERSION
                         + ", found="
                         + foundVersion + ")");
-            }
-            if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
+          }
+            if (foundVersion.compareTo(MINIMUM_WORKSPACE_SCHEMA_VERSION) < 0) {
                 // Returns true to signal workspace requires schema migration
                 return true;
             }
