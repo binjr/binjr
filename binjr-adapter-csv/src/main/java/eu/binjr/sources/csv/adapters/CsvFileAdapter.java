@@ -17,25 +17,22 @@
 package eu.binjr.sources.csv.adapters;
 
 import com.google.gson.Gson;
+import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CustomCsvParsingProfile;
-import javafx.scene.control.TreeItem;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StoredField;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.util.List;
@@ -60,7 +57,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
      * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
      */
     public CsvFileAdapter() throws DataAdapterException {
-        this("", ZoneId.systemDefault(), "utf-8", BuiltInCsvParsingProfile.ISO);
+        this("", ZoneId.systemDefault(), "utf-8", BuiltInCsvParsingProfile.ISO, new String[]{"*"}, new String[]{"*.csv"});
     }
 
     /**
@@ -71,7 +68,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String filePath, ZoneId zoneId) throws DataAdapterException {
-        this(filePath, zoneId, "utf-8", BuiltInCsvParsingProfile.ISO);
+        this(filePath, zoneId, "utf-8", BuiltInCsvParsingProfile.ISO, new String[]{"*"}, new String[]{"*.csv"});
     }
 
     /**
@@ -86,40 +83,38 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
     public CsvFileAdapter(String filePath,
                           ZoneId zoneId,
                           String encoding,
-                          CsvParsingProfile parsingProfile)
+                          CsvParsingProfile parsingProfile,
+                          String[] folderFilters,
+                          String[] fileExtensionsFilters)
             throws DataAdapterException {
-        super(filePath, zoneId, encoding, parsingProfile);
+        super(filePath, zoneId, encoding, parsingProfile, folderFilters, fileExtensionsFilters);
         numberFormatters = ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale()));
     }
 
     @Override
-    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
-        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
-                new TimeSeriesBinding.Builder()
-                        .withLabel(getSourceName())
-                        .withPath("/")
-                        .withAdapter(this)
-                        .build());
-        try (InputStream in = Files.newInputStream(filePath)) {
+    protected void attachLeafNode(FileSystemBrowser.FileSystemEntry fsEntry,
+                                  FilterableTreeItem<SourceBinding> fileBranch) throws DataAdapterException {
+        try (InputStream in = fileBrowser.getData(fsEntry.getPath().toString())) {
             List<String> headers = eventFormat.getDataColumnHeaders(in);
             for (int i = 0; i < headers.size(); i++) {
                 if (i != parsingProfile.getTimestampColumn()) {
                     String header = headers.get(i).isBlank() ? "Column #" + i : headers.get(i);
-                    var b = new TimeSeriesBinding.Builder()
-                            .withLabel(Integer.toString(i))
-                            .withPath(getId() + "/" + filePath.toString())
-                            .withLegend(header)
-                            .withParent(tree.getValue())
-                            .withAdapter(this)
-                            .build();
-                    tree.getInternalChildren().add(new TreeItem<>(b));
+                    FilterableTreeItem<SourceBinding> filenode = new FilterableTreeItem<>(
+                            new TimeSeriesBinding.Builder()
+                                    .withLabel(Integer.toString(i))
+                                    .withPath(getId() + "/" + fsEntry.getPath().toString())
+                                    .withLegend(header)
+                                    .withParent(fileBranch.getValue())
+                                    .withAdapter(this)
+                                    .build());
+                    fileBranch.getInternalChildren().add(filenode);
                 }
             }
-        } catch (IOException e) {
-            throw new FetchingDataFromAdapterException(e);
+        } catch (Exception e) {
+            throw new DataAdapterException("Failed to create data binding for file " + fsEntry.getPath() + ": " + e.getMessage(), e);
         }
-        return tree;
     }
+
 
     @Override
     protected CsvEventFormat supplyEventFormat(CsvParsingProfile parsingProfile, ZoneId zoneId, Charset charset) {

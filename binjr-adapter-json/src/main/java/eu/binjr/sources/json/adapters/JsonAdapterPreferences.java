@@ -52,7 +52,7 @@ public class JsonAdapterPreferences extends DataAdapterPreferences {
      */
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "extensionFilters",
-            new String[]{"*.log", "*.txt"},
+            new String[]{"*.json"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 

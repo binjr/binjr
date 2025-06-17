@@ -58,11 +58,9 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
  */
 public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     private static final Logger logger = Logger.create(BaseJfrDataAdapter.class);
-    protected static final Gson gson = new Gson();
     protected static final Property<ReloadStatus> INDEXING_OK = new SimpleObjectProperty<>(ReloadStatus.OK);
     protected static final String ZONE_ID = "zoneId";
     protected static final String ENCODING = "encoding";
-    protected static final String PARSING_PROFILE = "parsingProfile";
     protected static final String PATH = "jfrPath";
     protected JfrEventFormat eventFormat;
 
@@ -99,19 +97,17 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     }
 
     @Override
-    public void loadParams(Map<String, String> params) throws DataAdapterException {
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
-        initParams(validateParameter(params, ZONE_ID,
-                        s -> {
-                            if (s == null) {
-                                throw new InvalidAdapterParameterException("Parameter '" + ZONE_ID + "'  is missing in adapter " + getSourceName());
-                            }
-                            return ZoneId.of(s);
-                        }),
-                Paths.get(validateParameterNullity(params, PATH)),
-                validateParameterNullity(params, ENCODING));
+        initParams(mapParameter(params, ZONE_ID, ZoneId::of),
+                mapParameter(params, PATH, Path::of),
+                mapParameter(params, ENCODING));
+        var workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.jfrFilePath.getRoot();
+        if (workspaceRootPath != null) {
+            this.jfrFilePath = workspaceRootPath.resolve(jfrFilePath);
+        }
     }
 
     private void initParams(ZoneId zoneId,
@@ -127,7 +123,7 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
     public void onStart() throws DataAdapterException {
         super.onStart();
         try {
-            this.fileBrowser = FileSystemBrowser.of(jfrFilePath.getParent());
+            this.fileBrowser = FileSystemBrowser.of(jfrFilePath);
             this.index = Indexes.LOG_FILES.acquire();
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
@@ -173,7 +169,7 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
         for (var binding : sources) {
             if (!index.getIndexedFiles().containsKey(binding)) {
                 var a = binding.split("\\|");
-                var filePath = Path.of(a[0].replace(BuiltInParsingProfile.NONE.getProfileId() + "/", ""));
+                var filePath = fileBrowser.getRootDirectory().resolve(a[0].replace(BuiltInParsingProfile.NONE.getProfileId() + "/", ""));
                 var eventType = a[1];
                 filterMap.computeIfAbsent(filePath, p -> new HashSet<>()).add(eventType);
                 isCommitNecessary = true;

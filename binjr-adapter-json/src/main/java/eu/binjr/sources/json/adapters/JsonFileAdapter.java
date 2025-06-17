@@ -17,6 +17,7 @@
 package eu.binjr.sources.json.adapters;
 
 import com.google.gson.Gson;
+import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.JarFsPathResolver;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.core.data.adapters.*;
@@ -51,7 +52,7 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
      * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
      */
     public JsonFileAdapter() throws DataAdapterException {
-        this("", ZoneId.systemDefault(), "utf-8", BuiltInJsonParsingProfile.ISO);
+        this("", ZoneId.systemDefault(), "utf-8", BuiltInJsonParsingProfile.ISO, new String[]{"*"}, new String[]{"*.json"});
     }
 
     /**
@@ -62,7 +63,7 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public JsonFileAdapter(String jsonPath, ZoneId zoneId) throws DataAdapterException {
-        this(jsonPath, zoneId, "utf-8", BuiltInJsonParsingProfile.ISO);
+        this(jsonPath, zoneId, "utf-8", BuiltInJsonParsingProfile.ISO, new String[]{"*"}, new String[]{"*.json"});
     }
 
     /**
@@ -77,9 +78,11 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
     public JsonFileAdapter(String filePath,
                            ZoneId zoneId,
                            String encoding,
-                           JsonParsingProfile parsingProfile)
+                           JsonParsingProfile parsingProfile,
+                           String[] folderFilters,
+                           String[] fileExtensionsFilters)
             throws DataAdapterException {
-        super(filePath, zoneId, encoding, parsingProfile);
+        super(filePath, zoneId, encoding, parsingProfile, folderFilters, fileExtensionsFilters);
     }
 
     @Override
@@ -100,29 +103,24 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
         this.parsingProfile = mapParameter(params, PARSING_PROFILE, p -> gson.fromJson(p, CustomJsonParsingProfile.class));
     }
 
+
     @Override
-    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
-        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
-                new TimeSeriesBinding.Builder()
-                        .withLabel(getSourceName())
-                        .withPath("/")
-                        .withAdapter(this)
-                        .build());
-        int i = 0;
+    protected void attachLeafNode(FileSystemBrowser.FileSystemEntry fsEntry,
+                                  FilterableTreeItem<SourceBinding> fileBranch) throws DataAdapterException {
         for (var defs : parsingProfile.getJsonDefinition().series()) {
             Path index = JarFsPathResolver.get(defs.path());
-            var currentBranch = tree;
+            var currentBranch = fileBranch;
             for (int j = 0; j < index.getNameCount(); j++) {
                 var currentName = index.getName(j);
                 Path subpath = index.getRoot().resolve(index.subpath(0, j + 1));
                 FilterableTreeItem<SourceBinding> finalCurrentBranch = currentBranch;
                 FilterableTreeItem<SourceBinding> branchNode = (FilterableTreeItem<SourceBinding>) TreeViewUtils.findFirstInTree(
-                        tree, t -> JarFsPathResolver.get(t.getValue().getLabel()).equals(subpath)).orElseGet(() -> {
+                        fileBranch, t -> JarFsPathResolver.get(t.getValue().getLabel()).equals(subpath)).orElseGet(() -> {
                     final var newBranch = new TimeSeriesBinding.Builder()
                             .withLabel(subpath.toString())
-                            .withPath(getId() + "/" + filePath.toString())
+                            .withPath(getId() + "/" + fsEntry.getPath().toString())
                             .withLegend(currentName.toString())
-                            .withParent(tree.getValue())
+                            .withParent(fileBranch.getValue())
                             .withGraphType(defs.graphType())
                             .withUnitName(defs.unit())
                             .withPrefix(defs.prefix())
@@ -135,7 +133,6 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
                 currentBranch = branchNode;
             }
         }
-        return tree;
     }
 
     @Override

@@ -123,7 +123,6 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Rel
         return tree;
     }
 
-
     @Deprecated
     @Override
     public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path,

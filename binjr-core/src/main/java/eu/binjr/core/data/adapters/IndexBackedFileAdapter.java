@@ -16,12 +16,13 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.function.CheckedFunction;
+import com.google.gson.Gson;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
@@ -33,10 +34,9 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import eu.binjr.core.dialogs.Dialogs;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import org.apache.lucene.document.Document;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,11 +51,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>, P extends ParsingProfile> extends BaseDataAdapter<Double> implements Reloadable<Double> {
+    private static final Logger logger = Logger.create(IndexBackedFileAdapter.class);
+    private static final Gson GSON = new Gson();
     protected static final String ZONE_ID = "zoneId";
     protected static final String ENCODING = "encoding";
     protected static final String PARSING_PROFILE = "parsingProfile";
+    private static final String FOLDER_FILTERS_PARAM_NAME = "folderFilters";
+    private static final String EXTENSIONS_FILTERS_PARAM_NAME = "fileExtensionsFilters";
     protected static final String PATH = "sourcePath";
-    private static final Logger logger = Logger.create(IndexBackedFileAdapter.class);
     public static final Property<ReloadStatus> INDEXING_OK = new SimpleObjectProperty<>(ReloadStatus.OK);
     protected final Map<String, ReloadStatus> indexedFiles = new HashMap<>();
     protected F eventFormat;
@@ -64,17 +67,23 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
     protected ZoneId zoneId;
     protected String encoding;
     protected Index index;
+    protected String[] folderFilters;
+    protected String[] fileExtensionsFilters;
     protected FileSystemBrowser fileBrowser;
     private Path workspaceRootPath;
 
     protected IndexBackedFileAdapter(String filePath,
                                      ZoneId zoneId,
                                      String encoding,
-                                     P parsingProfile) {
+                                     P parsingProfile,
+                                     String[] folderFilters,
+                                     String[] fileExtensionsFilters) {
         this.filePath = Path.of(filePath);
         this.zoneId = zoneId;
         this.encoding = encoding;
         this.parsingProfile = parsingProfile;
+        this.fileExtensionsFilters = fileExtensionsFilters;
+        this.folderFilters = folderFilters;
     }
 
     @Override
@@ -86,6 +95,75 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
             throw new DataAdapterException("Error retrieving initial time range", e);
         }
     }
+
+
+    private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
+
+    @Override
+    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+        FilterableTreeItem<SourceBinding> root = new FilterableTreeItem<>(
+                new TimeSeriesBinding.Builder()
+                        .withLabel(getSourceName())
+                        .withPath("/")
+                        .withAdapter(this)
+                        .build());
+        try {
+            Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
+            nodeDict.put(fileBrowser.toInternalPath("/"), root);
+            for (var fsEntry : fileBrowser.listEntries(folderFilters, fileExtensionsFilters)) {
+
+                String fileName = fsEntry.getPath().getFileName().toString() + " (" + binaryPrefixFormatter.format(fsEntry.getSize()) + "B)";
+                var attachTo = root;
+                if (fsEntry.getPath().getParent() != null) {
+                    attachTo = nodeDict.get(fsEntry.getPath().getParent());
+                    if (attachTo == null) {
+                        attachTo = makeBranchNode(nodeDict, fsEntry.getPath().getParent(), root);
+                    }
+                }
+                FilterableTreeItem<SourceBinding> fileBranch = new FilterableTreeItem<>(
+                        new TimeSeriesBinding.Builder()
+                                .withLabel(fileName)
+                                .withPath(getId() + "/" + fsEntry.getPath().toString())
+                                .withAdapter(this)
+                                .build());
+
+                attachLeafNode(fsEntry, fileBranch);
+                attachTo.getInternalChildren().add(fileBranch);
+            }
+        } catch (Exception ex) {
+            throw new DataAdapterException("Error building treeview for adapter " + this.getAdapterInfo().getName() + ": " + ex.getMessage(), ex);
+        }
+        return root;
+    }
+
+    protected abstract void attachLeafNode(FileSystemBrowser.FileSystemEntry fsEntry,
+                                           FilterableTreeItem<SourceBinding> fileBranch) throws DataAdapterException;
+
+    private FilterableTreeItem<SourceBinding> makeBranchNode(Map<Path, FilterableTreeItem<SourceBinding>> nodeDict,
+                                                             Path path,
+                                                             FilterableTreeItem<SourceBinding> root) {
+        var parent = root;
+        var rootPath = path.isAbsolute() ? path.getRoot() : path.getName(0);
+        for (int i = 0; i < path.getNameCount(); i++) {
+            Path current = rootPath.resolve(path.getName(i));
+            FilterableTreeItem<SourceBinding> filenode = nodeDict.get(current);
+            if (filenode == null) {
+                filenode = new FilterableTreeItem<>(
+                        new TimeSeriesBinding.Builder()
+                                .withLabel(current.getFileName().toString())
+                                .withPath(getId() + "/" + path)
+                                .withParent(parent.getValue())
+                                .withAdapter(this)
+                                .build());
+                nodeDict.put(current, filenode);
+                parent.getInternalChildren().add(filenode);
+            }
+            parent = filenode;
+            rootPath = current;
+        }
+        return parent;
+    }
+
 
     @Override
     public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path,
@@ -149,7 +227,7 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
     public void onStart() throws DataAdapterException {
         super.onStart();
         try {
-            this.fileBrowser = FileSystemBrowser.of(filePath.getParent());
+            this.fileBrowser = FileSystemBrowser.of(filePath);
             this.index = Indexes.NUM_SERIES.acquire();
             this.eventFormat = supplyEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
         } catch (IOException e) {
@@ -177,6 +255,8 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
         params.put(ZONE_ID, zoneId.toString());
         params.put(ENCODING, encoding);
         params.put(PATH, filePath.toString());
+        params.put(FOLDER_FILTERS_PARAM_NAME, GSON.toJson(folderFilters));
+        params.put(EXTENSIONS_FILTERS_PARAM_NAME, GSON.toJson(fileExtensionsFilters));
         return params;
     }
 
@@ -188,6 +268,8 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
         this.zoneId = mapParameter(params, ZONE_ID, ZoneId::of);
         this.filePath = mapParameter(params, PATH, Path::of);
         this.encoding = mapParameter(params, ENCODING);
+        this.folderFilters = mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class));
+        this.fileExtensionsFilters = mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class));
         this.workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.filePath.getRoot();
         if (workspaceRootPath != null) {
             this.filePath = workspaceRootPath.resolve(filePath);

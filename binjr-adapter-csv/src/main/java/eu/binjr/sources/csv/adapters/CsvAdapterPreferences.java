@@ -52,7 +52,7 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
      */
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "extensionFilters",
-            new String[]{"*.log", "*.txt"},
+            new String[]{"*.csv"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 

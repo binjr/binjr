@@ -27,15 +27,13 @@ import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
 
@@ -124,12 +122,45 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
     @Override
     protected File displayFileChooser(Node owner) {
         try {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open CSV file");
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
-            Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
-            return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
+            ContextMenu sourceMenu = new ContextMenu();
+            MenuItem fileMenuItem = new MenuItem("CSV file");
+            fileMenuItem.setOnAction(eventHandler -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Open CSV File");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV file", "*.csv"));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
+                Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
+                File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
+                if (selectedFile != null) {
+                    setSourceUri(selectedFile.getPath());
+                }
+            });
+            sourceMenu.getItems().add(fileMenuItem);
+            MenuItem zipMenuItem = new MenuItem("Zip file");
+            zipMenuItem.setOnAction(eventHandler -> {
+                FileChooser fileChooser = new FileChooser();
+                fileChooser.setTitle("Open Zip Archive");
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Zip archive", "*.zip"));
+                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*", "*"));
+                Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
+                File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
+                if (selectedFile != null) {
+                    setSourceUri(selectedFile.getPath());
+                }
+            });
+            sourceMenu.getItems().add(zipMenuItem);
+            MenuItem folderMenuItem = new MenuItem("Folder");
+            folderMenuItem.setOnAction(eventHandler -> {
+                DirectoryChooser dirChooser = new DirectoryChooser();
+                dirChooser.setTitle("Open Folder");
+                Dialogs.getInitialDir(getMostRecentList()).ifPresent(dirChooser::setInitialDirectory);
+                File selectedFile = dirChooser.showDialog(NodeUtils.getStage(owner));
+                if (selectedFile != null) {
+                    setSourceUri(selectedFile.getPath());
+                }
+            });
+            sourceMenu.getItems().add(folderMenuItem);
+            sourceMenu.show(owner, Side.RIGHT, 0, 0);
         } catch (Exception e) {
             Dialogs.notifyException("Error while displaying file chooser: " + e.getMessage(), e, owner);
         }
@@ -156,7 +187,9 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
                 charsetName,
-                parsingChoiceBox.getValue()));
+                parsingChoiceBox.getValue(),
+                prefs.folderFilters.get(),
+                prefs.fileExtensionFilters.get()));
     }
 
     private void updateProfileList(CsvParsingProfile[] newValue) {
