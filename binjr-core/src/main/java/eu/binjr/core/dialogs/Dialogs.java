@@ -187,6 +187,16 @@ public class Dialogs {
     /**
      * Display an info notification
      *
+     * @param title   the title for the notification
+     * @param message the title for the notification
+     */
+    public static void notifyWarning(String title, String message) {
+        notifyWarning(title, message, Pos.BOTTOM_RIGHT, null);
+    }
+
+    /**
+     * Display an info notification
+     *
      * @param title    the title for the notification
      * @param message  the title for the notification
      * @param position the position of the notification on screen.

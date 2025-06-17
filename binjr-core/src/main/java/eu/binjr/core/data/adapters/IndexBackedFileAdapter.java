@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.function.CheckedFunction;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
@@ -23,6 +24,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Index;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.parser.EventFormat;
@@ -31,11 +33,14 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.core.dialogs.Dialogs;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import org.apache.lucene.document.Document;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -49,17 +54,28 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
     protected static final String ZONE_ID = "zoneId";
     protected static final String ENCODING = "encoding";
     protected static final String PARSING_PROFILE = "parsingProfile";
-    protected static final String PATH = "filePath";
+    protected static final String PATH = "sourcePath";
     private static final Logger logger = Logger.create(IndexBackedFileAdapter.class);
     public static final Property<ReloadStatus> INDEXING_OK = new SimpleObjectProperty<>(ReloadStatus.OK);
     protected final Map<String, ReloadStatus> indexedFiles = new HashMap<>();
-    protected F parser;
+    protected F eventFormat;
     protected P parsingProfile;
     protected Path filePath;
     protected ZoneId zoneId;
     protected String encoding;
     protected Index index;
     protected FileSystemBrowser fileBrowser;
+    private Path workspaceRootPath;
+
+    protected IndexBackedFileAdapter(String filePath,
+                                     ZoneId zoneId,
+                                     String encoding,
+                                     P parsingProfile) {
+        this.filePath = Path.of(filePath);
+        this.zoneId = zoneId;
+        this.encoding = encoding;
+        this.parsingProfile = parsingProfile;
+    }
 
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
@@ -97,30 +113,6 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
     }
 
     @Override
-    public void onStart() throws DataAdapterException {
-        super.onStart();
-        try {
-            this.fileBrowser = FileSystemBrowser.of(filePath.getParent());
-            this.index = Indexes.NUM_SERIES.acquire();
-        } catch (IOException e) {
-            throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
-        }
-    }
-
-    @Override
-    public void close() {
-        try {
-            Indexes.NUM_SERIES.release();
-        } catch (Exception e) {
-            logger.error("An error occurred while releasing index " + Indexes.NUM_SERIES.name() + ": " + e.getMessage());
-            logger.debug("Stack Trace:", e);
-        }
-        IOUtils.close(fileBrowser);
-        super.close();
-    }
-
-
-    @Override
     public void reload(String path, List<TimeSeriesInfo<Double>> seriesInfo, ReloadPolicy reloadPolicy, DoubleProperty progress, Property<ReloadStatus> reloadStatus) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), reloadPolicy);
@@ -141,13 +133,64 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
                     index.add(p,
                             inputStream,
                             true,
-                            parser,
+                            eventFormat,
                             this::mapEventToDocument,
                             charRead,
                             INDEXING_OK);
                     return ReloadStatus.OK;
                 }
             }));
+        }
+    }
+
+    protected abstract Document mapEventToDocument(Document doc, ParsedEvent event);
+
+    @Override
+    public void onStart() throws DataAdapterException {
+        super.onStart();
+        try {
+            this.fileBrowser = FileSystemBrowser.of(filePath.getParent());
+            this.index = Indexes.NUM_SERIES.acquire();
+            this.eventFormat = supplyEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
+        } catch (IOException e) {
+            throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
+        }
+    }
+
+    protected abstract F supplyEventFormat(P parsingProfile, ZoneId zoneId, Charset charset);
+
+    @Override
+    public void close() {
+        try {
+            Indexes.NUM_SERIES.release();
+        } catch (Exception e) {
+            logger.error("An error occurred while releasing index " + Indexes.NUM_SERIES.name() + ": " + e.getMessage());
+            logger.debug("Stack Trace:", e);
+        }
+        IOUtils.close(fileBrowser);
+        super.close();
+    }
+
+    @Override
+    public Map<String, String> getParams() {
+        Map<String, String> params = new HashMap<>();
+        params.put(ZONE_ID, zoneId.toString());
+        params.put(ENCODING, encoding);
+        params.put(PATH, filePath.toString());
+        return params;
+    }
+
+    @Override
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
+        if (params == null) {
+            throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
+        }
+        this.zoneId = mapParameter(params, ZONE_ID, ZoneId::of);
+        this.filePath = mapParameter(params, PATH, Path::of);
+        this.encoding = mapParameter(params, ENCODING);
+        this.workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.filePath.getRoot();
+        if (workspaceRootPath != null) {
+            this.filePath = workspaceRootPath.resolve(filePath);
         }
     }
 
@@ -169,6 +212,4 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
                 (zoneId != null ? zoneId : "???") +
                 ")";
     }
-
-    protected abstract Document mapEventToDocument(Document doc, ParsedEvent event);
 }

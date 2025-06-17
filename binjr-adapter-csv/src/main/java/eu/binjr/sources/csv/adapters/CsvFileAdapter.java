@@ -21,7 +21,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
-import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.sources.csv.data.parsers.BuiltInCsvParsingProfile;
@@ -37,10 +36,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -91,8 +88,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
                           String encoding,
                           CsvParsingProfile parsingProfile)
             throws DataAdapterException {
-        super();
-        initParams(zoneId, filePath, encoding, parsingProfile);
+        super(filePath, zoneId, encoding, parsingProfile);
         numberFormatters = ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale()));
     }
 
@@ -105,7 +101,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
                         .withAdapter(this)
                         .build());
         try (InputStream in = Files.newInputStream(filePath)) {
-            List<String> headers = parser.getDataColumnHeaders(in);
+            List<String> headers = eventFormat.getDataColumnHeaders(in);
             for (int i = 0; i < headers.size(); i++) {
                 if (i != parsingProfile.getTimestampColumn()) {
                     String header = headers.get(i).isBlank() ? "Column #" + i : headers.get(i);
@@ -126,41 +122,27 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
     }
 
     @Override
+    protected CsvEventFormat supplyEventFormat(CsvParsingProfile parsingProfile, ZoneId zoneId, Charset charset) {
+        return new CsvEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
+    }
+
+    @Override
     public Map<String, String> getParams() {
-        Map<String, String> params = new HashMap<>();
-        params.put(ZONE_ID, zoneId.toString());
-        params.put(ENCODING, encoding);
+        Map<String, String> params = super.getParams();
         params.put(PARSING_PROFILE, gson.toJson(CustomCsvParsingProfile.of(parsingProfile)));
-        params.put(CSV_PATH, filePath.toString());
         return params;
     }
 
     @Override
-    public void loadParams(Map<String, String> params) throws DataAdapterException {
-        if (params == null) {
-            throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
+        // Convert file path parameter name from old format to new one.
+        // WARNING: newly saved workspace will no longer be compatible with older versions.
+        if (params.get(CSV_PATH) != null) {
+            params.put(PATH, params.get(CSV_PATH));
+            params.remove(CSV_PATH);
         }
-        initParams(validateParameter(params, ZONE_ID,
-                        s -> {
-                            if (s == null) {
-                                throw new InvalidAdapterParameterException("Parameter '" + ZONE_ID + "'  is missing in adapter " + getSourceName());
-                            }
-                            return ZoneId.of(s);
-                        }),
-                validateParameterNullity(params, CSV_PATH),
-                validateParameterNullity(params, ENCODING),
-                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE), CustomCsvParsingProfile.class));
-    }
-
-    private void initParams(ZoneId zoneId,
-                            String csvPath,
-                            String encoding,
-                            CsvParsingProfile parsingProfile) {
-        this.zoneId = zoneId;
-        this.filePath = Path.of(csvPath);
-        this.encoding = encoding;
-        this.parsingProfile = parsingProfile;
-        this.parser = new CsvEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
+        super.loadParams(params, context);
+        this.parsingProfile = mapParameter(params, PARSING_PROFILE, (p -> gson.fromJson(p, CustomCsvParsingProfile.class)));
     }
 
     @Override

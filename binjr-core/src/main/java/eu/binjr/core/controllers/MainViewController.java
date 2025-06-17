@@ -830,7 +830,7 @@ public class MainViewController implements Initializable {
                         Workspace wsFromfile = Workspace.from(file);
                         for (Source source : wsFromfile.getSources()) {
                             DataAdapter<?> da = DataAdapterFactory.getInstance().newAdapter(source.getAdapterClassName());
-                            da.loadParams(source.getAdapterParams());
+                            da.loadParams(source.getAdapterParams(), new DataAdapter.LoadingContext(wsFromfile.getPath()));
                             da.setId(source.getAdapterId());
                             source.setAdapter(da);
                             loadSource(source);

@@ -68,17 +68,70 @@ public abstract class BaseDataAdapter<T> implements DataAdapter<T> {
                 '}';
     }
 
-    protected String validateParameterNullity(Map<String, String> params, String paramName) throws InvalidAdapterParameterException {
-        return validateParameter(params, paramName, s -> {
-            if (s == null) {
-                throw new InvalidAdapterParameterException("Parameter " + paramName + " is missing for adapter " + this.getSourceName());
-            }
-            return s;
-        });
+    @Deprecated
+    protected String validateParameterNullity(Map<String, String> params, String paramName)
+            throws InvalidAdapterParameterException {
+        return mapParameter(params, paramName);
     }
 
-    protected <R> R validateParameter(Map<String, String> params, String paramName, CheckedFunction<String, R, InvalidAdapterParameterException> validator) throws InvalidAdapterParameterException {
+    @Deprecated
+    protected <R> R validateParameter(Map<String, String> params,
+                                      String paramName,
+                                      CheckedFunction<String, R, InvalidAdapterParameterException> validator)
+            throws InvalidAdapterParameterException {
         String paramValue = params.get(paramName);
         return validator.apply(paramValue);
+    }
+
+    public <R> R mapParameter(Map<String, String> params,
+                              String paramName,
+                              CheckedFunction<String, R, InvalidAdapterParameterException> mapper)
+            throws InvalidAdapterParameterException {
+        String paramValue = mapParameter(params, paramName);
+        try {
+            return mapper.apply(paramValue);
+        } catch (Exception e) {
+            throw new InvalidAdapterParameterException(
+                    "Error while mapping parameter " + paramName +
+                            " for adapter " + this.getSourceName() + ": " + e.getMessage(), e);
+        }
+    }
+
+    public String mapParameter(Map<String, String> params, String paramName)
+            throws InvalidAdapterParameterException {
+        if (params == null || paramName == null) {
+            throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
+        }
+        String paramValue = params.get(paramName);
+        if (paramValue == null) {
+            throw new InvalidAdapterParameterException(
+                    "Parameter " + paramName + " is missing for adapter " + this.getSourceName());
+        }
+        return paramValue;
+    }
+
+    /**
+     * Legacy
+     * Use 'loadParams(Map<String, String> params, LoadingContext context)' instead
+     *
+     * @param params
+     * @throws DataAdapterException
+     */
+    @Deprecated
+    public void loadParams(Map<String, String> params) throws DataAdapterException {
+
+    }
+
+    /**
+     * Default implementation that loops back to legacy 'loadParams(Map<String, String> params)'
+     * Ignores additional context.
+     *
+     * @param params  the parameters required to establish a connection to the underlying data source
+     * @param context contextual data provided to the adapter
+     * @throws DataAdapterException
+     */
+    @Override
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
+        this.loadParams(params);
     }
 }

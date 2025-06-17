@@ -21,7 +21,6 @@ import eu.binjr.common.io.JarFsPathResolver;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.sources.json.data.parsers.BuiltInJsonParsingProfile;
@@ -35,7 +34,6 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -70,57 +68,36 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
     /**
      * Initializes a new instance of the {@link JsonFileAdapter} class with the provided parameters.
      *
-     * @param jsonPath       the path to the json file.
+     * @param filePath       the path to the json file.
      * @param zoneId         the time zone to used.
      * @param encoding       the encoding for the json file.
      * @param parsingProfile a pattern to decode time stamps.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
-    public JsonFileAdapter(String jsonPath,
+    public JsonFileAdapter(String filePath,
                            ZoneId zoneId,
                            String encoding,
                            JsonParsingProfile parsingProfile)
             throws DataAdapterException {
-        super();
-        initParams(zoneId, jsonPath, encoding, parsingProfile);
+        super(filePath, zoneId, encoding, parsingProfile);
+    }
+
+    @Override
+    protected JsonEventFormat supplyEventFormat(JsonParsingProfile parsingProfile, ZoneId zoneId, Charset charset) {
+        return new JsonEventFormat(parsingProfile, zoneId, charset);
     }
 
     @Override
     public Map<String, String> getParams() {
-        Map<String, String> params = new HashMap<>();
-        params.put(ZONE_ID, zoneId.toString());
-        params.put(ENCODING, encoding);
+        Map<String, String> params = super.getParams();
         params.put(PARSING_PROFILE, gson.toJson(CustomJsonParsingProfile.of(parsingProfile)));
-        params.put(PATH, filePath.toString());
         return params;
     }
 
     @Override
-    public void loadParams(Map<String, String> params) throws DataAdapterException {
-        if (params == null) {
-            throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
-        }
-        initParams(validateParameter(params, ZONE_ID,
-                        s -> {
-                            if (s == null) {
-                                throw new InvalidAdapterParameterException("Parameter '" + ZONE_ID + "'  is missing in adapter " + getSourceName());
-                            }
-                            return ZoneId.of(s);
-                        }),
-                validateParameterNullity(params, PATH),
-                validateParameterNullity(params, ENCODING),
-                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE), CustomJsonParsingProfile.class));
-    }
-
-    private void initParams(ZoneId zoneId,
-                            String jsonPath,
-                            String encoding,
-                            JsonParsingProfile parsingProfile) {
-        this.zoneId = zoneId;
-        this.filePath = Path.of(jsonPath);
-        this.encoding = encoding;
-        this.parsingProfile = parsingProfile;
-        this.parser = new JsonEventFormat(parsingProfile, zoneId, Charset.forName(encoding));
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
+        super.loadParams(params, context);
+        this.parsingProfile = mapParameter(params, PARSING_PROFILE, p -> gson.fromJson(p, CustomJsonParsingProfile.class));
     }
 
     @Override

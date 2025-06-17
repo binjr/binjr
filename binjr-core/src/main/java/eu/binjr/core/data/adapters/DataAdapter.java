@@ -24,6 +24,7 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.List;
@@ -104,13 +105,30 @@ public interface DataAdapter<T> extends AutoCloseable {
      */
     Map<String, String> getParams();
 
+//    /**
+//     * Sets the parameters required to establish a connection to the underlying data source
+//     *
+//     * @param params the parameters required to establish a connection to the underlying data source
+//     * @throws DataAdapterException if an error occurs while loading parameters
+//     */
+//    void loadParams(Map<String, String> params) throws DataAdapterException;
+
     /**
      * Sets the parameters required to establish a connection to the underlying data source
      *
      * @param params the parameters required to establish a connection to the underlying data source
+     * @param context contextual data provided to the adapter
      * @throws DataAdapterException if an error occurs while loading parameters
      */
-    void loadParams(Map<String, String> params) throws DataAdapterException;
+     void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException;
+
+    /**
+     * Contextual data provided to the adapter
+     *
+     * @param savedWorkspacePath the path the saved file a workspace is loaded from
+     */
+    record LoadingContext(Path savedWorkspacePath) {
+    }
 
     /**
      * An api hook that is executed once, after parameters have been loaded and before any other call
