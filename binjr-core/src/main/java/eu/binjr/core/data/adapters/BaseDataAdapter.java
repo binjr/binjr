@@ -22,6 +22,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -87,27 +88,49 @@ public abstract class BaseDataAdapter<T> implements DataAdapter<T> {
                               String paramName,
                               CheckedFunction<String, R, InvalidAdapterParameterException> mapper)
             throws InvalidAdapterParameterException {
-        String paramValue = mapParameter(params, paramName);
+        return mapParameter(params, paramName, mapper, Optional.empty());
+    }
+
+    public <R> R mapParameter(Map<String, String> params,
+                              String paramName,
+                              CheckedFunction<String, R, InvalidAdapterParameterException> mapper,
+                              Optional<R> defaultValue)
+            throws InvalidAdapterParameterException {
         try {
+            if (params == null || paramName == null) {
+                throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
+            }
+            String paramValue = params.get(paramName);
+            if (paramValue == null) {
+                throw new InvalidAdapterParameterException(
+                        "Parameter " + paramName + " is missing for adapter " + this.getSourceName());
+            }
             return mapper.apply(paramValue);
+
+        } catch (InvalidAdapterParameterException iae) {
+            if (defaultValue.isPresent()) {
+                logger.warn(() -> iae.getMessage() + ". Returning default value");
+                return defaultValue.get();
+            }
+            throw iae;
         } catch (Exception e) {
-            throw new InvalidAdapterParameterException(
-                    "Error while mapping parameter " + paramName +
-                            " for adapter " + this.getSourceName() + ": " + e.getMessage(), e);
+            var msg = "Error while mapping parameter " + paramName +
+                    " for adapter " + this.getSourceName() + ": " + e.getMessage();
+            if (defaultValue.isPresent()) {
+                logger.warn(() -> msg + ". Returning default value");
+                return defaultValue.get();
+            }
+            throw new InvalidAdapterParameterException(msg, e);
         }
     }
 
-    public String mapParameter(Map<String, String> params, String paramName)
+    public String mapParameter(Map<String, String> params, String paramName) throws InvalidAdapterParameterException {
+        return mapParameter(params, paramName, Optional.empty());
+    }
+
+    public String mapParameter(Map<String, String> params, String paramName, Optional<String> defaultValue)
             throws InvalidAdapterParameterException {
-        if (params == null || paramName == null) {
-            throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
-        }
-        String paramValue = params.get(paramName);
-        if (paramValue == null) {
-            throw new InvalidAdapterParameterException(
-                    "Parameter " + paramName + " is missing for adapter " + this.getSourceName());
-        }
-        return paramValue;
+        return mapParameter(params, paramName, p -> p, defaultValue);
     }
 
     /**
