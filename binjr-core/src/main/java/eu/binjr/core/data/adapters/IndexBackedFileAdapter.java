@@ -44,10 +44,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>, P extends ParsingProfile> extends BaseDataAdapter<Double> implements Reloadable<Double> {
@@ -268,8 +265,8 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
         this.zoneId = mapParameter(params, ZONE_ID, ZoneId::of);
         this.filePath = mapParameter(params, PATH, Path::of);
         this.encoding = mapParameter(params, ENCODING);
-        this.folderFilters = mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class));
-        this.fileExtensionsFilters = mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class));
+        this.folderFilters = mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class), Optional.of(new String[]{"*"}));
+        this.fileExtensionsFilters = mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class), Optional.of(new String[]{"*.*"}));
         this.workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.filePath.getRoot();
         if (workspaceRootPath != null) {
             this.filePath = workspaceRootPath.resolve(filePath);

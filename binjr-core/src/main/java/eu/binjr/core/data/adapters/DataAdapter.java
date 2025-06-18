@@ -105,14 +105,6 @@ public interface DataAdapter<T> extends AutoCloseable {
      */
     Map<String, String> getParams();
 
-//    /**
-//     * Sets the parameters required to establish a connection to the underlying data source
-//     *
-//     * @param params the parameters required to establish a connection to the underlying data source
-//     * @throws DataAdapterException if an error occurs while loading parameters
-//     */
-//    void loadParams(Map<String, String> params) throws DataAdapterException;
-
     /**
      * Sets the parameters required to establish a connection to the underlying data source
      *
