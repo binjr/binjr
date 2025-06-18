@@ -2,7 +2,7 @@
 Released on Wed, 23 Apr 2025
 
 * _[New] [UI]_ There is now an option to specify whether a split worksheet pane should be automatically closed or left open when the last tab is contains is closed (`Settings > Close empty tab panes automatically`).
-* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 24.0.1.
+* _[Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 24.0.1.
 * _[Fixed] [UI]_ The new tab `[+]` button on split and detached tab pane does not have a context menu for choosing the type of worksheet to create.
 * _[Fixed] [JFR]_  The JFR adapter fails to parse recordings that contain custom event types and fields without a label.
 
@@ -12,7 +12,7 @@ Released on Wed, 29 Jan 2025
 * _[New] [UI]_ It is now possible to split the visualisation area in the main window or in a detached tab, to display many worksheets side-by-side.
 * _[New] [GC logs Adapter]_ Added a new data adaptor to plot metrics extracted from JVM GC logs.
 * _[New] [HTTP Adapters]_ Http adaptors now support basic authentication.
-* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.0.2
+* _[Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.0.2
 * _[Fixed] [Log files Adapter]_ JVM unified logs parsing rules sometime fail to capture log severity.
 * _[Fixed] [Packaging]_ Cannot install .deb on Debian bookworm (unmet dependencies for libffi)
 
@@ -31,8 +31,8 @@ Released on Wed, 23 Oct 2024
 * _[New] [CSV Adapter]_ Doing a hard refresh (Ctrl+F5) on a worksheet now forces all data read form CSV sources to be reloaded from the underlying files.
 * _[New] [CSV Adapter]_ Added an option to ignore lines with unparsable time stamps.
 * _[New] [CSV Adapter]_ Better error message when failing to parse a time stamp (provides column and line numbers).
-* _[New] [Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.0.1
-* _[New] [Dependencies]_ Updated to Lucene 10.
+* _{Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 23.0.1
+* _{Dependencies]_ Updated to Lucene 10.
 * _[Fixed]_ "Unable to find valid certification path to requested target" error when trying to establish an HTTPS connection on macOS.
 * _[Fixed]_ When dropping more than one node from the source tree view onto the legend pane of a worksheet, only the last node is added to the current chart.
 * _[Fixed]_ User preference for "Treat undefined Y values as 0" is ignored.
@@ -43,7 +43,7 @@ Released on Wed, 23 Oct 2024
 Released on Fri, 19 Jul 2024
 
 * _[New]_ It is now possible for the user to configure a default value for the stroke width used in different types of charts.
-* _[New]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.2
+* _[Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.2
 * _[Fixed]_  Event heatmap in log worksheet shows wrong data when displaying events older than 1970/01/01 00:00:00 UTC.
 * _[Fixed]_ Do not interpolate Y values at interval boundaries for scatter point charts.
 * _[Fixed]_ Wrapping text in log view does not always work when selecting the option.
@@ -52,8 +52,8 @@ Released on Fri, 19 Jul 2024
 Released on Wed, 24 Apr 2024
 
 * _[New]_ Added a new "System" UI theme that inherits the OS color scheme preferences.  
-* _[New]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.1  
-* _[New]_ Migrated Wix toolset config to version 5.0.0  
+* _[Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to 22.0.1  
+* _[Dependencies]_ Migrated Wix toolset config to version 5.0.0  
 * _[New]_ Added an option to force using the embedded JVM certificate store instead of the host's on Windows and macOS.  
 * _[Fixed]_ Broken parsing profile for unified JVM logs containing only elapsed time.  
 * _[Fixed]_ Notification popup does not show if the text it contains is too long.  
@@ -62,18 +62,18 @@ Released on Wed, 24 Apr 2024
 ## [binjr v3.17.0](https://github.com/binjr/binjr/releases/tag/v3.17.0)
 Released on Wed, 21 Mar 2024
 
-* _[New]_ Updated the embedded runtimes for Java and JavaFX to version 22.  
 * _[New]_ Support for new package managers: AUR for Archlinux and winget for Windows.  
 * _[New]_ Added an option to override hardware acceleration support.  
 * _[New]_ Added an option to change the user interface scaling factor.  
 * _[New]_ Added an option to trim extraneous spaces in malformed CSV files in parsing profiles.  
+* _[Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 22.  
 * _[Fixed]_ Dead links for support pages in MSI installer metadata.
 
 ## [binjr v3.16.0](https://github.com/binjr/binjr/releases/tag/v3.16.0)
 Released on Wed, 7 Feb 2024
 
-* _[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.2  
 * _[New]_ Added an option to allow Basic auth in tunneling over https.  
+* _[Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.2
 * _[Fixed]_ Source pane remains opened if a connection failed.  
 * _[Fixed]_ Replace Apache http client by OpenJDK's built-in implementation.  
 * _[Fixed]_ Use https instead of http when inferring missing protocol.
@@ -91,7 +91,7 @@ Released on Tue, 5 Dec 2023
 ## [binjr v3.14.0](https://github.com/binjr/binjr/releases/tag/v3.14.0)
 Released on Mon, 30 Oct 2023
 
-* _[New]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.1  
+* _[Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 21.0.1  
 * _[New]_ Source and target compatibility level for binjr's artifacts have been updated to 21  
 * _[New]_ It is now possible to set the default values for chart type and unit prefixes, used when these aren't defined by the source  
 * _[New]_ Enhanced JVM logging parsing profiles to accept ISO timestamps  
@@ -118,7 +118,7 @@ Released on Sat, 20 May 2023
 * _[New]_ Inline help is now directly accessible for many options throughout the application's User Interface by clicking the `?`next to it.  
 * _[New]_ Let users choose the date & time that serves as an anchor to construct timestamps for partial data.  
 * _[New]_ Added an option for the user to toggle whether or not the Y axis should always include the origin (0) when auto-scale is enabled.  
-* _[New]_ Updated embedded runtimes to OpenJDK 20.0.1 and OpenJFX 20.0.1  
+* _[Dependencies]_ Updated embedded runtimes to OpenJDK 20.0.1 and OpenJFX 20.0.1  
 * _[New]_ Added more built-in parsing profiles (Quarkus, Syslog).  
 * _[Fixed]_ Removed unnecessary scoring computation in Log adapter queries to increase filtering performances.  
 * _[Fixed]_ Settings panel is now wider and its content less cramped.  
@@ -134,7 +134,7 @@ Released on Wed, 1 Feb 2023
 * _[New]_ Added the possibility to parse months from their names (english only for now) in logs and CSV parsing rules.
 * _[New]_ Added built-in parsing profile for IcedTea-Web log files.
 * _[New]_ Application bundles are now built with, and embed, the Eclipse Temurin distribution of OpenJDK.
-* _[New]_ Updated embedded runtimes to OpenJDK 19.0.2 and OpenJFX 19.0.2.1
+* _[Dependencies]_ Updated embedded runtimes to OpenJDK 19.0.2 and OpenJFX 19.0.2.1
 * _[Fixed]_ Removed unused dependencies to gtk2 package in rpm build.
 * _[Fixed]_ Rpm package cannot be built using rpm v4.16.0 or later.
 
@@ -142,7 +142,7 @@ Released on Wed, 1 Feb 2023
 Released on Thu, 6 Oct 2022
 
 * _[New]_ It is now possible to adjust the size of the text in logs worksheets, as well as changing the default size in the preferences (`Settings > Logs > Default text size`).
-* _[New]_ Updated Java and JavaFX Runtimes to version 19.
+* _[Dependencies]_ Updated Java and JavaFX Runtimes to version 19.
 * _[Fixed]_ Text in debug console could be rendered using wrong encoding on some platforms.
 
 ## [binjr v3.9.0](https://github.com/binjr/binjr/releases/tag/v3.9.0)
@@ -173,7 +173,7 @@ Released on Wed, 23 Mar 2022
 * _[New]_ Enhanced snapshot feature to provide a preview of the snapped image and allows users to either save it to a file or to the clipboard.
 * _[New]_ Added contextual menu entries for copying series details from tree view and table view.
 * _[New]_ *binjr* can now be built to run natively on aarch64 architectures on Linux and macOS.
-* _[New]_ Updated Java and JavaFX Runtimes to version 18.
+* _[Dependencies]_ Updated Java and JavaFX Runtimes to version 18.
 * _[Fixed]_ Pressing the "delete" key while editing series name removes it from worksheet.
 * _[Fixed]_ Leaves in source treeview are not sorted in alphabetical order.
 * _[Fixed]_ A deadlock can occur if an error is raised while parsing log events.
@@ -186,7 +186,7 @@ Released on Fri, 21 Jan 2022
 * _[New]_ It is now possible to use regular expressions when filtering the source tree view.
 * _[New]_ Added a context menu to the list of series in a worksheet to expose edition features (select, delete, rename, etc...)
 * _[New]_ Introduced features to automatically infer names and colors for multiple series in a worksheet.
-* _[New]_ Updated the embedded OpenJDK and JavaFX runtimes to 17.0.2
+* _[Dependencies]_ Updated the embedded OpenJDK and JavaFX runtimes to 17.0.2
 * _[Fixed]_ A memory leak cause by a regression introduced in JavaFX 17.0.0
 * _[Fixed]_ Improved performances and reduced memory usage when working with logs.
 * _[Fixed]_ A regression introduced in v3.3.0 that caused logs with messages already displayed in debug console to not
@@ -196,12 +196,12 @@ Released on Fri, 21 Jan 2022
 ## [binjr v3.5.2](https://github.com/binjr/binjr/releases/tag/v3.5.2)
 Released on Fri, 17 Dec 2021
 
-* _[Fixed]_ Updated Log4j to version 2.16.0 in response to [CVE-2021-45046](https://nvd.nist.gov/vuln/detail/CVE-2021-45046)
+* _[Dependencies]_ Updated Log4j to version 2.16.0 in response to [CVE-2021-45046](https://nvd.nist.gov/vuln/detail/CVE-2021-45046)
 
 ## [binjr v3.5.1](https://github.com/binjr/binjr/releases/tag/v3.5.1)
 Released on Sat, 11 Dec 2021
 
-* _[Fixed]_ Updated Log4j to version 2.15.0 in response to [CVE-2021-44228](https://nvd.nist.gov/vuln/detail/CVE-2021-44228)
+* _[Dependencies]_ Updated Log4j to version 2.15.0 in response to [CVE-2021-44228](https://nvd.nist.gov/vuln/detail/CVE-2021-44228)
 
 ## [binjr v3.5.0](https://github.com/binjr/binjr/releases/tag/v3.5.0)
 Released on Thu, 25 Nov 2021
@@ -280,7 +280,7 @@ Released on Wed, 31 Mar 2021
 * _[New]_ Relative presets in the time range selection panel.
 * _[New]_ Users no longer have to input a minimum of 3 characters in the source filtering bar to trigger filtering.
 * _[New]_ Added a new PERF log level in between INFO and DEBUG.
-* _[New]_ Embedded Java runtime updated to OpenJDK 16 and OpenJFX 16.
+* _[Dependencies]_ Embedded Java runtime updated to OpenJDK 16 and OpenJFX 16.
 * _[New]_ Added a "Reset Time Range" button to TimeRangePicker control.
 * _[New]_ Added new keyboard shortcuts to close a worksheet and navigate history.
 * _[New]_ Windows installer allows overriding existing installation path via an MSI property.
@@ -330,7 +330,7 @@ Released on Tue, 12 May 2020
 * _[New]_ A new adapter allows to use Netdata (https://netdata.cloud) servers as data sources.  
 * _[New]_ Users can now choose which default color palette to use for charts when the color isn't specified by the source. 
 * _[New]_ "Show outline" and "Default opacity" preferences are now settable separately for "area charts" and "stacked area" charts.
-* _[New]_ Updated the embedded runtime to OpenJDK 14.0.1 and OpenJFX 14.0.1
+* _[Dependencies]_ Updated the embedded runtime to OpenJDK 14.0.1 and OpenJFX 14.0.1
 * _[Fixed]_ JRDS adapter incorrectly reports all charts as stacked area charts.
 * _[Fixed]_ "Show outline on area charts " user preference is not persisted across sessions. 
 * _[Fixed]_ A concurrency issue causes an ArrayIndexOutOfBoundsException when applying sample reduction transform. 
@@ -339,7 +339,7 @@ Released on Tue, 12 May 2020
 ## [binjr v2.14.0](https://github.com/binjr/binjr/releases/tag/v2.14.0)
 Released on Thu, 19 Mar 2020
 
-* _[New]_ Updated the embedded runtime to OpenJDK 14 and OpenJFX 14.
+* _[Dependencies]_ Updated the embedded runtime to OpenJDK 14 and OpenJFX 14.
 * _[New]_ Linux version no longer depends on GTK 2.
 * _[Fixed]_ "Unrecognized image loader:null" error occurs when attempting to capture snapshots of worksheet with many a large number of charts.
 
@@ -347,7 +347,7 @@ Released on Thu, 19 Mar 2020
 Released on Thu, 30 Jan 2020
 
 * _[New]_ Enhanced downsampling algorithm; this allows a more faithful visual representation of series while still dramatically reducing the number of plotted samples.
-* _[New]_ Updated the embedded Java and JavaFX runtimes to 13.0.2
+* _[Dependencies]_ Updated the embedded Java and JavaFX runtimes to 13.0.2
 * _[New]_ Changed default value for max heap size to 4GB
 * _[Fixed]_ Last and first samples for the selected time range are ignored when rendering data from CSV adapter.
 * _[Fixed]_ Time range label on screenshots is incorrect.
@@ -365,7 +365,7 @@ Released on Fri, 20 Dec 2019
 ## [binjr v2.11.0](https://github.com/binjr/binjr/releases/tag/v2.11.0)
 Released on Thu, 25 Nov 2019
 
-* _[New]_ Updated the embedded Java runtime to OpenJDK 13.0.1
+* _[Dependencies]_ Updated the embedded Java runtime to OpenJDK 13.0.1
 * _[New]_ It is now possible to choose the output scale (i.e. the physical pixel density) for snapshots taken from binjr worksheets.
 * _[Fixed]_ On HiDPI screens the tooltip representing a tree node when dragging it to a worksheet is not at the right scale.  
 
@@ -381,12 +381,12 @@ Released on Thu, 24 Oct 2019
 Released on Fri, 27 Sep 2019
 
 * _[New]_ Added options to import and export user preferences, as well as clear opened files history.
-* _[New]_ Update bundled OpenJavaFX to version 13.
+* _[Dependencies]_ Update bundled OpenJavaFX to version 13.
 * _[Fixed]_ NPE in JrdsDataAdapter when the adapter is loaded from saved workspace.
 * _[Fixed]_ CsvDataAdapter ignores some configuration keys when loaded from saved workspace.
 * _[Fixed]_ Fetching data via an adapter may fail silently.
 * _[Fixed]_ Charts do no honor the exact time range specified by the user.
-* _[Fixed]_ An offset on the time axis between two or more charts may occurs if the sources for them have different resolutions.
+* _[Fixed]_ An offset on the time axis between two or more charts may occur if the sources for them have different resolutions.
 * _[Fixed]_ UI themes defined in external plugins aren't loaded if set as the current theme when binjr is started.
 * _[Fixed]_ Unexpected cache miss in http data adapters.
 * _[Fixed]_ Disabling a DataAdapter in the settings section doesn't prevent it from being present in "Sources > New Sources..." menu.
@@ -441,7 +441,7 @@ Released on Wed, 06 Jul 2019
 * _[New]_ binjr now remembers its main window's screen position in-between sessions.
 * _[New]_ Added a new "Presentation Mode" that maximize the amount of space dedicated to the visualization of charts by hiding the source pane, chart settings pane and displays the chart legends in a condensed view.
 * _[New]_ The snapshot functionality has been enhanced to automatically take a snapshot of the whole charts display area of a worksheet, even if this area requires scrolling when displayed in the application. 
-* _[New]_ Embedded OpenJDK in application bundle has been updated to version 12.
+* _[Dependencies]_ Embedded OpenJDK in application bundle has been updated to version 12.
 * _[New]_ Defaults to the new Shenandoah garbage collector with the "compact" heuristics, which allows for a larger maximum heap size while keeping actual memory usage reasonable when a large heap is no longer required.   
 * _[New]_ Warn end-users when trying to add a large number of series to a single chart at once.
 * _[New]_ History of previously opened sources is now accessible via a combo box on the selection dialog (as well as through the existing auto-completion feature).
@@ -507,7 +507,7 @@ Released on Mon, 28 Jan 2019
 * _[Fixed]_ DataAdapter plugins do not get loaded when starting binjr from exec-maven-plugin or Graviton.
 * _[Fixed]_ JavaFX crashes on focus loss from dialog on macOS 10.14 Mojave.
 * _[Fixed]_ Trying to establish a connection via HTTPS fails with " Received fatal alert: handshake_failure". 
-* _[Fixed]_ DataAdapter never cleans up its resources if if fails when populating source tree view.
+* _[Fixed]_ DataAdapter never cleans up its resources if fails when populating source tree view.
 
 ## [binjr v2.2.1](https://github.com/binjr/binjr/releases/tag/v2.2.1)
 Released on Fri, 11 Jan 2019
@@ -535,7 +535,7 @@ Released on Fri, 28 Dec 2018
 Released on Thu, 20 Dec 2018
 
 * _[New]_ Added a new data adapter to directly open and plot the content of rrd db files produced by [RRd4j](https://github.com/rrd4j/rrd4j)
-* _[New]_ Added a context menu accessible when right-cliking on the tab that provide shortcuts to various manipulations of the tabs (close, edit, duplicate and detach).
+* _[New]_ Added a context menu accessible when right-clicking on the tab that provide shortcuts to various manipulations of the tabs (close, edit, duplicate and detach).
 
 ## [binjr v2.0.0](https://github.com/binjr/binjr/releases/tag/v2.0.0)
 Released on Mon, 26 Nov 2018
@@ -549,7 +549,7 @@ Released on Mon, 26 Nov 2018
 
 * _[New]_ Built to run on Java 11 and beyond, and use the new standalone distribution of OpenJFX (https://openjfx.io/)
 The platform specific packages above contain all required dependencies, including the Java runtime; simply download the one for your OS, unpack it and run "binjr" to start.
-* _[New]_ It is now possible to link the time line of two or more independent worksheets (i.e. change the time range on one worksheet also affect all linked worksheets).
+* _[New]_ It is now possible to link the timeline of two or more independent worksheets (i.e. change the time range on one worksheet also affect all linked worksheets).
 * _[New]_ It is now possible to copy/paste a time range from one worksheet to another.
 * _[New]_ Removed the modal dialog shown when adding a new worksheet; instead new worksheet are set to editable mode upon creation.
 * _[Fixed]_ Clicking the "OK" button on new source dialog has no effect when the source adapter is loaded from a faulty plugin.
