@@ -143,8 +143,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:5.13.1')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.13.1')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:5.13.3')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.13.3')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
