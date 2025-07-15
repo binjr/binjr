@@ -273,9 +273,9 @@ tasks.register('copyAppLibs', Copy) {
     from project(":binjr-adapter-jfr").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
-    from project(":binjr-adapter-json").configurations.runtimeClasspath {
-        exclude "javafx-*.jar"
-    }
+//    from project(":binjr-adapter-json").configurations.runtimeClasspath {
+//        exclude "javafx-*.jar"
+//    }
     from project(":binjr-adapter-jvmgc").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
         exclude "binjr-adapter-logs-*.jar"
@@ -300,7 +300,7 @@ tasks.register('copyPluginLibs', Copy) {
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-jfr").jar
-    from project(":binjr-adapter-json").jar
+//    from project(":binjr-adapter-json").jar
     from project(":binjr-adapter-jvmgc").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
@@ -325,9 +325,9 @@ tasks.register('copyJpackageInputLibs', Copy) {
     from project(":binjr-adapter-csv").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
-    from project(":binjr-adapter-json").configurations.runtimeClasspath {
-        exclude "javafx-*.jar"
-    }
+//    from project(":binjr-adapter-json").configurations.runtimeClasspath {
+//        exclude "javafx-*.jar"
+//    }
     from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
@@ -345,7 +345,7 @@ tasks.register('copyJpackageInputLibs', Copy) {
     from project(":binjr-adapter-jfr").jar
     from project(":binjr-adapter-jvmgc").jar
     from project(":binjr-adapter-csv").jar
-    from project(":binjr-adapter-json").jar
+//    from project(":binjr-adapter-json").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
 //    from project(":binjr-adapter-text").jar
