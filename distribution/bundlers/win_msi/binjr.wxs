@@ -1,5 +1,5 @@
 ﻿<!--
-  ~    Copyright 2019 Frederic Thevenet
+  ~    Copyright 2019-2025 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Package Name="binjr" Language="1033" Version="$(var.binjrVersion)" Manufacturer="binjr"
              UpgradeCode="6362B9A7-06AA-42CB-8A81-5743B319CE23" InstallerVersion="200" Scope="perUser">
-        <SummaryInformation Description="binjr - A time Series Browser"/>
+        <SummaryInformation Description="binjr - A Time Series Browser"/>
 
         <Icon Id="binjr.ico" SourceFile="$(var.resourcesDir)\platforms\windows\resources\icons\binjr.ico"/>
         <Property Id="ARPPRODUCTICON" Value="binjr.ico"/>

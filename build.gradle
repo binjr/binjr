@@ -88,8 +88,8 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
-ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX5")
-ext.WIX_VERSION = "5.0.2"
+ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX6")
+ext.WIX_VERSION = "6.0.1"
 ext.ARTIFACTS_ROOT_PATH = "${buildDir}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")

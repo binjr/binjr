@@ -41,7 +41,7 @@ stages:
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
           javaVersion: $(javaVersion)
           pool:
-            vmImage: 'macOS-13'
+            vmImage: 'macOS-latest'
 
       # Windows app bundle job
       - template: build-job.yml
@@ -49,7 +49,7 @@ stages:
           name: app_bundle_windows
           platform: win
           arch: x64
-          wixVersion: '5.0.2'
+          wixVersion: '6.0.1'
           jdkDownloadUrl: https://api.adoptium.net/v3/binary/latest/$(javaVersion)/ga/windows/x64/jdk/hotspot/normal/eclipse
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           javaVersion: $(javaVersion)
