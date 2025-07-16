@@ -843,7 +843,7 @@ tasks.register('signPackageDistribution') {
 
 def isNonStable = { String version ->
     // Ignore javafx early access and glassfish beta
-    def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(alpha)|(beta)|(b)|(m))[-\+]*[0-9.]+$/
+    def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(alpha)|(beta)|(b)|(m))[-\+]*[0-9.]+b?$/
     return (version ==~ regex)
 }
 
