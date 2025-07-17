@@ -4,5 +4,6 @@
 * _[New] [Workspace]_ The binjr workspace schema version number has been updated to `3.2`. Opening workspaces created with this version in prior versions of binjr will cause warnings to be logged and may have incompatibility issues.   
 * _[Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to `24.0.2`
 * _[Fixed]_ binjr can now properly resolve relative paths to source assets (e.g. paths to .csv, .jfr or log files, etc...) inside saved workspaces (.bjr).  
+* _[Fixed]_ Closing the last tab in a panel on an external tab window closes the whole window even if it contains other non-empty panels.
 * _[Fixed]_ Missing "jdk.accessibility" module causes binjr to fail working with screen readers.
 * _[Fixed]_ Explicitly enabled native access for JavaFX graphics modules to remove warnings.

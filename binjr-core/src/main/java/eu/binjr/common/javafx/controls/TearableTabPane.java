@@ -371,10 +371,11 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
 
         bindingManager.attachListener(this.getTabs(), ((ListChangeListener<Tab>) c -> {
             if (c.getList().isEmpty()) {
-                if (TearableTabPane.isCloseIfEmpty() && this.getHasSibling()) {
+                if (TearableTabPane.isCloseIfEmpty()) {
                     this.closePane();
-                } else if (NodeUtils.getStage(this) instanceof TabPaneDetachedStage paneStage) {
-                    paneStage.close();
+                    if (!this.getHasSibling() && NodeUtils.getStage(this) instanceof TabPaneDetachedStage paneStage) {
+                        paneStage.close();
+                    }
                 }
             }
         }));
