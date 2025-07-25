@@ -92,12 +92,20 @@ public class Chart {
         }
 
         public static ChartTypeEnum fromValue(String value) {
+            return fromValue(value, null);
+        }
+
+        public static ChartTypeEnum fromValue(String value, ChartTypeEnum defaultValue) {
             for (ChartTypeEnum b : ChartTypeEnum.values()) {
                 if (b.value.equals(value)) {
                     return b;
                 }
             }
-            throw new IllegalArgumentException("Unexpected value '" + value + "'");
+            if (defaultValue == null) {
+                throw new IllegalArgumentException("Unexpected value '" + value + "'");
+            } else {
+                return defaultValue;
+            }
         }
 
         public static class Adapter extends TypeAdapter<ChartTypeEnum> {
@@ -109,7 +117,7 @@ public class Chart {
             @Override
             public ChartTypeEnum read(final JsonReader jsonReader) throws IOException {
                 String value = jsonReader.nextString();
-                return ChartTypeEnum.fromValue(value);
+                return ChartTypeEnum.fromValue(value, ChartTypeEnum.LINE);
             }
         }
     }

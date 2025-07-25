@@ -3,6 +3,7 @@
 * _[New] [Core]_ [Compact object headers]((https://openjdk.org/jeps/450)) are now enabled by default by the application's launcher, for a 10 to 20% reduction in heap memory usage.  
 * _[New] [Core]_ The binjr workspace schema version number has been updated to `3.2`. Opening workspaces created with this version in prior versions of binjr will cause warnings to be logged and may have incompatibility issues.   
 * _[Dependencies]_ Updated embedded OpenJDK and JavaFX runtimes to `24.0.2`
+* _[Fixed] [Netdata Adapter]_ "Unexpected value 'heatmap'" error when attempting to connect to a Netdata instance that serves probes with a 'heatmap' chart type.  
 * _[Fixed] [Core]_ binjr can now properly resolve relative paths to source assets (e.g. paths to .csv, .jfr or log files, etc...) inside saved workspaces (.bjr).  
 * _[Fixed] [UI]_ Closing the last tab in a panel on an external tab window closes the whole window even if it contains other non-empty panels.
 * _[Fixed] [Core]_ Missing "jdk.accessibility" module causes binjr to fail working with screen readers.
