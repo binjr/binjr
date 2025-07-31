@@ -3,7 +3,9 @@ parameters:
   pool: ''
   platform: ''
   arch: ''
+  targetArch: ''
   wixVersion: ''
+  packagingTask: 'signPackageDistribution'
 
 jobs:
   - job: ${{ parameters.name }}
@@ -52,6 +54,7 @@ jobs:
       - task: gradle@3
         condition: succeeded()
         env:
+          TARGET_ARCH: ${{ parameters.targetArch }}
           GPG_KEY_NAME: $(gpg.keyname)
           GPG_PASSPHRASE: $(gpg.passphrase)
           GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
@@ -67,7 +70,7 @@ jobs:
           jdkVersionOption: 1.${{ parameters.javaVersion }}
           jdkArchitectureOption: ${{ parameters.arch }}
           publishJUnitResults: false
-          tasks: 'signPackageDistribution'
+          tasks: ${{ parameters.packagingTask }}
 
       - task: GithubRelease@1
         condition: and(succeeded(), eq(variables['isTag'], 'true'))
