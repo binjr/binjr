@@ -101,6 +101,8 @@ ext.ARTIFACTS_PATH_RPM = file("${ARTIFACTS_ROOT_PATH}/rpm/")
 ext.ARTIFACTS_PATH_DEB = file("${ARTIFACTS_ROOT_PATH}/deb/")
 ext.ARTIFACTS_PATH_TGZ = file("${ARTIFACTS_ROOT_PATH}/tgz/")
 ext.ARTIFACTS_PATH_WIN = file("${ARTIFACTS_ROOT_PATH}/win/")
+ext.ARTIFACTS_PATH_MAC = file("${ARTIFACTS_ROOT_PATH}/macos/")
+ext.ARTIFACTS_PATH_LINUX = file("${ARTIFACTS_ROOT_PATH}/linux/")
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = System.getenv('GPG_KEYRING_PATH')
@@ -555,7 +557,7 @@ tasks.register('wixRunBuild', Exec) {
     outputs.dir ARTIFACTS_PATH_MSI
 }
 
-tasks.register('jpackageWin', Exec) {
+tasks.register('jpackageAppWin', Exec) {
     dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir ARTIFACTS_PATH_WIN
     commandLine = [
@@ -570,7 +572,7 @@ tasks.register('jpackageWin', Exec) {
             "--description", BINJR_DESCRIPTION,
             "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.ico",
-            "--arguments", "--packaging=WIN_ZIP",
+            "--arguments", "--packaging=WIN_APP",
             "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
@@ -586,6 +588,75 @@ tasks.register('jpackageWin', Exec) {
             "--java-options", "--enable-native-access=javafx.graphics"
     ]
     outputs.dir ARTIFACTS_PATH_WIN
+}
+
+tasks.register('jpackageAppMac', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
+    workingDir ARTIFACTS_PATH_MAC
+    commandLine = [
+            "jpackage",
+            "--name", project.name,
+            "--input", "${buildDir}/tmp/input",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
+            "--main-class", "eu.binjr.core.Bootstrap",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
+            "--type", "app-image",
+            "--copyright", BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
+            "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",
+            "--arguments", "--packaging=MAC_APP",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
+            "--java-options", "-XX:+UnlockExperimentalVMOptions",
+            "--java-options", "-XX:+UseShenandoahGC",
+            "--java-options", "-XX:ShenandoahGCHeuristics=compact",
+            "--java-options", "-XX:ShenandoahAllocationThreshold=20",
+            "--java-options", "-XX:+UseCompactObjectHeaders",
+            "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
+            "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "-Dapple.awt.application.appearance=system"
+    ]
+    outputs.dir ARTIFACTS_PATH_MAC
+}
+
+tasks.register('jpackageAppLinux', Exec) {
+    dependsOn prepareAppBundle, copyJpackageInputLibs
+    workingDir ARTIFACTS_PATH_LINUX
+    commandLine = [
+            "jpackage",
+            "--name", project.name,
+            "--input", "${buildDir}/tmp/input",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
+            "--main-class", "eu.binjr.core.Bootstrap",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
+            "--type", "app-image",
+            "--copyright", BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
+            "--app-version", BINJR_VERSION.replace("-", "."),
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.png",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
+            "--java-options", "-XX:+UnlockExperimentalVMOptions",
+            "--java-options", "-XX:+UseShenandoahGC",
+            "--java-options", "-XX:ShenandoahGCHeuristics=compact",
+            "--java-options", "-XX:ShenandoahAllocationThreshold=20",
+            "--java-options", "-XX:+UseCompactObjectHeaders",
+            "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
+            "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
+            "--java-options", "--enable-native-access=javafx.graphics",
+            "--arguments", "--system-plugins-path=/opt/binjr/plugins",
+            "--arguments", "--packaging=LINUX_APP",
+            "--verbose"
+    ]
+    outputs.dir ARTIFACTS_PATH_LINUX
 }
 
 tasks.register('jpackageDmg', Exec) {
@@ -666,7 +737,6 @@ tasks.register('jpackagePkg', Exec) {
     outputs.dir ARTIFACTS_PATH_PKG
 }
 
-
 tasks.register('jpackageDeb', Exec) {
     dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir ARTIFACTS_PATH_DEB
@@ -733,8 +803,6 @@ tasks.register('jpackageRpm', Exec) {
             "--app-version", BINJR_VERSION.replace("-", "."),
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
-            "--file-associations", "${projectDir}/distribution/bundlers/linux_rpm/file-associations.properties",
-            "--resource-dir", "${projectDir}/distribution/bundlers/linux_rpm/",
             "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
@@ -750,13 +818,6 @@ tasks.register('jpackageRpm', Exec) {
             "--java-options", "--enable-native-access=javafx.graphics",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_RPM",
-            "--linux-package-name", "binjr",
-            "--linux-app-category", "Utility",
-            "--linux-app-release", LINUX_APP_RELEASE,
-            "--linux-menu-group", "Utility",
-            "--linux-rpm-license-type", "Apache-2.0",
-            "--linux-shortcut",
-            "--temp", "${buildDir}/tmp/rpm",
             "--verbose"
     ]
     doLast {
