@@ -127,5 +127,12 @@ public class StringUtils {
         }
     }
 
+    public static boolean isNullOrEmpty(String val){
+        return val == null || val.isEmpty();
+    }
+
+    public static boolean isNullOrBlank(String val){
+        return val == null || val.isBlank();
+    }
 
 }
