@@ -47,7 +47,8 @@ ext.BINJR_COPYRIGHT = "Copyright (c) 2016-2025 Frederic Thevenet"
 ext.BINJR_DESCRIPTION = "A Time Series Browser"
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.OS_ARCH = System.getProperty("os.arch")
-ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
+ext.TARGET_ARCH = isNullOrBlank(System.getenv('TARGET_ARCH')) ? OS_ARCH : System.getenv('TARGET_ARCH')
+ext.IS_64 = TARGET_ARCH.toLowerCase().contains("64")
 ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.IS_MONOCLE = false
 ext.IS_MAC = OS_NAME.contains("mac") || OS_NAME.contains("darwin")
@@ -86,7 +87,7 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "jdk.crypto.cryptoki" +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
-ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
+ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${TARGET_ARCH}"
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX6")
@@ -399,8 +400,8 @@ tasks.register('downloadOpenJfxModules', Download) {
 
 tasks.register('downloadJlinkOpenJdk', Download) {
     onlyIfModified true
-    src craftJlinkJdkUrl()
-    dest new File(DL_CACHE_PATH, "openjdk_${BUNDLE_JDK_VERSION}${IS_WINDOWS ? '.zip' : '.tar.gz'}")
+    src craftJlinkJmodUrl()
+    dest new File(DL_CACHE_PATH, "openjdk_${BUNDLE_JDK_VERSION}-jmods${IS_WINDOWS ? '.zip' : '.tar.gz'}")
 }
 
 tasks.register('unzipOpenJfxModules', Copy) {
@@ -425,30 +426,32 @@ tasks.register('createRuntimeImage', Exec) {
     if (!IS_JAVAFX_BUNDLED) {
         dependsOn unzipOpenJfxModules
     }
-    def jlinkJdkDir
+    def platformJlinkDir = JDK_HOME
+    def targetJlinkDir
     if (USE_BUILD_JDK_IN_BUNDLE) {
-        jlinkJdkDir = JDK_HOME
-    } else if (Files.exists(Paths.get("${BUNDLE_JDK_PATH}/bin/jlink${IS_WINDOWS ? ".exe" : ""}"))) {
-        jlinkJdkDir = BUNDLE_JDK_PATH
+        targetJlinkDir = platformJlinkDir
+    } else if (Files.exists(Paths.get("${BUNDLE_JDK_PATH}/jmods/java.base.jmod"))) {
+        targetJlinkDir = BUNDLE_JDK_PATH
     } else {
         if (IS_WINDOWS) {
             dependsOn unzipJlinkOpenJdk
         } else {
             dependsOn untarJlinkOpenJdk
         }
-        jlinkJdkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}${IS_MAC ? '/Contents/Home' : ''}".replace("-ea-beta", "")
+        targetJlinkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}-jmods${IS_MAC ? '/Contents/Home' : ''}".replace("-ea-beta", "")
     }
 
 
     workingDir project.projectDir
     commandLine = [
-            "${jlinkJdkDir}/bin/jlink",
-            '-p', "${jlinkJdkDir}/jmods${ADDITIONAL_JMOD_PATH}",
+            "${platformJlinkDir}/bin/jlink",
+            '-p', "${targetJlinkDir}${ADDITIONAL_JMOD_PATH}",
             '--add-modules', JLINK_ADD_MODULES,
             '--strip-debug',
             '--no-header-files',
             '--no-man-pages',
             "--vm=server",
+            "--verbose",
             "--compress=zip-6",
             '--output', "${APP_IMAGE_PATH}/runtime"
     ]
@@ -708,7 +711,7 @@ tasks.register('jpackageDeb', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${OS_ARCH}.deb")
+        def source = java.nio.file.Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
     }
     outputs.dir ARTIFACTS_PATH_DEB
@@ -853,19 +856,19 @@ def craftPlatformClassifier() {
     def classifier
     if (IS_MAC) {
         classifier = "mac"
-        if (OS_ARCH == "aarch64") {
+        if (TARGET_ARCH == "aarch64") {
             classifier += "-aarch64"
         }
     } else if (IS_LINUX) {
         classifier = "linux"
-        if (OS_ARCH == "aarch64") {
+        if (TARGET_ARCH == "aarch64") {
             classifier += "-aarch64"
-        } else if (OS_ARCH == "aarch32" || OS_ARCH == "arm32") {
+        } else if (TARGET_ARCH == "aarch32" || TARGET_ARCH == "arm32") {
             classifier += "-arm32"
         }
     } else if (IS_WINDOWS) {
         classifier = "win"
-        if (OS_ARCH == "x86") {
+        if (TARGET_ARCH == "x86") {
             classifier += "-x86"
         }
     }
@@ -875,7 +878,7 @@ def craftPlatformClassifier() {
     return classifier
 }
 
-def craftJlinkJdkUrl() {
+def craftJlinkJmodUrl() {
     def platform
     switch (OS_FAMILY) {
         case "windows":
@@ -888,10 +891,10 @@ def craftJlinkJdkUrl() {
             platform = "mac"
             break
         default:
-            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+            throw new Exception("Cannot download OpenJDK modules for unsupported platform: ${OS_FAMILY} - ${TARGET_ARCH}")
     }
     def arch = getArch()
-    return "https://api.adoptium.net/v3/binary/version/${BUNDLE_JDK_VERSION}/${platform}/${arch}/jdk/hotspot/normal/eclipse"
+    return "https://api.adoptium.net/v3/binary/version/${BUNDLE_JDK_VERSION}/${platform}/${arch}/jmods/hotspot/normal/adoptium"
 }
 
 def craftOpenJfxModsUrl() {
@@ -907,7 +910,7 @@ def craftOpenJfxModsUrl() {
             platform = "osx"
             break
         default:
-            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${TARGET_ARCH}")
     }
     def arch = getArch()
     return "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${platform}-${arch}_bin-jmods.zip"
@@ -915,7 +918,8 @@ def craftOpenJfxModsUrl() {
 
 def getArch() {
     def arch
-    switch (OS_ARCH) {
+    switch (TARGET_ARCH) {
+        case "x64":
         case "amd64":
         case "x86_64":
             arch = "x64"
@@ -927,7 +931,7 @@ def getArch() {
             arch = "aarch64"
             break
         default:
-            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${TARGET_ARCH}")
     }
     return arch
 }
@@ -936,6 +940,10 @@ dependencyUpdates {
     rejectVersionIf {
         isNonStable(it.candidate.version)
     }
+}
+
+static boolean isNullOrBlank(String val){
+    return val == null || val.isBlank();
 }
 
 
