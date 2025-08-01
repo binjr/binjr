@@ -64,7 +64,7 @@ stages:
           platform: mac
           arch: aarch64
           targetArch: aarch64
-          packagingTask: 'signPackageAsTarGz'
+          packagingTask: 'signPackageAsMacTarGz'
           jdkDownloadUrl: https://api.adoptium.net/v3/installer/latest/$(javaVersion)/ga/mac/x64/jdk/hotspot/normal/eclipse
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
           javaVersion: $(javaVersion)
