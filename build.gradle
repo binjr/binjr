@@ -18,8 +18,10 @@
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 
@@ -632,9 +634,11 @@ tasks.register('jpackageAppMac', Exec) {
     doLast {
         //Override launcher for target arch
         if (TARGET_ARCH != OS_ARCH) {
-            Files.copy(Paths.get("${projectDir}/distribution/platforms/mac/${TARGET_ARCH}/binjr"),
-                    Paths.get("${JPACKAGE_IMAGE_PATH}/binjr.app/Contents/MacOS/binjr"),
-                    StandardCopyOption.REPLACE_EXISTING)
+            Path launcherSource = Paths.get("${projectDir}/distribution/platforms/mac/launcher/${TARGET_ARCH}/jpackageapplauncher")
+            Path launcherTarget = Paths.get("${JPACKAGE_IMAGE_PATH}/binjr.app/Contents/MacOS/binjr")
+            Files.copy(launcherSource, launcherTarget, StandardCopyOption.REPLACE_EXISTING)
+            // make launcher executable
+           launcherTarget.toFile().setExecutable(true, false)
         }
     }
     outputs.dir JPACKAGE_IMAGE_PATH
@@ -708,7 +712,7 @@ tasks.register('jpackageDmg', Exec) {
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${ARTIFACTS_PATH_DMG}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.dmg")
+        def source = Path.of("${ARTIFACTS_PATH_DMG}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.dmg")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.dmg"))
     }
     outputs.dir ARTIFACTS_PATH_DMG
@@ -747,7 +751,7 @@ tasks.register('jpackagePkg', Exec) {
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${ARTIFACTS_PATH_PKG}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.pkg")
+        def source = Path.of("${ARTIFACTS_PATH_PKG}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.pkg")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.pkg"))
     }
     outputs.dir ARTIFACTS_PATH_PKG
@@ -797,7 +801,7 @@ tasks.register('jpackageDeb', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
+        def source = Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
     }
     outputs.dir ARTIFACTS_PATH_DEB
@@ -837,7 +841,7 @@ tasks.register('jpackageRpm', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${ARTIFACTS_PATH_RPM}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
+        def source = Path.of("${ARTIFACTS_PATH_RPM}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
     }
     outputs.dir ARTIFACTS_PATH_RPM
