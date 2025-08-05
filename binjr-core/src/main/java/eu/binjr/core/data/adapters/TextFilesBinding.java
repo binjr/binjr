@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.preferences.UserPreferences;
@@ -43,7 +44,7 @@ public class TextFilesBinding extends SourceBinding<String> {
     }
 
     @Override
-    protected Color[] getDefaultColorPalette() {
+    protected ColorPalette getDefaultColorPalette() {
         return UserPreferences.getInstance().logFilesColorPalette.get().getPalette();
     }
 

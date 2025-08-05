@@ -16,10 +16,11 @@
 
 package eu.binjr.core.appearance;
 
+import eu.binjr.common.colors.ColorPalette;
 import javafx.scene.paint.Color;
 
 public enum BuiltInChartColorPalettes {
-    VIBRANT("Vibrant", new Color[]{
+    VIBRANT("Vibrant", new ColorPalette(
             Color.valueOf("#3366CC"),
             Color.valueOf("#66AA00"),
             Color.valueOf("#5555DD"),
@@ -37,9 +38,9 @@ public enum BuiltInChartColorPalettes {
             Color.valueOf("#DDDD00"),
             Color.valueOf("#FE3912"),
             Color.valueOf("#0099C6"),
-            Color.valueOf("#5054E6"),
-    }),
-    PASTEL("Pastel", new Color[]{
+            Color.valueOf("#5054E6")
+    )),
+    PASTEL("Pastel", new ColorPalette(
             Color.LIGHTBLUE,
             Color.LIGHTCORAL,
             Color.LIGHTCYAN,
@@ -61,9 +62,9 @@ public enum BuiltInChartColorPalettes {
             Color.MEDIUMSPRINGGREEN,
             Color.MEDIUMTURQUOISE,
             Color.MEDIUMVIOLETRED,
-            Color.MINTCREAM,
-    }),
-    FIRE("Fire", new Color[]{
+            Color.MINTCREAM)
+    ),
+    FIRE("Fire", new ColorPalette(
             Color.valueOf("#faffb0"),
             Color.valueOf("#fff20e"),
             Color.valueOf("#ffdc17"),
@@ -76,8 +77,8 @@ public enum BuiltInChartColorPalettes {
             Color.valueOf("#ba2b19"),
             Color.valueOf("#9c2d1c"),
             Color.valueOf("#74291c")
-    }),
-    ICE("Ice", new Color[]{
+    )),
+    ICE("Ice", new ColorPalette(
             Color.valueOf("#e2e6ee"),
             Color.valueOf("#d9dfea"),
             Color.valueOf("#c2cce0"),
@@ -90,9 +91,8 @@ public enum BuiltInChartColorPalettes {
             Color.valueOf("#002ff0"),
             Color.valueOf("#0022d4"),
             Color.valueOf("#04297c")
-
-    }),
-    GRAY_SCALE("Gray Scale", new Color[]{
+    )),
+    GRAY_SCALE("Gray Scale", new ColorPalette(
             Color.valueOf("#FFFFFF"),
             Color.valueOf("#E0E0E0"),
             Color.valueOf("#CCCCCC"),
@@ -103,17 +103,17 @@ public enum BuiltInChartColorPalettes {
             Color.valueOf("#3D3D3D"),
             Color.valueOf("#292929"),
             Color.valueOf("#0A0A0A")
-    });
+    ));
 
-    private final Color[] palette;
+    private final ColorPalette palette;
     private final String name;
 
-    BuiltInChartColorPalettes(String name, Color[] colors) {
+    BuiltInChartColorPalettes(String name, ColorPalette colors) {
         this.palette = colors;
         this.name = name;
     }
 
-    public Color[] getPalette() {
+    public ColorPalette getPalette() {
         return palette;
     }
 
