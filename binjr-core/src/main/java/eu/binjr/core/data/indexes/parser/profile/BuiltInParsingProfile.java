@@ -93,7 +93,15 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     TemporalCaptureGroup.HOUR, "\\d{2}",
                     TemporalCaptureGroup.MINUTE, "\\d{2}",
                     TemporalCaptureGroup.SECOND, "\\d{2}"),
-            "$MONTH $DAY $HOUR:$MINUTE:$SECOND");
+            "$MONTH $DAY $HOUR:$MINUTE:$SECOND"),
+    HOTSPOT_JIT("Hotspot JVM JIT logs",
+            "BUILTIN_HSJIT",
+            Map.of(TemporalCaptureGroup.FRACTION, "\\d+",
+                    CaptureGroup.of("COMPID"), "\\d+",
+                    CaptureGroup.of("SEVERITY"), "[0-4]",
+                    CaptureGroup.of("METHOD"), ".*",
+                    CaptureGroup.of("SIZE"), "(\\d+|native)"),
+            "$FRACTION\\s+$COMPID\\s+[%\\s!\\w]*$SEVERITY\\s*$METHOD\\s*\\($SIZE( bytes)?\\).*");
 
     private final String profileName;
     private final String lineTemplateExpression;
