@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
@@ -80,7 +81,7 @@ public class LogFilesBinding extends SourceBinding<SearchHit> {
     }
 
     @Override
-    protected Color[] getDefaultColorPalette() {
+    protected ColorPalette getDefaultColorPalette() {
         return UserPreferences.getInstance().logFilesColorPalette.get().getPalette();
     }
 

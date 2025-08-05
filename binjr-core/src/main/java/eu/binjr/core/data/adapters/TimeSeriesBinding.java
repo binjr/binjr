@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
@@ -69,7 +70,7 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
     }
 
     @Override
-    protected Color[] getDefaultColorPalette() {
+    protected ColorPalette getDefaultColorPalette() {
         return UserPreferences.getInstance().chartColorPalette.get().getPalette();
     }
 

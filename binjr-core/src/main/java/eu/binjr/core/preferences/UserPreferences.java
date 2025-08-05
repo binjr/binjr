@@ -493,6 +493,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
     }
 
     private final Map<String, String> severityStyleMap = Map.ofEntries(
+            Map.entry("0", "palette_15"),
+            Map.entry("1", "palette_10"),
+            Map.entry("2", "palette_5"),
+            Map.entry("3", "palette_12"),
+            Map.entry("4", "palette_13"),
+            Map.entry("unknown", "unknown"),
             Map.entry("finer", "trace"),
             Map.entry("finest", "trace"),
             Map.entry("trace", "trace"),
@@ -514,7 +520,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public String mapSeverityStyle(String toMap) {
         var style = severityStyleMap.get(toMap.toLowerCase(Locale.ROOT));
-        return (style == null) ? "unknown" : style;
+        return (style == null) ? "undefined" : style;
     }
 
     public ChartType defineChartType(ChartType chartType) {

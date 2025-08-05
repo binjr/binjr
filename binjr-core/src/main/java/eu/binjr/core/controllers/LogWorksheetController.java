@@ -18,6 +18,7 @@ package eu.binjr.core.controllers;
 
 
 import com.google.gson.Gson;
+import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
@@ -32,6 +33,7 @@ import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.StringUtils;
+import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -216,6 +218,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private BinjrLoadingPane loadingPane;
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
+    private final ColorPalette facetColorPalette = BuiltInChartColorPalettes.VIBRANT.getPalette();
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -870,7 +873,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(LogFilesBinding.MIME_TYPE))) {
-           getParentController().getSelectedTreeNodes().ifPresent(items -> {
+            getParentController().getSelectedTreeNodes().ifPresent(items -> {
                 Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                 if (targetStage != null) {
                     targetStage.requestFocus();
@@ -1009,7 +1012,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             severityListView.setAllEntries(severityFacetEntries);
                             severityListView.getFacetPills()
                                     .forEach(f -> {
-                                        f.getStyleClass().add("facet-pill-" + userPrefs.mapSeverityStyle(f.getFacet().label()));
+                                        f.getStyleClass().add("facet-pill-" + mapSeverityToCssEntry(f.getFacet().label()));
                                         f.setSelected(worksheet.getQueryParameters().getSeverities().contains(f.getFacet().label()));
                                     });
                             // Update filePath facet view
@@ -1051,7 +1054,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
                                             message,
-                                            List.of(userPrefs.mapSeverityStyle(severity)),
+                                            List.of(mapSeverityToCssEntry(severity)),
                                             List.of("file-" + path.hashCode()));
                                 }
                                 // Add a dummy paragraph if result set is empty, otherwise doc creation will fail
@@ -1086,11 +1089,21 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
+    private String mapSeverityToCssEntry(String severityLabel) {
+        var severityLevel = UserPreferences.getInstance().mapSeverityStyle(severityLabel);
+        return severityLevel.equals("undefined") ?
+                "palette_" + facetColorPalette.getStableIndexFromLabel(severityLabel) :
+                severityLevel;
+    }
+
     private XYChart.Data<String, Integer> createDataPoint(String severityLabel, String bucketName, int nbOccurrences) {
         XYChart.Data<String, Integer> data = new XYChart.Data<>(bucketName, nbOccurrences);
         StackPane bar = new StackPane();
-        //   bar.getStyleClass().add("facet-pill-" + UserPreferences.getInstance().mapSeverityStyle(severityLabel));
-        bar.setStyle("-fx-background-color: -" + UserPreferences.getInstance().mapSeverityStyle(severityLabel) + "-color;");
+        var severityLevel = UserPreferences.getInstance().mapSeverityStyle(severityLabel);
+        var severityColor = severityLevel.equals("undefined") ?
+                ColorUtils.toHex(facetColorPalette.getStableColorFromLabel(severityLabel)) :
+                "-" + severityLevel + "-color";
+        bar.setStyle("-fx-background-color: " + severityColor + ";");
         data.setNode(bar);
         return data;
     }
@@ -1429,6 +1442,24 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     .map((i) -> ".file-" + i.getPathFacetValue().hashCode() +
                             "{-fx-background-color:" + ColorUtils.toHex(i.getDisplayColor(), 0.2) + ";}")
                     .collect(Collectors.joining("\n"));
+            cssStr += "\n";
+            for (int i = 0; i < facetColorPalette.getColors().length; i++) {
+                var name = "palette_" + i;
+                var color = ColorUtils.toHex(facetColorPalette.getColors()[i]);
+                cssStr += "{ -" + name + "-color: " + color + "; }\n" +
+                        ".facet-pill-" + name + "," +
+                        ".facet-pill-" + name + " .box {\n" +
+                        "-fx-background-color: derive(" + color + ", 80%); " +
+                        " -fx-text-fill: derive(" + color + ", -20%); " +
+                        "-fx-border-color: derive(" + color + ", -20%); " +
+                        "}\n" +
+                        ".facet-pill-" + name + ":selected .box .mark {\n" +
+                        "-fx-background-color: derive(" + color + ", -20%); " +
+                        "}\n" +
+                        ".styled-text-area ." + name + "," +
+                        ".log-" + name + " {-fx-fill: " + color + ";}\n";
+            }
+
             Files.writeString(cssPath, cssStr, StandardOpenOption.TRUNCATE_EXISTING);
             root.getStylesheets().add(cssUrl);
         } catch (IOException e) {

@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.preferences.UserPreferences;
@@ -23,8 +24,6 @@ import javafx.scene.paint.Color;
 
 import jakarta.xml.bind.annotation.*;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
@@ -154,11 +153,11 @@ public abstract class SourceBinding<T> {
      * @return the color of the bound series as defined in the source.
      */
     public Color getColor() {
-        return this.color == null ? computeDefaultColor(this.getLabel()) : this.color;
+        return this.color == null ? getDefaultColorPalette().getStableColorFromLabel(this.getLabel()) : this.color;
     }
 
     public Color getAutoColor(String key) {
-        return computeDefaultColor(key);
+        return  getDefaultColorPalette().getStableColorFromLabel(key);
     }
 
     public String getMimeType() {
@@ -198,26 +197,26 @@ public abstract class SourceBinding<T> {
 
     public abstract Class<? extends Worksheet<T>> getWorksheetClass();
 
-    protected abstract Color[] getDefaultColorPalette();
+    protected abstract ColorPalette getDefaultColorPalette();
 
-    protected Color computeDefaultColor(String key) {
-        long targetNum = getHashValue(key) % getDefaultColorPalette().length;
-        if (targetNum < 0) {
-            targetNum = targetNum * -1;
-        }
-        return getDefaultColorPalette()[((int) targetNum)];
-    }
-
-    private long getHashValue(final String value) {
-        long hashVal;
-        var md = threadLocalMessageDigest.get();
-        if (md == null) {
-            return value.hashCode();
-        }
-        md.update((value).getBytes(StandardCharsets.UTF_8));
-        hashVal = new BigInteger(1, md.digest()).longValue();
-        return hashVal;
-    }
+//    protected Color computeDefaultColor(String key) {
+//        long targetNum = getHashValue(key) % getDefaultColorPalette().length;
+//        if (targetNum < 0) {
+//            targetNum = targetNum * -1;
+//        }
+//        return getDefaultColorPalette()[((int) targetNum)];
+//    }
+//
+//    private long getHashValue(final String value) {
+//        long hashVal;
+//        var md = threadLocalMessageDigest.get();
+//        if (md == null) {
+//            return value.hashCode();
+//        }
+//        md.update((value).getBytes(StandardCharsets.UTF_8));
+//        hashVal = new BigInteger(1, md.digest()).longValue();
+//        return hashVal;
+//    }
 
 
     public abstract static class Builder<T, S extends SourceBinding<T>, B extends Builder<T, S, B>> {
