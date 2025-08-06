@@ -1092,7 +1092,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private String mapSeverityToCssEntry(String severityLabel) {
         var severityLevel = UserPreferences.getInstance().mapSeverityStyle(severityLabel);
         return severityLevel.equals("undefined") ?
-                "palette_" + facetColorPalette.getStableIndexFromLabel(severityLabel) :
+                "palette_" + facetColorPalette.matchEntryIndexToLabel(severityLabel) :
                 severityLevel;
     }
 
@@ -1101,7 +1101,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         StackPane bar = new StackPane();
         var severityLevel = UserPreferences.getInstance().mapSeverityStyle(severityLabel);
         var severityColor = severityLevel.equals("undefined") ?
-                ColorUtils.toHex(facetColorPalette.getStableColorFromLabel(severityLabel)) :
+                ColorUtils.toHex(facetColorPalette.matchEntryToLabel(severityLabel)) :
                 "-" + severityLevel + "-color";
         bar.setStyle("-fx-background-color: " + severityColor + ";");
         data.setNode(bar);

@@ -46,11 +46,11 @@ public class ColorPalette {
         return colors;
     }
 
-    public Color getStableColorFromLabel(String label) {
-        return colors[getStableIndexFromLabel(label)];
+    public Color matchEntryToLabel(String label) {
+        return colors[matchEntryIndexToLabel(label)];
     }
 
-    public int getStableIndexFromLabel(String label) {
+    public int matchEntryIndexToLabel(String label) {
         long targetNum = getHashValue(label) % colors.length;
         if (targetNum < 0) {
             targetNum = targetNum * -1;

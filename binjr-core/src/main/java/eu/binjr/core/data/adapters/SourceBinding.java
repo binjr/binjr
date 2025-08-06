@@ -153,11 +153,11 @@ public abstract class SourceBinding<T> {
      * @return the color of the bound series as defined in the source.
      */
     public Color getColor() {
-        return this.color == null ? getDefaultColorPalette().getStableColorFromLabel(this.getLabel()) : this.color;
+        return this.color == null ? getDefaultColorPalette().matchEntryToLabel(this.getLabel()) : this.color;
     }
 
     public Color getAutoColor(String key) {
-        return  getDefaultColorPalette().getStableColorFromLabel(key);
+        return  getDefaultColorPalette().matchEntryToLabel(key);
     }
 
     public String getMimeType() {
