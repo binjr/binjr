@@ -23,7 +23,7 @@ dependencies {
     api 'org.controlsfx:controlsfx:11.2.2'
     implementation 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.13.1'
-    api 'org.apache.commons:commons-csv:1.14.0'
+    api 'org.apache.commons:commons-csv:1.14.1'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
     implementation 'org.bouncycastle:bcpg-jdk18on:1.81'
