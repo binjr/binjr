@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2024 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.core.appearance;
 
+import javafx.application.ColorScheme;
 import javafx.application.Platform;
 
 import java.util.Objects;
@@ -30,17 +31,22 @@ public enum BuiltInUserInterfaceThemes implements UserInterfaceThemes {
     SYSTEM("System", () -> switch (Platform.getPreferences().colorSchemeProperty().get()) {
         case DARK -> "/eu/binjr/css/Dark.css";
         case LIGHT -> "/eu/binjr/css/Light.css";
+    }, () -> switch (Platform.getPreferences().colorSchemeProperty().get()) {
+        case DARK -> ColorScheme.DARK;
+        case LIGHT -> ColorScheme.LIGHT;
     }),
-    LIGHT("Light", () -> "/eu/binjr/css/Light.css"),
-    DARK("Dark", () -> "/eu/binjr/css/Dark.css"),
-    CLASSIC("Classic", () -> "/eu/binjr/css/Classic.css");
+    LIGHT("Light", () -> "/eu/binjr/css/Light.css", () -> ColorScheme.LIGHT),
+    DARK("Dark", () -> "/eu/binjr/css/Dark.css", () -> ColorScheme.DARK),
+    CLASSIC("Classic", () -> "/eu/binjr/css/Classic.css", () -> ColorScheme.LIGHT);
 
-    private final Supplier<String> cssPath;
+    private final Supplier<String> cssPathSupplier;
     private final String label;
+    private final Supplier<ColorScheme> colorSchemeSupplier;
 
-    BuiltInUserInterfaceThemes(String label, Supplier<String> cssPath) {
+    BuiltInUserInterfaceThemes(String label, Supplier<String> cssPath, Supplier<ColorScheme> colorSchemeSupplier) {
         this.label = label;
-        this.cssPath = cssPath;
+        this.cssPathSupplier = cssPath;
+        this.colorSchemeSupplier = colorSchemeSupplier;
     }
 
     /**
@@ -48,8 +54,13 @@ public enum BuiltInUserInterfaceThemes implements UserInterfaceThemes {
      *
      * @return the path of the css for this theme.
      */
-    public String getCssPath() {
-        return cssPath.get();
+    public String getCssPathSupplier() {
+        return cssPathSupplier.get();
+    }
+
+    @Override
+    public ColorScheme getColorScheme() {
+        return colorSchemeSupplier.get();
     }
 
     @Override

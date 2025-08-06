@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2023 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.plugins.ServiceLoaderHelper;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.application.ColorScheme;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -100,7 +101,7 @@ public interface UserInterfaceThemes {
      *
      * @return the path of the css for this theme.
      */
-    String getCssPath();
+    String getCssPathSupplier();
 
     /**
      * Returns the constant name for the UI theme
@@ -108,4 +109,15 @@ public interface UserInterfaceThemes {
      * @return the constant name for the UI theme
      */
     String name();
+
+    /**
+     * Returns the general color scheme of the UI theme.
+     *
+     * @return  the general color scheme of the UI theme.
+     */
+    ColorScheme getColorScheme();
+
+
+
+
 }
