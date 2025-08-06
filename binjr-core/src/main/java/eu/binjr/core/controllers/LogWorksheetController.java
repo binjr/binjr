@@ -49,6 +49,7 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
+import javafx.application.ColorScheme;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -610,16 +611,21 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(heatmapArea.managedProperty(), heatmapArea.visibleProperty());
         getBindingManager().bind(heatmapArea.visibleProperty(), heatmapToggleButton.selectedProperty());
 
-        heatmapArea.managedProperty().addListener((obs, oldVal, newVal) -> {
-            heatmapArea.setMinHeight(newVal ? 120 : 0);
-            toolbarSplitPane.setDividerPositions(0.0);
-        });
+        heatmapArea.setMinHeight(heatmapArea.isManaged() ? 120 : 0);
+        logsToolPane.setMinHeight(logsToolPane.isManaged() ? 45 : 0);
 
-        logsToolPane.managedProperty().addListener((obs, oldVal, newVal) -> {
-            logsToolPane.setMinHeight(newVal ? 45 : 0);
-             if (!heatmapArea.isVisible())
-                 toolbarSplitPane.setDividerPositions(0.0);
-        });
+        getBindingManager().attachListener(heatmapArea.managedProperty(),
+                (ChangeListener<Boolean>) (obs, oldVal, newVal) -> {
+                    heatmapArea.setMinHeight(newVal ? 120 : 0);
+                    toolbarSplitPane.setDividerPositions(0.0);
+                });
+
+        getBindingManager().attachListener(logsToolPane.managedProperty(),
+                (ChangeListener<Boolean>) (obs, oldVal, newVal) -> {
+                    logsToolPane.setMinHeight(newVal ? 45 : 0);
+                    if (!heatmapArea.isVisible())
+                        toolbarSplitPane.setDividerPositions(0.0);
+                });
 
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
@@ -655,8 +661,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Init log files table view
         intiLogFileTable();
 
-        splitPane.setDividerPositions(worksheet.getDividerPosition());
-        getBindingManager().bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+        toolbarSplitPane.setDividerPositions(worksheet.getTopDividerPosition());
+        getBindingManager().bind(worksheet.topDividerPositionProperty(), toolbarSplitPane.getDividers().getFirst().positionProperty());
+
+        splitPane.setDividerPositions(worksheet.getBottomDividerPosition());
+        getBindingManager().bind(worksheet.bottomDividerPositionProperty(), splitPane.getDividers().getFirst().positionProperty());
 
         var eventTarget = root.getParent();
         if (eventTarget == null) {
@@ -713,6 +722,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         Bindings.add(logsToolPane.minHeightProperty(), heatmapArea.minHeightProperty()))
         );
         invalidate(false, false, ReloadPolicy.UNLOADED, false);
+
+        getBindingManager().attachListener(UserPreferences.getInstance().userInterfaceTheme.property(),
+                _ -> invalidate(false, false, ReloadPolicy.UNLOADED, false));
+
         super.initialize(location, resources);
     }
 
@@ -967,7 +980,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     protected void setEditChartMode(Boolean newValue) {
         if (!newValue) {
-            getBindingManager().suspend(worksheet.dividerPositionProperty());
+            getBindingManager().suspend(worksheet.bottomDividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             fileTablePane.setVisible(false);
             fileTablePane.setManaged(false);
@@ -976,8 +989,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             fileTablePane.setMaxHeight(Double.MAX_VALUE);
             fileTablePane.setManaged(true);
             fileTablePane.setVisible(true);
-            splitPane.setDividerPositions(worksheet.getDividerPosition());
-            getBindingManager().resume(worksheet.dividerPositionProperty());
+            splitPane.setDividerPositions(worksheet.getBottomDividerPosition());
+            getBindingManager().resume(worksheet.bottomDividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
         super.setEditChartMode(newValue);
@@ -1462,18 +1475,19 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             "{-fx-background-color:" + ColorUtils.toHex(i.getDisplayColor(), 0.2) + ";}")
                     .collect(Collectors.joining("\n"));
             cssStr += "\n";
+            int deriveFactor = UserPreferences.getInstance().userInterfaceTheme.get().getColorScheme() == ColorScheme.LIGHT ? 1 : -1;
             for (int i = 0; i < facetColorPalette.getColors().length; i++) {
                 var name = "palette_" + i;
                 var color = ColorUtils.toHex(facetColorPalette.getColors()[i]);
                 cssStr += "{ -" + name + "-color: " + color + "; }\n" +
                         ".facet-pill-" + name + "," +
                         ".facet-pill-" + name + " .box {\n" +
-                        "-fx-background-color: derive(" + color + ", 80%); " +
-                        " -fx-text-fill: derive(" + color + ", -20%); " +
-                        "-fx-border-color: derive(" + color + ", -20%); " +
+                        "-fx-background-color: derive(" + color + ", " + deriveFactor * 70 + "%); " +
+                        " -fx-text-fill: derive(" + color + ", " + deriveFactor * 10 + "%); " +
+                        "-fx-border-color: derive(" + color + ", " + deriveFactor * 10 + "%); " +
                         "}\n" +
                         ".facet-pill-" + name + ":selected .box .mark {\n" +
-                        "-fx-background-color: derive(" + color + ", -20%); " +
+                        "-fx-background-color: derive(" + color + ", " + deriveFactor * 10 + "%); " +
                         "}\n" +
                         ".styled-text-area ." + name + "," +
                         ".log-" + name + " {-fx-fill: " + color + ";}\n";
