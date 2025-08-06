@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -55,7 +55,9 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     @IsDirtyable
     private final IntegerProperty textViewFontSize;
     @IsDirtyable
-    private final DoubleProperty dividerPosition;
+    private final DoubleProperty topDividerPosition;
+    @IsDirtyable
+    private final DoubleProperty bottomDividerPosition;
     @IsDirtyable
     private final BooleanProperty filterBarVisible;
     @IsDirtyable
@@ -82,7 +84,8 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         super(name, editModeEnabled);
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
-        this.dividerPosition = new SimpleDoubleProperty(0.85);
+        this.bottomDividerPosition = new SimpleDoubleProperty(0.85);
+        this.topDividerPosition = new SimpleDoubleProperty(0);
         this.textViewFontSize = new SimpleIntegerProperty(UserPreferences.getInstance().defaultTextViewFontSize.get().intValue());
         this.seriesInfo = FXCollections.observableList(new LinkedList<>());
         this.filterBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFilterBarVisible.get());
@@ -102,18 +105,30 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     }
 
     @XmlAttribute
-    public Double getDividerPosition() {
-        return dividerPosition.getValue();
+    public double getTopDividerPosition() {
+        return topDividerPosition.getValue();
     }
 
-    public void setDividerPosition(Double dividerPosition) {
-        this.dividerPosition.setValue(dividerPosition);
+    public void setTopDividerPosition(Double topDividerPosition) {
+        this.topDividerPosition.setValue(topDividerPosition);
     }
 
-    public DoubleProperty dividerPositionProperty() {
-        return dividerPosition;
+    public Property<Number> topDividerPositionProperty() {
+        return topDividerPosition;
     }
 
+    @XmlAttribute
+    public Double getBottomDividerPosition() {
+        return bottomDividerPosition.getValue();
+    }
+
+    public void setBottomDividerPosition(Double bottomDividerPosition) {
+        this.bottomDividerPosition.setValue(bottomDividerPosition);
+    }
+
+    public DoubleProperty bottomDividerPositionProperty() {
+        return bottomDividerPosition;
+    }
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
