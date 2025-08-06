@@ -57,19 +57,19 @@ stages:
           pool:
             vmImage: 'macOS-latest'
 
-      # MacOS aarch64 cross build job
-      - template: build-job.yml
-        parameters:
-          name: app_bundle_mac_aarch64
-          platform: mac
-          arch: aarch64
-          targetArch: aarch64
-          packagingTask: 'signPackageAsMacTarGz'
-          jdkDownloadUrl: https://api.adoptium.net/v3/installer/latest/$(javaVersion)/ga/mac/x64/jdk/hotspot/normal/eclipse
-          jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
-          javaVersion: $(javaVersion)
-          pool:
-            vmImage: 'macOS-latest'
+#      # MacOS aarch64 cross build job
+#      - template: build-job.yml
+#        parameters:
+#          name: app_bundle_mac_aarch64
+#          platform: mac
+#          arch: aarch64
+#          targetArch: aarch64
+#          packagingTask: 'signPackageAsMacTarGz'
+#          jdkDownloadUrl: https://api.adoptium.net/v3/installer/latest/$(javaVersion)/ga/mac/x64/jdk/hotspot/normal/eclipse
+#          jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.pkg
+#          javaVersion: $(javaVersion)
+#          pool:
+#            vmImage: 'macOS-latest'
 
       # Windows app bundle job
       - template: build-job.yml
