@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2024 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
-import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -307,11 +306,7 @@ public class PreferenceDialogController implements Initializable {
         bindEnumToChoiceBox(userPrefs.defaultDateTimeAnchor, dateTimeAnchorChoiceBox, DateTimeAnchor.values());
         bindEnumToChoiceBox(userPrefs.defaultChartType, defaultChartTypeChoiceBox, ChartType.definedValues());
         bindEnumToChoiceBox(userPrefs.defaultUnitPrefix, defaultUnitPrefixChoiceBox, UnitPrefixes.definedValues());
-        bindEnumToChoiceBox(userPrefs.userInterfaceTheme,
-                s -> UserInterfaceThemes.valueOf(s, BuiltInUserInterfaceThemes.LIGHT),
-                UserInterfaceThemes::name,
-                uiThemeChoiceBox,
-                UserInterfaceThemes.values());
+        bindEnumToChoiceBox(userPrefs.userInterfaceTheme,uiThemeChoiceBox, UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.hardwareAcceleration, hwAccelerationChoiceBox, HardwareAccelerationSupport.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());

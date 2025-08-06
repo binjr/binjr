@@ -21,10 +21,10 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
+import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
-import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.workspace.ChartType;
@@ -98,8 +98,13 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The User Interface theme applied to the application.
      */
-    public final ObservablePreference<String> userInterfaceTheme =
-            stringPreference("userInterfaceTheme", BuiltInUserInterfaceThemes.SYSTEM.name());
+    public final ObservablePreference<UserInterfaceThemes> userInterfaceTheme =
+            objectPreference(UserInterfaceThemes.class,
+                    "userInterfaceTheme",
+                    BuiltInUserInterfaceThemes.SYSTEM,
+                    UserInterfaceThemes::name,
+                    s -> UserInterfaceThemes.valueOf(s, BuiltInUserInterfaceThemes.SYSTEM));
+
 
     /**
      * True if the last open workspace should be reload next time the app if started, false otherwise.
@@ -370,7 +375,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> javaFxVerbose = booleanPreference("javaFxVerbose", false);
 
-    public final  ObservablePreference<Boolean> autoAttemptBasicAuth = booleanPreference("autoAttemptBasicAuth", true);
+    public final ObservablePreference<Boolean> autoAttemptBasicAuth = booleanPreference("autoAttemptBasicAuth", true);
 
     /**
      * A list of user defined {@link ParsingProfile} for parsing log events
