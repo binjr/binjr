@@ -51,12 +51,14 @@
                     <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
                 </children>
             </VBox>
-            <LabelWithInlineHelp fx:id="showAreaOutlineLabel" text="Show outline" inlineHelp="Check this option if you want this chart to display a brighter coloured outline for each series."/>
+            <LabelWithInlineHelp fx:id="showAreaOutlineLabel" text="Show outline"
+                                 inlineHelp="Check this option if you want this chart to display a brighter coloured outline for each series."/>
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
                 </ToggleSwitch>
             </VBox>
-            <LabelWithInlineHelp fx:id="strokeWidthLabel" text="Stroke width" inlineHelp="The width for the outlines/scatter points on this chart."/>
+            <LabelWithInlineHelp fx:id="strokeWidthLabel" text="Stroke width"
+                                 inlineHelp="The width for the outlines/scatter points on this chart."/>
             <VBox>
                 <HBox alignment="CENTER_LEFT">
                     <Slider fx:id="strokeWidthSlider" blockIncrement="0.5" majorTickUnit="10.0" max="10.0" min="0.0"
@@ -64,7 +66,8 @@
                     <Label fx:id="strokeWidthText" text="1.0"/>
                 </HBox>
             </VBox>
-            <LabelWithInlineHelp fx:id="graphOpacityLabel" text="Area opacity" inlineHelp="The opacity of the area of series plotted on this chart." />
+            <LabelWithInlineHelp fx:id="graphOpacityLabel" text="Area opacity"
+                                 inlineHelp="The opacity of the area of series plotted on this chart."/>
             <VBox>
                 <HBox alignment="CENTER_LEFT">
                     <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
@@ -72,50 +75,43 @@
                 </HBox>
             </VBox>
             <Separator prefWidth="200.0"/>
-            <LabelWithInlineHelp text="Auto scale Y axis" inlineHelp="Check this option if you want the scale of the Y axis to adjust automatically based on the minimum and maximum values currently plotted.&#xd;Uncheck it  if you want the Y axis to be fixed and adjust the scale manually using the fields below."/>
+            <LabelWithInlineHelp text="Auto scale Y axis"
+                                 inlineHelp="Check this option if you want the scale of the Y axis to adjust automatically based on the minimum and maximum values currently plotted.&#xd;Uncheck it  if you want the Y axis to be fixed and adjust the scale manually using the fields below."/>
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
             </VBox>
             <HBox fx:id="yAxisScaleSettings" alignment="CENTER_LEFT">
-                <children>
-                    <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                              vgap="10.0">
-                        <columnConstraints>
-                            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity"/>
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="30.0"/>
-                        </columnConstraints>
-                        <rowConstraints>
-                            <RowConstraints vgrow="SOMETIMES"/>
-                            <RowConstraints vgrow="SOMETIMES"/>
-                        </rowConstraints>
-                        <children>
-                            <TextField fx:id="yMinRange" editable="true" minWidth="50.0" GridPane.columnIndex="2">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Lower bound for the Y axis"/>
-                                </tooltip>
-                            </TextField>
-                            <TextField fx:id="yMaxRange" editable="true" minWidth="50.0" GridPane.columnIndex="2"
-                                       GridPane.rowIndex="1">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Upper bound for the Y axis"/>
-                                </tooltip>
-                            </TextField>
-                            <Label text="Min:" GridPane.columnIndex="1"/>
-                            <Label text="Max:" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        </children>
-                        <HBox.margin>
-                            <Insets/>
-                        </HBox.margin>
-                    </GridPane>
-                </children>
+                <VBox spacing="10">
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Label text="Min:" HBox.hgrow="ALWAYS" minWidth="40" maxWidth="Infinity"/>
+                        <TextField fx:id="yMinRange" HBox.hgrow="SOMETIMES">
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Lower bound for the Y axis"/>
+                            </tooltip>
+                        </TextField>
+                    </HBox>
+                    <HBox spacing="10" alignment="CENTER_RIGHT">
+                        <Label text="Max:" HBox.hgrow="ALWAYS" minWidth="40" maxWidth="Infinity"/>
+                        <TextField fx:id="yMaxRange"
+                                   HBox.hgrow="SOMETIMES">
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Upper bound for the Y axis"/>
+                            </tooltip>
+                        </TextField>
+                    </HBox>
+                    <HBox.margin>
+                        <Insets right="1"/>
+                    </HBox.margin>
+                </VBox>
             </HBox>
-            <LabelWithInlineHelp fx:id="keepZeroLabel" text="Always keep 0 in range" inlineHelp="Check this option if you want to always keep the origin within range on the Y axis when it is adjusted automatically."/>
+            <LabelWithInlineHelp fx:id="keepZeroLabel" text="Always keep 0 in range"
+                                 inlineHelp="Check this option if you want to always keep the origin within range on the Y axis when it is adjusted automatically."/>
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="alwaysIncludeOriginInAutoScale" prefWidth="1.0"/>
             </VBox>
             <Separator prefWidth="200.0"/>
-            <LabelWithInlineHelp text="Minimum chart height" inlineHelp="This is the minimum height charts in this worksheet will be sized down to before a vertical scroll bar appears."/>
+            <LabelWithInlineHelp text="Minimum chart height"
+                                 inlineHelp="This is the minimum height charts in this worksheet will be sized down to before a vertical scroll bar appears."/>
             <VBox>
                 <HBox alignment="CENTER_LEFT">
                     <Slider fx:id="minChartHeightSlider" blockIncrement="1" max="500" min="80"/>

@@ -246,7 +246,7 @@
 
 #logsTextOutput .paragraph-text {
     -fx-line-spacing: -4;
-    -fx-padding: 0 0 5 0;
+    -fx-padding: 0 0 5 7;
 }
 
 .para1 {

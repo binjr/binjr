@@ -31,160 +31,153 @@
     <VBox prefHeight="537.0" prefWidth="687.0"
           AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <VBox alignment="CENTER_RIGHT">
-            <AnchorPane>
-                <VBox.margin>
-                    <Insets top="1.0"/>
-                </VBox.margin>
-                <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar"
-                      AnchorPane.leftAnchor="0.0"
-                      AnchorPane.rightAnchor="0.0">
-                    <HBox fx:id="navigationToolbar" HBox.hgrow="SOMETIMES">
-                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                text="back"
-                                textAlignment="CENTER">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="backArrow-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Go back"/>
-                            </tooltip>
-                        </Button>
-                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                text="forward"
-                                textAlignment="CENTER">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="forwardArrow-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Go forward"/>
-                            </tooltip>
-                        </Button>
-                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                text="refresh"
-                                textAlignment="CENTER">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="refresh-icon"/>
-                                </HBox>
-                            </graphic>
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Refresh"/>
-                            </tooltip>
-                        </Button>
-                        <Pane HBox.hgrow="ALWAYS"/>
-                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER"
-                                         maxHeight="1.7976931348623157E308" maxWidth="4000.0"
-                                         minWidth="425"
-                                         minHeight="40"
-                                         styleClass="tool-bar"
-                                         text="" HBox.hgrow="SOMETIMES">
-                        </TimeRangePicker>
-                        <Pane HBox.hgrow="ALWAYS"/>
-                        <ToolBar fx:id="chartsToolbar">
-                            <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                          maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                          mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                          text="ToggleButton">
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="vertical-crosshair-icon"/>
-                                    </HBox>
-                                </graphic>
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Toggle vertical crosshair marker"/>
-                                </tooltip>
-                            </ToggleButton>
-                            <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                          maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                          minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
-                                          prefWidth="40.0"
-                                          text="ToggleButton">
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="horizontal-crosshair-icon"/>
-                                    </HBox>
-                                </graphic>
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Toggle horizontal crosshair marker"/>
-                                </tooltip>
-                            </ToggleButton>
-                            <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                    minWidth="-Infinity"
-                                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                    styleClass="dialog-button"
-                                    text="Add Chart">
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="addWorksheet-icon"/>
-                                    </HBox>
-                                </graphic>
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet"/>
-                                </tooltip>
-                            </Button>
-                            <Button fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
-                                        prefWidth="40.0"
-                                        styleClass="dialog-button"
-                                        text="Chart layout">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Select chart layout"/>
-                                </tooltip>
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="layout-icon"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                            <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
-                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                    text="Snapshot">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms"
-                                             text="Take a screen capture of the current worksheet"/>
-                                </tooltip>
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="camera-icon"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                            <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
-                                    contentDisplay="GRAPHIC_ONLY"
-                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                    text="Toggle charts display mode">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)"/>
-                                </tooltip>
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="expand-view-icon"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                        </ToolBar>
+        <HBox fx:id="navigationToolbar" styleClass="worksheet-tool-bar" HBox.hgrow="SOMETIMES">
+            <VBox.margin>
+                <Insets top="1.0"/>
+            </VBox.margin>
+            <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                    text="back"
+                    textAlignment="CENTER">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="backArrow-icon"/>
                     </HBox>
-                </HBox>
-            </AnchorPane>
-        </VBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Go back"/>
+                </tooltip>
+            </Button>
+            <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                    text="forward"
+                    textAlignment="CENTER">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="forwardArrow-icon"/>
+                    </HBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Go forward"/>
+                </tooltip>
+            </Button>
+            <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                    text="refresh"
+                    textAlignment="CENTER">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="refresh-icon"/>
+                    </HBox>
+                </graphic>
+                <font>
+                    <Font size="10.0"/>
+                </font>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Refresh"/>
+                </tooltip>
+            </Button>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER"
+                             maxHeight="1.7976931348623157E308" maxWidth="4000.0"
+                             minWidth="425"
+                             minHeight="40"
+                             styleClass="tool-bar"
+                             text="" HBox.hgrow="SOMETIMES">
+            </TimeRangePicker>
+            <Pane HBox.hgrow="ALWAYS"/>
+            <ToolBar fx:id="chartsToolbar">
+                <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                              maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                              mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                              text="ToggleButton">
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="vertical-crosshair-icon"/>
+                        </HBox>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Toggle vertical crosshair marker"/>
+                    </tooltip>
+                </ToggleButton>
+                <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                              maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                              minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
+                              prefWidth="40.0"
+                              text="ToggleButton">
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="horizontal-crosshair-icon"/>
+                        </HBox>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Toggle horizontal crosshair marker"/>
+                    </tooltip>
+                </ToggleButton>
+                <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                        minWidth="-Infinity"
+                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                        styleClass="dialog-button"
+                        text="Add Chart">
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="addWorksheet-icon"/>
+                        </HBox>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet"/>
+                    </tooltip>
+                </Button>
+                <Button fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
+                        prefWidth="40.0"
+                        styleClass="dialog-button"
+                        text="Chart layout">
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Select chart layout"/>
+                    </tooltip>
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="layout-icon"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+                <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
+                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                        text="Snapshot">
+                    <tooltip>
+                        <Tooltip showDelay="500ms"
+                                 text="Take a screen capture of the current worksheet"/>
+                    </tooltip>
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="camera-icon"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+                <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
+                        contentDisplay="GRAPHIC_ONLY"
+                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                        text="Toggle charts display mode">
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)"/>
+                    </tooltip>
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="expand-view-icon"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+            </ToolBar>
+        </HBox>
+
         <SplitPane fx:id="splitPane" dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0"
                    prefWidth="718.0"
                    VBox.vgrow="ALWAYS">
@@ -223,6 +216,7 @@
                     </VBox>
                 </AnchorPane>
                 <DrawerPane fx:id="chartProperties" cache="true" cacheHint="SPEED"
+                            styleClass="worksheet-tool-bar"
                             collapsedWidth="0"
                             expandedWidth="200"
                             side="RIGHT"
@@ -242,6 +236,7 @@
             </AnchorPane>
         </SplitPane>
     </VBox>
-    <BinjrLoadingPane fx:id="worksheetMaskerPane" targetFps="2" animationSize="LARGE" visible="false" AnchorPane.bottomAnchor="0.0"
+    <BinjrLoadingPane fx:id="worksheetMaskerPane" targetFps="2" animationSize="LARGE" visible="false"
+                      AnchorPane.bottomAnchor="0.0"
                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 </AnchorPane>

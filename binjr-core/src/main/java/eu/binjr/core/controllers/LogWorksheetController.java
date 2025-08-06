@@ -132,8 +132,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private final BooleanProperty controllerBusy = new SimpleBooleanProperty(false);
     private Path tmpCssPath;
     @FXML
-    private AnchorPane root;
-    @FXML
     private CodeArea logsTextOutput;
     @FXML
     private VirtualizedScrollPane<CodeArea> logsScrollPane;
@@ -213,9 +211,15 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button favoriteButton;
     @FXML
     private ToggleButton textSizeButton;
-
+    @FXML
+    private VBox toolbarArea;
+    @FXML
+    private Pane navigationToolbar;
     @FXML
     private BinjrLoadingPane loadingPane;
+    @FXML
+    private SplitPane toolbarSplitPane;
+
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
     private final ColorPalette facetColorPalette = BuiltInChartColorPalettes.VIBRANT.getPalette();
@@ -606,6 +610,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(heatmapArea.managedProperty(), heatmapArea.visibleProperty());
         getBindingManager().bind(heatmapArea.visibleProperty(), heatmapToggleButton.selectedProperty());
 
+        heatmapArea.managedProperty().addListener((obs, oldVal, newVal) -> {
+            heatmapArea.setMinHeight(newVal ? 120 : 0);
+            toolbarSplitPane.setDividerPositions(0.0);
+        });
+
+        logsToolPane.managedProperty().addListener((obs, oldVal, newVal) -> {
+            logsToolPane.setMinHeight(newVal ? 45 : 0);
+             if (!heatmapArea.isVisible())
+                 toolbarSplitPane.setDividerPositions(0.0);
+        });
+
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
                 focusOnSearchHit(searchHitIterator.previous());
@@ -693,6 +708,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Init heatmap
         initHeatmap();
 
+        toolbarArea.minHeightProperty().bind(
+                Bindings.add(navigationToolbar.minHeightProperty(),
+                        Bindings.add(logsToolPane.minHeightProperty(), heatmapArea.minHeightProperty()))
+        );
         invalidate(false, false, ReloadPolicy.UNLOADED, false);
         super.initialize(location, resources);
     }
