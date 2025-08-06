@@ -472,10 +472,9 @@
 
 /***********************************/
 .split-pane .split-pane-divider {
-    -fx-pref-width: 1;
-    -fx-background-color: transparent;
-    -fx-border-width: 1;
-    -fx-border-color: -binjr-icon-background-color;
+    -fx-pref-width: 4;
+    -fx-background-color:  -binjr-icon-background-color;
+    -fx-border-width: 0;
 }
 
 .axis {

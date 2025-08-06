@@ -219,7 +219,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
         AnchorPane.setLeftAnchor(settingsPane, 0.0);
-        settingsPane.getStyleClass().add("toolPane");
+        settingsPane.getStyleClass().addAll("toolPane");
         return propertiesController;
     }
 

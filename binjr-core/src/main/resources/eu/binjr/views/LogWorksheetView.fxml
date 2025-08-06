@@ -26,144 +26,158 @@
 <?import org.fxmisc.richtext.CodeArea?>
 <?import eu.binjr.common.javafx.controls.EnhancedPagination?>
 <?import eu.binjr.common.javafx.controls.BinjrLoadingPane?>
-<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0"
-            xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
-    <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <VBox alignment="CENTER_RIGHT" styleClass="worksheet-tool-bar">
-            <HBox fx:id="navigationToolbar" alignment="CENTER_LEFT">
-                <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
-                        textAlignment="CENTER">
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="backArrow-icon"/>
-                        </HBox>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Go back"/>
-                    </tooltip>
-                </Button>
-                <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
-                        textAlignment="CENTER">
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="forwardArrow-icon"/>
-                        </HBox>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Go forward"/>
-                    </tooltip>
-                </Button>
-                <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
-                        textAlignment="CENTER">
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="refresh-icon"/>
-                        </HBox>
-                    </graphic>
-                    <font>
-                        <Font size="10.0"/>
-                    </font>
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Refresh (Crtl+click for forced reload)"/>
-                    </tooltip>
-                </Button>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER"
-                                 maxHeight="1.7976931348623157E308" maxWidth="4000.0"
-                                 minHeight="40" minWidth="425"
-                                 text="" HBox.hgrow="SOMETIMES">
-                </TimeRangePicker>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <ToolBar fx:id="chartsToolbar">
-                    <ToggleButton fx:id="filterToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                                  prefWidth="40.0" selected="true" styleClass="dialog-button">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Filter log events (Ctrl+K)"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="filter-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="heatmapToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                                  prefWidth="40.0" selected="false" styleClass="dialog-button">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Display/Hide log events heatmap"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="bar-chart-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="findToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                                  prefWidth="40.0" selected="false" styleClass="dialog-button">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Find in current page (Ctrl+F)"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="find-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="textSizeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                  maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                  mnemonicParsing="false"
-                                  prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                  text="Adjust text size">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Adjust text size"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="text-size-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                  maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                  mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                  text="Snapshot">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Toggle Word Wrap"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="word-wrap-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
-                    <Button fx:id="toggleChartDisplayModeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                            maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                            text="Toggle charts display mode">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="expand-view-icon"/>
-                            </HBox>
-                        </graphic>
-                    </Button>
-                </ToolBar>
-            </HBox>
-            <VBox fx:id="logsToolPane" spacing="10.0">
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                </padding>
-                <HBox fx:id="filteringBar" maxWidth="1.7976931348623157E308" spacing="10.0" HBox.hgrow="ALWAYS">
-                    <children>
-                        <HBox fx:id="filterBar" alignment="CENTER_LEFT" minWidth="320" maxHeight="-Infinity" maxWidth="600"
+<VBox fx:id="root" prefHeight="800.0" prefWidth="1200.0"
+      styleClass="skinnable-pane-border"
+      xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <HBox fx:id="navigationToolbar" styleClass="worksheet-tool-bar"
+          alignment="CENTER_LEFT">
+        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
+                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
+                textAlignment="CENTER">
+            <graphic>
+                <HBox alignment="CENTER" styleClass="icon-container">
+                    <Region styleClass="backArrow-icon"/>
+                </HBox>
+            </graphic>
+            <tooltip>
+                <Tooltip showDelay="500ms" text="Go back"/>
+            </tooltip>
+        </Button>
+        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
+                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
+                textAlignment="CENTER">
+            <graphic>
+                <HBox alignment="CENTER" styleClass="icon-container">
+                    <Region styleClass="forwardArrow-icon"/>
+                </HBox>
+            </graphic>
+            <tooltip>
+                <Tooltip showDelay="500ms" text="Go forward"/>
+            </tooltip>
+        </Button>
+        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
+                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
+                textAlignment="CENTER">
+            <graphic>
+                <HBox alignment="CENTER" styleClass="icon-container">
+                    <Region styleClass="refresh-icon"/>
+                </HBox>
+            </graphic>
+            <font>
+                <Font size="10.0"/>
+            </font>
+            <tooltip>
+                <Tooltip showDelay="500ms" text="Refresh (Crtl+click for forced reload)"/>
+            </tooltip>
+        </Button>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER"
+                         maxHeight="1.7976931348623157E308" maxWidth="4000.0"
+                         minHeight="40" minWidth="425"
+                         text="" HBox.hgrow="SOMETIMES">
+        </TimeRangePicker>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <ToolBar fx:id="chartsToolbar">
+            <ToggleButton fx:id="filterToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
+                          prefWidth="40.0" selected="true" styleClass="dialog-button">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Filter log events (Ctrl+K)"/>
+                </tooltip>
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="filter-icon"/>
+                    </HBox>
+                </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="heatmapToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
+                          prefWidth="40.0" selected="false" styleClass="dialog-button">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Display/Hide log events heatmap"/>
+                </tooltip>
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="bar-chart-icon"/>
+                    </HBox>
+                </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="findToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
+                          prefWidth="40.0" selected="false" styleClass="dialog-button">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Find in current page (Ctrl+F)"/>
+                </tooltip>
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="find-icon"/>
+                    </HBox>
+                </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="textSizeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                          maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                          mnemonicParsing="false"
+                          prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                          text="Adjust text size">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Adjust text size"/>
+                </tooltip>
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="text-size-icon"/>
+                    </HBox>
+                </graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                          maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                          mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                          text="Snapshot">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Toggle Word Wrap"/>
+                </tooltip>
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="word-wrap-icon"/>
+                    </HBox>
+                </graphic>
+            </ToggleButton>
+            <Button fx:id="toggleChartDisplayModeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                    maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                    prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                    text="Toggle charts display mode">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)"/>
+                </tooltip>
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="expand-view-icon"/>
+                    </HBox>
+                </graphic>
+            </Button>
+        </ToolBar>
+    </HBox>
+    <AnchorPane prefHeight="600.0" styleClass="skinnable-pane-border" VBox.vgrow="ALWAYS" maxHeight="Infinity">
+        <SplitPane fx:id="toolbarSplitPane" dividerPositions="0.0"
+                   orientation="VERTICAL"
+                   VBox.vgrow="ALWAYS"
+                   maxHeight="Infinity"
+                   AnchorPane.bottomAnchor="0.0"
+                   AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0"
+                   AnchorPane.topAnchor="0.0">
+            <VBox fx:id="toolbarArea"
+                  SplitPane.resizableWithParent="false"
+                  alignment="TOP_RIGHT"
+                  VBox.vgrow="ALWAYS"
+                  styleClass="worksheet-tool-bar">
+
+                <VBox fx:id="logsToolPane" minHeight="45.0" spacing="10.0">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <HBox fx:id="filteringBar" maxWidth="1.7976931348623157E308" spacing="10.0" HBox.hgrow="ALWAYS">
+                        <HBox fx:id="filterBar" alignment="CENTER_LEFT" minWidth="320" maxHeight="-Infinity"
+                              maxWidth="600"
                               prefHeight="27.0"
                               spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
                             <padding>
@@ -243,42 +257,39 @@
                         </HBox>
                         <FacetPillsContainer fx:id="severityListView" styleClass="facet-pills-container"
                                              HBox.hgrow="SOMETIMES"/>
-                    </children>
-                </HBox>
+                    </HBox>
 
+                </VBox>
+                <AnchorPane fx:id="heatmapArea" minHeight="120"
+                            VBox.vgrow="ALWAYS"
+                            styleClass="skinnable-pane-border"
+                            cache="true"
+                            cacheHint="SPEED"
+                            depthTest="DISABLE"
+                            minWidth="0"
+                            prefWidth="200"
+                            maxWidth="Infinity"
+                            maxHeight="Infinity"
+                            prefHeight="120">
+                </AnchorPane>
             </VBox>
-            <AnchorPane fx:id="heatmapArea"
-                        styleClass="skinnable-pane-border"
-                        cache="true"
-                        cacheHint="SPEED"
-                        depthTest="DISABLE"
-                        minWidth="0"
-                        prefWidth="200"
-                        maxWidth="Infinity"
-                        minHeight="0"
-                        maxHeight="Infinity"
-                        prefHeight="110">
-            </AnchorPane>
-        </VBox>
 
-        <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
-                    styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
-            <SplitPane fx:id="splitPane" dividerPositions="0.8"
-                       VBox.vgrow="ALWAYS"
-                       orientation="VERTICAL"
-                       AnchorPane.bottomAnchor="0.0"
-                       AnchorPane.leftAnchor="0.0"
-                       AnchorPane.rightAnchor="0.0"
-                       AnchorPane.topAnchor="0.0">
-                <items>
+            <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
+                        styleClass="text-viewport-parent, skinnable-pane-border" VBox.vgrow="ALWAYS">
+                <SplitPane fx:id="splitPane" dividerPositions="0.8"
+                           VBox.vgrow="ALWAYS"
+                           orientation="VERTICAL"
+                           AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0"
+                           AnchorPane.rightAnchor="0.0"
+                           AnchorPane.topAnchor="0.0">
                     <VBox>
-                        <VirtualizedScrollPane  fx:id="logsScrollPane" VBox.vgrow="SOMETIMES">
+                        <VirtualizedScrollPane fx:id="logsScrollPane" VBox.vgrow="SOMETIMES">
                             <content>
                                 <CodeArea fx:id="logsTextOutput" styleClass="log-view"/>
                             </content>
                         </VirtualizedScrollPane>
                         <VBox styleClass="worksheet-tool-bar">
-
                             <HBox fx:id="highlightControls" alignment="CENTER_LEFT">
                                 <padding>
                                     <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>
@@ -389,7 +400,9 @@
                             </children>
                         </HBox>
                     </VBox>
-                    <StackPane fx:id="fileTablePane" prefHeight="150.0" prefWidth="200.0">
+                    <StackPane fx:id="fileTablePane"
+                               SplitPane.resizableWithParent="false"
+                               prefHeight="150.0" prefWidth="200.0">
                         <children>
                             <TableView fx:id="fileTable" prefHeight="128.0" prefWidth="1198.0"
                                        editable="true">
@@ -397,64 +410,65 @@
                             </TableView>
                         </children>
                     </StackPane>
-                </items>
-            </SplitPane>
-        </AnchorPane>
-    </VBox>
-    <BinjrLoadingPane fx:id="loadingPane" targetFps="2" animationSize="LARGE" visible="false"
-                      AnchorPane.bottomAnchor="0.0"
-                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-    <VBox fx:id="progressPane" visible="false" cache="true" alignment="CENTER" maxHeight="-Infinity"
-          maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
-          styleClass="busy-indicator"
-          fillWidth="false"
-          spacing="5.0"
-          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <children>
-            <VBox alignment="CENTER" styleClass="title-frame">
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                </padding>
-                <children>
-                    <Label text="Please Wait...">
-                        <padding>
-                            <Insets bottom="10.0" left="10.0" right="10.0" top="0.0"/>
-                        </padding>
-                        <font>
-                            <Font name="System Bold" size="12.0"/>
-                        </font>
-                    </Label>
-                    <ProgressBar fx:id="progressIndicator" prefWidth="200.0"/>
-                    <Label fx:id="progressStatus" text="">
-                        <padding>
-                            <Insets bottom="10.0" left="0.0" right="0.0" top="0.0"/>
-                        </padding>
-                    </Label>
-                    <Button fx:id="cancelIndexButton" alignment="CENTER"
-                            contentDisplay="LEFT"
-                            disable="false"
-                            graphicTextGap="12.0"
-                            maxHeight="-Infinity"
-                            maxWidth="-Infinity"
-                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                </SplitPane>
+            </AnchorPane>
+            <!--    </VBox>-->
+        </SplitPane>
+        <BinjrLoadingPane fx:id="loadingPane" targetFps="2" animationSize="LARGE" visible="false"
+                          AnchorPane.bottomAnchor="0.0"
+                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <VBox fx:id="progressPane" visible="false" cache="true" alignment="CENTER" maxHeight="-Infinity"
+              maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
+              styleClass="busy-indicator"
+              fillWidth="false"
+              spacing="5.0"
+              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <VBox alignment="CENTER" styleClass="title-frame">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <children>
+                        <Label text="Please Wait...">
+                            <padding>
+                                <Insets bottom="10.0" left="10.0" right="10.0" top="0.0"/>
+                            </padding>
+                            <font>
+                                <Font name="System Bold" size="12.0"/>
+                            </font>
+                        </Label>
+                        <ProgressBar fx:id="progressIndicator" prefWidth="200.0"/>
+                        <Label fx:id="progressStatus" text="">
+                            <padding>
+                                <Insets bottom="10.0" left="0.0" right="0.0" top="0.0"/>
+                            </padding>
+                        </Label>
+                        <Button fx:id="cancelIndexButton" alignment="CENTER"
+                                contentDisplay="LEFT"
+                                disable="false"
+                                graphicTextGap="12.0"
+                                maxHeight="-Infinity"
+                                maxWidth="-Infinity"
+                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
 
-                            styleClass="dialog-button" text="Cancel"
-                            textAlignment="CENTER">
-                        <padding>
-                            <Insets bottom="4.0" left="14.0" right="6.0" top="4.0"/>
-                        </padding>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="cancel-icon, medium-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Cancel loading"/>
-                        </tooltip>
-                    </Button>
-                </children>
-            </VBox>
-        </children>
-    </VBox>
-</AnchorPane>
+                                styleClass="dialog-button" text="Cancel"
+                                textAlignment="CENTER">
+                            <padding>
+                                <Insets bottom="4.0" left="14.0" right="6.0" top="4.0"/>
+                            </padding>
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="cancel-icon, medium-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Cancel loading"/>
+                            </tooltip>
+                        </Button>
+                    </children>
+                </VBox>
+            </children>
+        </VBox>
+    </AnchorPane>
+</VBox>

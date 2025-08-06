@@ -397,21 +397,20 @@
 
 /***********************************/
 .split-pane .split-pane-divider {
-    -fx-pref-width: 1;
-    -fx-background-color: transparent;
-    -fx-border-width: 1;
-    -fx-border-color: -binjr-gray-border-color;
+    -fx-pref-width: 4;
+    -fx-background-color:-binjr-color-lighter-gray;/* -binjr-window-background-color;*/
+    -fx-border-width: 0;
 }
 
 .text-viewport-parent,
 .chart-viewport-parent {
-    -fx-background-color: white;
+    -fx-background-color: white;/*transparent;*/
     -fx-border-width: 0;
 }
 
 .text-viewport-parent {
     -fx-border-color: -binjr-gray-border-color;
-    -fx-border-width: 1 0 0 0;
+    -fx-border-width: 0;
 }
 
 .binjr-content-view {
@@ -664,7 +663,7 @@
 }
 
 .toolPane {
-    -fx-background-color: white;
+    -fx-background-color: -binjr-control-background-color;
 
     /* -fx-opacity:90%;*/
     /*  -fx-border-width:1;
@@ -1528,8 +1527,8 @@
 
 .worksheet-tool-bar {
     -fx-background-color: -binjr-control-background-color;
-    /*-fx-border-color: -binjr-gray-border-color;*/
-    /*-fx-border-width: 0 0 1 0;*/
+    -fx-border-color: red;
+    -fx-border-width: 0;
 }
 
 .worksheet-tool-bar .menu-button .arrow-button {
