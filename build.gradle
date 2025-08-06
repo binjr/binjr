@@ -631,16 +631,6 @@ tasks.register('jpackageAppMac', Exec) {
             "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
-    doLast {
-        //Override launcher for target arch
-        if (TARGET_ARCH != OS_ARCH) {
-            Path launcherSource = Paths.get("${projectDir}/distribution/platforms/mac/launcher/${TARGET_ARCH}/jpackageapplauncher")
-            Path launcherTarget = Paths.get("${JPACKAGE_IMAGE_PATH}/binjr.app/Contents/MacOS/binjr")
-            Files.copy(launcherSource, launcherTarget, StandardCopyOption.REPLACE_EXISTING)
-            // make launcher executable
-           launcherTarget.toFile().setExecutable(true, false)
-        }
-    }
     outputs.dir JPACKAGE_IMAGE_PATH
 }
 
@@ -882,7 +872,7 @@ tasks.register('packageAsTarGz', WrapTaskForSigning) {
     archiveFileName = "${DISTRIBUTION_NAME}.tar.gz"
 }
 
-tasks.register('packageAsMacTarGz', WrapTaskForSigning) {
+tasks.register('packageAsMacApp', WrapTaskForSigning) {
     dependsOn compressJpackageAsTar
     from "${ARTIFACTS_PATH_TGZ}/${DISTRIBUTION_NAME}.tar.gz"
     destinationDirectory = ARTIFACTS_PATH_TGZ
@@ -910,14 +900,14 @@ signing {
     sign packageAsTarGz
     sign packageAsRpm
     sign packageAsDeb
-    sign packageAsMacTarGz
+    sign packageAsMacApp
 }
 
 tasks.register('packageDistribution') {
     if (IS_WINDOWS) {
         finalizedBy(packageAsMsi, packageAsZip)
     } else if (IS_MAC) {
-        finalizedBy(packageAsPkg, packageAsMacTarGz)
+        finalizedBy(packageAsPkg, packageAsMacApp)
     } else {
         finalizedBy(packageAsTarGz, packageAsDeb, packageAsRpm)
     }
@@ -927,7 +917,7 @@ tasks.register('signPackageDistribution') {
     if (IS_WINDOWS) {
         finalizedBy(signPackageAsMsi, signPackageAsZip)
     } else if (IS_MAC) {
-        finalizedBy(signPackageAsPkg, signPackageAsMacTarGz)
+        finalizedBy(signPackageAsPkg, signPackageAsMacApp)
     } else {
         finalizedBy(signPackageAsTarGz, signPackageAsDeb, signPackageAsRpm)
     }
