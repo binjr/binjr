@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2024 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -198,12 +198,12 @@ public class StageAppearanceManager {
                         .collect(Collectors.joining(", "));
     }
 
-    private void setAppearance(Stage stage, String theme, Set<AppearanceOptions> options) {
+    private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<AppearanceOptions> options) {
         if (options.contains(AppearanceOptions.SET_NONE)) {
             return;
         }
         if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_THEME)) {
-            setUiTheme(stage.getScene(), UserInterfaceThemes.valueOf(theme, BuiltInUserInterfaceThemes.SYSTEM));
+            setUiTheme(stage.getScene(), theme);
         }
         if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_ICON)) {
             setIcon(stage);
@@ -236,14 +236,14 @@ public class StageAppearanceManager {
     }
 
     public List<String> getStyleSheets() {
-        var theme = UserInterfaceThemes.valueOf(UserPreferences.getInstance().userInterfaceTheme.get(), BuiltInUserInterfaceThemes.SYSTEM);
+        var theme =UserPreferences.getInstance().userInterfaceTheme.get();
         return getStyleSheets(theme);
     }
 
     public List<String> getStyleSheets(UserInterfaceThemes theme) {
         return List.of(getClass().getResource(getFontFamilyCssPath()).toExternalForm(),
                 getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
-                theme.getClass().getResource(theme.getCssPath()).toExternalForm(),
+                theme.getClass().getResource(theme.getCssPathSupplier()).toExternalForm(),
                 getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
     }
 
