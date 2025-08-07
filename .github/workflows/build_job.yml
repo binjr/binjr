@@ -16,7 +16,8 @@ on:
         default: ''
         type: string
 jobs:
-  ${{ parameters.name }}:
+  build_job:
+    name: ${{ inputs.name }}
     runs-on: ${{ inputs.chosen-os }}
     steps:
     - name: checkout
