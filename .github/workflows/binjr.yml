@@ -6,9 +6,9 @@ on:
   pull_request:
     branches: ["master"]
 env:
-  isSnapshot: 'false'
-  isTag: 'false'
-  javaVersion: '24'
+  IS_SNAPSHOT: 'false'
+  IS_TAG: 'false'
+  JAVA_VERSION: '24'
 jobs:
   build_job_linux_x64:
     name: build_job_linux_x64
@@ -16,30 +16,35 @@ jobs:
     with:
       name: app_bundle_linux_x64
       chosen-os: ubuntu-22.04
+      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_linux_aarch64:
     name: build_job_linux_aarch64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_linux_aarch64
       chosen-os: ubuntu-22.04-arm
+      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_mac_x64:
     name: build_job_mac_x64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_x64
       chosen-os: macOS-13
+      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_mac_aarch64:
     name: build_job_mac_aarch64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_aarch64
       chosen-os: macOS-latest
+      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_windows_x64:
     name: build_job_windows_x64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_windows_x64
       chosen-os: windows-2022
+      javaVersion: "${{ env.JAVA_VERSION }}"
       wixVersion: 6.0.1
   deploy_site-deploy_site:
     needs:
@@ -56,7 +61,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: "${{ env.javaVersion }}"
+          java-version: " ${{ env.JAVA_VERSION }}"
           check-latest: true
           cache: 'gradle'
           cache-dependency-path: |
@@ -69,7 +74,8 @@ jobs:
 #       displayName: Download GPG Keyring
 #       inputs:
 #         secureFile: keyring.gpg
-    - env:
+    - name: expandTemplates
+      env:
         IS_TAG: 'true'
         REPO_TAG_NAME: "${{ github.ref }}"
         GPG_KEY_NAME: "${{ secrets.gpg_keyname }}"
@@ -189,11 +195,11 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4.1.0
     - if: success() && startsWith(github.ref, 'refs/tags/')
-      run: echo '##vso[task.setvariable variable=isTag;]true'
+      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: "${{ env.javaVersion }}"
+          java-version: " ${{ env.JAVA_VERSION }}"
           check-latest: true
           cache: 'gradle'
           cache-dependency-path: |
@@ -206,7 +212,7 @@ jobs:
 #       inputs:
 #         secureFile: keyring.gpg
     - env:
-        IS_TAG: "${{ env.isTag }}"
+        IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         GPG_KEY_NAME: "${{ secrets.gpg_package_keyname }}"

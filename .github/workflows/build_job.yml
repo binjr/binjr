@@ -11,6 +11,10 @@ on:
         required: true
         default: ''
         type: string
+      javaVersion:
+        required: true
+        default: ''
+        type: string
       wixVersion:
         required: false
         default: ''
@@ -23,15 +27,17 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4.1.0
     - if: success() && startsWith(github.ref, 'refs/tags/')
-      run: echo '##vso[task.setvariable variable=isTag;]true'
+      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
+      # echo '##vso[task.setvariable variable=isTag;]true'
       shell: bash
     - if: success() && endsWith(github.ref, '-SNAPSHOT')
-      run: echo '##vso[task.setvariable variable=isSnapshot;]true'
+      run: echo "IS_SNAPSHOT=true" >> "$GITHUB_ENV"
+      # echo '##vso[task.setvariable variable=isSnapshot;]true'
       shell: bash
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: "${{ env.javaVersion }}"
+          java-version: "${{ inputs.javaVersion }}"
           check-latest: true
           cache: 'gradle'
           cache-dependency-path: |
@@ -93,8 +99,8 @@ jobs:
 #         releaseNotesSource: filePath
 #         releaseNotesFilePath: "${{ github.workspace }}/UNRELEASED.md"
 #         addChangeLog: false
-#         isPreRelease: "${{ env.isSnapshot }}"
-    - if: success() && env.isTag == 'true' && env.isSnapshot != 'true' && !(contains(github.ref, '-b')) && runner.os == 'Linux'
+#         isPreRelease: "${{ env.IS_SNAPSHOT }}"
+    - if: success() && env.isTag == 'true' && env.IS_SNAPSHOT != 'true' && !(contains(github.ref, '-b')) && runner.os == 'Linux'
       run: |-
         echo "**************************************"
         echo "* Install dependencies"
