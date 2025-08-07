@@ -11,10 +11,6 @@ on:
         required: true
         default: ''
         type: string
-      javaVersion:
-        required: true
-        default: ''
-        type: string
       wixVersion:
         required: false
         default: ''
@@ -37,7 +33,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: "${{ inputs.javaVersion }}"
+          java-version:  ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
           cache-dependency-path: |

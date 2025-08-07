@@ -8,7 +8,6 @@ on:
 env:
   IS_SNAPSHOT: 'false'
   IS_TAG: 'false'
-  JAVA_VERSION: '24'
 jobs:
   build_job_linux_x64:
     name: build_job_linux_x64
@@ -16,35 +15,30 @@ jobs:
     with:
       name: app_bundle_linux_x64
       chosen-os: ubuntu-22.04
-      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_linux_aarch64:
     name: build_job_linux_aarch64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_linux_aarch64
       chosen-os: ubuntu-22.04-arm
-      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_mac_x64:
     name: build_job_mac_x64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_x64
       chosen-os: macOS-13
-      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_mac_aarch64:
     name: build_job_mac_aarch64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_aarch64
       chosen-os: macOS-latest
-      javaVersion: "${{ env.JAVA_VERSION }}"
   build_job_windows_x64:
     name: build_job_windows_x64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_windows_x64
       chosen-os: windows-2022
-      javaVersion: "${{ env.JAVA_VERSION }}"
       wixVersion: 6.0.1
   deploy_site-deploy_site:
     needs:
@@ -61,7 +55,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: " ${{ env.JAVA_VERSION }}"
+          java-version: ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
           cache-dependency-path: |
