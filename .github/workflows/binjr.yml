@@ -58,10 +58,6 @@ jobs:
           java-version: ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
-          cache-dependency-path: |
-            sub-project/*.gradle*
-            sub-project/**/gradle-wrapper.properties
-
 #     # This item has no matching transformer
 #     - task: DownloadSecureFile@1
 #       name: gpgKeyring
@@ -196,9 +192,6 @@ jobs:
           java-version: " ${{ env.JAVA_VERSION }}"
           check-latest: true
           cache: 'gradle'
-          cache-dependency-path: |
-            sub-project/*.gradle*
-            sub-project/**/gradle-wrapper.properties
 #     # This item has no matching transformer
 #     - task: DownloadSecureFile@1
 #       name: gpgKeyring

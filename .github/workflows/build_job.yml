@@ -36,9 +36,6 @@ jobs:
           java-version:  ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
-          cache-dependency-path: |
-            sub-project/*.gradle*
-            sub-project/**/gradle-wrapper.properties
     - if: success() && runner.os == 'Windows_NT'
       env:
         TOOL_DIR: "${{ runner.tool_cache }}"
