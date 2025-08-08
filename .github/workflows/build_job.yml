@@ -44,19 +44,19 @@ jobs:
     - env:
         KEYRING_GPG: ${{ secrets.KEYRING_GPG_BASE64 }}
       run: |
-        echo $KEYRING_GPG | base64 --decode > keyring.gpg
+        echo $KEYRING_GPG | base64 --decode > "${{ github.workspace }}/keyring.gpg"
       shell: bash
     - env:
-        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
+        GPG_KEY_NAME: "${{ vars.GPG_KEY_ID }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "keyring.gpg"
+        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
-      run: ./gradlew clean signPackageDistribution --no-daemon
+      run: ./gradlew clean signPackageDistribution --no-daemon --debug
     - run: |
-        shred -fuz keyring.gpg
+        shred -fuz "${{ github.workspace }}/keyring.gpg"
       shell: bash
     - name: Release
       uses: softprops/action-gh-release@v2
