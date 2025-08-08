@@ -830,7 +830,7 @@ tasks.register('jpackageRpm', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = Path.of("${ARTIFACTS_PATH_DEB}/${makeRpmPackageName()}")
+        def source = Path.of("${ARTIFACTS_PATH_RPM}/${makeRpmPackageName()}")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
     }
     outputs.dir ARTIFACTS_PATH_RPM
