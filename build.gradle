@@ -790,9 +790,8 @@ tasks.register('jpackageDeb', Exec) {
             "--verbose"
     ]
     doLast {
-//        def source = Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
-//        def filename = makeDistributionName("deb") + "deb"
-//        Files.move(source, source.resolveSibling(filename))
+        def source = Path.of("${ARTIFACTS_PATH_DEB}/${makeDebPackageName()}")
+        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
     }
     outputs.dir ARTIFACTS_PATH_DEB
 }
@@ -831,9 +830,8 @@ tasks.register('jpackageRpm', Exec) {
             "--verbose"
     ]
     doLast {
-//        def source = Path.of("${ARTIFACTS_PATH_RPM}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
-//        def filename = makeDistributionName("rpm") + "deb"
-//        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
+        def source = Path.of("${ARTIFACTS_PATH_DEB}/${makeRpmPackageName()}")
+        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
     }
     outputs.dir ARTIFACTS_PATH_RPM
 }
@@ -882,16 +880,16 @@ tasks.register('packageAsMacApp', WrapTaskForSigning) {
 
 tasks.register('packageAsRpm', WrapTaskForSigning) {
     dependsOn jpackageRpm
-    from "${ARTIFACTS_PATH_RPM}/${makeRpmPackageName()}"
+    from "${ARTIFACTS_PATH_RPM}/${DISTRIBUTION_NAME}.rpm"
     destinationDirectory = ARTIFACTS_PATH_RPM
-    archiveFileName = "${makeRpmPackageName()}"
+    archiveFileName = "${DISTRIBUTION_NAME}.rpm"
 }
 
 tasks.register('packageAsDeb', WrapTaskForSigning) {
     dependsOn jpackageDeb
-    from "${ARTIFACTS_PATH_DEB}/${makeDebPackageName()}"
+    from "${ARTIFACTS_PATH_DEB}/${DISTRIBUTION_NAME}.deb"
     destinationDirectory = ARTIFACTS_PATH_DEB
-    archiveFileName = "${makeDebPackageName()}"
+    archiveFileName = "${DISTRIBUTION_NAME}.deb"
 }
 
 signing {
