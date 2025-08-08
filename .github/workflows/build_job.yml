@@ -60,7 +60,7 @@ jobs:
     - env:
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       run: |
-        shred -fuz $KEYRING_PATH
+        rm -rf $KEYRING_PATH
       shell: bash
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -108,17 +108,18 @@ jobs:
         gpg -v --batch --no-tty --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --import keyring.asc
         echo "Init GPG" | gpg -v  --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --batch --no-tty -u $GPG_KEY_NAME --sign --armor
         shred -fuz keyring.asc
+        targetArch=$(uname --machine)
         echo "**************************************"
         echo "* Generate apt repo"
         echo "**************************************"
         aptly --distribution="stable" --comment="binjr apt repository" repo create binjr
-        aptly repo add binjr  ${{ github.workspace }}/build/artifacts/deb/binjr-*_linux-amd64.deb
+        aptly repo add binjr  ${{ github.workspace }}/build/artifacts/deb/binjr-*_linux-$targetArch.deb
         aptly -gpg-key="$GPG_KEY_NAME" publish repo binjr
         echo "**************************************"
         echo "* Signing rpm"
         echo "**************************************"
         echo "%_gpg_name $GPG_KEY_NAME" >> ~/.rpmmacros
-        rpm --addsign -v build/artifacts/rpm/binjr-*_linux-amd64.rpm
+        rpm --addsign -v build/artifacts/rpm/binjr-*_linux-$targetArch.rpm
         echo "**************************************"
         echo "* Cloning repos.binjr.eu"
         echo "**************************************"
@@ -134,7 +135,7 @@ jobs:
         cp -r ~/.aptly/public/pool apt/pool
         rm -rf rpm/stable
         mkdir rpm/stable
-        cp ${{ github.workspace }}/build/artifacts/rpm/binjr-*_linux-amd64.rpm rpm/stable
+        cp ${{ github.workspace }}/build/artifacts/rpm/binjr-*_linux-$targetArch.rpm rpm/stable
         echo "**************************************"
         echo "* Generate rpm repo"
         echo "**************************************"
