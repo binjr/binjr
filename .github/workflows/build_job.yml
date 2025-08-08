@@ -54,9 +54,8 @@ jobs:
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
-        WIX_HOME: "${{ runner.tool_cache }}/wix-cli/bin"
+        WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
       run: ./gradlew clean signPackageDistribution --no-daemon --info
-      shell: bash
     - env:
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       run: |

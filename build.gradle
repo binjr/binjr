@@ -520,7 +520,7 @@ tasks.register('wixRunHeat', Exec) {
     }
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}/x64/heat.exe",
+            "${WIX_HOME}x64/heat.exe",
             "dir", "${APP_IMAGE_PATH}",
             "-cg", "binjrFiles",
             "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
@@ -531,7 +531,7 @@ tasks.register('wixRunHeat', Exec) {
 }
 tasks.register('getWixVer', Exec) {
     dependsOn wixRunHeat
-    commandLine = ["${WIX_HOME}/wix.exe", "--version"]
+    commandLine = ["${WIX_HOME}wix.exe", "--version"]
     standardOutput = new ByteArrayOutputStream()
     doLast {
         WIX_VERSION = standardOutput.toString()
@@ -540,19 +540,19 @@ tasks.register('getWixVer', Exec) {
 
 tasks.register('wixAddUiExt', Exec) {
     dependsOn getWixVer
-    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext/${WIX_VERSION}"]
+    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext/${WIX_VERSION}"]
 }
 
 tasks.register('wixAddUtilExt', Exec) {
     dependsOn wixAddUiExt
-    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext/${WIX_VERSION}"]
+    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext/${WIX_VERSION}"]
 }
 
 tasks.register('wixRunBuild', Exec) {
     dependsOn wixAddUtilExt
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}/wix.exe", "build", "-arch", "${getArch()}",
+            "${WIX_HOME}wix.exe", "build", "-arch", "${getArch()}",
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "${buildDir}/wix/binjrFiles.wxs",
             "-ext", "WixToolset.UI.wixext",
