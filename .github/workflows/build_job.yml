@@ -34,7 +34,7 @@ jobs:
           java-version:  ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
-    - if: success() && runner.os == 'Windows_NT'
+    - if: success() && runner.os == 'windows'
       env:
         TOOL_DIR: "${{ runner.tool_cache }}"
         WIX_VERSION: "${{ inputs.wixVersion }}"
