@@ -58,26 +58,26 @@ jobs:
           java-version: ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
-#     # This item has no matching transformer
-#     - task: DownloadSecureFile@1
-#       name: gpgKeyring
-#       displayName: Download GPG Keyring
-#       inputs:
-#         secureFile: keyring.gpg
+    - env:
+        KEYRING_GPG: ${{ secrets.KEYRING_GPG_BASE64 }}
+      run: |
+        echo $KEYRING_GPG | base64 --decode > keyring.gpg
+      shell: bash
     - name: expandTemplates
       env:
         IS_TAG: 'true'
         REPO_TAG_NAME: "${{ github.ref }}"
-        GPG_KEY_NAME: "${{ secrets.gpg_keyname }}"
-        GPG_PASSPHRASE: "${{ secrets.gpg_passphrase }}"
-        GPG_KEYRING_PATH: "${{ env.gpgKeyring_secureFilePath }}"
-        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.mcr_auth_password }}"
-        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.mcr_auth_username }}"
-        GH_PKG_TOKEN: "${{ secrets.gh_pkg_token }}"
-        GH_PKG_USERNAME: "${{ secrets.gh_pkg_username }}"
+        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
+        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+        GPG_KEYRING_PATH: "keyring.gpg"
+        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
+        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
       run: ./gradlew expandMdTemplates --no-daemon
+    - run: |
+        shred -fuz keyring.gpg
+      shell: bash
     - env:
-        GH_ACCESS_TOKEN: "${{ secrets.gh_access_token }}"
+        GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
         REPO_TAG_NAME: "${{ github.ref }}"
       run: |-
         python3 --version
@@ -111,23 +111,20 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
-#     # This item has no matching transformer
-#     - task: DownloadSecureFile@1
-#       name: aur_ssh_key_file
-#       displayName: Download AUR ssh key
-#       inputs:
-#         secureFile: aur_ssh_key_file
-#     # This item has no matching transformer
-#     - task: InstallSSHKey@0
-#       inputs:
-#         knownHostsEntry: aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN
-#         sshPublicKey: "${{ secrets.aur_ssh_public }}"
-#         sshPassphrase: "${{ secrets.aur_ssh_password }}"
-#         sshKeySecureFile: aur_ssh_key_file
-#         addEntryToConfig: true
-#         configHostAlias: aur.archlinux.org
-#         configHostname: aur.archlinux.org
-#         configUser: aur
+    - name: Install SSH key
+      env:
+        AUR_SSH_PASSWORD: ${{ secrets.AUR_SSH_PASSWORD }}
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.AUR_SSH_PRIVATE }}
+        name: id_rsa
+        known_hosts: "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN"
+        if_key_exists: fail
+        config: |                                       
+          Host target
+            HostName aur.archlinux.org
+            User aur
+            ProxyCommand sshpass -p 'AUR_SSH_PASSWORD' ssh
     - env:
         REPO_TAG_NAME: "${{ github.ref }}"
       run: |-
@@ -169,7 +166,7 @@ jobs:
         Add-AppxPackage wingetcreate.appx
       shell: powershell
     - env:
-        GH_ACCESS_TOKEN: "${{ secrets.gh_access_token }}"
+        GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
         REPO_TAG_NAME: "${{ github.ref }}"
       run: wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
       shell: bash
@@ -192,21 +189,21 @@ jobs:
           java-version: " ${{ env.JAVA_VERSION }}"
           check-latest: true
           cache: 'gradle'
-#     # This item has no matching transformer
-#     - task: DownloadSecureFile@1
-#       name: gpgKeyring
-#       displayName: Download GPG Keyring
-#       inputs:
-#         secureFile: keyring.gpg
+    - env:
+        KEYRING_GPG: ${{ secrets.KEYRING_GPG_BASE64 }}
+      run: |
+        echo $KEYRING_GPG | base64 --decode > keyring.gpg
+      shell: bash
     - env:
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
-        GPG_KEY_NAME: "${{ secrets.gpg_package_keyname }}"
-        GPG_PASSPHRASE: "${{ secrets.gpg_package_passphrase }}"
-        GPG_KEYRING_PATH: "${{ env.gpgKeyring_secureFilePath }}"
-        MCR_AUTH_PASSWORD: "${{ secrets.mcr_auth_password }}"
-        MCR_AUTH_USERNAME: "${{ secrets.mcr_auth_username }}"
-        GH_PKG_TOKEN: "${{ secrets.gh_pkg_token }}"
-        GH_PKG_USERNAME: "${{ secrets.gh_pkg_username }}"
+        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
+        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+        GPG_KEYRING_PATH: "keyring.gpg"
+        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
+        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
       run: ./gradlew publishArtifacts --no-daemon
+    - run: |
+        shred -fuz keyring.gpg
+      shell: bash
