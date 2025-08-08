@@ -27,24 +27,28 @@ jobs:
     with:
       name: app_bundle_linux_x64
       chosen-os: ubuntu-22.04
+    secrets: inherit
   build_job_linux_aarch64:
     name: build_job_linux_aarch64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_linux_aarch64
       chosen-os: ubuntu-22.04-arm
+    secrets: inherit
   build_job_mac_x64:
     name: build_job_mac_x64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_x64
       chosen-os: macOS-13
+    secrets: inherit
   build_job_mac_aarch64:
     name: build_job_mac_aarch64
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_aarch64
       chosen-os: macOS-latest
+    secrets: inherit
   build_job_windows_x64:
     name: build_job_windows_x64
     uses: "./.github/workflows/build_job.yml"
@@ -52,6 +56,7 @@ jobs:
       name: app_bundle_windows_x64
       chosen-os: windows-2022
       wixVersion: 6.0.1
+    secrets: inherit
   deploy_site-deploy_site:
     needs:
     - build_job_linux_x64
