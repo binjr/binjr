@@ -39,8 +39,8 @@ jobs:
         TOOL_DIR: "${{ runner.tool_cache }}"
         WIX_VERSION: "${{ inputs.wixVersion }}"
       run: |-
-        curl -LO https://github.com/wixtoolset/wix/releases/download/v%WIX_VERSION%/wix-cli-x64.msi
-        msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="%TOOL_DIR%\wix-cli"
+        curl -LO https://github.com/wixtoolset/wix/releases/download/v$env:WIX_VERSION/wix-cli-x64.msi
+        msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="$env:TOOL_DIR\wix-cli"
     - env:
         KEYRING_GPG_BASE64: ${{ secrets.KEYRING_GPG_BASE64 }}
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
