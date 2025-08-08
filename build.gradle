@@ -1005,6 +1005,7 @@ static def convertArchName(String archName, String packager) {
                 case "linux":
                 case "rpm":
                     return "x86_64"
+                case "deb":
                 case "apt":
                     return "amd64"
             }
@@ -1017,6 +1018,7 @@ static def convertArchName(String archName, String packager) {
                 case "linux":
                 case "rpm":
                     return "aarch64"
+                case "deb":
                 case "apt":
                     return "arm64"
             }
@@ -1026,11 +1028,11 @@ static def convertArchName(String archName, String packager) {
 
 
 def makeDebPackageName() {
-    return "${project.name}-${BINJR_VERSION}-${LINUX_APP_RELEASE}_${convertArchName("${TARGET_ARCH}", "deb")}.deb"
+    return "${project.name}_${BINJR_VERSION}-${LINUX_APP_RELEASE}_${convertArchName("${TARGET_ARCH}", "deb")}.deb"
 }
 
 def makeRpmPackageName() {
-    return "${project.name}-${BINJR_VERSION}-${LINUX_APP_RELEASE}.${convertArchName("${TARGET_ARCH}", "rpm")}.rpm"
+    return "${project.name}-${BINJR_VERSION.replace("-", ".")}-${LINUX_APP_RELEASE}.${convertArchName("${TARGET_ARCH}", "rpm")}.rpm"
 }
 
 def getArch() {
