@@ -48,15 +48,15 @@ ext.BINJR_COPYRIGHT = "Copyright (c) 2016-2025 Frederic Thevenet"
 ext.BINJR_DESCRIPTION = "A Time Series Browser"
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.TARGET_OS_NAME = isNullOrBlank(System.getenv('TARGET_OS_NAME')) ? OS_NAME : System.getenv('TARGET_OS_NAME')
-ext.OS_ARCH = System.getProperty("os.arch")
-ext.TARGET_ARCH = isNullOrBlank(System.getenv('TARGET_ARCH')) ? OS_ARCH : System.getenv('TARGET_ARCH')
-ext.IS_64 = TARGET_ARCH.toLowerCase().contains("64")
-ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.IS_MONOCLE = false
 ext.IS_MAC = TARGET_OS_NAME.contains("mac") || TARGET_OS_NAME.contains("darwin")
 ext.IS_WINDOWS = TARGET_OS_NAME.contains("windows")
 ext.IS_LINUX = TARGET_OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
+ext.OS_ARCH = System.getProperty("os.arch")
+ext.TARGET_ARCH = convertArchName(isNullOrBlank(System.getenv('TARGET_ARCH')) ? OS_ARCH : System.getenv('TARGET_ARCH'), "${OS_FAMILY}")
+ext.IS_64 = TARGET_ARCH.toLowerCase().contains("64")
+ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "24.0.2"
 ext.USE_BUILD_JDK_IN_BUNDLE = false
@@ -112,7 +112,7 @@ System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag: ${IS_TAG}")
 System.out.println("Is release: ${IS_RELEASE}")
 
-if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
+if (IS_TAG && !System.getenv('REPO_TAG_NAME').endsWith("v${BINJR_VERSION}")) {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
 }
 
@@ -520,7 +520,7 @@ tasks.register('wixRunHeat', Exec) {
     }
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}/x64/heat.exe",
+            "${WIX_HOME}x64/heat.exe",
             "dir", "${APP_IMAGE_PATH}",
             "-cg", "binjrFiles",
             "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
@@ -531,7 +531,7 @@ tasks.register('wixRunHeat', Exec) {
 }
 tasks.register('getWixVer', Exec) {
     dependsOn wixRunHeat
-    commandLine = ["${WIX_HOME}/wix.exe", "--version"]
+    commandLine = ["${WIX_HOME}wix.exe", "--version"]
     standardOutput = new ByteArrayOutputStream()
     doLast {
         WIX_VERSION = standardOutput.toString()
@@ -540,19 +540,19 @@ tasks.register('getWixVer', Exec) {
 
 tasks.register('wixAddUiExt', Exec) {
     dependsOn getWixVer
-    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext/${WIX_VERSION}"]
+    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext/${WIX_VERSION}"]
 }
 
 tasks.register('wixAddUtilExt', Exec) {
     dependsOn wixAddUiExt
-    commandLine = ["${WIX_HOME}/wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext/${WIX_VERSION}"]
+    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext/${WIX_VERSION}"]
 }
 
 tasks.register('wixRunBuild', Exec) {
     dependsOn wixAddUtilExt
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}/wix.exe", "build", "-arch", "${getArch()}",
+            "${WIX_HOME}wix.exe", "build", "-arch", "${getArch()}",
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "${buildDir}/wix/binjrFiles.wxs",
             "-ext", "WixToolset.UI.wixext",
@@ -790,7 +790,7 @@ tasks.register('jpackageDeb', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
+        def source = Path.of("${ARTIFACTS_PATH_DEB}/${makeDebPackageName()}")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
     }
     outputs.dir ARTIFACTS_PATH_DEB
@@ -830,7 +830,7 @@ tasks.register('jpackageRpm', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = Path.of("${ARTIFACTS_PATH_RPM}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
+        def source = Path.of("${ARTIFACTS_PATH_RPM}/${makeRpmPackageName()}")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
     }
     outputs.dir ARTIFACTS_PATH_RPM
@@ -994,6 +994,47 @@ def craftOpenJfxModsUrl() {
     return "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${platform}-${arch}_bin-jmods.zip"
 }
 
+static def convertArchName(String archName, String packager) {
+    switch (archName) {
+        case "x64":
+        case "amd64":
+        case "x86_64":
+            switch (packager) {
+                case "mac":
+                case "windows":
+                case "linux":
+                case "rpm":
+                    return "x86_64"
+                case "deb":
+                case "apt":
+                    return "amd64"
+            }
+            break
+        case "arm64":
+        case "aarch64":
+            switch (packager) {
+                case "mac":
+                case "windows":
+                case "linux":
+                case "rpm":
+                    return "aarch64"
+                case "deb":
+                case "apt":
+                    return "arm64"
+            }
+    }
+    return archName
+}
+
+
+def makeDebPackageName() {
+    return "${project.name}_${BINJR_VERSION}-${LINUX_APP_RELEASE}_${convertArchName("${TARGET_ARCH}", "deb")}.deb"
+}
+
+def makeRpmPackageName() {
+    return "${project.name}-${BINJR_VERSION.replace("-", ".")}-${LINUX_APP_RELEASE}.${convertArchName("${TARGET_ARCH}", "rpm")}.rpm"
+}
+
 def getArch() {
     def arch
     switch (TARGET_ARCH) {
@@ -1020,7 +1061,7 @@ dependencyUpdates {
     }
 }
 
-static boolean isNullOrBlank(String val){
+static boolean isNullOrBlank(String val) {
     return val == null || val.isBlank();
 }
 
