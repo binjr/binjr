@@ -9,6 +9,18 @@ env:
   IS_SNAPSHOT: 'false'
   IS_TAG: 'false'
 jobs:
+  pretest:
+    runs-on: ubuntu-22.04
+    name: pretest
+    steps:
+    - env:
+        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
+        ls -lsa $KEYRING_PATH
+        shred -fuz $KEYRING_PATH
+      shell: bash
   build_job_linux_x64:
     name: build_job_linux_x64
     uses: "./.github/workflows/build_job.yml"
