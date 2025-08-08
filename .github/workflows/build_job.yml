@@ -41,6 +41,7 @@ jobs:
       run: |-
         curl -LO https://github.com/wixtoolset/wix/releases/download/v$env:WIX_VERSION/wix-cli-x64.msi
         msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="$env:TOOL_DIR\wix-cli"
+        $env:TOOL_DIR\wix-cli\bin\wix.exe --version
     - env:
         KEYRING_GPG_BASE64: ${{ secrets.KEYRING_GPG_BASE64 }}
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
@@ -50,7 +51,7 @@ jobs:
     - env:
         GPG_KEY_NAME: "${{ vars.GPG_KEY_ID }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "${{ env.KEYRING_PATH }}"
+        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
