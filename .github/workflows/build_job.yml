@@ -1,0 +1,153 @@
+# Environment variables defined in a calling workflow are not accessible to this reusable workflow. Refer to the documentation for further details on this limitation.
+name: build_job
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        default: ''
+        type: string
+      chosen-os:
+        required: true
+        default: ''
+        type: string
+      wixVersion:
+        required: false
+        default: ''
+        type: string
+jobs:
+  build_job:
+    name: ${{ inputs.name }}
+    runs-on: ${{ inputs.chosen-os }}
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - if: success() && startsWith(github.ref, 'refs/tags/')
+      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
+      shell: bash
+    - if: success() && endsWith(github.ref, '-SNAPSHOT')
+      run: echo "IS_SNAPSHOT=true" >> "$GITHUB_ENV"
+      shell: bash
+    - uses: actions/setup-java@v4
+      with:
+          distribution: 'temurin'
+          java-version:  ${{ vars.BUILD_JAVA_VERSION}}
+          check-latest: true
+          cache: 'gradle'
+    - if: success() && runner.os == 'windows'
+      env:
+        TOOL_DIR: "${{ runner.tool_cache }}"
+        WIX_VERSION: "${{ inputs.wixVersion }}"
+      run: |-
+        curl -LO https://github.com/wixtoolset/wix/releases/download/v$env:WIX_VERSION/wix-cli-x64.msi
+        msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="$env:TOOL_DIR\wix-cli"
+    - env:
+        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
+        ls -lsa $KEYRING_PATH
+      shell: bash
+    - env:
+        GPG_KEY_NAME: "${{ vars.GPG_KEY_ID }}"
+        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+        BINJR_BUILD_NUMBER: "${{ github.run_number }}"
+        IS_TAG: "${{ env.IS_TAG }}"
+        REPO_TAG_NAME: "${{ github.ref }}"
+        WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
+      run: ./gradlew clean signPackageDistribution --no-daemon --info
+    - env:
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        rm -rf $KEYRING_PATH
+      shell: bash
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        body_path: "${{ github.workspace }}/UNRELEASED.md"
+        repository: binjr/binjr
+        token: ${{ secrets.GH_ACCESS_TOKEN }}
+        make_latest: ${{ !env.IS_SNAPSHOT }}
+        prerelease:  ${{ env.IS_SNAPSHOT }}
+        files: |
+          ${{ github.workspace }}/build/artifacts/deb/*.deb
+          ${{ github.workspace }}/build/artifacts/deb/*.deb.asc
+          ${{ github.workspace }}/build/artifacts/rpm/*.rpm
+          ${{ github.workspace }}/build/artifacts/rpm/*.rpm.asc
+          ${{ github.workspace }}/build/artifacts/dmg/*.dmg
+          ${{ github.workspace }}/build/artifacts/dmg/*.dmg.asc
+          ${{ github.workspace }}/build/artifacts/pkg/*.pkg
+          ${{ github.workspace }}/build/artifacts/pkg/*.pkg.asc
+          ${{ github.workspace }}/build/artifacts/msi/*.msi
+          ${{ github.workspace }}/build/artifacts/msi/*.msi.asc
+          ${{ github.workspace }}/build/artifacts/zip/*.zip
+          ${{ github.workspace }}/build/artifacts/zip/*.zip.asc
+          ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz
+          ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz.asc
+    - if: success() && env.isTag == 'true' && env.IS_SNAPSHOT != 'true' && !(contains(github.ref, '-b')) && runner.os == 'Linux'
+      env:
+        BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64: "${{ secrets.BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64 }}"
+        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
+        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+        GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
+      run: |-
+        echo "**************************************"
+        echo "* Install dependencies"
+        echo "**************************************"
+        wget -qO - https://www.aptly.info/pubkey.txt | sudo apt-key add -
+        echo -e '\ndeb http://repo.aptly.info/ squeeze main ' | sudo tee -a /etc/apt/sources.list
+        sudo apt update
+        sudo apt -y install aptly createrepo-c
+        echo "**************************************"
+        echo "* GPG setup"
+        echo "**************************************"
+        echo $BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64 | base64 --decode > keyring.asc
+        export GPG_TTY=${{ env.tty }}
+        gpg -v --batch --no-tty --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --import keyring.asc
+        echo "Init GPG" | gpg -v  --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --batch --no-tty -u $GPG_KEY_NAME --sign --armor
+        shred -fuz keyring.asc
+        targetArch=$(uname --machine)
+        echo "**************************************"
+        echo "* Generate apt repo"
+        echo "**************************************"
+        aptly --distribution="stable" --comment="binjr apt repository" repo create binjr
+        aptly repo add binjr  ${{ github.workspace }}/build/artifacts/deb/binjr-*_linux-$targetArch.deb
+        aptly -gpg-key="$GPG_KEY_NAME" publish repo binjr
+        echo "**************************************"
+        echo "* Signing rpm"
+        echo "**************************************"
+        echo "%_gpg_name $GPG_KEY_NAME" >> ~/.rpmmacros
+        rpm --addsign -v build/artifacts/rpm/binjr-*_linux-$targetArch.rpm
+        echo "**************************************"
+        echo "* Cloning repos.binjr.eu"
+        echo "**************************************"
+        git clone https://github.com/binjr/repos.binjr.eu.git build/tmp/repos.binjr.eu
+        cd  build/tmp/repos.binjr.eu
+        echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> ~/.git-credentials
+        git config credential.helper store
+        git config user.email "binjr.bot@free.fr"
+        git config user.name "binjr-bot"
+        rm -rf apt/dists
+        rm -rf apt/pool
+        cp -r ~/.aptly/public/dists apt/dists
+        cp -r ~/.aptly/public/pool apt/pool
+        rm -rf rpm/stable
+        mkdir rpm/stable
+        cp ${{ github.workspace }}/build/artifacts/rpm/binjr-*_linux-$targetArch.rpm rpm/stable
+        echo "**************************************"
+        echo "* Generate rpm repo"
+        echo "**************************************"
+        createrepo_c -v rpm/stable
+        gpg -v --batch --no-tty  --pinentry-mode loopback --passphrase $GPG_PASSPHRASE -u $GPG_KEY_NAME --detach-sign --armor rpm/stable/repodata/repomd.xml
+        cp ${{ github.workspace }}/distribution/bundlers/linux_rpm/binjr.repo rpm/binjr.repo
+        echo "**************************************"
+        echo "* Upload to repos.binjr.eu"
+        echo "**************************************"
+        git add .
+        git commit --amend -am "Release  ${{ github.ref }}"
+        git push -f
+        git config credential.helper cache
+        shred -fuz ~/.git-credentials
+      shell: bash

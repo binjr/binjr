@@ -1,0 +1,219 @@
+name: binjr/binjr
+on:
+  push:
+    branches: ["master", "pipeline2gha", "*-dev", "*-ci_test"]
+    tags: ["v*"]
+  pull_request:
+    branches: ["master"]
+env:
+  IS_SNAPSHOT: 'false'
+  IS_TAG: 'false'
+jobs:
+  build_job_linux_x64:
+    name: build_job_linux_x64
+    uses: "./.github/workflows/build_job.yml"
+    with:
+      name: app_bundle_linux_x64
+      chosen-os: ubuntu-22.04
+    secrets: inherit
+  build_job_linux_aarch64:
+    name: build_job_linux_aarch64
+    uses: "./.github/workflows/build_job.yml"
+    with:
+      name: app_bundle_linux_aarch64
+      chosen-os: ubuntu-22.04-arm
+    secrets: inherit
+  build_job_mac_x64:
+    name: build_job_mac_x64
+    uses: "./.github/workflows/build_job.yml"
+    with:
+      name: app_bundle_mac_x64
+      chosen-os: macOS-13
+    secrets: inherit
+  build_job_mac_aarch64:
+    name: build_job_mac_aarch64
+    uses: "./.github/workflows/build_job.yml"
+    with:
+      name: app_bundle_mac_aarch64
+      chosen-os: macOS-latest
+    secrets: inherit
+  build_job_windows_x64:
+    name: build_job_windows_x64
+    uses: "./.github/workflows/build_job.yml"
+    with:
+      name: app_bundle_windows_x64
+      chosen-os: windows-2022
+      wixVersion: 6.0.1
+    secrets: inherit
+  deploy_site-deploy_site:
+    needs:
+    - build_job_linux_x64
+    - build_job_linux_aarch64
+    - build_job_mac_x64
+    - build_job_mac_aarch64
+    - build_job_windows_x64
+    runs-on: ubuntu-22.04
+    if: success() && startsWith(github.ref, 'refs/tags/') && !(endsWith(github.ref, '-SNAPSHOT')) && !(contains(github.ref, '-b'))
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - uses: actions/setup-java@v4
+      with:
+          distribution: 'temurin'
+          java-version: "${{ vars.BUILD_JAVA_VERSION}}"
+          check-latest: true
+          cache: 'gradle'
+    - name: expandTemplates
+      env:
+        IS_TAG: 'true'
+        REPO_TAG_NAME: "${{ github.ref }}"
+      run: ./gradlew expandMdTemplates --no-daemon
+    - env:
+        GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
+        REPO_TAG_NAME: "${{ github.ref }}"
+      run: |-
+        python3 --version
+        python3 -m pip --version
+        python3 -m pip install --upgrade pip setuptools
+        python3 -m pip install mkdocs
+        python3 -m pip install mkdocs-material==9.*
+        python3 -m pip install mkdocs-rss-plugin
+        git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
+        cd  build/tmp/binjr-site
+        cp ../expanded/CHANGELOG docs/download/CHANGELOG.md
+        cp ../expanded/latest_release.md docs/download/latest_release.md
+        cp ../expanded/binjr-tagName-is-now-available!.md docs/blog/posts/binjr-$REPO_TAG_NAME-is-now-available!.md
+        echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
+        git config credential.helper store
+        git config user.email "binjr.bot@free.fr"
+        git config user.name "binjr-bot"
+        wget https://api.github.com/repos/binjr/binjr/releases/latest -O docs/repos/binjr/binjr/releases/latest
+        git add docs/blog/posts/binjr-$REPO_TAG_NAME-is-now-available!.md
+        git commit -am "Release $REPO_TAG_NAME"
+        git push
+        python3 -m mkdocs gh-deploy --no-history --remote-branch master
+        git config credential.helper cache
+        shred -fuz "$HOME/.git-credentials"
+      shell: bash
+  aur_update-aur_update:
+    needs:
+    - build_job_linux_x64
+    - build_job_linux_aarch64
+    - build_job_mac_x64
+    - build_job_mac_aarch64
+    - build_job_windows_x64
+    runs-on: ubuntu-22.04
+    if: success() && startsWith(github.ref, 'refs/tags/') && !(endsWith(github.ref, '-SNAPSHOT')) && !(contains(github.ref, '-b'))
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - env:
+        AUR_SSH_PRIVATE_BASE64: "${{ secrets.AUR_SSH_PRIVATE_BASE64 }}"
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
+      run: |
+        echo $AUR_SSH_PRIVATE_BASE64 | base64 --decode > $AUR_SSH_PRIVATE_PATH
+      shell: bash
+    - name: Install SSH key
+      env:
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ env.AUR_SSH_PRIVATE_PATH }}
+        name: id_rsa
+        known_hosts: "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN"
+        if_key_exists: fail
+        config: |                                       
+          Host target
+            HostName aur.archlinux.org
+            User aur
+            ProxyCommand sshpass -p 'AUR_SSH_PASSWORD' ssh
+    - env:
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
+      run: |
+        shred -fuz $KEYRING_PATH
+      shell: bash
+    - env:
+        REPO_TAG_NAME: "${{ github.ref }}"
+      run: |-
+        git clone ssh://aur@aur.archlinux.org/binjr-bin.git
+        cd binjr-bin
+        export OLD_VER=$(grep -Po 'pkgver=\K[^"]*' PKGBUILD)
+        export NEW_VER=${REPO_TAG_NAME//v}
+        # Change version and release number
+        sed -i "s/$OLD_VER/$NEW_VER/g" PKGBUILD
+        sed -i "s/^pkgrel=.*$/pkgrel=1/" PKGBUILD
+        sed -i "s/$OLD_VER/$NEW_VER/g" .SRCINFO
+        sed -i "s/pkgrel =.*/pkgrel = 1/" .SRCINFO
+        # Commit and push update
+        git config user.email "binjr.bot@free.fr"
+        git config user.name "binjr-bot"
+        git commit -am "Release ${REPO_TAG_NAME}-1"
+        git show
+        git push
+      shell: bash
+  winget_update-winget_update:
+    needs:
+      - build_job_linux_x64
+      - build_job_linux_aarch64
+      - build_job_mac_x64
+      - build_job_mac_aarch64
+      - build_job_windows_x64
+    runs-on: windows-2022
+    if: success() && startsWith(github.ref, 'refs/tags/') && !(endsWith(github.ref, '-SNAPSHOT')) && !(contains(github.ref, '-b'))
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - name: install wingetCreate
+      run: |-
+        # Download and install C++ Runtime framework package.
+        iwr https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx -OutFile vcLibsBundleFile.appx
+        Add-AppxPackage vcLibsBundleFile.appx
+        # Download, install, and execute update.
+        iwr https://aka.ms/wingetcreate/latest/msixbundle -OutFile wingetcreate.appx
+        Add-AppxPackage wingetcreate.appx
+      shell: powershell
+    - env:
+        GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
+        REPO_TAG_NAME: "${{ github.ref }}"
+      run: wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
+      shell: bash
+  maven_publish-maven_publish:
+    needs:
+      - build_job_linux_x64
+      - build_job_linux_aarch64
+      - build_job_mac_x64
+      - build_job_mac_aarch64
+      - build_job_windows_x64
+    runs-on: ubuntu-22.04
+    steps:
+    - name: checkout
+      uses: actions/checkout@v4.1.0
+    - if: success() && startsWith(github.ref, 'refs/tags/')
+      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
+    - uses: actions/setup-java@v4
+      with:
+          distribution: 'temurin'
+          java-version: "${{ vars.BUILD_JAVA_VERSION}}"
+          check-latest: true
+          cache: 'gradle'
+    - env:
+        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
+      shell: bash
+    - env:
+        IS_TAG: "${{ env.IS_TAG }}"
+        REPO_TAG_NAME: "${{ github.ref }}"
+        BINJR_BUILD_NUMBER: "${{ github.run_number }}"
+        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
+        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
+        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
+      run: ./gradlew publishArtifacts --no-daemon
+    - env:
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        shred -fuz $KEYRING_PATH
+      shell: bash
