@@ -97,6 +97,10 @@ jobs:
       shell: bash
   aur_update-aur_update:
     needs:
+    - build_job_linux_x64
+    - build_job_linux_aarch64
+    - build_job_mac_x64
+    - build_job_mac_aarch64
     - build_job_windows_x64
     runs-on: ubuntu-22.04
     if: success() && startsWith(github.ref, 'refs/tags/') && !(endsWith(github.ref, '-SNAPSHOT')) && !(contains(github.ref, '-b'))
@@ -189,7 +193,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: " ${{ env.JAVA_VERSION }}"
+          java-version: "${{ vars.BUILD_JAVA_VERSION}}"
           check-latest: true
           cache: 'gradle'
     - env:
