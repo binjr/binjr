@@ -882,16 +882,16 @@ tasks.register('packageAsMacApp', WrapTaskForSigning) {
 
 tasks.register('packageAsRpm', WrapTaskForSigning) {
     dependsOn jpackageRpm
-    from "${ARTIFACTS_PATH_RPM}/${ makeDistributionName("rpm") }.rpm"
+    from "${ARTIFACTS_PATH_RPM}/${ makeRpmPackageName() }"
     destinationDirectory = ARTIFACTS_PATH_RPM
-    archiveFileName = "${DISTRIBUTION_NAME}.rpm"
+    archiveFileName = "${ makeRpmPackageName() }"
 }
 
 tasks.register('packageAsDeb', WrapTaskForSigning) {
     dependsOn jpackageDeb
-    from "${ARTIFACTS_PATH_DEB}/${  makeDistributionName("deb") }.deb"
+    from "${ARTIFACTS_PATH_DEB}/${  makeDebPackageName() }"
     destinationDirectory = ARTIFACTS_PATH_DEB
-    archiveFileName = "${ makeDistributionName("deb") }.deb"
+    archiveFileName = "${ makeDebPackageName() }"
 }
 
 signing {
@@ -1027,9 +1027,12 @@ def convertArchName(String archName, String packager) {
 }
 
 
-def makeDistributionName(String packager) {
-    def arch = convertArchName("${TARGET_ARCH}", packager)
-    return "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-$arch"
+def makeDebPackageName() {
+    return "${project.name}-${BINJR_VERSION}-${LINUX_APP_RELEASE}_${ convertArchName("${TARGET_ARCH}", deb) }.deb"
+}
+
+def makeRpmPackageName() {
+    return "${project.name}-${BINJR_VERSION}-${LINUX_APP_RELEASE}.${ convertArchName("${TARGET_ARCH}", rpm) }.rpm"
 }
 
 def getArch() {
