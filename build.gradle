@@ -89,7 +89,7 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "jdk.crypto.cryptoki" +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
-ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${TARGET_ARCH}"
+ext.DISTRIBUTION_NAME = makeDistributionName("${OS_FAMILY}")
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.JPACKAGE_IMAGE_PATH = "${buildDir}/jpackage_image/${DISTRIBUTION_NAME}"
@@ -790,8 +790,9 @@ tasks.register('jpackageDeb', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
-        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
+//        def source = Path.of("${ARTIFACTS_PATH_DEB}/${project.name}_${BINJR_VERSION}-1_${TARGET_ARCH}.deb")
+//        def filename = makeDistributionName("deb") + "deb"
+//        Files.move(source, source.resolveSibling(filename))
     }
     outputs.dir ARTIFACTS_PATH_DEB
 }
@@ -830,8 +831,9 @@ tasks.register('jpackageRpm', Exec) {
             "--verbose"
     ]
     doLast {
-        def source = Path.of("${ARTIFACTS_PATH_RPM}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
-        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
+//        def source = Path.of("${ARTIFACTS_PATH_RPM}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
+//        def filename = makeDistributionName("rpm") + "deb"
+//        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
     }
     outputs.dir ARTIFACTS_PATH_RPM
 }
@@ -880,16 +882,16 @@ tasks.register('packageAsMacApp', WrapTaskForSigning) {
 
 tasks.register('packageAsRpm', WrapTaskForSigning) {
     dependsOn jpackageRpm
-    from "${ARTIFACTS_PATH_RPM}/${DISTRIBUTION_NAME}.rpm"
+    from "${ARTIFACTS_PATH_RPM}/${ makeDistributionName("rpm") }.rpm"
     destinationDirectory = ARTIFACTS_PATH_RPM
     archiveFileName = "${DISTRIBUTION_NAME}.rpm"
 }
 
 tasks.register('packageAsDeb', WrapTaskForSigning) {
     dependsOn jpackageDeb
-    from "${ARTIFACTS_PATH_DEB}/${DISTRIBUTION_NAME}.deb"
+    from "${ARTIFACTS_PATH_DEB}/${  makeDistributionName("deb") }.deb"
     destinationDirectory = ARTIFACTS_PATH_DEB
-    archiveFileName = "${DISTRIBUTION_NAME}.deb"
+    archiveFileName = "${ makeDistributionName("deb") }.deb"
 }
 
 signing {
@@ -994,6 +996,42 @@ def craftOpenJfxModsUrl() {
     return "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${platform}-${arch}_bin-jmods.zip"
 }
 
+def convertArchName(String archName, String packager) {
+    switch (archName) {
+        case "x64":
+        case "amd64":
+        case "x86_64":
+            switch (packager) {
+                case "mac":
+                case "windows":
+                case "linux":
+                case "rpm":
+                    return "x86_64"
+                case "apt":
+                    return "amd64"
+            }
+            break
+        case "arm64":
+        case "aarch64":
+            switch (packager) {
+                case "mac":
+                case "windows":
+                case "linux":
+                case "rpm":
+                    return "aarch64"
+                case "apt":
+                    return "arm64"
+            }
+    }
+    return archName
+}
+
+
+def makeDistributionName(String packager) {
+    def arch = convertArchName("${TARGET_ARCH}", packager)
+    return "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-$arch"
+}
+
 def getArch() {
     def arch
     switch (TARGET_ARCH) {
@@ -1020,7 +1058,7 @@ dependencyUpdates {
     }
 }
 
-static boolean isNullOrBlank(String val){
+static boolean isNullOrBlank(String val) {
     return val == null || val.isBlank();
 }
 
