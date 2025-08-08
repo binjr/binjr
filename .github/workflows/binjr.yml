@@ -58,24 +58,11 @@ jobs:
           java-version: ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
-    - env:
-        KEYRING_GPG: ${{ secrets.KEYRING_GPG_BASE64 }}
-      run: |
-        echo $KEYRING_GPG | base64 --decode > keyring.gpg
-      shell: bash
     - name: expandTemplates
       env:
         IS_TAG: 'true'
         REPO_TAG_NAME: "${{ github.ref }}"
-        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
-        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "keyring.gpg"
-        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
-        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
       run: ./gradlew expandMdTemplates --no-daemon
-    - run: |
-        shred -fuz keyring.gpg
-      shell: bash
     - env:
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
         REPO_TAG_NAME: "${{ github.ref }}"
@@ -111,12 +98,18 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
+    - env:
+        AUR_SSH_PRIVATE_BASE64: ${{ secrets.AUR_SSH_PRIVATE_BASE64 }}
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
+      run: |
+        echo $AUR_SSH_PRIVATE_BASE64 | base64 --decode > $AUR_SSH_PRIVATE_PATH
+      shell: bash
     - name: Install SSH key
       env:
-        AUR_SSH_PASSWORD: ${{ secrets.AUR_SSH_PASSWORD }}
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
       uses: shimataro/ssh-key-action@v2
       with:
-        key: ${{ secrets.AUR_SSH_PRIVATE }}
+        key: ${{ env.AUR_SSH_PRIVATE_PATH }}
         name: id_rsa
         known_hosts: "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN"
         if_key_exists: fail
@@ -125,6 +118,11 @@ jobs:
             HostName aur.archlinux.org
             User aur
             ProxyCommand sshpass -p 'AUR_SSH_PASSWORD' ssh
+    - env:
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
+      run: |
+        shred -fuz $KEYRING_PATH
+      shell: bash
     - env:
         REPO_TAG_NAME: "${{ github.ref }}"
       run: |-
@@ -190,9 +188,10 @@ jobs:
           check-latest: true
           cache: 'gradle'
     - env:
-        KEYRING_GPG: ${{ secrets.KEYRING_GPG_BASE64 }}
+        KEYRING_GPG_BASE64: ${{ secrets.KEYRING_GPG_BASE64 }}
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       run: |
-        echo $KEYRING_GPG | base64 --decode > keyring.gpg
+        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
       shell: bash
     - env:
         IS_TAG: "${{ env.IS_TAG }}"
@@ -200,10 +199,12 @@ jobs:
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "keyring.gpg"
+        GPG_KEYRING_PATH: "${{ env.KEYRING_PATH }}"
         ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
         ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
       run: ./gradlew publishArtifacts --no-daemon
-    - run: |
-        shred -fuz keyring.gpg
+    - env:
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        shred -fuz $KEYRING_PATH
       shell: bash

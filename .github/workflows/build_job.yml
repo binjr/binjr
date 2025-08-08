@@ -42,21 +42,24 @@ jobs:
         curl -LO https://github.com/wixtoolset/wix/releases/download/v%WIX_VERSION%/wix-cli-x64.msi
         msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="%TOOL_DIR%\wix-cli"
     - env:
-        KEYRING_GPG: ${{ secrets.KEYRING_GPG_BASE64 }}
+        KEYRING_GPG_BASE64: ${{ secrets.KEYRING_GPG_BASE64 }}
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       run: |
-        echo $KEYRING_GPG | base64 --decode > "${{ github.workspace }}/keyring.gpg"
+        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
       shell: bash
     - env:
         GPG_KEY_NAME: "${{ vars.GPG_KEY_ID }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+        GPG_KEYRING_PATH: "${{ env.KEYRING_PATH }}"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
       run: ./gradlew clean signPackageDistribution --no-daemon --info
-    - run: |
-        shred -fuz "${{ github.workspace }}/keyring.gpg"
+    - env:
+        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      run: |
+        shred -fuz $KEYRING_PATH
       shell: bash
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -84,7 +87,7 @@ jobs:
           ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz.asc
     - if: success() && env.isTag == 'true' && env.IS_SNAPSHOT != 'true' && !(contains(github.ref, '-b')) && runner.os == 'Linux'
       env:
-        BINJR_PACKAGE_SIGNING_KEYS_ASC: "${{ secrets.BINJR_PACKAGE_SIGNING_KEYS_ASC }}"
+        BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64: "${{ secrets.BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64 }}"
         GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
@@ -99,7 +102,7 @@ jobs:
         echo "**************************************"
         echo "* GPG setup"
         echo "**************************************"
-        echo $BINJR_PACKAGE_SIGNING_KEYS_ASC > keyring.asc
+        echo $BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64 | base64 --decode > keyring.asc
         export GPG_TTY=${{ env.tty }}
         gpg -v --batch --no-tty --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --import keyring.asc
         echo "Init GPG" | gpg -v  --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --batch --no-tty -u $GPG_KEY_NAME --sign --armor
