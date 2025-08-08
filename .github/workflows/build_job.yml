@@ -54,7 +54,7 @@ jobs:
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
-      run: ./gradlew clean signPackageDistribution --no-daemon --debug
+      run: ./gradlew clean signPackageDistribution --no-daemon --info
     - run: |
         shred -fuz "${{ github.workspace }}/keyring.gpg"
       shell: bash
