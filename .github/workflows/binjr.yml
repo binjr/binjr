@@ -55,7 +55,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: ${{ vars.BUILD_JAVA_VERSION}}
+          java-version: "${{ vars.BUILD_JAVA_VERSION}}"
           check-latest: true
           cache: 'gradle'
     - name: expandTemplates
@@ -99,7 +99,7 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4.1.0
     - env:
-        AUR_SSH_PRIVATE_BASE64: ${{ secrets.AUR_SSH_PRIVATE_BASE64 }}
+        AUR_SSH_PRIVATE_BASE64: "${{ secrets.AUR_SSH_PRIVATE_BASE64 }}"
         AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
       run: |
         echo $AUR_SSH_PRIVATE_BASE64 | base64 --decode > $AUR_SSH_PRIVATE_PATH
@@ -188,7 +188,7 @@ jobs:
           check-latest: true
           cache: 'gradle'
     - env:
-        KEYRING_GPG_BASE64: ${{ secrets.KEYRING_GPG_BASE64 }}
+        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       run: |
         echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
@@ -199,7 +199,7 @@ jobs:
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "${{ env.KEYRING_PATH }}"
+        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
         ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
         ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
       run: ./gradlew publishArtifacts --no-daemon

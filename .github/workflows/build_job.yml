@@ -41,9 +41,8 @@ jobs:
       run: |-
         curl -LO https://github.com/wixtoolset/wix/releases/download/v$env:WIX_VERSION/wix-cli-x64.msi
         msiexec /passive /i wix-cli-x64.msi INSTALLFOLDER="$env:TOOL_DIR\wix-cli"
-        "$env:TOOL_DIR\wix-cli\bin\wix.exe" --version
     - env:
-        KEYRING_GPG_BASE64: ${{ secrets.KEYRING_GPG_BASE64 }}
+        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       run: |
         echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
