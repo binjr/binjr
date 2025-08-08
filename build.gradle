@@ -112,7 +112,7 @@ System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag: ${IS_TAG}")
 System.out.println("Is release: ${IS_RELEASE}")
 
-if (IS_TAG && !System.getenv('REPO_TAG_NAME').endsWith("v" + ${BINJR_VERSION})) {
+if (IS_TAG && !System.getenv('REPO_TAG_NAME').endsWith("v${BINJR_VERSION}")) {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
 }
 
