@@ -44,8 +44,7 @@ efficient navigation and pretty presentation for time series collected elsewhere
 not geared toward that particular task, and there are better tools for that out there. Instead, it aims to be an 
 investigation tool, for when you don't necessarily know what you're looking for beforehand and you'll want to build 
 and change the view of the data as you navigate through it rather than be constrained by pre-determined dashboards. 
-* _binjr_ is **not** cloud-native, serverless, containerized, etc... It's a client application that runs locally; there is no need to sign-up anywhere or deploy/host/orchestrate anything: you download the bits and then you run them.
-* _binjr_ does **not** "harness the power of AI"...
+* _binjr_ is **not** cloud-native, serverless, containerized, etc... It's a client application that runs locally; there is no need to sign-up anywhere or deploy/host/orchestrate anything: you download the bits, and then you run them.
 
 ## Features
 
@@ -59,7 +58,7 @@ and change the view of the data as you navigate through it rather than be constr
 ####  Designed for ad-hoc view composition
   * Drag and drop series from any sources directly on the chart view.
   * Mix series from different sources on the same view.
-  * Allows charts overlay: create charts with several Y axis and a shared time line.
+  * Allows charts overlay: create charts with several Y axis and a shared timeline.
   * Highly customizable views; choose chart types, change series colours, transparency, legends, etc...
   * Save you work session to a file at any time, to be reopened later or shared with someone else.  
    
@@ -69,7 +68,7 @@ and change the view of the data as you navigate through it rather than be constr
   * Browser-like, forward & backward navigation of zoom history.
   * Advanced time-range selection widget.
   * The tabs holding the chart views can be detached into separate windows.
-  * Charts from different tabs/windows can be synchronized to a common time line.
+  * Charts from different tabs/windows can be synchronized to a common timeline.
   
 ####  Fast, responsive & aesthetically pleasing visuals
   * Built on top of [JavaFX](https://openjfx.io/) for a modern look and cross-platform, hardware accelerated graphics.
@@ -146,7 +145,7 @@ If you encounter an issue, or would like to suggest an enhancement or a new feat
 
 ## Contributing
 
-This project accepts contributions via [GitHub pull requests](https://github.com/binjr/binjr/pulls).
+This project accepts contributions made via either [GitHub pull requests](https://github.com/binjr/binjr/pulls) or [Codeberg pull requests](https://codeberg.org/binjr/binjr/pulls), at your convenience.  
 
 ### Certificate of Origin
 
