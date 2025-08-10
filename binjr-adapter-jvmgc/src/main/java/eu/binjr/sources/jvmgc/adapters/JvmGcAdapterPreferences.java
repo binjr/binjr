@@ -17,6 +17,7 @@
 package eu.binjr.sources.jvmgc.adapters;
 
 
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
@@ -34,4 +35,6 @@ public class JvmGcAdapterPreferences extends DataAdapterPreferences {
     public JvmGcAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
     }
+
+    public ObservablePreference<Boolean> isDetectRollingLogs = booleanPreference("isDetectRollingLogs", true);
 }

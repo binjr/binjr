@@ -18,6 +18,7 @@ package eu.binjr.sources.jvmgc.adapters;
 
 import com.microsoft.gctoolkit.GCToolKit;
 import com.microsoft.gctoolkit.io.GCLogFile;
+import com.microsoft.gctoolkit.io.RotatingGCLogFile;
 import com.microsoft.gctoolkit.io.SingleGCLogFile;
 import com.microsoft.gctoolkit.jvm.JavaVirtualMachine;
 import eu.binjr.common.javafx.controls.TimeRange;
@@ -28,6 +29,7 @@ import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.codec.csv.DataSample;
+import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
@@ -39,6 +41,7 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -58,7 +61,10 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     public static final String GC_FILE_PATH = "gcFilePath";
     public static final String ZONE_ID = "zoneId";
     public static final String ENCODING = "encoding";
+    public static final String ROLLING_LOGS = "RollingLogs";
+    private final JvmGcAdapterPreferences adapterPrefs = (JvmGcAdapterPreferences) getAdapterInfo().getPreferences();
 
+    private boolean detectRollingLogs;
     private Path gcLogPath;
     private ZoneId zoneId;
     private String encoding;
@@ -71,7 +77,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
      * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
      */
     public JvmGcDataAdapter() throws DataAdapterException {
-        this(Path.of(""), ZoneId.systemDefault());
+        this(Path.of(""), ZoneId.systemDefault(), true);
     }
 
     /**
@@ -81,8 +87,8 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
      * @param zoneId    the time zone to used.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
-    public JvmGcDataAdapter(Path gcLogPath, ZoneId zoneId) throws DataAdapterException {
-        this(gcLogPath, zoneId, "utf-8");
+    public JvmGcDataAdapter(Path gcLogPath, ZoneId zoneId, boolean detectRollingLogs) throws DataAdapterException {
+        this(gcLogPath, zoneId, "utf-8", detectRollingLogs);
     }
 
     /**
@@ -93,12 +99,12 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
      * @param encoding  the encoding for the csv file.
      * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
-    public JvmGcDataAdapter(Path gcLogPath, ZoneId zoneId, String encoding) throws DataAdapterException {
+    public JvmGcDataAdapter(Path gcLogPath, ZoneId zoneId, String encoding, boolean detectRollingLogs) throws DataAdapterException {
         super();
         this.gcLogPath = gcLogPath;
         this.zoneId = zoneId;
         this.encoding = encoding;
-
+        this.detectRollingLogs = detectRollingLogs;
     }
 
     @Override
@@ -106,7 +112,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
         ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
         try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
-            GCLogFile logFile = new SingleGCLogFile(gcLogPath);
+            GCLogFile logFile = detectRollingLogs ? new RotatingGCLogFile(gcLogPath) : new SingleGCLogFile(gcLogPath);
             GCToolKit gcToolKit = new GCToolKit();
             var gcDataStore = new GcLogDataStore();
             gcToolKit.loadAggregation(gcDataStore);
@@ -230,7 +236,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return "[GC Logs] " + (gcLogPath != null ? gcLogPath.getFileName() : "???");
+        return "[GC Logs] " + (gcLogPath != null ? gcLogPath.getFileName() : "???" + (detectRollingLogs ? "(rolling)" : ""));
     }
 
     @Override
@@ -239,24 +245,23 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         params.put(ZONE_ID, zoneId.toString());
         params.put(ENCODING, encoding);
         params.put(GC_FILE_PATH, gcLogPath.toString());
+        params.put(ROLLING_LOGS, Boolean.toString(detectRollingLogs));
         return params;
     }
 
     @Override
-    public void loadParams(Map<String, String> params) throws DataAdapterException {
+    public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
-        zoneId = validateParameter(params, ZONE_ID,
-                s -> {
-                    if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adapter " + getSourceName());
-                    }
-                    return ZoneId.of(s);
-                });
-        String path = validateParameterNullity(params, GC_FILE_PATH);
-        encoding = validateParameterNullity(params, ENCODING);
-        this.gcLogPath = Paths.get(path);
+        this.zoneId = mapParameter(params, ZONE_ID, ZoneId::of);
+        this.gcLogPath = mapParameter(params, GC_FILE_PATH, Path::of);
+        this.encoding = mapParameter(params, ENCODING);
+        this.detectRollingLogs =  mapParameter(params,ROLLING_LOGS, Boolean::valueOf);
+        Path workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.gcLogPath.getRoot();
+        if (workspaceRootPath != null) {
+            this.gcLogPath = workspaceRootPath.resolve(gcLogPath);
+        }
     }
 
     @Override

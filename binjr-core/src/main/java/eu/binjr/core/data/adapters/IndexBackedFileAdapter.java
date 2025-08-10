@@ -67,7 +67,6 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
     protected String[] folderFilters;
     protected String[] fileExtensionsFilters;
     protected FileSystemBrowser fileBrowser;
-    private Path workspaceRootPath;
 
     protected IndexBackedFileAdapter(String filePath,
                                      ZoneId zoneId,
@@ -267,7 +266,7 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
         this.encoding = mapParameter(params, ENCODING);
         this.folderFilters = mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class), Optional.of(new String[]{"*"}));
         this.fileExtensionsFilters = mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class), Optional.of(new String[]{"*.*"}));
-        this.workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.filePath.getRoot();
+        Path workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.filePath.getRoot();
         if (workspaceRootPath != null) {
             this.filePath = workspaceRootPath.resolve(filePath);
         }
