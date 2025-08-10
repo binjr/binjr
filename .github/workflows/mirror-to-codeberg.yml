@@ -1,0 +1,16 @@
+name: "Mirror to codeberg"
+on: [push]
+
+jobs:
+  mirror:
+    name: Mirror to codeberg
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: yesolutions/mirror-action@master
+        with:
+          REMOTE: 'https://codeberg.org/binjr/binjr.git'
+          GIT_USERNAME: binjr-bot
+          GIT_PASSWORD: ${{ secrets.CODEBERG_MIRROR_TOKEN }}
