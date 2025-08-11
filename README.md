@@ -38,13 +38,14 @@ It provides many of the same powerful visualization and search features while st
 
 ### ...and what it isn't
 
-* _binjr_ is **not** a system performance collector, nor a collector of anything else for that matter. What it provides is
-efficient navigation and pretty presentation for time series collected elsewhere. 
-* _binjr_ is **not** a live system monitoring dashboard. While you can use it to connect to live sources, its feature set is
-not geared toward that particular task, and there are better tools for that out there. Instead, it aims to be an 
+* _binjr_ is **not** a system performance collector, nor a collector of anything else for that matter. What it provides
+is efficient navigation and pretty presentation for time series collected elsewhere. 
+* _binjr_ is **not** a live system monitoring dashboard. While you can use it to connect to live sources, its feature 
+set is not geared toward that particular task, and there are better tools for that out there. Instead, it aims to be an 
 investigation tool, for when you don't necessarily know what you're looking for beforehand and you'll want to build 
 and change the view of the data as you navigate through it rather than be constrained by pre-determined dashboards. 
-* _binjr_ is **not** cloud-native, serverless, containerized, etc... It's a client application that runs locally; there is no need to sign-up anywhere or deploy/host/orchestrate anything: you download the bits, and then you run them.
+* _binjr_ is **not** SaaS or otherwise cloud-based.It is a purely client-side application that runs locally; there 
+is no need to sign up to anything or upload your data anywhere.
 
 ## Features
 
