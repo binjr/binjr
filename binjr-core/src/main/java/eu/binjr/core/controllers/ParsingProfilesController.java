@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -168,6 +168,8 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
         var exportPath = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (exportPath != null) {
             try {
+                // Apply changes before exporting to file
+                this.applyChanges();
                 Files.deleteIfExists(exportPath.toPath());
                 UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
                 Files.writeString(exportPath.toPath(), gson.toJson(profileComboBox.getItems().stream()
