@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2024 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import eu.binjr.sources.csv.adapters.CsvAdapterPreferences;
 import eu.binjr.sources.csv.adapters.CsvFileAdapter;
 import javafx.beans.property.SimpleStringProperty;
@@ -70,8 +71,6 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private TextField parsingLocaleTextField;
     @FXML
     private CheckBox trimCellsCheckbox;
-    @FXML
-    private CheckBox continueOnTSErrorCheckbox;
 
     private final UnaryOperator<TextFormatter.Change> clampToSingleChar = c -> {
         if (c.isContentChange()) {
@@ -92,15 +91,21 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
+    //    onParseFailureChoiceBox.getItems().setAll(UnparseableLinesBehavior.ABORT,UnparseableLinesBehavior.IGNORE);
         delimiterTextField.textProperty().addListener((observable) -> resetTest());
         timeColumnTextField.valueProperty().addListener(observable -> resetTest());
         readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
         trimCellsCheckbox.selectedProperty().addListener(observable -> resetTest());
-        continueOnTSErrorCheckbox.selectedProperty().addListener(observable -> resetTest());
+        onParseFailureChoiceBox.getSelectionModel().selectedItemProperty().addListener(observable -> resetTest());
         TextFields.bindAutoCompletion(parsingLocaleTextField,
                 Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
         delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
         quoteCharacterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
+    }
+
+    @Override
+    protected ParsingFailureMode[] getSupportedUnparseableBehaviors() {
+        return new ParsingFailureMode[] { ParsingFailureMode.ABORT, ParsingFailureMode.IGNORE};
     }
 
     @Override
@@ -112,7 +117,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
         this.trimCellsCheckbox.setSelected(profile.isTrimCellValues());
-        this.continueOnTSErrorCheckbox.setSelected(profile.isContinueOnTimestampParsingFailure());
+        this.onParseFailureChoiceBox.getSelectionModel().select(profile.onParsingFailure());
     }
 
     public record ColumnPosition(int index) {
@@ -289,7 +294,11 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     }
 
     @Override
-    protected Optional<CsvParsingProfile> updateProfile(String profileName, String profileId, Map<NamedCaptureGroup, String> groups, String lineExpression) {
+    protected Optional<CsvParsingProfile> updateProfile(String profileName,
+                                                        String profileId,
+                                                        Map<NamedCaptureGroup, String> groups,
+                                                        String lineExpression,
+                                                        ParsingFailureMode onParsingFailure) {
         List<String> errors = new ArrayList<>();
         if (this.lineTemplateExpression.getText().isBlank()) {
             TextFieldValidator.fail(delimiterTextField, true);
@@ -328,7 +337,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.forLanguageTag(parsingLocaleTextField.getText()),
                 this.trimCellsCheckbox.isSelected(),
-                this.continueOnTSErrorCheckbox.isSelected()));
+                onParsingFailure));
     }
 
     private String formatToDouble(String value) {

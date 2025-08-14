@@ -16,8 +16,10 @@
 
 package eu.binjr.core.data.indexes.parser;
 
+import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 
@@ -98,12 +100,13 @@ public class LogEventParser implements EventParser {
                 progress.set(progress.get() + charRead);
                 charRead = 0;
             }
-            var parsed = parse(sequence.incrementAndGet(), line);
+            long lineNumber = sequence.incrementAndGet();
+            var parsed = parse(lineNumber, line);
             if (parsed != null) {
                 var yield = buffered;
                 buffered = parsed;
                 return yield;
-            } else {
+            } else if (format.getProfile().onParsingFailure() == ParsingFailureMode.CONCAT) {
                 if (buffered != null) {
                     // Having to create a new event object each time we need to mutate the buffer's
                     // content isn't ideal performance-wise, but based on the assumption that most
@@ -115,8 +118,11 @@ public class LogEventParser implements EventParser {
                             buffered.getText() + "\n" + line,
                             buffered.getTextFields());
                 }
-                return null;
+            } else if (format.getProfile().onParsingFailure() == ParsingFailureMode.ABORT) {
+                throw new FatalParsingEventException("Parsing aborted because of unparseable data at line "+ lineNumber +
+                        ": \"" + StringUtils.sanitizeNotificationMessage(line) + "\"");
             }
+            return null;
         }
 
         @Override

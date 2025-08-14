@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.indexes.*;
 import eu.binjr.core.data.indexes.parser.EventFormat;
+import eu.binjr.core.data.indexes.parser.FatalParsingEventException;
 import eu.binjr.core.data.indexes.parser.LogEventFormat;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
@@ -343,6 +344,8 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
                     progress,
                     reloadPolicy,
                     reloadStatus);
+        } catch (FatalParsingEventException fe) {
+            throw fe;
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
@@ -402,6 +405,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
                             indexingStatus);
                     indexedFiles.put(key, indexingStatus.getValue());
                 }
+            } catch (FatalParsingEventException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new IOException(e);
             } finally {
                 // remove listener
                 charRead.removeListener(progressListener);

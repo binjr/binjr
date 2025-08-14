@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2022 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,19 +33,22 @@ public class CustomParsingProfile implements ParsingProfile {
     protected final String profileId;
     @JsonAdapter(PatternJsonAdapter.class)
     private final Pattern regex;
+    private final ParsingFailureMode onParsingFailure;
 
     public CustomParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "");
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ParsingFailureMode.CONCAT);
     }
 
     public CustomParsingProfile(String profileName,
                                 String profileId,
                                 Map<NamedCaptureGroup, String> captureGroups,
-                                String lineTemplateExpression) {
+                                String lineTemplateExpression, 
+                                ParsingFailureMode onParsingFailure) {
         this.profileName = profileName;
         this.profileId = profileId;
         this.captureGroups = captureGroups;
         this.lineTemplateExpression = lineTemplateExpression;
+        this.onParsingFailure = onParsingFailure;
         this.regex = Pattern.compile(buildParsingRegexString());
     }
 
@@ -53,7 +56,8 @@ public class CustomParsingProfile implements ParsingProfile {
         return new CustomParsingProfile(parsingProfile.getProfileName(),
                 parsingProfile.getProfileId(),
                 parsingProfile.getCaptureGroups(),
-                parsingProfile.getLineTemplateExpression());
+                parsingProfile.getLineTemplateExpression(),
+                parsingProfile.onParsingFailure());
     }
 
     @Override
@@ -104,4 +108,8 @@ public class CustomParsingProfile implements ParsingProfile {
         return profileName;
     }
 
+    @Override
+    public ParsingFailureMode onParsingFailure() {
+        return onParsingFailure;
+    }
 }

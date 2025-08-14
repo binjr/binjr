@@ -27,8 +27,6 @@ public interface JsonParsingProfile extends ParsingProfile {
 
     JsonDefinition getJsonDefinition();
 
-    boolean isContinueOnTimestampParsingFailure();
-
     record JsonSeriesDefinition(String path,
                                 Color color,
                                 String unit,

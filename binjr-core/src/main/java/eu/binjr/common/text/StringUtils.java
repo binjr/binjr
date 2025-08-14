@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package eu.binjr.common.text;
 
+import eu.binjr.core.dialogs.Dialogs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class StringUtils {
     private final static String NON_THIN = "[^iIl1\\.,']";
+    private static final int MAX_NOTIFICATION_LEN = 300;
     private static final Logger logger = LogManager.getLogger(StringUtils.class);
 
     private static int textWidth(String str) {
@@ -135,4 +137,14 @@ public class StringUtils {
         return val == null || val.isBlank();
     }
 
+    public static String sanitizeNotificationMessage(String msg) {
+        if (msg == null) {
+            return "";
+        }
+        if (msg.length() <= MAX_NOTIFICATION_LEN) {
+            return msg;
+        } else {
+            return msg.substring(0, MAX_NOTIFICATION_LEN) + "...";
+        }
+    }
 }
