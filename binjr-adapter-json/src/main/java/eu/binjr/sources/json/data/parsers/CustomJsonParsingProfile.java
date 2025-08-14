@@ -18,15 +18,15 @@ package eu.binjr.sources.json.data.parsers;
 
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 
 import java.util.*;
 
 public class CustomJsonParsingProfile extends CustomParsingProfile implements JsonParsingProfile {
-    private final boolean continueOnTimestampParsingFailure;
     private final JsonDefinition jsonDefinition;
 
     public CustomJsonParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", false, null);
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ParsingFailureMode.ABORT, null);
     }
 
 
@@ -35,7 +35,7 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
                 parsingProfile.getProfileId(),
                 parsingProfile.getCaptureGroups(),
                 parsingProfile.getLineTemplateExpression(),
-                parsingProfile.isContinueOnTimestampParsingFailure(),
+                parsingProfile.onParsingFailure(),
                 parsingProfile.getJsonDefinition()
         );
     }
@@ -45,10 +45,9 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
                                     String profileId,
                                     Map<NamedCaptureGroup, String> captureGroups,
                                     String lineTemplateExpression,
-                                    boolean continueOnTimestampParsingFailure,
+                                    ParsingFailureMode onParsingFailure,
                                     JsonDefinition jsonDefinition) {
-        super(profileName, profileId, captureGroups, lineTemplateExpression);
-        this.continueOnTimestampParsingFailure = continueOnTimestampParsingFailure;
+        super(profileName, profileId, captureGroups, lineTemplateExpression, onParsingFailure);
         this.jsonDefinition = jsonDefinition;
     }
 
@@ -58,8 +57,4 @@ public class CustomJsonParsingProfile extends CustomParsingProfile implements Js
         return this.jsonDefinition;
     }
 
-    @Override
-    public boolean isContinueOnTimestampParsingFailure() {
-        return this.continueOnTimestampParsingFailure;
-    }
 }

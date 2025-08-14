@@ -24,6 +24,7 @@ import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import eu.binjr.sources.json.adapters.JsonAdapterPreferences;
 import eu.binjr.sources.json.adapters.JsonFileAdapter;
 import javafx.event.ActionEvent;
@@ -78,9 +79,13 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
     }
 
     @Override
+    protected ParsingFailureMode[] getSupportedUnparseableBehaviors() {
+        return new ParsingFailureMode[] {ParsingFailureMode.ABORT, ParsingFailureMode.IGNORE};
+    }
+
+    @Override
     protected void loadParserParameters(JsonParsingProfile profile) {
         super.loadParserParameters(profile);
-        this.continueOnTSErrorCheckbox.setSelected(profile.isContinueOnTimestampParsingFailure());
     }
 
     public record ColumnPosition(int index) {
@@ -207,14 +212,17 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
     }
 
     @Override
-    protected Optional<JsonParsingProfile> updateProfile(String profileName, String profileId, Map<NamedCaptureGroup, String> groups, String lineExpression) {
+    protected Optional<JsonParsingProfile> updateProfile(String profileName,
+                                                         String profileId, Map<NamedCaptureGroup, String> groups,
+                                                         String lineExpression,
+                                                         ParsingFailureMode onParsingFailure) {
         List<String> errors = new ArrayList<>();
 
         return Optional.of(new CustomJsonParsingProfile(profileName,
                 profileId,
                 groups,
                 lineExpression,
-                this.continueOnTSErrorCheckbox.isSelected(),
+                onParsingFailure,
                 null));
     }
 

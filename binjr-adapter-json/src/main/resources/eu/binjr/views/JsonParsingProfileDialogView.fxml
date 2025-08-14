@@ -131,8 +131,17 @@
                                     </CodeArea>
                                 </children>
                             </HBox>
-                            <CheckBox fx:id="continueOnTSErrorCheckbox"
-                                      text="Don't interrupt loading on unparsable time stamps"/>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <LabelWithInlineHelp minWidth="110.0" text="On encountering unparseable lines:"
+                                                     inlineHelp="Choose how the parser should handle lines that do not comply with the parsing rules:
+&#xD;Abort processing: stops the parsing of the file and throws an error.
+&#xD;Ignore and move to next line: filter out the un-compliant lines.
+&#xD;Concatenate with previous event: the text for the unparsed line is added the the previously successfully parsed event."
+                                                     alignment="CENTER_RIGHT"/>
+                                <ChoiceBox fx:id="onParseFailureChoiceBox"
+                                           maxHeight="1.7976931348623157E308"
+                                           maxWidth="1.7976931348623157E308"/>
+                            </HBox>
                         </VBox>
                     </TitledPane>
                     <TitledPane fx:id="testTitledPane" animated="false" maxWidth="Infinity"

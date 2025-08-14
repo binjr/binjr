@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2025 Frederic Thevenet
+ *    Copyright 2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,25 +14,15 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.csv.data.parsers;
+package eu.binjr.core.data.indexes.parser;
 
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import java.io.IOException;
 
-import java.util.Locale;
-
-public interface CsvParsingProfile extends ParsingProfile {
-    String getDelimiter();
-
-    int getTimestampColumn();
-
-    int[] getExcludedColumns();
-
-    boolean isReadColumnNames();
-
-    Locale getNumberFormattingLocale();
-
-    char getQuoteCharacter();
-
-    boolean isTrimCellValues();
-
+public class FatalParsingEventException extends RuntimeException {
+    public FatalParsingEventException(String s) {
+        super(s);
+    }
+    public FatalParsingEventException(String s, Throwable e) {
+        super(s, e);
+    }
 }

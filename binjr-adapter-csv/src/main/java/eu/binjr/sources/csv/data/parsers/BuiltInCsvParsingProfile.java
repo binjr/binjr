@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2024 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package eu.binjr.sources.csv.data.parsers;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 
 import java.util.Locale;
 import java.util.Map;
@@ -43,7 +44,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             true,
             Locale.US,
             false,
-            false),
+            ParsingFailureMode.ABORT),
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
@@ -55,7 +56,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             true,
             Locale.US,
             false,
-            false),
+            ParsingFailureMode.ABORT),
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
@@ -68,7 +69,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             true,
             Locale.US,
             false,
-            false);
+            ParsingFailureMode.ABORT);
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -82,7 +83,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final boolean readColumnNames;
     private final char quoteCharacter;
     private final boolean trimCellValues;
-    private final boolean abortOnTimestampParsingFailure;
+    private final ParsingFailureMode onParsingFailure;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
@@ -95,7 +96,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                              boolean readColumnNames,
                              Locale numberFormattingLocale,
                              boolean trimCellValues,
-                             boolean abortOnTimestampParsingFailure) {
+                             ParsingFailureMode onParsingFailure) {
         this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
@@ -108,7 +109,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
         this.readColumnNames = readColumnNames;
         this.numberFormattingLocale = numberFormattingLocale;
         this.trimCellValues = trimCellValues;
-        this.abortOnTimestampParsingFailure = abortOnTimestampParsingFailure;
+        this.onParsingFailure = onParsingFailure;
     }
 
     @Override
@@ -182,7 +183,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     }
 
     @Override
-    public boolean isContinueOnTimestampParsingFailure() {
-        return this.abortOnTimestampParsingFailure;
+    public ParsingFailureMode onParsingFailure() {
+        return onParsingFailure;
     }
 }

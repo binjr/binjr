@@ -21,6 +21,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import org.jsfr.json.JacksonParser;
@@ -92,7 +93,7 @@ public class JsonEventParser implements EventParser {
                 var errMessage = "Failed to parse \"" + StringUtils.ellipsize(dateString, 100) +
                         "\" as a valid time stamp at \"" + format.getProfile().getJsonDefinition().timeStampsPointer() +
                         "\".";
-                if (format.getProfile().isContinueOnTimestampParsingFailure()) {
+                if (format.getProfile().onParsingFailure() == ParsingFailureMode.IGNORE) {
                     logger.warn(errMessage);
                     // Ignore the current json node and jump to the next
                     return this.next();

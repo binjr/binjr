@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2020 Frederic Thevenet
+  ~    Copyright 2020-2025 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -38,22 +38,28 @@
 <?import javafx.scene.control.TitledPane?>
 <?import eu.binjr.common.javafx.controls.LabelWithInlineHelp?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ChoiceBox?>
 <DialogPane fx:id="dialogPane" styleClass="skinnable-pane-border, tool-dialog-window"
             xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
     <content>
-        <AnchorPane fx:id="root" prefHeight="777.0" prefWidth="853.0">
+        <AnchorPane fx:id="root">
             <children>
                 <VBox fx:id="expressions" spacing="10.0"
                       AnchorPane.bottomAnchor="4.0"
                       AnchorPane.leftAnchor="4.0"
                       AnchorPane.rightAnchor="4.0"
                       AnchorPane.topAnchor="40.0">
-                    <TitledPane fx:id="setupTitledPane" text="" animated="false" maxWidth="Infinity" maxHeight="Infinity"
+                    <TitledPane fx:id="setupTitledPane" text="" animated="false"
+                                minHeight="200"
+                                minWidth="400"
+                                maxWidth="Infinity" maxHeight="Infinity"
                                 contentDisplay="GRAPHIC_ONLY"
                                 VBox.vgrow="SOMETIMES">
                         <graphic>
-                            <LabelWithInlineHelp text="Setup" inlineHelp="Setup parsing rules&#xD;&#xD;Note: The settings below are greyed out when a built-in profile is selected. If you need to customize a built-in profile, click on &quot;Duplicate profile&quot; to create a copy that you can modify." alignment="CENTER_RIGHT" />
+                            <LabelWithInlineHelp text="Setup"
+                                                 inlineHelp="Setup parsing rules&#xD;&#xD;Note: The settings below are greyed out when a built-in profile is selected. If you need to customize a built-in profile, click on &quot;Duplicate profile&quot; to create a copy that you can modify."
+                                                 alignment="CENTER_RIGHT"/>
                         </graphic>
                         <VBox fx:id="setupPane" spacing="10.0">
                             <padding>
@@ -139,6 +145,17 @@
                                     </CodeArea>
                                 </children>
                             </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <LabelWithInlineHelp minWidth="110.0" text="On encountering unparseable lines:"
+                                                     inlineHelp="Choose how the parser should handle lines that do not comply with the parsing rules:
+&#xD;Abort processing: stops the parsing of the file and throws an error.
+&#xD;Ignore and move to next line: filter out the un-compliant lines.
+&#xD;Concatenate with previous event: the text for the unparsed line is added the the previously successfully parsed event."
+                                                     alignment="CENTER_RIGHT"/>
+                                <ChoiceBox fx:id="onParseFailureChoiceBox"
+                                           maxHeight="1.7976931348623157E308"
+                                           maxWidth="1.7976931348623157E308"/>
+                            </HBox>
                         </VBox>
                     </TitledPane>
                     <TitledPane fx:id="testTitledPane" animated="false" maxWidth="Infinity" maxHeight="Infinity"
@@ -148,7 +165,7 @@
                                                  inlineHelp="Test data extraction&#xD;&#xD;
 You can enter text (or paste from clipboard/load it from a file) in the &quot;input&quot; tab below to&#xD;
 and see the results of your parsing rules."
-                                                 alignment="CENTER_RIGHT" />
+                                                 alignment="CENTER_RIGHT"/>
                         </graphic>
                         <VBox fx:id="testPane" spacing="10.0">
                             <padding>

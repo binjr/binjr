@@ -80,5 +80,9 @@ public interface ParsingProfile {
         return UserPreferences.getInstance().defaultDateTimeAnchor.get();
     }
 
+    default ParsingFailureMode onParsingFailure(){
+        return ParsingFailureMode.ABORT;
+    }
+
 }
 

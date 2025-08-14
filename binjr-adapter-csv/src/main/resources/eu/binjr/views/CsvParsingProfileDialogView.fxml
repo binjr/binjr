@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2022-2024 Frederic Thevenet
+  ~    Copyright 2022-2025 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@
                       AnchorPane.rightAnchor="4.0"
                       AnchorPane.topAnchor="40.0">
                     <TitledPane fx:id="setupTitledPane" animated="false" maxWidth="Infinity"
+                                minHeight="300"
+                                minWidth="400"
                                 maxHeight="Infinity"
                                 contentDisplay="GRAPHIC_ONLY"
                                 VBox.vgrow="SOMETIMES">
@@ -155,8 +157,17 @@
                                       text="Use values from first line as column names"/>
                             <CheckBox fx:id="trimCellsCheckbox"
                                       text="Trim cell values"/>
-                            <CheckBox fx:id="continueOnTSErrorCheckbox"
-                                      text="Ignore lines with unparsable time stamps"/>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <LabelWithInlineHelp minWidth="110.0" text="On encountering unparseable lines:"
+                                                     inlineHelp="Choose how the parser should handle lines that do not comply with the parsing rules:
+&#xD;Abort processing: stops the parsing of the file and throws an error.
+&#xD;Ignore and move to next line: filter out the un-compliant lines.
+&#xD;Concatenate with previous event: the text for the unparsed line is added the the previously successfully parsed event."
+                                                     alignment="CENTER_RIGHT"/>
+                                <ChoiceBox fx:id="onParseFailureChoiceBox"
+                                           maxHeight="1.7976931348623157E308"
+                                           maxWidth="1.7976931348623157E308"/>
+                            </HBox>
                             <HBox spacing="10.0">
                                 <LabelWithInlineHelp text="Locale for parsing numbers"
                                                      inlineHelp="Indicates which regional settings should be applied when parsing column content as numbers."

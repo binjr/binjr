@@ -19,6 +19,7 @@ package eu.binjr.sources.json.data.parsers;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 
@@ -71,7 +72,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
                     CaptureGroup.of("TIMEZONE"), "(Z|[+-]\\d{2}:?(\\d{2})?)"),
             "$YEAR[\\s\\/-]$MONTH[\\s\\/-]$DAY([-\\sT]$HOUR:$MINUTE:$SECOND)?([\\.,]$MILLI)?$TIMEZONE?",
             Locale.US,
-            false),
+            ParsingFailureMode.ABORT),
 
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
@@ -79,7 +80,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
             Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
             "$EPOCH",
             Locale.US,
-            false),
+            ParsingFailureMode.ABORT),
 
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
@@ -88,7 +89,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
                     TemporalCaptureGroup.MILLI, "\\d{3}"),
             "$EPOCH$MILLI",
             Locale.US,
-            false);
+            ParsingFailureMode.ABORT);
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -97,7 +98,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     private final Pattern regex;
     private final Locale numberFormattingLocale;
     private final JsonDefinition definitions;
-    private final boolean abortOnTimestampParsingFailure;
+    private final ParsingFailureMode onParsingFailure;
 
     BuiltInJsonParsingProfile(String profileName,
                               String id,
@@ -105,7 +106,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
                               Map<NamedCaptureGroup, String> groups,
                               String lineTemplateExpression,
                               Locale numberFormattingLocale,
-                              boolean abortOnTimestampParsingFailure) {
+                              ParsingFailureMode onParsingFailure) {
         this.profileId = id;
         this.definitions = definitions;
         this.profileName = profileName;
@@ -113,7 +114,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
         this.lineTemplateExpression = lineTemplateExpression;
         this.regex = Pattern.compile(buildParsingRegexString());
         this.numberFormattingLocale = numberFormattingLocale;
-        this.abortOnTimestampParsingFailure = abortOnTimestampParsingFailure;
+        this.onParsingFailure = onParsingFailure;
     }
 
     @Override
@@ -124,6 +125,11 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     @Override
     public Pattern getParsingRegex() {
         return regex;
+    }
+
+    @Override
+    public ParsingFailureMode onParsingFailure() {
+        return this.onParsingFailure;
     }
 
     @Override
@@ -156,8 +162,6 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
         return this.definitions;
     }
 
-    @Override
-    public boolean isContinueOnTimestampParsingFailure() {
-        return this.abortOnTimestampParsingFailure;
-    }
+
+
 }

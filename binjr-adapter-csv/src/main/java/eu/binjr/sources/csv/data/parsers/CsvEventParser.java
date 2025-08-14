@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2024 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
-import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import org.apache.commons.csv.CSVFormat;
@@ -116,7 +115,7 @@ public class CsvEventParser implements EventParser {
                     var errMessage = "Failed to parse \"" + StringUtils.ellipsize(dateString, 100) +
                             "\" as a valid time stamp in column #" + (format.getProfile().getTimestampColumn() + 1) +
                             ", line #" + csvRecord.getRecordNumber() + ".";
-                    if (format.getProfile().isContinueOnTimestampParsingFailure()) {
+                    if (format.getProfile().onParsingFailure() == ParsingFailureMode.IGNORE) {
                         logger.warn(errMessage);
                         // Ignore the current csv record and jump to the next
                         return this.next();

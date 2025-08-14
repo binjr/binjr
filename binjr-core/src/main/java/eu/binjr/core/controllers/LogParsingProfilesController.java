@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import eu.binjr.core.data.indexes.parser.LogEventFormat;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -65,6 +66,11 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
     }
 
     @Override
+    protected ParsingFailureMode[] getSupportedUnparseableBehaviors() {
+        return  ParsingFailureMode.values();
+    }
+
+    @Override
     protected List<ParsingProfile> deSerializeProfiles(String profileString) {
         Type profileListType = new TypeToken<ArrayList<CustomParsingProfile>>() {
         }.getType();
@@ -93,7 +99,11 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
     }
 
     @Override
-    protected Optional<ParsingProfile> updateProfile(String profileName, String profileId, Map groups, String lineExpression) {
-        return Optional.of(new CustomParsingProfile(profileName, profileId, groups, lineExpression));
+    protected Optional<ParsingProfile> updateProfile(String profileName,
+                                                     String profileId,
+                                                     Map groups,
+                                                     String lineExpression,
+                                                     ParsingFailureMode onParsingFailure) {
+        return Optional.of(new CustomParsingProfile(profileName, profileId, groups, lineExpression, onParsingFailure));
     }
 }

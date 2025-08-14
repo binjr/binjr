@@ -24,6 +24,7 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
@@ -110,9 +111,11 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected VBox setupPane;
     @FXML
     protected VBox testPane;
+    @FXML
+    protected ChoiceBox<ParsingFailureMode> onParseFailureChoiceBox;
 
     protected final AtomicInteger groupSequence = new AtomicInteger(0);
-    private final T selectedProfile;
+    protected final T selectedProfile;
     private final Set<T> userParsingProfiles;
     private final boolean allowTemporalCaptureGroupsOnly;
     private final Charset defaultCharset;
@@ -386,6 +389,19 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                 return val;
             }
         });
+        this.onParseFailureChoiceBox.getItems().setAll(getSupportedUnparseableBehaviors());
+        this.onParseFailureChoiceBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(ParsingFailureMode o) {
+                return o != null ? o.toString() : "";
+            }
+
+            @Override
+            public ParsingFailureMode fromString(String s) {
+                return onParseFailureChoiceBox.getValue();
+            }
+        });
+
 
         lineTemplateExpression.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             Node source = (Node) event.getSource();
@@ -452,6 +468,8 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
 
         TableViewUtils.autoFillTableWidthWithColumn(captureGroupTable, 1);
     }
+
+    protected abstract ParsingFailureMode[] getSupportedUnparseableBehaviors();
 
     private void navigateToNextNode(Node source) {
         Node parent = source.getParent();
@@ -551,6 +569,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             this.deleteProfileButton.setDisable(profile.isBuiltIn());
             this.captureGroupTable.setEditable(!profile.isBuiltIn());
             this.profileComboBox.getEditor().setEditable(!profile.isBuiltIn());
+            this.onParseFailureChoiceBox.getSelectionModel().select(profile.onParsingFailure());
         } catch (
                 Exception e) {
             Dialogs.notifyException("Error loading profile", e, root);
@@ -560,20 +579,23 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     protected abstract Optional<T> updateProfile(String profileName,
                                                  String profileId,
                                                  Map<NamedCaptureGroup, String> groups,
-                                                 String lineExpression);
+                                                 String lineExpression,
+                                                 ParsingFailureMode onParsingFailure);
 
     protected Optional<T> duplicateProfile(T profile) {
         return updateProfile("Copy of " + profile.getProfileName(),
                 UUID.randomUUID().toString(),
                 profile.getCaptureGroups(),
-                profile.getLineTemplateExpression());
+                profile.getLineTemplateExpression(),
+                profile.onParsingFailure());
     }
 
     protected Optional<T> newProfile() {
         return updateProfile("New profile",
                 UUID.randomUUID().toString(),
                 new HashMap<>(),
-                "");
+                "",
+                ParsingFailureMode.IGNORE);
     }
 
     public boolean applyChanges() {
@@ -583,7 +605,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             var name = profileComboBox.getEditor().getText();
             var groups = this.captureGroupTable.getItems().stream()
                     .collect(Collectors.toMap(NameExpressionPair::getName, NameExpressionPair::getExpression));
-            var updated = updateProfile(name, profile.getProfileId(), groups, this.lineTemplateExpression.getText());
+            var updated = updateProfile(name, profile.getProfileId(), groups, this.lineTemplateExpression.getText(), onParseFailureChoiceBox.getValue());
             if (updated.isPresent()) {
                 // Suspend selection listener
                 this.profileComboBox.getSelectionModel().selectedItemProperty().removeListener(selectionListener);
