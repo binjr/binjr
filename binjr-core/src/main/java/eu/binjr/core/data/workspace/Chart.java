@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.controllers.TimelineDisplayMode;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.Reloadable;
 import eu.binjr.core.data.adapters.ReloadPolicy;
@@ -84,6 +85,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     private final DoubleProperty yAxisMinValue;
     @IsDirtyable
     private final DoubleProperty yAxisMaxValue;
+    @IsDirtyable
+    private final ObjectProperty<TimelineDisplayMode> timelineDisplayMode;
+
 
     private final transient ChangeWatcher status;
     private final transient BooleanProperty showProperties;
@@ -117,7 +121,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 true,
                 UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
                 0.0,
-                100.0);
+                100.0,
+                TimelineDisplayMode.DATE_TIME);
     }
 
     /**
@@ -139,8 +144,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 initChart.isAutoScaleYAxis(),
                 initChart.isAlwaysIncludeOriginInAutoScale(),
                 initChart.getyAxisMinValue(),
-                initChart.getyAxisMaxValue()
-        );
+                initChart.getyAxisMaxValue(),
+                initChart.getTimelineDisplayMode());
     }
 
     private Chart(String name,
@@ -154,7 +159,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                   boolean autoScaleYAxis,
                   boolean alwaysIncludeOriginInAutoScale,
                   double yAxisMinValue,
-                  double yAxisMaxValue) {
+                  double yAxisMaxValue,
+                  TimelineDisplayMode timelineDisplayMode) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(UserPreferences.getInstance().defineChartType(chartType));
@@ -167,6 +173,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
         this.alwaysIncludeOriginInAutoScale = new SimpleBooleanProperty(alwaysIncludeOriginInAutoScale);
         this.yAxisMinValue = new SimpleDoubleProperty(yAxisMinValue);
         this.yAxisMaxValue = new SimpleDoubleProperty(yAxisMaxValue);
+        this.timelineDisplayMode = new SimpleObjectProperty<>(timelineDisplayMode);
         this.showProperties = new SimpleBooleanProperty(false);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
@@ -638,6 +645,19 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
 
     public boolean isSaveHistoryArmed() {
         return saveHistoryTrigger.compareAndSet(true, false);
+    }
+
+    @XmlAttribute
+    public TimelineDisplayMode getTimelineDisplayMode() {
+        return timelineDisplayMode.get();
+    }
+
+    public ObjectProperty<TimelineDisplayMode> timelineDisplayModeProperty() {
+        return timelineDisplayMode;
+    }
+
+    public void setTimelineDisplayMode(TimelineDisplayMode timelineDisplayMode) {
+        this.timelineDisplayMode.set(timelineDisplayMode);
     }
 }
 

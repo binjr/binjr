@@ -16,6 +16,8 @@
 
 package eu.binjr.core.data.indexes.parser.capture;
 
+import eu.binjr.common.time.ExtraChronoField;
+
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
 import java.util.Locale;
@@ -54,7 +56,10 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     MILLI(ChronoField.MILLI_OF_SECOND),
     NANO(ChronoField.NANO_OF_SECOND),
     FRACTION(ChronoField.MILLI_OF_SECOND),
-    ELAPSED(ChronoField.SECOND_OF_DAY);
+    ELAPSEDMILLI(ExtraChronoField.MILLIS_OF_YEAR),
+    ELAPSEDMICRO(ExtraChronoField.MICROS_OF_YEAR),
+    ELAPSEDNANO(ExtraChronoField.NANOS_OF_YEAR),
+    ELAPSED(ExtraChronoField.SECONDS_OF_YEAR);
 
     private final TemporalField temporalMapping;
     private final Function<String, Long> tranformer;

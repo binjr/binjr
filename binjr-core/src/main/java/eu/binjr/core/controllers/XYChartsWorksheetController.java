@@ -288,11 +288,12 @@ public class XYChartsWorksheetController extends WorksheetController {
         super.setEditChartMode(newValue);
     }
 
-    private ZonedDateTimeAxis buildTimeAxis() {
+    private ZonedDateTimeAxis buildTimeAxis(Property<TimelineDisplayMode> timelineDisplayModeProperty) {
         ZonedDateTimeAxis axis = new ZonedDateTimeAxis(worksheet.getTimeZone());
         getBindingManager().bind(axis.zoneIdProperty(), worksheet.timeZoneProperty());
         axis.setAnimated(false);
         axis.setSide(Side.BOTTOM);
+        getBindingManager().bind(axis.timelineDisplayModeProperty(), timelineDisplayModeProperty);
         return axis;
     }
 
@@ -305,7 +306,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             final int currentIndex = i;
             final Chart currentChart = worksheet.getCharts().get(i);
             ZonedDateTimeAxis xAxis;
-            xAxis = buildTimeAxis();
+            xAxis = buildTimeAxis(currentChart.timelineDisplayModeProperty());
+
             StableTicksAxis<Double> yAxis = switch (currentChart.getUnitPrefixes()) {
                 case BINARY -> {
                     var axis = new StableTicksAxis<Double>(new BinaryPrefixFormatter());

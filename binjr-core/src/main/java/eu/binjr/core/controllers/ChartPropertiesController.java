@@ -30,6 +30,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -88,6 +89,8 @@ public class ChartPropertiesController implements Initializable, Closeable {
     private Slider minChartHeightSlider;
     @FXML
     private Label minChartHeightText;
+    @FXML
+    private ChoiceBox<TimelineDisplayMode> timelineModeChoiceBox;
 
     public ChartPropertiesController(XYChartsWorksheet worksheet, Chart chart) {
         this.worksheet = worksheet;
@@ -175,6 +178,20 @@ public class ChartPropertiesController implements Initializable, Closeable {
         closeButton.setOnAction(e -> root.visibleProperty().setValue(false));
         bindingManager.bind(yAxisScaleSettings.disableProperty(), autoScaleYAxis.selectedProperty());
         bindingManager.bind(alwaysIncludeOriginInAutoScale.disableProperty(), autoScaleYAxis.selectedProperty().not());
+
+        bindingManager.bindBidirectional(timelineModeChoiceBox.valueProperty(), chart.timelineDisplayModeProperty());
+        this.timelineModeChoiceBox.getItems().setAll(TimelineDisplayMode.values());
+        this.timelineModeChoiceBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(TimelineDisplayMode o) {
+                return o != null ? o.toString() : "";
+            }
+
+            @Override
+            public TimelineDisplayMode fromString(String s) {
+                return timelineModeChoiceBox.getValue();
+            }
+        });
     }
 
     private void adaptToChartType(boolean disable) {

@@ -26,6 +26,9 @@
 package eu.binjr.common.javafx.charts;
 
 
+import eu.binjr.common.time.ExtraChronoField;
+import eu.binjr.core.controllers.TimelineDisplayMode;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import javafx.beans.property.*;
 import javafx.scene.chart.Axis;
 import javafx.util.StringConverter;
@@ -34,8 +37,11 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +86,25 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
     };
 
     private final Property<ZoneId> zoneId;
+
+    private final Property<TimelineDisplayMode> timelineDisplayMode = new ObjectPropertyBase<>() {
+        @Override
+        protected void invalidated() {
+            invalidateRange();
+            requestAxisLayout();
+        }
+
+        @Override
+        public Object getBean() {
+            return ZonedDateTimeAxis.this;
+        }
+
+        @Override
+        public String getName() {
+            return "timelineDisplayMode";
+        }
+    };
+
 
     /**
      * Stores the min and max date of the list of dates which is used.
@@ -172,10 +197,10 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         if (list.isEmpty()) {
             minDate = maxDate = ZonedDateTime.now(zoneId.getValue());
         } else if (list.size() == 1) {
-            minDate = maxDate = list.get(0);
-        } else if (list.size() > 1) {
-            minDate = list.get(0);
-            maxDate = list.get(list.size() - 1);
+            minDate = maxDate = list.getFirst();
+        } else {
+            minDate = list.getFirst();
+            maxDate = list.getLast();
         }
     }
 
@@ -343,16 +368,46 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             return converter.toString(date);
         }
         DateTimeFormatter formatter;
-        if (actualInterval.unit == ChronoUnit.YEARS && date.getMonthValue() == 1 && date.getDayOfMonth() == 1) {
-            formatter = DateTimeFormatter.ofPattern("yyyy");
-        } else if (actualInterval.unit == ChronoUnit.MONTHS && date.getDayOfMonth() == 1) {
-            formatter = DateTimeFormatter.ofPattern("MMM yy");
-        } else {
+        if (timelineDisplayMode.getValue() == TimelineDisplayMode.DURATION)
+            formatter = switch (actualInterval) {
+                case DECADE, YEAR, MONTH_6, MONTH_3 -> new DateTimeFormatterBuilder()
+                        .appendValue(ChronoField.YEAR_OF_ERA)
+                        .toFormatter();
+                case MONTH_1 -> new DateTimeFormatterBuilder()
+                        .appendValue(ChronoField.MONTH_OF_YEAR)
+                        .appendLiteral("mon")
+                        .toFormatter();
+                case WEEK -> new DateTimeFormatterBuilder()
+                        .appendValue(ChronoField.ALIGNED_WEEK_OF_YEAR)
+                        .appendLiteral("weeks")
+                        .toFormatter();
+                case DAY -> new DateTimeFormatterBuilder()
+                        .appendValue(ChronoField.DAY_OF_YEAR)
+                        .appendLiteral('d')
+                        .toFormatter();
+                case HOUR_1, HOUR_3, HOUR_6, HOUR_12 -> new DateTimeFormatterBuilder()
+                        .appendValue(ChronoField.HOUR_OF_DAY)
+                        .appendLiteral('h')
+                        .toFormatter();
+                case MINUTE_1, MINUTE_5, MINUTE_10, MINUTE_30 -> new DateTimeFormatterBuilder()
+                        .appendValue(ChronoField.MINUTE_OF_DAY)
+                        .appendLiteral("min")
+                        .toFormatter();
+                case MILLISECOND_500, MILLISECOND_100, SECOND_15, SECOND_5, SECOND_1 -> new DateTimeFormatterBuilder()
+                        .appendValue(ExtraChronoField.SECONDS_OF_YEAR)
+                        .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
+                        .appendLiteral('s')
+                        .toFormatter();
+                case MILLISECOND_10, MILLISECOND_1 -> DateTimeFormatter.ofPattern("A'ms'");
+            };
+        else {
             formatter = switch (actualInterval.unit) {
-                default -> DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
+                case YEARS -> DateTimeFormatter.ofPattern("yyyy");
+                case MONTHS -> DateTimeFormatter.ofPattern("MMM yyyy");
                 case HOURS, MINUTES -> DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
                 case SECONDS -> DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM);
                 case MILLIS -> DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+                default -> DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT);
             };
         }
         return formatter.withZone(zoneId.getValue()).format(date);
@@ -533,6 +588,18 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
     public Property<ZoneId> zoneIdProperty() {
         return zoneId;
+    }
+
+    public TimelineDisplayMode getTimelineDisplayMode() {
+        return timelineDisplayMode.getValue();
+    }
+
+    public Property<TimelineDisplayMode> timelineDisplayModeProperty() {
+        return timelineDisplayMode;
+    }
+
+    public void setTimelineDisplayMode(TimelineDisplayMode timelineDisplayMode) {
+        this.timelineDisplayMode.setValue(timelineDisplayMode);
     }
 
 

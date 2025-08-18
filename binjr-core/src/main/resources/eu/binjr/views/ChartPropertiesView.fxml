@@ -75,6 +75,11 @@
                 </HBox>
             </VBox>
             <Separator prefWidth="200.0"/>
+            <LabelWithInlineHelp text="Show timeline as:"
+                                 inlineHelp="Show values on the time axis either as dates and times or as the elapsed duration since the beginning of the current year (e.g. Jan 1st at 00:00:00.000)"/>
+            <ChoiceBox fx:id="timelineModeChoiceBox"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Separator prefWidth="200.0"/>
             <LabelWithInlineHelp text="Auto scale Y axis"
                                  inlineHelp="Check this option if you want the scale of the Y axis to adjust automatically based on the minimum and maximum values currently plotted.&#xd;Uncheck it  if you want the Y axis to be fixed and adjust the scale manually using the fields below."/>
             <VBox fillWidth="false">
