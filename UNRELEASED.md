@@ -7,3 +7,4 @@
 * _[Fixed] [Core]_ Saving parsing profile to JSON does not account for latest changes.  
 * _[Fixed] [JVM GC Logs]_ JVM GC Logs adapter cannot load workspace with log paths relative to the workspace path.
 * _[Fixed] [UI]_ Split pane dividers are larger and easier to grab.  
+* _[Fixed] [JFR adapter]_ Some events are attached to the wrong category in the tree view.

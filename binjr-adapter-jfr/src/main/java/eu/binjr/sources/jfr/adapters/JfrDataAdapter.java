@@ -95,12 +95,13 @@ public class JfrDataAdapter extends BaseJfrDataAdapter<SearchHit> implements Rel
             for (EventType eventType : recordingFile.readEventTypes()) {
                 var branch = tree;
                 for (var cat : eventType.getCategoryNames()) {
-                    var pos = TreeViewUtils.findFirstInTree(tree, item -> item.getValue().getLabel().equals(cat));
+                    String nodePath = branch.getValue().getPath() + "/" + cat;
+                    var pos = TreeViewUtils.findFirstInTree(tree, item -> item.getValue().getPath().equals(nodePath));
                     if (pos.isEmpty()) {
                         var node = new FilterableTreeItem<>((SourceBinding) new LogFilesBinding.Builder()
                                 .withLabel(cat)
                                 .withParent(branch.getValue())
-                                .withPath(branch.getValue().getPath() + "/" + cat)
+                                .withPath(nodePath)
                                 .withAdapter(this)
                                 .build());
                         branch.getInternalChildren().add(node);
