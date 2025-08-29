@@ -120,7 +120,7 @@ public class LogWorksheetController extends WorksheetController {
     public static final String PSEUDOCLASS_FAVORITES = "favorites";
     public static final String PSEUDOCLASS_HISTORY = "history";
     public static final String PSEUDOCLASS_CATEGORY = "category";
-    public static final double AXIS_WIDTH = 60.0;
+    public static final double AXIS_WIDTH = 30.0;
     public static final double AXIS_HEIGHT = 15.0;
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -750,7 +750,8 @@ public class LogWorksheetController extends WorksheetController {
         heatmapY.setPrefWidth(AXIS_WIDTH);
         heatmapY.setMinWidth(AXIS_WIDTH);
         heatmapY.setMaxWidth(AXIS_WIDTH);
-        heatmapY.setLabel("No. Events");
+
+        //heatmapY.setLabel("No. Events");
 
         heatmap = new StackedBarChart<>(categoryAxis, heatmapY);
         heatmap.setCategoryGap(0.5);
@@ -764,7 +765,7 @@ public class LogWorksheetController extends WorksheetController {
         heatmap.setLegendSide(Side.BOTTOM);
         heatmap.setAnimated(false);
         heatmap.getStyleClass().add("heatmap-chart");
-        AnchorPane.setLeftAnchor(heatmap, 0.0);
+        AnchorPane.setLeftAnchor(heatmap, AXIS_WIDTH);
         AnchorPane.setRightAnchor(heatmap, 0.0);
         AnchorPane.setTopAnchor(heatmap, 0.0);
         AnchorPane.setBottomAnchor(heatmap, 0.0);
@@ -773,6 +774,7 @@ public class LogWorksheetController extends WorksheetController {
 
         ZonedDateTimeAxis timeAxis = new ZonedDateTimeAxis(timeRangePicker.getZoneId());
         getBindingManager().bind(timeAxis.zoneIdProperty(), timeRangePicker.zoneIdProperty());
+        getBindingManager().bindBidirectional(timeAxis.timelineDisplayModeProperty(), worksheet.timelineDisplayModeProperty());
         timeAxis.setAnimated(false);
         timeAxis.setLowerBound(timeRangePicker.getTimeRange().getBeginning());
         timeAxis.setUpperBound(timeRangePicker.getTimeRange().getEnd());
@@ -798,11 +800,37 @@ public class LogWorksheetController extends WorksheetController {
         timeline.setVerticalGridLinesVisible(false);
         timeline.setHorizontalGridLinesVisible(false);
 
-        AnchorPane.setLeftAnchor(timeline, 0.0);
+        AnchorPane.setLeftAnchor(timeline, AXIS_WIDTH);
         AnchorPane.setRightAnchor(timeline, 0.0);
         AnchorPane.setTopAnchor(timeline, 0.0);
         AnchorPane.setBottomAnchor(timeline, 0.0);
         heatmapArea.getChildren().add(timeline);
+
+        var timelineModeBtn = new ToolButtonBuilder<ToggleButton>(getBindingManager())
+                .setText("Timeline display mode")
+                .setWidth(24)
+                .setHeight(24)
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("time-icon",  "small-icon")
+                .setTooltip("Set timeline display mode")
+                .build(ToggleButton::new);
+
+        getBindingManager().bind(worksheet.timelineDisplayModeProperty(),
+                Bindings.createObjectBinding(() -> (timelineModeBtn.isSelected() ? TimelineDisplayMode.DURATION : TimelineDisplayMode.DATE_TIME),
+                        timelineModeBtn.selectedProperty()));
+
+        AnchorPane.setLeftAnchor(timelineModeBtn, 18.0);
+        AnchorPane.setBottomAnchor(timelineModeBtn, 7.0);
+        heatmapArea.getChildren().add(timelineModeBtn);
+
+        var axisLabel = new Label("No Events");
+        axisLabel.setRotate(-90);
+        axisLabel.setPrefHeight(10);
+        axisLabel.setMaxHeight(10);
+        AnchorPane.setLeftAnchor(axisLabel, 0.0);
+        AnchorPane.setTopAnchor(axisLabel, 10.0);
+        AnchorPane.setBottomAnchor(axisLabel, 30.0);
+        heatmapArea.getChildren().add(axisLabel);
 
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(timeline, Object::toString);

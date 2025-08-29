@@ -260,18 +260,31 @@
                     </HBox>
 
                 </VBox>
-                <AnchorPane fx:id="heatmapArea" minHeight="120"
-                            VBox.vgrow="ALWAYS"
-                            styleClass="skinnable-pane-border"
-                            cache="true"
-                            cacheHint="SPEED"
-                            depthTest="DISABLE"
-                            minWidth="0"
-                            prefWidth="200"
-                            maxWidth="Infinity"
-                            maxHeight="Infinity"
-                            prefHeight="120">
-                </AnchorPane>
+<!--                <HBox VBox.vgrow="ALWAYS">-->
+<!--                    <VBox prefWidth="60" maxWidth="Infinity" spacing="10" VBox.vgrow="ALWAYS" maxHeight="Infinity">-->
+<!--                        <Label VBox.vgrow="ALWAYS"-->
+<!--                               text="No. Events"-->
+<!--                               alignment="CENTER"-->
+<!--                               rotate="-90"-->
+<!--                               maxWidth="Infinity"-->
+<!--                               maxHeight="Infinity"/>-->
+<!--                        <Button VBox.vgrow="NEVER" prefWidth="30" prefHeight="30" alignment="BOTTOM_CENTER"/>-->
+<!--                    </VBox>-->
+
+                    <AnchorPane fx:id="heatmapArea" minHeight="120"
+                                HBox.hgrow="ALWAYS"
+                                VBox.vgrow="ALWAYS"
+                                styleClass="skinnable-pane-border"
+                                cache="true"
+                                cacheHint="SPEED"
+                                depthTest="DISABLE"
+                                minWidth="0"
+                                prefWidth="200"
+                                maxWidth="Infinity"
+                                maxHeight="Infinity"
+                                prefHeight="120">
+                    </AnchorPane>
+<!--                </HBox>-->
             </VBox>
 
             <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
