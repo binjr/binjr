@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2021 Frederic Thevenet
+ *    Copyright 2016-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,10 +18,7 @@ package eu.binjr.common.javafx.charts;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.logging.Logger;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
@@ -54,13 +51,11 @@ import static org.gillius.jfxutils.JFXUtil.getYShift;
 public class XYChartCrosshair<X, Y> {
     private static final Logger logger = Logger.create(XYChartCrosshair.class);
     private static final double SELECTION_OPACITY = 0.5;
-
     private final Line horizontalMarker = new Line();
     private final Line verticalMarker = new Line();
     private final Label xAxisLabel;
     private final Label yAxisLabel;
     private final LinkedHashMap<XYChart<X, Y>, Function<Y, String>> charts;
-    private final Function<X, String> xValuesFormatter;
     private final XYChartInfo chartInfo;
     private final BooleanProperty isSelecting = new SimpleBooleanProperty(false);
     private final Pane parent;
@@ -73,6 +68,7 @@ public class XYChartCrosshair<X, Y> {
     private final BooleanProperty mouseOverChart = new SimpleBooleanProperty(false);
     private final BindingManager bindingManager = new BindingManager();
     private final BooleanProperty displayFullHeightMarker = new SimpleBooleanProperty(false);
+    private final ObjectProperty<Function<X, String>> xAxisValueFormatter =  new SimpleObjectProperty<>(Object::toString);
     private Point2D selectionStart = new Point2D(-1, -1);
     private Point2D mousePosition = new Point2D(-1, -1);
     private Consumer<Map<XYChart<X, Y>, XYChartSelection<X, Y>>> selectionDoneEvent;
@@ -82,9 +78,8 @@ public class XYChartCrosshair<X, Y> {
      *
      * @param charts           a map of the  {@link XYChart} to attach and their formatting function of the Y values.
      * @param parent           the parent node of the chart
-     * @param xValuesFormatter a function used to format the display of X values as strings
      */
-    public XYChartCrosshair(LinkedHashMap<XYChart<X, Y>, Function<Y, String>> charts, Pane parent, Function<X, String> xValuesFormatter) {
+    public XYChartCrosshair(LinkedHashMap<XYChart<X, Y>, Function<Y, String>> charts, Pane parent) {
         this.charts = charts;
         applyStyle(this.verticalMarker);
         applyStyle(this.horizontalMarker);
@@ -93,7 +88,6 @@ public class XYChartCrosshair<X, Y> {
         this.yAxisLabel = newAxisLabel();
         this.parent = parent;
         parent.getChildren().addAll(xAxisLabel, yAxisLabel, verticalMarker, horizontalMarker, selection);
-        this.xValuesFormatter = xValuesFormatter;
         masterChart = charts.keySet().stream().reduce((p, n) -> n).orElseThrow(() -> new IllegalStateException("Could not identify last element in chart linked hash map."));
         this.chartInfo = new XYChartInfo(masterChart, parent);
         masterChart.addEventHandler(MouseEvent.MOUSE_MOVED, bindingManager.registerHandler(this::handleMouseMoved));
@@ -321,7 +315,7 @@ public class XYChartCrosshair<X, Y> {
         xAxisLabel.setLayoutY(plotArea.getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX() + 4, plotArea.getMaxX() - xAxisLabel.getWidth()));
         currentXValue.setValue(getValueFromXcoord(mousePosition.getX()));
-        xAxisLabel.setText(xValuesFormatter.apply(currentXValue.getValue()));
+        xAxisLabel.setText(xAxisValueFormatter.get().apply(currentXValue.getValue()));
     }
 
 
@@ -404,5 +398,17 @@ public class XYChartCrosshair<X, Y> {
                 fillColor.getGreen(),
                 fillColor.getBlue(),
                 SELECTION_OPACITY));
+    }
+
+    public Function getxAxisValueFormatter() {
+        return xAxisValueFormatter.get();
+    }
+
+    public ObjectProperty<Function<X, String>> xAxisValueFormatterProperty() {
+        return xAxisValueFormatter;
+    }
+
+    public void setxAxisValueFormatter(Function xAxisValueFormatter) {
+        this.xAxisValueFormatter.set(xAxisValueFormatter);
     }
 }

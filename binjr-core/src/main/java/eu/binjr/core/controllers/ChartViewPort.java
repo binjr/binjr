@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.PrefixFormatter;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.core.preferences.DateFormat;
+import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.XYChart;
@@ -137,6 +140,13 @@ public class ChartViewPort implements Closeable {
 
     public void setCrosshair(XYChartCrosshair<ZonedDateTime, Double> crosshair) {
         this.crosshair = crosshair;
+        this.crosshair.xAxisValueFormatterProperty().bind(Bindings.createObjectBinding(() -> dateTime -> {
+            if (this.getDataStore().getTimelineDisplayMode() == TimelineDisplayMode.DURATION) {
+                return DateFormat.DURATION.getDateTimeFormatter().format(dateTime);
+            } else {
+                return UserPreferences.getInstance().labelDateFormat.get().getDateTimeFormatter().format(dateTime);
+            }
+        }, this.getDataStore().timelineDisplayModeProperty()));
     }
 
     public TitledPane getSeriesDetailsPane() {

@@ -613,8 +613,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         viewPorts.forEach(v -> map.put(v.getChart(), v.getPrefixFormatter()::format));
-        var crossHair = new XYChartCrosshair<>(map, pane,
-                dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
+        var crossHair = new XYChartCrosshair<>(map, pane);
         viewPorts.forEach(v -> v.setCrosshair(crossHair));
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
@@ -664,8 +663,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         // setup crosshair
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(viewPorts.getFirst().getChart(), viewPorts.getFirst().getPrefixFormatter()::format);
-        var crossHair = new XYChartCrosshair<>(map, chartParent,
-                dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
+        var crossHair = new XYChartCrosshair<>(map, chartParent);
         var nbChartObs = new SimpleIntegerProperty(viewPorts.size());
         var crosshairHeightBinding = BooleanBinding.booleanExpression(userPrefs.fullHeightCrosshairMarker.property())
                 .and(Bindings.greaterThan(nbChartObs, 1));
@@ -690,8 +688,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         for (int i = 1; i < viewPorts.size(); i++) {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
-            XYChartCrosshair<ZonedDateTime, Double> ch = new XYChartCrosshair<>(m, chartParent,
-                    dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
+            XYChartCrosshair<ZonedDateTime, Double> ch = new XYChartCrosshair<>(m, chartParent);
             ch.displayFullHeightMarkerProperty().bind(crosshairHeightBinding);
             ch.onSelectionDone(s -> {
                 logger.debug(() -> "Applying zoom selection: " + s.toString());

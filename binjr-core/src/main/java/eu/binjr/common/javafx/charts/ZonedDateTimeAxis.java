@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2013, Christian Schudt
- * Copyright (c) 2016-2020, Frederic Thevenet
+ * Copyright (c) 2016-2025, Frederic Thevenet
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -393,12 +393,11 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                         .appendValue(ChronoField.MINUTE_OF_DAY)
                         .appendLiteral("min")
                         .toFormatter();
-                case MILLISECOND_500, MILLISECOND_100, SECOND_15, SECOND_5, SECOND_1 -> new DateTimeFormatterBuilder()
+                case MILLISECOND_500, MILLISECOND_100, SECOND_15, SECOND_5, SECOND_1,MILLISECOND_10, MILLISECOND_1 -> new DateTimeFormatterBuilder()
                         .appendValue(ExtraChronoField.SECONDS_OF_YEAR)
                         .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
                         .appendLiteral('s')
                         .toFormatter();
-                case MILLISECOND_10, MILLISECOND_1 -> DateTimeFormatter.ofPattern("A'ms'");
             };
         else {
             formatter = switch (actualInterval.unit) {

@@ -46,6 +46,7 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.DateFormat;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
@@ -807,8 +808,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(timeline, Object::toString);
-        var crossHair = new XYChartCrosshair<>(map, heatmapArea, dateTime ->
-                userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
+        var crossHair = new XYChartCrosshair<>(map, heatmapArea);
+        crossHair.xAxisValueFormatterProperty().bind(Bindings.createObjectBinding(() -> dateTime -> {
+            if (this.worksheet.getTimelineDisplayMode() == TimelineDisplayMode.DURATION) {
+                return DateFormat.DURATION.getDateTimeFormatter().format(dateTime);
+            } else {
+                return UserPreferences.getInstance().labelDateFormat.get().getDateTimeFormatter().format(dateTime);
+            }
+        }, this.worksheet.timelineDisplayModeProperty()));
         crossHair.setDisplayFullHeightMarker(false);
         crossHair.setVerticalMarkerVisible(true);
         crossHair.setHorizontalMarkerVisible(false);

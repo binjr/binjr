@@ -20,6 +20,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
+import eu.binjr.core.controllers.TimelineDisplayMode;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
@@ -64,6 +65,8 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     private final BooleanProperty findBarVisible;
     @IsDirtyable
     private final BooleanProperty heatmapVisible;
+    @IsDirtyable
+    private final ObjectProperty<TimelineDisplayMode> timelineDisplayMode;
 
 
     private transient final DoubleProperty progress = new SimpleDoubleProperty(-1);
@@ -74,13 +77,15 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
                 LogQueryParameters.empty(),
                 true,
-                false);
+                false,
+                TimelineDisplayMode.DATE_TIME);
     }
 
     protected LogWorksheet(String name,
                            LogQueryParameters queryParameters,
                            boolean editModeEnabled,
-                           boolean isLinked) {
+                           boolean isLinked,
+                           TimelineDisplayMode timelineDisplayMode) {
         super(name, editModeEnabled);
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
@@ -91,6 +96,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         this.filterBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFilterBarVisible.get());
         this.findBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFindBarVisible.get());
         this.heatmapVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logHeatmapVisible.get());
+        this.timelineDisplayMode = new SimpleObjectProperty<>(timelineDisplayMode);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
@@ -100,7 +106,8 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         this(worksheet.getName(),
                 worksheet.getQueryParameters(),
                 worksheet.isEditModeEnabled(),
-                worksheet.isTimeRangeLinked());
+                worksheet.isTimeRangeLinked(),
+                worksheet.getTimelineDisplayMode());
         seriesInfo.addAll(worksheet.getSeriesInfo().stream().map(LogFileSeriesInfo::new).toList());
     }
 
@@ -336,6 +343,19 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     public Property<ReloadStatus> indexingStatusProperty() {
         return indexingStatus;
+    }
+
+    @XmlAttribute
+    public TimelineDisplayMode getTimelineDisplayMode() {
+        return timelineDisplayMode.get();
+    }
+
+    public ObjectProperty<TimelineDisplayMode> timelineDisplayModeProperty() {
+        return timelineDisplayMode;
+    }
+
+    public void setTimelineDisplayMode(TimelineDisplayMode timelineDisplayMode) {
+        this.timelineDisplayMode.set(timelineDisplayMode);
     }
 
 }
