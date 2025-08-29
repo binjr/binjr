@@ -112,7 +112,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.groupingBy;
 import static javafx.scene.control.SelectionMode.MULTIPLE;
 
-public class LogWorksheetController extends WorksheetController implements Syncable {
+public class LogWorksheetController extends WorksheetController {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final PseudoClass DRAGGED_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("draggedover");
@@ -287,9 +287,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setHeight(40)
                 .setWidth(40)
                 .setIconStyleClass("sync-icon", "medium-icon")
-                .setAction(event -> {
-                    worksheet.textViewFontSizeProperty().setValue(userPrefs.defaultTextViewFontSize.get().intValue());
-                }).build(Button::new);
+                .setAction(_ -> worksheet.textViewFontSizeProperty().setValue(userPrefs.defaultTextViewFontSize.get().intValue())).build(Button::new);
         var textSizeToolbar = new ToolBar();
         textSizeToolbar.getItems().addAll(decreaseTextSizeButton, resetTextSizeButton, increaseTextSizeButton);
         var pane = new StackPane(textSizeToolbar);
@@ -1097,7 +1095,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                             List.of("file-" + path.hashCode()));
                                 }
                                 // Add a dummy paragraph if result set is empty, otherwise doc creation will fail
-                                if (res.getData().size() == 0) {
+                                if (res.getData().isEmpty()) {
                                     docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
                                 }
                                 var doc = docBuilder.build();
@@ -1458,7 +1456,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var params = worksheet.getQueryParameters();
         facets.put(CaptureGroup.SEVERITY, params.getSeverities());
         try {
-            return (facets.get(Index.PATH).size() == 0) ? new SearchHitsProcessor() :
+            return (facets.get(Index.PATH).isEmpty()) ? new SearchHitsProcessor() :
                     Indexes.LOG_FILES.get().search(start.toEpochMilli(),
                             end.toEpochMilli(),
                             facets,
@@ -1513,21 +1511,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
             tmpCssPath.toFile().deleteOnExit();
         }
         return tmpCssPath;
-    }
-
-    @Override
-    public Boolean isTimeRangeLinked() {
-        return null;
-    }
-
-    @Override
-    public Property<Boolean> timeRangeLinkedProperty() {
-        return null;
-    }
-
-    @Override
-    public void setTimeRangeLinked(Boolean timeRangeLinked) {
-
     }
 
 }
