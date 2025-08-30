@@ -20,7 +20,6 @@ package eu.binjr.core.controllers;
 import com.google.gson.Gson;
 import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.common.colors.ColorUtils;
-import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
 import eu.binjr.common.javafx.charts.XYChartCrosshair;
 import eu.binjr.common.javafx.charts.ZonedDateTimeAxis;
@@ -741,7 +740,9 @@ public class LogWorksheetController extends WorksheetController {
         categoryAxis.setStartMargin(0.0);
         categoryAxis.setEndMargin(0.0);
         categoryAxis.setGapStartAndEnd(true);
-        StableTicksAxis<Integer> heatmapY = new MetricStableTicksAxis<>();
+        StableTicksAxis<Integer> heatmapY = new StableTicksAxis<>(new MetricPrefixFormatter());
+        heatmapY.majorTickDividersProperty().bind(userPrefs.decimalAxisTickDividers.property());
+        heatmapY.numMinorTickProperty().bind(userPrefs.numMinorTickDecimal.property());
         heatmapY.setAutoRanging(true);
         heatmapY.setAnimated(false);
         heatmapY.setTickLabelsVisible(true);
@@ -750,8 +751,6 @@ public class LogWorksheetController extends WorksheetController {
         heatmapY.setPrefWidth(AXIS_WIDTH);
         heatmapY.setMinWidth(AXIS_WIDTH);
         heatmapY.setMaxWidth(AXIS_WIDTH);
-
-        //heatmapY.setLabel("No. Events");
 
         heatmap = new StackedBarChart<>(categoryAxis, heatmapY);
         heatmap.setCategoryGap(0.5);
