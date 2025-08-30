@@ -444,7 +444,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
-                    .setIconStyleClass("cross-icon", "small-icon")
+                    .setIconStyleClass("trash-alt-icon", "small-icon")
                     .setAction(event -> warnAndRemoveChart(currentChart))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
@@ -996,7 +996,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
-                    .setIconStyleClass("cross-icon", "small-icon")
+                    .setIconStyleClass("trash-alt-icon", "small-icon")
                     .setAction(event -> warnAndRemoveChart(currentViewPort.getDataStore()))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
