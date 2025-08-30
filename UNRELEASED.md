@@ -10,3 +10,4 @@
 * _[Fixed] [UI]_ Split pane dividers are larger and easier to grab.  
 * _[Fixed] [UI]_ Use a trashcan icon to better distinguish actions that remove an element from actions that close a UI panel.  
 * _[Fixed] [JFR adapter]_ Some events are attached to the wrong category in the tree view.
+* _[Fixed] [RPM]_ Desktop shortcut for the rpm package does not show properly in application menu on Fedora.   
