@@ -1,8 +1,8 @@
 package eu.binjr.core.controllers;
 
 public enum TimelineDisplayMode {
-    DATE_TIME("Date & times"),
-    DURATION("Duration");
+    DATE_TIME("Dates & times"),
+    DURATION("Durations");
 
     private final String description;
 

@@ -806,31 +806,41 @@ public class LogWorksheetController extends WorksheetController {
         AnchorPane.setBottomAnchor(timeline, 0.0);
         heatmapArea.getChildren().add(timeline);
 
-        var timelineModeBtn = new ToolButtonBuilder<ToggleButton>(getBindingManager())
+        var timelineModeBtn = new ToolButtonBuilder<Button>(getBindingManager())
                 .setText("Timeline display mode")
                 .setWidth(24)
                 .setHeight(24)
                 .setStyleClass("dialog-button")
-                .setIconStyleClass("time-icon",  "small-icon")
+                .setIconStyleClass("hourglass-icon", "small-icon")
                 .setTooltip("Set timeline display mode")
-                .build(ToggleButton::new);
+                .setAction(event -> worksheet.setTimelineDisplayMode((worksheet.getTimelineDisplayMode() == TimelineDisplayMode.DURATION) ? TimelineDisplayMode.DATE_TIME : TimelineDisplayMode.DURATION))
+                .build(Button::new);
 
-        getBindingManager().bind(worksheet.timelineDisplayModeProperty(),
-                Bindings.createObjectBinding(() -> (timelineModeBtn.isSelected() ? TimelineDisplayMode.DURATION : TimelineDisplayMode.DATE_TIME),
-                        timelineModeBtn.selectedProperty()));
+        getBindingManager().bind(timelineModeBtn.graphicProperty(),
+                Bindings.createObjectBinding(() -> (worksheet.getTimelineDisplayMode() == TimelineDisplayMode.DURATION) ?
+                                ToolButtonBuilder.makeIconNode(Pos.CENTER, "time-icon", "scale-2-dot-2-icon") :
+                                ToolButtonBuilder.makeIconNode(Pos.CENTER, "hourglass-icon", "scale-2-dot-2-icon"),
+                        worksheet.timelineDisplayModeProperty()));
 
-        AnchorPane.setLeftAnchor(timelineModeBtn, 18.0);
-        AnchorPane.setBottomAnchor(timelineModeBtn, 7.0);
+        getBindingManager().bind(timelineModeBtn.tooltipProperty(),
+                Bindings.createObjectBinding(() -> (worksheet.getTimelineDisplayMode() == TimelineDisplayMode.DURATION) ?
+                                new Tooltip("Display timeline labels as dates & times") :
+                                new Tooltip("Display timeline labels as durations"),
+                        worksheet.timelineDisplayModeProperty()));
+
+        AnchorPane.setLeftAnchor(timelineModeBtn, 10.0);
+        AnchorPane.setBottomAnchor(timelineModeBtn, 5.0);
         heatmapArea.getChildren().add(timelineModeBtn);
-
         var axisLabel = new Label("No Events");
         axisLabel.setRotate(-90);
-        axisLabel.setPrefHeight(10);
-        axisLabel.setMaxHeight(10);
-        AnchorPane.setLeftAnchor(axisLabel, 0.0);
-        AnchorPane.setTopAnchor(axisLabel, 10.0);
-        AnchorPane.setBottomAnchor(axisLabel, 30.0);
-        heatmapArea.getChildren().add(axisLabel);
+      //  axisLabel.setStyle("-fx-border-width: 1 1 1 1; -fx-border-color: blue;");
+        var parent = new VBox(axisLabel);
+        parent.setAlignment(Pos.CENTER);
+        //parent.setStyle("-fx-border-width: 1 1 1 1; -fx-border-color: red;");
+        AnchorPane.setLeftAnchor(parent, -8.0);
+        AnchorPane.setTopAnchor(parent, 0.0);
+        AnchorPane.setBottomAnchor(parent, 30.0);
+        heatmapArea.getChildren().add(parent);
 
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(timeline, Object::toString);
