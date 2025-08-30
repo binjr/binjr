@@ -256,6 +256,9 @@ public class JfrChartsDataAdapter extends BaseJfrDataAdapter<Double> {
     private Unit extractKnownUnit(ValueDescriptor field) {
         var timespan = field.getAnnotation(Timespan.class);
         if (timespan != null) {
+            if (field.getName().equalsIgnoreCase(JfrEventFormat.EVENT_NAME_DURATION)) {
+                return new Unit("SECONDS", UnitPrefixes.METRIC);
+            }
             return new Unit(timespan.value(), UnitPrefixes.METRIC);
         }
 

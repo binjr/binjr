@@ -38,6 +38,7 @@ public class JfrEventFormat implements EventFormat<JfrRecordingFilter> {
     public static final String JVM_SYSTEM = "jvmSystem";
     public static final String JVM_USER = "jvmUser";
     public static final String MACHINE_TOTAL = "machineTotal";
+    public static final String EVENT_NAME_DURATION = "DURATION";
     private static final Logger logger = Logger.create(JfrEventParser.class);
     public static final String CATEGORIES = "categories";
     public static final String HAS_NUM_FIELDS = "hasNumFields";

@@ -9,5 +9,6 @@
 * _[Fixed] [JVM GC Logs]_ JVM GC Logs adapter cannot load workspace with log paths relative to the workspace path.
 * _[Fixed] [UI]_ Split pane dividers are larger and easier to grab.  
 * _[Fixed] [UI]_ Use a trashcan icon to better distinguish actions that remove an element from actions that close a UI panel.  
-* _[Fixed] [JFR adapter]_ Some events are attached to the wrong category in the tree view.
-* _[Fixed] [RPM]_ Desktop shortcut for the rpm package does not show properly in application menu on Fedora.   
+* _[Fixed] [JFR adapter]_ Some events are attached to the wrong category in the tree view.  
+* _[Fixed] [JFR adapter]_ JFR event durations are indexed in ticks instead of seconds.  
+* _[Fixed] [RPM package]_ Desktop shortcut for the rpm package does not show properly in application menu on Fedora.  

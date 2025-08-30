@@ -117,9 +117,12 @@ public class JfrEventParser implements EventParser {
         private void addField(String parentLabel, RecordedObject jfrEvent, Map<String, Number> numFields) {
             for (var field : jfrEvent.getFields()) {
                 if (JfrEventFormat.includeField(field)) {
-                    numFields.put(
-                            String.join(" ", parentLabel, (field.getLabel() != null ? field.getLabel() : field.getName())).trim(),
-                            jfrEvent.getValue(field.getName()));
+                    var name = String.join(" ", parentLabel, (field.getLabel() != null ? field.getLabel() : field.getName())).trim();
+                    if (name.equalsIgnoreCase(JfrEventFormat.EVENT_NAME_DURATION) && jfrEvent instanceof RecordedEvent recEvent) {
+                        numFields.put(name, recEvent.getDuration().getNano() / 1_000_000_000D);
+                    } else {
+                        numFields.put(name, jfrEvent.getValue(field.getName()));
+                    }
                 }
                 if (!field.getFields().isEmpty() && jfrEvent.getValue(field.getName()) instanceof RecordedObject nestedEvent) {
                     addField((field.getLabel() != null ? field.getLabel() : field.getName()), nestedEvent, numFields);
@@ -131,7 +134,6 @@ public class JfrEventParser implements EventParser {
         public boolean hasNext() {
             return recordingFile.hasMoreEvents();
         }
-
 
     }
 
