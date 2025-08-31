@@ -111,33 +111,22 @@ jobs:
       uses: actions/checkout@v4.1.0
     - name: get tag name
       run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-    - env:
-        AUR_SSH_PRIVATE_BASE64: "${{ secrets.AUR_SSH_PRIVATE_BASE64 }}"
-        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
-      run: |
-        echo $AUR_SSH_PRIVATE_BASE64 | base64 --decode > $AUR_SSH_PRIVATE_PATH
-      shell: bash
     - name: Install SSH key
-      env:
-        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
       uses: shimataro/ssh-key-action@v2
       with:
-        key: ${{ env.AUR_SSH_PRIVATE_PATH }}
+        key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         name: id_rsa
         known_hosts: "aur.archlinux.org ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEuBKrPzbawxA/k2g6NcyV5jmqwJ2s+zpgZGZ7tpLIcN"
         if_key_exists: fail
-        config: |                                       
-          Host target
-            HostName aur.archlinux.org
-            User aur
-            ProxyCommand sshpass -p 'AUR_SSH_PASSWORD' ssh
     - env:
         REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
+      name: Publish to AUR
       run: |-
         git clone ssh://aur@aur.archlinux.org/binjr-bin.git
         cd binjr-bin
         export OLD_VER=$(grep -Po 'pkgver=\K[^"]*' PKGBUILD)
         export NEW_VER=${REPO_TAG_NAME//v}
+        echo "From: $OLD_VER To: $NEW_VER"
         # Change version and release number
         sed -i "s/$OLD_VER/$NEW_VER/g" PKGBUILD
         sed -i "s/^pkgrel=.*$/pkgrel=1/" PKGBUILD
@@ -149,11 +138,6 @@ jobs:
         git commit -am "Release ${REPO_TAG_NAME}-1"
         git show
         git push
-      shell: bash
-    - env:
-        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
-      run: |
-        shred -fuz $AUR_SSH_PRIVATE_PATH
       shell: bash
   winget_update-winget_update:
     needs:
