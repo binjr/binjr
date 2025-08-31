@@ -23,18 +23,22 @@ jobs:
     - name: checkout
       uses: actions/checkout@v4.1.0
     - if: success() && startsWith(github.ref, 'refs/tags/')
+      name: Is TAG?
       run: echo "IS_TAG=true" >> "$GITHUB_ENV"
       shell: bash
     - if: success() && endsWith(github.ref, '-SNAPSHOT')
+      name: Is SNAPSHOT?
       run: echo "IS_SNAPSHOT=true" >> "$GITHUB_ENV"
       shell: bash
     - uses: actions/setup-java@v4
+      name: Install JDK
       with:
           distribution: 'temurin'
           java-version:  ${{ vars.BUILD_JAVA_VERSION}}
           check-latest: true
           cache: 'gradle'
     - if: success() && runner.os == 'windows'
+      name: Install WIX
       env:
         TOOL_DIR: "${{ runner.tool_cache }}"
         WIX_VERSION: "${{ inputs.wixVersion }}"
@@ -44,6 +48,7 @@ jobs:
     - env:
         KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      name: Init keyring
       run: |
         echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
         ls -lsa $KEYRING_PATH
@@ -56,9 +61,11 @@ jobs:
         IS_TAG: "${{ env.IS_TAG }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
+      name: Gradle build
       run: ./gradlew clean signPackageDistribution --no-daemon --info
     - env:
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+      name: Cleanup keyring
       run: |
         rm -rf $KEYRING_PATH
       shell: bash
@@ -86,13 +93,19 @@ jobs:
           ${{ github.workspace }}/build/artifacts/zip/*.zip.asc
           ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz
           ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz.asc
-    - if: success() && env.isTag == 'true' && env.IS_SNAPSHOT != 'true' && !(contains(github.ref, '-b')) && runner.os == 'Linux'
+    - if: success() && runner.os == 'linux' && env.isTag == 'true' && env.IS_SNAPSHOT != 'true'
+      name: Publish APT and RPM repos
       env:
         BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64: "${{ secrets.BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64 }}"
         GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
       run: |-
+        targetArch=$(uname --machine)
+        if [ $targetArch = 'aarch64' ]; then
+          echo 'Publishing to repo for aarch64 is not supported: Ignoring.'
+          exit 0
+        fi
         echo "**************************************"
         echo "* Install dependencies"
         echo "**************************************"
@@ -108,7 +121,6 @@ jobs:
         gpg -v --batch --no-tty --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --import keyring.asc
         echo "Init GPG" | gpg -v  --pinentry-mode loopback --passphrase $GPG_PASSPHRASE --batch --no-tty -u $GPG_KEY_NAME --sign --armor
         shred -fuz keyring.asc
-        targetArch=$(uname --machine)
         echo "**************************************"
         echo "* Generate apt repo"
         echo "**************************************"

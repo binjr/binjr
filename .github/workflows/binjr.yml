@@ -1,7 +1,7 @@
 name: binjr/binjr
 on:
   push:
-    branches: ["master", "pipeline2gha", "*-dev", "*-ci_test"]
+    branches: ["master", "*-dev", "*-ci_test"]
     tags: ["v*"]
   pull_request:
     branches: ["master"]
