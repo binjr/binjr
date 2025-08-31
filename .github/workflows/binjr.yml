@@ -57,6 +57,8 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
+    - name: get tag name
+      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
@@ -66,11 +68,11 @@ jobs:
     - name: expandTemplates
       env:
         IS_TAG: 'true'
-        REPO_TAG_NAME: "${{ github.ref }}"
+        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: ./gradlew expandMdTemplates --no-daemon
     - env:
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
-        REPO_TAG_NAME: "${{ github.ref }}"
+        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: |-
         python3 --version
         python3 -m pip --version
@@ -107,6 +109,8 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
+    - name: get tag name
+      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
     - env:
         AUR_SSH_PRIVATE_BASE64: "${{ secrets.AUR_SSH_PRIVATE_BASE64 }}"
         AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
@@ -133,7 +137,7 @@ jobs:
         shred -fuz $KEYRING_PATH
       shell: bash
     - env:
-        REPO_TAG_NAME: "${{ github.ref }}"
+        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: |-
         git clone ssh://aur@aur.archlinux.org/binjr-bin.git
         cd binjr-bin
@@ -163,6 +167,9 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
+    - name: get tag name
+      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+      shell: bash
     - name: install wingetCreate
       run: |-
         # Download and install C++ Runtime framework package.
@@ -174,7 +181,7 @@ jobs:
       shell: powershell
     - env:
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
-        REPO_TAG_NAME: "${{ github.ref }}"
+        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
       shell: bash
   maven_publish-maven_publish:
@@ -188,6 +195,8 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
+    - name: get tag name
+      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
     - if: success() && startsWith(github.ref, 'refs/tags/')
       run: echo "IS_TAG=true" >> "$GITHUB_ENV"
     - uses: actions/setup-java@v4
@@ -204,7 +213,7 @@ jobs:
       shell: bash
     - env:
         IS_TAG: "${{ env.IS_TAG }}"
-        REPO_TAG_NAME: "${{ github.ref }}"
+        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
         GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
