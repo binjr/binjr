@@ -132,11 +132,6 @@ jobs:
             User aur
             ProxyCommand sshpass -p 'AUR_SSH_PASSWORD' ssh
     - env:
-        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
-      run: |
-        shred -fuz $KEYRING_PATH
-      shell: bash
-    - env:
         REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: |-
         git clone ssh://aur@aur.archlinux.org/binjr-bin.git
@@ -154,6 +149,11 @@ jobs:
         git commit -am "Release ${REPO_TAG_NAME}-1"
         git show
         git push
+      shell: bash
+    - env:
+        AUR_SSH_PRIVATE_PATH: "${{ github.workspace }}/id_rsa"
+      run: |
+        shred -fuz $AUR_SSH_PRIVATE_PATH
       shell: bash
   winget_update-winget_update:
     needs:
