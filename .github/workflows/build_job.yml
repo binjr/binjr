@@ -22,13 +22,20 @@ jobs:
     steps:
     - name: checkout
       uses: actions/checkout@v4.1.0
-    - if: success() && startsWith(github.ref, 'refs/tags/')
-      name: Is TAG?
-      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
-      shell: bash
-    - if: success() && endsWith(github.ref, '-SNAPSHOT')
-      name: Is SNAPSHOT?
-      run: echo "IS_SNAPSHOT=true" >> "$GITHUB_ENV"
+    - name: Init env
+      env:
+        GITHUB_REF: ${{ github.ref }}
+      run: |-
+        if [[ "$GITHUB_REF" == *"-SNAPSHOT" ]]; then
+          echo "IS_SNAPSHOT=true" >> "$GITHUB_ENV"
+        else
+          echo "IS_SNAPSHOT=false" >> "$GITHUB_ENV"
+        fi
+        if [[ "$GITHUB_REF" == "refs/tags/"* ]]; then
+          echo "IS_TAG=true" >> "$GITHUB_ENV"
+        else
+          echo "IS_TAG=false" >> "$GITHUB_ENV"
+        fi
       shell: bash
     - uses: actions/setup-java@v4
       name: Install JDK
@@ -59,6 +66,7 @@ jobs:
         GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
         BINJR_BUILD_NUMBER: "${{ github.run_number }}"
         IS_TAG: "${{ env.IS_TAG }}"
+        IS_SNAPSHOT: "${{ env.IS_SNAPSHOT }}"
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
       name: Gradle build
@@ -93,7 +101,7 @@ jobs:
           ${{ github.workspace }}/build/artifacts/zip/*.zip.asc
           ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz
           ${{ github.workspace }}/build/artifacts/tgz/*.tar.gz.asc
-    - if: success() && runner.os == 'linux' && env.isTag == 'true' && env.IS_SNAPSHOT != 'true'
+    - if: success() && runner.os == 'linux' && startsWith(github.ref, 'refs/tags/') && !(endsWith(github.ref, '-SNAPSHOT'))
       name: Publish APT and RPM repos
       env:
         BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64: "${{ secrets.BINJR_PACKAGE_SIGNING_KEY_SEC_BASE64 }}"
