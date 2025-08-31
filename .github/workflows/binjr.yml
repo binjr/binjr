@@ -182,7 +182,7 @@ jobs:
     - env:
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
         REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
-      run: wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-amd64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
+      run: wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-x86_64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
       shell: bash
   maven_publish-maven_publish:
     needs:
