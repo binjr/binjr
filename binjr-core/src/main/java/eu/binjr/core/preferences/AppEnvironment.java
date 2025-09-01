@@ -32,6 +32,7 @@ import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.Level;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
@@ -280,6 +281,20 @@ public class AppEnvironment {
         sysInfo.add(new SysInfoProperty("JVM Heap Stats", getHeapStats()));
         sysInfo.add(new SysInfoProperty("Garbage Collectors", getGcNames()));
         return sysInfo;
+    }
+
+    public String getArchClassifier() {
+        return normalizeArchName(System.getProperty("os.arch"));
+    }
+
+    public String normalizeArchName(String archName) {
+        return archName == null ? "unsupported" : switch (archName.toLowerCase()) {
+            case "x64", "amd64", "x86_64" -> "x86_64";
+            case "x86", "x86_32", "i386", "i586", "i686" -> "x86";
+            case "arm64", "aarch64" -> "aarch64";
+            case "arm", "arm32", "aarch32" -> "aarch32";
+            default -> "unsupported";
+        };
     }
 
     public Version getJavaVersion() {

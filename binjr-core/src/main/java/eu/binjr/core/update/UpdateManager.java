@@ -204,9 +204,10 @@ public class UpdateManager {
             @Override
             protected Path call() throws Exception {
                 var targetDir = Files.createTempDirectory(userPrefs.temporaryFilesRoot.get(), "binjr-update_");
-                String packageAssetName = String.format("binjr-%s_%s.%s",
+                String packageAssetName = String.format("binjr-%s_%s-%s.%s",
                         release.getVersion(),
                         appEnv.getOsFamily().getPlatformClassifier(),
+                        appEnv.getArchClassifier(),
                         appEnv.getPackaging().getBundleExtension());
                 var taskProgress = new SimpleDoubleProperty(0.0);
                 Dialogs.notifyProgress("Downloading Update...", "Downloading " + packageAssetName, taskProgress);

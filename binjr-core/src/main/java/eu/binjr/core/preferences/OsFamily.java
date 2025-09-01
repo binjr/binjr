@@ -22,10 +22,10 @@ package eu.binjr.core.preferences;
  * @author Frederic Thevenet
  */
 public enum OsFamily {
-    LINUX("linux-amd64"),
-    OSX("mac-x86_64"),
+    LINUX("linux"),
+    OSX("mac"),
     UNSUPPORTED("unsupported"),
-    WINDOWS("windows-amd64");
+    WINDOWS("windows");
 
     private final String platformClassifier;
 
