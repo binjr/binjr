@@ -1,3 +1,9 @@
+## [binjr v3.24.1](https://github.com/binjr/binjr/releases/tag/v3.24.1)
+Released on Mon, 1 September 2025
+
+* _[Fixed] [Core]_ In-app updater on Windows fails to download the binary for the update.
+* _[Fixed] [Core]_ In-app updater on Linux aarch64 attempts to update with the x86_64 binary.
+
 ## [binjr v3.24.0](https://github.com/binjr/binjr/releases/tag/v3.24.0)
 Released on Sun, 30 August 2025
 
