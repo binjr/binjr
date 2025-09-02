@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 plugins {
-    id "org.openapi.generator" version "7.14.0"
+    id "org.openapi.generator" version "7.15.0"
 }
 
 dependencies {
