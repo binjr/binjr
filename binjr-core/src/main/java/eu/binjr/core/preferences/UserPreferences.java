@@ -53,7 +53,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
 
-
     private static class LocalKeyring extends AesKeyring {
         private LocalKeyring() {
             super("binjr/local");
@@ -432,6 +431,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Number> singleMinTickThreshold = doublePreference("singleMinTickThreshold", 36.0);
 
     public final ObservablePreference<Boolean> useParallelIndexFetch = booleanPreference("useParallelIndexFetch", true);
+
+    public final ObservablePreference<String> userAgentString = stringPreference("userAgentString", "");
+
 
     public final ObservablePreference<double[]> decimalAxisTickDividers = objectPreference(
             double[].class,

@@ -59,13 +59,17 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     public static final String APPLICATION_JSON = "application/json";
     public static final String USER_AGENT_STRING = AppEnvironment.APP_NAME +
             "/" + AppEnvironment.getInstance().getVersion() +
-            " (Authenticates like: Firefox/Safari/Internet Explorer)";
+            " (" + System.getProperty("os.name") +
+            ", " + System.getProperty("os.version") +
+            "; " + System.getProperty("os.arch") +
+            "; " + System.getProperty("java.vm.name") +
+            " "  + System.getProperty("java.vm.version") +")";
     public static final String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
     public static final String AUTH_SCHEME_BASIC = "Basic ";
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String HEADER_USER_AGENT = "User-Agent";
     private final HttpClient httpClient;
-    private final UserPreferences userPreferences = UserPreferences.getInstance();
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
     private String basicAuthUserName;
     private ObfuscatedString basicAuthPassword;
     private URL baseAddress;
@@ -137,9 +141,8 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         basicAuthUserName = params.get(BASIC_AUTH_USER_NAME);
         var obfPwd = params.get(BASIC_AUTH_PASSWORD);
         if (obfPwd != null) {
-            basicAuthPassword = userPreferences.getObfuscator().fromObfuscatedText(obfPwd);
+            basicAuthPassword = userPrefs.getObfuscator().fromObfuscatedText(obfPwd);
         }
-
     }
 
     @Override
@@ -177,7 +180,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + url.toString() + "]", logger::perf)) {
             var httpGet = HttpRequest.newBuilder()
                     .GET()
-                    .setHeader(HEADER_USER_AGENT, USER_AGENT_STRING)
+                    .setHeader(HEADER_USER_AGENT, userPrefs.userAgentString.get().isBlank() ? USER_AGENT_STRING : userPrefs.userAgentString.get())
                     .uri(url);
             logger.debug(() -> "requestUri = " + url);
             if (basicAuthUserName != null && basicAuthPassword != null) {
@@ -185,7 +188,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                 httpGet.header(HEADER_AUTHORIZATION, AUTH_SCHEME_BASIC + Base64.getEncoder().encodeToString(authString.getBytes()));
             }
             HttpResponse<R> response = httpClient.send(httpGet.build(), bodyHandler);
-            if (userPreferences.autoAttemptBasicAuth.get() &&
+            if (userPrefs.autoAttemptBasicAuth.get() &&
                     response.statusCode() == 401 &&
                     response.headers().allValues(HEADER_WWW_AUTHENTICATE).stream().anyMatch(s -> s.startsWith(AUTH_SCHEME_BASIC))) {
                 logger.warn("Authentication required for \"" + url + "\": attempting basic authentication");
@@ -201,7 +204,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                 var credentials = Dialogs.getCredentials(null, url.getHost(), null, init);
                 if (credentials.isPresent()) {
                     this.basicAuthUserName = credentials.get().userName();
-                    this.basicAuthPassword = userPreferences.getObfuscator().fromPlainText(credentials.get().password());
+                    this.basicAuthPassword = userPrefs.getObfuscator().fromPlainText(credentials.get().password());
                     if (credentials.get().remember()) {
                         savedCredentials.putUserName(url.getHost(), basicAuthUserName, basicAuthPassword.toPlainText());
                     } else {
@@ -246,7 +249,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
 
     protected HttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
         try {
-            var userPrefs = userPreferences;
+            var userPrefs = this.userPrefs;
             var builder = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));

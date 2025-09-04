@@ -1,0 +1,1 @@
+_* [New] [Http Adapters]_ User Agent string can now be overridden 
