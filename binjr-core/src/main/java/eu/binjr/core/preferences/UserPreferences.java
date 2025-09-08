@@ -17,6 +17,7 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
+import eu.binjr.common.io.SSLContextUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
@@ -68,11 +69,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
     private final ObfuscatedString.Obfuscator obfuscator = new AesStringObfuscator(keyring.masterKey.get());
 
     private final UserFavorites favorites = new UserFavorites(BINJR_GLOBAL);
-
-    /**
-     * True if the app should use the CA certs from the JVM rather that the platform specific ones on Windows and macOS.
-     */
-    public final ObservablePreference<Boolean> useJvmCacerts = booleanPreference("useJvmCacerts", false);
 
     /**
      * True if series down-sampling is enabled, false otherwise.
@@ -434,6 +430,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<String> userAgentString = stringPreference("userAgentString", "");
 
+    public final ObservablePreference<SSLContextUtils.PlatformKeyStore> platformKeyStore = enumPreference(SSLContextUtils.PlatformKeyStore.class, "platformKeyStore", SSLContextUtils.PlatformKeyStore.AUTO);
 
     public final ObservablePreference<double[]> decimalAxisTickDividers = objectPreference(
             double[].class,
