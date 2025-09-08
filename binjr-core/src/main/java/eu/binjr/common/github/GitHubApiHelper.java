@@ -62,23 +62,19 @@ public class GitHubApiHelper implements Closeable {
     }
 
     private GitHubApiHelper(URI apiEndpoint) {
-        this(apiEndpoint, null, null, null, false);
+        this(apiEndpoint, null, null, null, SSLContextUtils.PlatformKeyStore.NONE);
     }
 
-    private GitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig, String userName, String token, boolean useJvmCacerts) {
+    private GitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig, String userName, String token, SSLContextUtils.PlatformKeyStore platformKeyStore) {
         this.apiEndpoint = Objects.requireNonNullElseGet(apiEndpoint, () -> URI.create(HTTPS_API_GITHUB_COM));
-        HttpClient.Builder builder = null;
-
-        builder = HttpClient.newBuilder()
+        var builder = HttpClient.newBuilder()
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
-        if (!useJvmCacerts) {
-            try {
-                builder.sslContext(SSLContextUtils.withPlatformKeystore());
-            } catch (SSLCustomContextException e) {
-                logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
-                logger.debug("Stacktrace", e);
-            }
+        try {
+            builder.sslContext(SSLContextUtils.withKeystore(platformKeyStore));
+        } catch (SSLCustomContextException e) {
+            logger.error("Error creating SSL context for GitHub helper:" + e.getMessage());
+            logger.debug("Stacktrace", e);
         }
         if (proxyConfig != null && proxyConfig.enabled()) {
             try {
@@ -127,8 +123,8 @@ public class GitHubApiHelper implements Closeable {
                                      ProxyConfiguration proxyConfiguration,
                                      String userName,
                                      String token,
-                                     boolean useJvmCacerts) {
-        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token, useJvmCacerts);
+                                     SSLContextUtils.PlatformKeyStore platformKeyStore) {
+        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token, platformKeyStore);
     }
 
     /**
@@ -142,7 +138,7 @@ public class GitHubApiHelper implements Closeable {
                                      ProxyConfiguration proxyConfiguration,
                                      String userName,
                                      String token) {
-        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token, false);
+        return new GitHubApiHelper(apiEndpoint, proxyConfiguration, userName, token, SSLContextUtils.PlatformKeyStore.NONE);
     }
 
     /**

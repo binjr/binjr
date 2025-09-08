@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2023 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -92,7 +92,8 @@ public class UpdateManager {
                             userPrefs.httpProxyLogin.get(),
                             userPrefs.httpProxyPassword.get().toPlainText().toCharArray()),
                     userPrefs.githubUserName.get(),
-                    userPrefs.githubAuthToken.get().toPlainText());
+                    userPrefs.githubAuthToken.get().toPlainText(),
+                    userPrefs.platformKeyStore.get());
         });
     }
 

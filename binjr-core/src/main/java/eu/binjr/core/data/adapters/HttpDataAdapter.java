@@ -63,7 +63,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
             ", " + System.getProperty("os.version") +
             "; " + System.getProperty("os.arch") +
             "; " + System.getProperty("java.vm.name") +
-            " "  + System.getProperty("java.vm.version") +")";
+            " " + System.getProperty("java.vm.version") + ")";
     public static final String HEADER_WWW_AUTHENTICATE = "WWW-Authenticate";
     public static final String AUTH_SCHEME_BASIC = "Basic ";
     public static final String HEADER_AUTHORIZATION = "Authorization";
@@ -253,13 +253,11 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
             var builder = HttpClient.newBuilder()
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .cookieHandler(new CookieManager(null, CookiePolicy.ACCEPT_ORIGINAL_SERVER));
-            if (!userPrefs.useJvmCacerts.get()) {
-                try {
-                    builder.sslContext(SSLContextUtils.withPlatformKeystore());
-                } catch (SSLCustomContextException e) {
-                    logger.error("Error creating SSL context for HttpDataAdapter: " + e.getMessage());
-                    logger.debug("Stacktrace", e);
-                }
+            try {
+                builder.sslContext(SSLContextUtils.withKeystore(userPrefs.platformKeyStore.get()));
+            } catch (SSLCustomContextException e) {
+                logger.error("Error creating SSL context for HttpDataAdapter: " + e.getMessage());
+                logger.debug("Stacktrace", e);
             }
             if (userPrefs.enableHttpProxy.get()) {
                 try {
