@@ -77,7 +77,7 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             null,
-            Map.of(TemporalCaptureGroup.EPOCH, "\\d+"),
+            Map.of(TemporalCaptureGroup.EPOCHSECONDS, "\\d+"),
             "$EPOCH",
             Locale.US,
             ParsingFailureMode.ABORT),
@@ -85,9 +85,8 @@ public enum BuiltInJsonParsingProfile implements JsonParsingProfile {
     EPOCH_MS("Milliseconds since 01/01/1970",
             "EPOCH_MS",
             null,
-            Map.of(TemporalCaptureGroup.EPOCH, "\\d+",
-                    TemporalCaptureGroup.MILLI, "\\d{3}"),
-            "$EPOCH$MILLI",
+            Map.of(TemporalCaptureGroup.EPOCHMILLIS, "\\d+"),
+            "$EPOCHMILLIS",
             Locale.US,
             ParsingFailureMode.ABORT);
 

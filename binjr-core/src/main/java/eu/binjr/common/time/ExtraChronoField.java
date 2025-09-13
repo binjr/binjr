@@ -2,7 +2,6 @@ package eu.binjr.common.time;
 
 import java.time.temporal.*;
 import java.util.Locale;
-import java.util.function.Function;
 
 
 import static java.time.temporal.ChronoField.*;
@@ -10,43 +9,63 @@ import static java.time.temporal.ChronoUnit.*;
 
 public enum ExtraChronoField implements TemporalField {
 
-    SECONDS_OF_YEAR(
-            "SecondsOfYear",
-            SECONDS,
-            YEARS,
-            ValueRange.of(0, 3600 * 24 * 365),
-            t -> t.getLong(SECOND_OF_DAY) + (t.getLong(DAY_OF_YEAR) - 1) * 3600L * 24),
-    MILLIS_OF_YEAR(
-            "MillisOfYear",
+    MILLI_OF_DAY(
+            "MilliOfDay",
             MILLIS,
-            YEARS,
-            ValueRange.of(0, 3600_000L * 24 * 365),
-            t -> t.getLong(MILLI_OF_DAY) + (t.getLong(DAY_OF_YEAR) - 1) * 3600_000L * 24),
-    MICROS_OF_YEAR(
-            "MicrosOfYear",
+            DAYS,
+            SECOND_OF_DAY,
+            ValueRange.of(0, 3_600_000L * 24)),
+    MICRO_OF_DAY(
+            "MicrosOfDay",
             MICROS,
-            YEARS,
-            ValueRange.of(0, 3600_000_000L * 24 * 365),
-            t -> t.getLong(MICRO_OF_DAY) + (t.getLong(DAY_OF_YEAR) - 1) * 3600_000_000L * 24),
-    NANOS_OF_YEAR(
-            "NanosOfYear",
+            DAYS,
+            SECOND_OF_DAY,
+            ValueRange.of(0, 3_600_000_000L * 24)),
+    NANO_OF_DAY(
+            "NanoOfDay",
             NANOS,
-            YEARS,
-            ValueRange.of(0, 3600_000_000_000L * 24 * 365),
-            t -> t.getLong(NANO_OF_DAY) + (t.getLong(DAY_OF_YEAR) - 1) * 3600_000_000_000L * 24);
+            DAYS,
+            SECOND_OF_DAY,
+            ValueRange.of(0, 3_600_000_000_000L * 24)),
+    INSTANT_MILLIS(
+            "InstantMillis",
+            MILLIS,
+            FOREVER,
+            INSTANT_SECONDS,
+            ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE)),
+    INSTANT_MICROS(
+            "InstantMicros",
+            MICROS,
+            FOREVER,
+            INSTANT_SECONDS,
+            ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE)),
+    INSTANT_NANOS(
+            "InstantNanos",
+            NANOS,
+            FOREVER,
+            INSTANT_SECONDS,
+            ValueRange.of(Long.MIN_VALUE, Long.MAX_VALUE));
 
-      private final String name;
+    private final String name;
     private final TemporalUnit baseUnit;
     private final TemporalUnit rangeUnit;
     private final ValueRange range;
-    private final Function<TemporalAccessor, Long> toLong;
+    private final long distToSec;
+    private final long distToNano;
+    private final ChronoField secondMapping;
 
-    ExtraChronoField(String name, TemporalUnit baseUnit, TemporalUnit rangeUnit, ValueRange range, Function<TemporalAccessor, Long> toLong) {
+    ExtraChronoField(String name,
+                     TemporalUnit baseUnit,
+                     TemporalUnit rangeUnit,
+                     ChronoField secondMapping,
+                     ValueRange range) {
         this.name = name;
         this.baseUnit = baseUnit;
         this.rangeUnit = rangeUnit;
         this.range = range;
-        this.toLong = toLong;
+        this.distToNano = baseUnit.getDuration().toNanos();
+        this.distToSec = 1_000_000_000L / this.distToNano;
+        this.secondMapping = secondMapping;
     }
 
     @Override
@@ -64,12 +83,10 @@ public enum ExtraChronoField implements TemporalField {
         return rangeUnit;
     }
 
-
     @Override
     public ValueRange range() {
         return range;
     }
-
 
     @Override
     public boolean isDateBased() {
@@ -81,11 +98,9 @@ public enum ExtraChronoField implements TemporalField {
         return ordinal() < DAY_OF_WEEK.ordinal();
     }
 
-
     public long checkValidValue(long value) {
         return range().checkValidValue(value, this);
     }
-
 
     public int checkValidIntValue(long value) {
         return range().checkValidIntValue(value, this);
@@ -103,13 +118,16 @@ public enum ExtraChronoField implements TemporalField {
 
     @Override
     public long getFrom(TemporalAccessor t) {
-        return toLong.apply(t);
+        return t.getLong(secondMapping) * distToSec + (t.getLong(NANO_OF_SECOND) / distToNano);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <R extends Temporal> R adjustInto(R temporal, long newValue) {
-        return (R) temporal.with(this, newValue);
+        var nbSec = newValue / distToSec;
+        var nbNanos = (newValue % distToSec) * distToNano;
+        var res = temporal.with(secondMapping, nbSec);
+        return (R) res.with(NANO_OF_SECOND, nbNanos);
     }
 
     @Override

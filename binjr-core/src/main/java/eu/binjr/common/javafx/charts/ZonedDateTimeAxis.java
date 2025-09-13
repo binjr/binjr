@@ -26,9 +26,7 @@
 package eu.binjr.common.javafx.charts;
 
 
-import eu.binjr.common.time.ExtraChronoField;
 import eu.binjr.core.controllers.TimelineDisplayMode;
-import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import javafx.beans.property.*;
 import javafx.scene.chart.Axis;
 import javafx.util.StringConverter;
@@ -41,7 +39,6 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -394,7 +391,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                         .appendLiteral("min")
                         .toFormatter();
                 case MILLISECOND_500, MILLISECOND_100, SECOND_15, SECOND_5, SECOND_1,MILLISECOND_10, MILLISECOND_1 -> new DateTimeFormatterBuilder()
-                        .appendValue(ExtraChronoField.SECONDS_OF_YEAR)
+                        .appendValue(ChronoField.SECOND_OF_DAY)
                         .appendFraction(ChronoField.MILLI_OF_SECOND, 0, 3, true)
                         .appendLiteral('s')
                         .toFormatter();
