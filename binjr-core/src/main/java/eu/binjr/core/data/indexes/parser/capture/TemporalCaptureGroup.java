@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -52,14 +52,17 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     HOUR(ChronoField.HOUR_OF_DAY),
     MINUTE(ChronoField.MINUTE_OF_HOUR),
     SECOND(ChronoField.SECOND_OF_MINUTE),
-    EPOCH(ChronoField.INSTANT_SECONDS),
     MILLI(ChronoField.MILLI_OF_SECOND),
     NANO(ChronoField.NANO_OF_SECOND),
     FRACTION(ChronoField.MILLI_OF_SECOND),
-    ELAPSEDMILLI(ExtraChronoField.MILLIS_OF_YEAR),
-    ELAPSEDMICRO(ExtraChronoField.MICROS_OF_YEAR),
-    ELAPSEDNANO(ExtraChronoField.NANOS_OF_YEAR),
-    ELAPSED(ExtraChronoField.SECONDS_OF_YEAR);
+    ELAPSEDSECONDS(ChronoField.SECOND_OF_DAY),
+    ELAPSEDMILLIS(ExtraChronoField.MILLI_OF_DAY),
+    ELAPSEDMICROS(ExtraChronoField.INSTANT_MICROS),
+    ELAPSEDNANOS(ExtraChronoField.INSTANT_NANOS),
+    EPOCHSECONDS(ChronoField.INSTANT_SECONDS),
+    EPOCHMILLIS(ExtraChronoField.INSTANT_MILLIS),
+    EPOCHMICROS(ExtraChronoField.INSTANT_MICROS),
+    EPOCHNANOS(ExtraChronoField.INSTANT_NANOS);
 
     private final TemporalField temporalMapping;
     private final Function<String, Long> tranformer;

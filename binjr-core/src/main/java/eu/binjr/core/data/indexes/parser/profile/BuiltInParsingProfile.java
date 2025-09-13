@@ -65,10 +65,10 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     TemporalCaptureGroup.MINUTE, "\\d{2}",
                     TemporalCaptureGroup.SECOND, "\\d{2}",
                     TemporalCaptureGroup.MILLI, "\\d{3}",
-                    TemporalCaptureGroup.ELAPSED, "\\d+",
+                    TemporalCaptureGroup.ELAPSEDSECONDS, "\\d+",
                     TemporalCaptureGroup.FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|INFO|WARNING|ERROR"),
-            "(\\[$YEAR-$MONTH-$DAY(T)$HOUR:$MINUTE:$SECOND\\.$MILLI([+-]\\d+)?\\])?(\\[($ELAPSED[\\.,]$FRACTION(s))\\s*\\])?(\\[$SEVERITY\\s*\\])?.*",
+            "(\\[$YEAR-$MONTH-$DAY(T)$HOUR:$MINUTE:$SECOND\\.$MILLI([+-]\\d+)?\\])?(\\[($ELAPSEDSECONDS[\\.,]$FRACTION(s))\\s*\\])?(\\[$SEVERITY\\s*\\])?.*",
             ParsingFailureMode.CONCAT),
     QUARKUS("Quarkus logs",
             "BUILTIN_QRK",
@@ -104,12 +104,12 @@ public enum BuiltInParsingProfile implements ParsingProfile {
             ParsingFailureMode.CONCAT),
     HOTSPOT_JIT("Hotspot JVM JIT logs",
             "BUILTIN_HSJIT",
-            Map.of(TemporalCaptureGroup.FRACTION, "\\d+",
+            Map.of(TemporalCaptureGroup.ELAPSEDMILLIS, "\\d+",
                     CaptureGroup.of("COMPID"), "\\d+",
                     CaptureGroup.of("SEVERITY"), "[0-4]",
                     CaptureGroup.of("METHOD"), ".*",
                     CaptureGroup.of("SIZE"), "(\\d+|native)"),
-            "$FRACTION\\s+$COMPID\\s+[%\\s!\\w]*$SEVERITY\\s*$METHOD\\s*\\($SIZE( bytes)?\\).*",
+            "$ELAPSEDMILLIS\\s+$COMPID\\s+[%\\s!\\w]*$SEVERITY\\s*$METHOD\\s*\\($SIZE( bytes)?\\).*",
             ParsingFailureMode.CONCAT);
 
     private final String profileName;
