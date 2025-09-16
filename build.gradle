@@ -86,7 +86,8 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "jdk.zipfs," +
         "jdk.unsupported.desktop," +
         "jdk.crypto.ec," +
-        "jdk.crypto.cryptoki" +
+        "jdk.crypto.cryptoki," +
+        "jdk.incubator.vector" +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${TARGET_ARCH}"
@@ -629,6 +630,7 @@ tasks.register('jpackageAppMac', Exec) {
             "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "--add-modules=jdk.incubator.vector",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     outputs.dir JPACKAGE_IMAGE_PATH
@@ -662,6 +664,7 @@ tasks.register('jpackageAppLinux', Exec) {
             "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "--add-modules=jdk.incubator.vector",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_TAR",
             "--verbose"
@@ -699,6 +702,7 @@ tasks.register('jpackageDmg', Exec) {
             "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "--add-modules=jdk.incubator.vector",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
@@ -738,6 +742,7 @@ tasks.register('jpackagePkg', Exec) {
             "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "--add-modules=jdk.incubator.vector",
             "--java-options", "-Dapple.awt.application.appearance=system"
     ]
     doLast {
@@ -778,6 +783,7 @@ tasks.register('jpackageDeb', Exec) {
             "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "--add-modules=jdk.incubator.vector",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_DEB",
             "--linux-package-name", "binjr",
@@ -827,6 +833,7 @@ tasks.register('jpackageRpm', Exec) {
             "--java-options", "--add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED",
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
+            "--java-options", "--add-modules=jdk.incubator.vector",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_RPM",
             "--linux-package-name", "binjr",

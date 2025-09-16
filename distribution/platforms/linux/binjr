@@ -20,6 +20,7 @@ exec "$JAVACMD" \
   --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED \
   --add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED \
   --enable-native-access=javafx.graphics \
+  --add-modules=jdk.incubator.vector \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
