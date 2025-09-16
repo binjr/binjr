@@ -17,6 +17,7 @@
 
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
+import org.gradle.internal.reflect.Instantiator
 
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -124,12 +125,15 @@ configure(subprojects) {
         apply plugin: 'java-library'
     apply plugin: "maven-publish"
     apply plugin: "signing"
-    group GROUP_ID
-    version BINJR_VERSION
-    sourceCompatibility = 22
-    targetCompatibility = 22
-    description BINJR_DESCRIPTION
+    group = GROUP_ID
+    version = BINJR_VERSION
+    description = BINJR_DESCRIPTION
     compileJava.options.encoding = 'UTF-8'
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_22
+        targetCompatibility = JavaVersion.VERSION_22
+    }
 
     if (project != project(':binjr-app')) {
         project.javadoc {
@@ -235,7 +239,7 @@ configure(subprojects) {
     }
 
     signing {
-        required { IS_RELEASE && gradle.taskGraph.hasTask("publishArtifacts") }
+        required = { IS_RELEASE && gradle.taskGraph.hasTask("publishArtifacts") }
         sign publishing.publications.mavenJava
     }
 
@@ -1092,7 +1096,8 @@ static boolean isNullOrBlank(String val) {
  * the source and target of the archive.
  * NB: No copy/move/archiving will actually take place.
  */
-class WrapTaskForSigning extends AbstractArchiveTask {
+
+abstract class WrapTaskForSigning extends AbstractArchiveTask {
     @Override
     protected CopyAction createCopyAction() {
         return new CopyAction() {
