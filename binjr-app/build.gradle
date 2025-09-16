@@ -33,7 +33,9 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
 }
 
-mainClassName = 'eu.binjr.core.Bootstrap'
+application {
+    mainClass = 'eu.binjr.core.Bootstrap'
+}
 
 run {
     systemProperties System.getProperties()
