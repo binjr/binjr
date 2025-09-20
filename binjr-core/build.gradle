@@ -26,8 +26,8 @@ dependencies {
     api 'org.apache.commons:commons-csv:1.14.1'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.4'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.5'
-    implementation 'org.bouncycastle:bcpg-jdk18on:1.81'
-    implementation 'org.bouncycastle:bcutil-jdk18on:1.81'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.82'
+    implementation 'org.bouncycastle:bcutil-jdk18on:1.82'
     implementation 'org.reflections:reflections:0.10.2'
     api('org.fxmisc.richtext:richtextfx:0.11.6') {
         exclude group: 'org.openjfx'
