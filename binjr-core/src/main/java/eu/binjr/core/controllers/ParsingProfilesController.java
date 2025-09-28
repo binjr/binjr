@@ -29,7 +29,6 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -120,12 +119,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
     private final boolean allowTemporalCaptureGroupsOnly;
     private final Charset defaultCharset;
     private final ZoneId defaultZoneId;
-
-    private final ChangeListener<T> selectionListener = (observable, oldValue, newValue) -> {
-        if (newValue != null) {
-            loadParserParameters(newValue);
-        }
-    };
+    private boolean inhibitProfileUpdate = false;
 
 
     @FXML
@@ -373,7 +367,11 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             this.profileComboBox.getItems().addAll(userParsingProfiles);
         }
 
-        this.profileComboBox.getSelectionModel().selectedItemProperty().addListener(selectionListener);
+        this.profileComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (!inhibitProfileUpdate && newValue != null) {
+                loadParserParameters(newValue);
+            }
+        });
         this.profileComboBox.setConverter(new StringConverter<T>() {
             @Override
             public String toString(T object) {
@@ -383,7 +381,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
             @Override
             public T fromString(String string) {
                 var val = profileComboBox.getValue();
-                if (!val.isBuiltIn()) {
+                if (!inhibitProfileUpdate && !val.isBuiltIn() && !val.getProfileName().equals(string)) {
                     applyChanges();
                 }
                 return val;
@@ -607,15 +605,19 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                     .collect(Collectors.toMap(NameExpressionPair::getName, NameExpressionPair::getExpression));
             var updated = updateProfile(name, profile.getProfileId(), groups, this.lineTemplateExpression.getText(), onParseFailureChoiceBox.getValue());
             if (updated.isPresent()) {
-                // Suspend selection listener
-                this.profileComboBox.getSelectionModel().selectedItemProperty().removeListener(selectionListener);
+                // Suspend profile update in listeners
+                this.inhibitProfileUpdate = true;
                 try {
                     var idx = profileComboBox.getItems().indexOf(profile);
                     profileComboBox.getItems().remove(profile);
                     profileComboBox.getItems().add(idx, updated.get());
                     profileComboBox.getSelectionModel().select(updated.get());
+                } catch (Exception e) {
+                    logger.error("Error will apply change to profile properties: {}", e.getMessage());
+                    logger.debug("Stack trace", e);
                 } finally {
-                    this.profileComboBox.getSelectionModel().selectedItemProperty().addListener(selectionListener);
+                    // Resume profile update in listeners
+                    this.inhibitProfileUpdate = false;
                 }
             } else {
                 return false;
