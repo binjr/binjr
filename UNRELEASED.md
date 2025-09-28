@@ -5,4 +5,5 @@
 * _[Fixed] [Installers]_ MacOS PKG installer does not associate the ".bjr" extension to binjr.  
 * _[Fixed] [Core]_ Extra TemporalField endless loop when using adjustInto method.  
 * _[Fixed] [HTTP Adapters]_ SSL context builder ignores user certificate keystore when validating certification paths on Windows and MacOS.  
+* _[Fixed] [CSV Adapter]_ The wrong field is highlighted when the time pattern field is empty in CSV parsing profile dialog.  
 

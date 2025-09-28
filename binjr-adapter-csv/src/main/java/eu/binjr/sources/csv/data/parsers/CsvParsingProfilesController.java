@@ -18,6 +18,7 @@ package eu.binjr.sources.csv.data.parsers;
 
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.javafx.controls.AlignedTableCellFactory;
+import eu.binjr.common.javafx.controls.CodeAreaValidator;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.text.StringUtils;
@@ -37,6 +38,7 @@ import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
+import org.fxmisc.richtext.CodeArea;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -306,7 +308,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                                                         ParsingFailureMode onParsingFailure) {
         List<String> errors = new ArrayList<>();
         if (this.lineTemplateExpression.getText().isBlank()) {
-            TextFieldValidator.fail(delimiterTextField, true);
+            CodeAreaValidator.fail(lineTemplateExpression, true);
             errors.add("Timestamp pattern cannot be empty");
         }
         if (this.delimiterTextField.getText().isEmpty()) {

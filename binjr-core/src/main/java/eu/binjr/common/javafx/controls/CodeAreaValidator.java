@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021-2022 Frederic Thevenet
+ *    Copyright 2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,28 +22,25 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableValue;
-import javafx.css.Styleable;
-import javafx.event.EventTarget;
 import javafx.geometry.Pos;
-import javafx.scene.control.TextField;
-import org.glassfish.jaxb.runtime.v2.runtime.property.Property;
+import org.fxmisc.richtext.CodeArea;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TextFieldValidator {
+public class CodeAreaValidator {
 
-    public static void succeed(TextField textField) {
+    public static void succeed(CodeArea textField) {
         textField.setStyle("");
     }
 
-    public static void fail(TextField textField,
+    public static void fail(CodeArea textField,
                             boolean autoReset,
                             ObservableValue<?>... resetProperties) {
         fail(textField, null, autoReset, resetProperties);
     }
 
-    public static void fail(TextField textField, String reason,
+    public static void fail(CodeArea textField, String reason,
                             boolean autoReset,
                             ObservableValue<?>... resetProperties) {
         textField.setStyle(String.format("-fx-background-color: %s;",
@@ -66,7 +63,7 @@ public class TextFieldValidator {
         }
     }
 
-    public static boolean validate(TextField textField,
+    public static boolean validate(CodeArea textField,
                                    boolean autoReset,
                                    Predicate<String> validator,
                                    ObservableValue<?>... resetProperties) {
@@ -79,7 +76,7 @@ public class TextFieldValidator {
         }
     }
 
-    public static boolean validate(TextField textField,
+    public static boolean validate(CodeArea textField,
                                    boolean autoReset,
                                    Function<String, ValidationStatus> validator,
                                    ObservableValue<?>... resetProperties) {
