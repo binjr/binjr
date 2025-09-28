@@ -56,6 +56,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     @FXML
     private TextField delimiterTextField;
     @FXML
+    private TextField commentTextField;
+    @FXML
     private TextField quoteCharacterTextField;
     @FXML
     private TableView<ParsedEvent> testResultTable;
@@ -93,6 +95,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         super.initialize(location, resources);
     //    onParseFailureChoiceBox.getItems().setAll(UnparseableLinesBehavior.ABORT,UnparseableLinesBehavior.IGNORE);
         delimiterTextField.textProperty().addListener((observable) -> resetTest());
+        commentTextField.textProperty().addListener(observable -> resetTest());
         timeColumnTextField.valueProperty().addListener(observable -> resetTest());
         readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
         trimCellsCheckbox.selectedProperty().addListener(observable -> resetTest());
@@ -100,6 +103,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         TextFields.bindAutoCompletion(parsingLocaleTextField,
                 Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
         delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
+        commentTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
         quoteCharacterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
     }
 
@@ -118,6 +122,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
         this.trimCellsCheckbox.setSelected(profile.isTrimCellValues());
         this.onParseFailureChoiceBox.getSelectionModel().select(profile.onParsingFailure());
+        this.commentTextField.setText(StringUtils.charToString(profile.getCommentMarker()));
     }
 
     public record ColumnPosition(int index) {
@@ -337,7 +342,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.forLanguageTag(parsingLocaleTextField.getText()),
                 this.trimCellsCheckbox.isSelected(),
-                onParsingFailure));
+                onParsingFailure,
+                StringUtils.stringToChar(this.commentTextField.getText())));
     }
 
     private String formatToDouble(String value) {

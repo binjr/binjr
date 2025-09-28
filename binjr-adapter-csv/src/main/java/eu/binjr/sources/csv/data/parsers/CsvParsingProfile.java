@@ -35,4 +35,5 @@ public interface CsvParsingProfile extends ParsingProfile {
 
     boolean isTrimCellValues();
 
+    char getCommentMarker();
 }

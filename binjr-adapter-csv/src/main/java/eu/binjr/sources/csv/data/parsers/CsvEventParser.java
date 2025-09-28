@@ -59,7 +59,10 @@ public class CsvEventParser implements EventParser {
             if (format.getProfile().isReadColumnNames()) {
                 builder.setHeader();
             }
-            this.csvParser = builder.build().parse(reader);
+            if (format.getProfile().getCommentMarker() != 0){
+                builder.setCommentMarker(format.getProfile().getCommentMarker());
+            }
+            this.csvParser = builder.get().parse(reader);
 
             this.eventIterator = new CsvEventIterator();
         } catch (IOException e) {

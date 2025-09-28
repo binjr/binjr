@@ -152,6 +152,12 @@
                                                      alignment="CENTER_RIGHT"/>
                                 <TextField fx:id="quoteCharacterTextField" maxWidth="35" minHeight="-Infinity"
                                            prefHeight="24.0" prefWidth="35.0"/>
+                                <Separator orientation="VERTICAL" prefHeight="20.0"/>
+                                <LabelWithInlineHelp minWidth="115.0" text="Comment marker"
+                                                     inlineHelp="The character used to mark comments in the CSV file."
+                                                     alignment="CENTER_RIGHT"/>
+                                <TextField fx:id="commentTextField" maxWidth="35" minHeight="-Infinity"
+                                           prefHeight="24.0" prefWidth="35.0"/>
                             </HBox>
                             <CheckBox fx:id="readColumnNameCheckBox"
                                       text="Use values from first line as column names"/>

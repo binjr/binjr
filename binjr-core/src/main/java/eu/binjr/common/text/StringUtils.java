@@ -147,4 +147,18 @@ public class StringUtils {
             return msg.substring(0, MAX_NOTIFICATION_LEN) + "...";
         }
     }
+
+    public static char stringToChar(String str){
+        if (str.isEmpty()){
+            return 0;
+        }
+        return str.toCharArray()[0];
+    }
+
+    public static String charToString(char chr){
+        if (chr==0){
+            return "";
+        }
+        return String.valueOf(chr);
+    }
 }

@@ -92,6 +92,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
         updateProfileList(prefs.csvTimestampParsingProfiles.get());
         parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
         var editParsingButton = new Button("Edit");
+        editParsingButton.setMinWidth(50);
         editParsingButton.setOnAction(event -> {
             try {
                 new CsvParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {

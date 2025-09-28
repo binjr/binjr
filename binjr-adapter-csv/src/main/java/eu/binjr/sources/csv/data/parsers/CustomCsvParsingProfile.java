@@ -36,9 +36,10 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     @JsonAdapter(LocaleJsonAdapter.class)
     private final Locale formattingLocale;
     private final boolean trimCellValues;
+    private final char commentMarker;
 
     public CustomCsvParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false, ParsingFailureMode.ABORT);
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false, ParsingFailureMode.ABORT, '#');
     }
 
 
@@ -54,7 +55,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.isReadColumnNames(),
                 parsingProfile.getNumberFormattingLocale(),
                 parsingProfile.isTrimCellValues(),
-                parsingProfile.onParsingFailure()
+                parsingProfile.onParsingFailure(),
+                parsingProfile.getCommentMarker()
         );
     }
 
@@ -67,7 +69,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    char quoteCharacter, int timestampColumn,
                                    int[] excludedColumns, boolean readColumnNames,
                                    Locale formattingLocale, boolean trimCellValues,
-                                   ParsingFailureMode onParsingFailure) {
+                                   ParsingFailureMode onParsingFailure, char commentMarker) {
         super(profileName, profileId, captureGroups, lineTemplateExpression, onParsingFailure);
         this.delimiter = delimiter;
         this.quoteCharacter = quoteCharacter;
@@ -76,6 +78,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         this.readColumnNames = readColumnNames;
         this.formattingLocale = formattingLocale;
         this.trimCellValues = trimCellValues;
+        this.commentMarker = commentMarker;
     }
 
     @Override
@@ -111,6 +114,11 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     @Override
     public boolean isTrimCellValues() {
         return trimCellValues;
+    }
+
+    @Override
+    public char getCommentMarker() {
+        return commentMarker;
     }
 
 }

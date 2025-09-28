@@ -44,7 +44,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             true,
             Locale.US,
             false,
-            ParsingFailureMode.ABORT),
+            ParsingFailureMode.ABORT,
+            '#'),
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             Map.of(TemporalCaptureGroup.EPOCHSECONDS, "\\d+"),
@@ -56,7 +57,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             true,
             Locale.US,
             false,
-            ParsingFailureMode.ABORT),
+            ParsingFailureMode.ABORT,
+            '#'),
     EPOCH_MS("Milliseconds since 01/01/1970 UTC",
             "EPOCH_MS",
             Map.of(TemporalCaptureGroup.EPOCHMILLIS, "\\d+"),
@@ -68,7 +70,8 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             true,
             Locale.US,
             false,
-            ParsingFailureMode.ABORT);
+            ParsingFailureMode.ABORT,
+            '#');
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -83,6 +86,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final char quoteCharacter;
     private final boolean trimCellValues;
     private final ParsingFailureMode onParsingFailure;
+    private final char commentMarker;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
@@ -95,11 +99,13 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
                              boolean readColumnNames,
                              Locale numberFormattingLocale,
                              boolean trimCellValues,
-                             ParsingFailureMode onParsingFailure) {
+                             ParsingFailureMode onParsingFailure,
+                             char commentMarker) {
         this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
+        this.commentMarker = commentMarker;
         this.regex = Pattern.compile(buildParsingRegexString());
         this.delimiter = delimiter;
         this.quoteCharacter = quoteChar;
@@ -179,6 +185,11 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     @Override
     public boolean isTrimCellValues() {
         return trimCellValues;
+    }
+
+    @Override
+    public char getCommentMarker() {
+        return commentMarker;
     }
 
     @Override
