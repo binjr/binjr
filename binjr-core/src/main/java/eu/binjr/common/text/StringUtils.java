@@ -16,7 +16,6 @@
 
 package eu.binjr.common.text;
 
-import eu.binjr.core.dialogs.Dialogs;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -148,15 +147,15 @@ public class StringUtils {
         }
     }
 
-    public static char stringToChar(String str){
-        if (str.isEmpty()){
-            return 0;
+    public static Character stringToCharacter(String str){
+        if (str == null || str.isEmpty()){
+            return null;
         }
         return str.toCharArray()[0];
     }
 
-    public static String charToString(char chr){
-        if (chr==0){
+    public static String CharacterToString(Character chr){
+        if (chr == null){
             return "";
         }
         return String.valueOf(chr);

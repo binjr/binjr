@@ -83,24 +83,24 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     private final int[] excludedColumns;
     private final Locale numberFormattingLocale;
     private final boolean readColumnNames;
-    private final char quoteCharacter;
+    private final Character quoteCharacter;
     private final boolean trimCellValues;
     private final ParsingFailureMode onParsingFailure;
-    private final char commentMarker;
+    private final Character commentMarker;
 
     BuiltInCsvParsingProfile(String profileName,
                              String id,
                              Map<NamedCaptureGroup, String> groups,
                              String lineTemplateExpression,
                              String delimiter,
-                             char quoteChar,
+                             Character quoteChar,
                              int timestampColumn,
                              int[] excludedColumns,
                              boolean readColumnNames,
                              Locale numberFormattingLocale,
                              boolean trimCellValues,
                              ParsingFailureMode onParsingFailure,
-                             char commentMarker) {
+                             Character commentMarker) {
         this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
@@ -178,7 +178,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     }
 
     @Override
-    public char getQuoteCharacter() {
+    public Character getQuoteCharacter() {
         return quoteCharacter;
     }
 
@@ -188,7 +188,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     }
 
     @Override
-    public char getCommentMarker() {
+    public Character getCommentMarker() {
         return commentMarker;
     }
 

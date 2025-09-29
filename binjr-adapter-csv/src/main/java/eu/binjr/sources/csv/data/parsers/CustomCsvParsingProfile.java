@@ -29,14 +29,14 @@ import java.util.UUID;
 
 public class CustomCsvParsingProfile extends CustomParsingProfile implements CsvParsingProfile {
     private final String delimiter;
-    private final char quoteCharacter;
+    private final Character quoteCharacter;
     private final int timestampColumn;
     private final int[] excludedColumns;
     private final boolean readColumnNames;
     @JsonAdapter(LocaleJsonAdapter.class)
     private final Locale formattingLocale;
     private final boolean trimCellValues;
-    private final char commentMarker;
+    private final Character commentMarker;
 
     public CustomCsvParsingProfile() {
         this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false, ParsingFailureMode.ABORT, '#');
@@ -66,10 +66,14 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    Map<NamedCaptureGroup, String> captureGroups,
                                    String lineTemplateExpression,
                                    String delimiter,
-                                   char quoteCharacter, int timestampColumn,
-                                   int[] excludedColumns, boolean readColumnNames,
-                                   Locale formattingLocale, boolean trimCellValues,
-                                   ParsingFailureMode onParsingFailure, char commentMarker) {
+                                   Character quoteCharacter,
+                                   int timestampColumn,
+                                   int[] excludedColumns,
+                                   boolean readColumnNames,
+                                   Locale formattingLocale,
+                                   boolean trimCellValues,
+                                   ParsingFailureMode onParsingFailure,
+                                   Character commentMarker) {
         super(profileName, profileId, captureGroups, lineTemplateExpression, onParsingFailure);
         this.delimiter = delimiter;
         this.quoteCharacter = quoteCharacter;
@@ -107,7 +111,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     }
 
     @Override
-    public char getQuoteCharacter() {
+    public Character getQuoteCharacter() {
         return quoteCharacter;
     }
 
@@ -117,7 +121,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     }
 
     @Override
-    public char getCommentMarker() {
+    public Character getCommentMarker() {
         return commentMarker;
     }
 

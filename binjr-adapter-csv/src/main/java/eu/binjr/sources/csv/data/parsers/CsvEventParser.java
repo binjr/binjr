@@ -55,12 +55,10 @@ public class CsvEventParser implements EventParser {
                     .setSkipHeaderRecord(true)
                     .setTrim(format.getProfile().isTrimCellValues())
                     .setQuote(format.getProfile().getQuoteCharacter())
-                    .setDelimiter(StringUtils.stringToEscapeSequence(format.getProfile().getDelimiter()));
+                    .setDelimiter(StringUtils.stringToEscapeSequence(format.getProfile().getDelimiter()))
+                    .setCommentMarker(format.getProfile().getCommentMarker());
             if (format.getProfile().isReadColumnNames()) {
                 builder.setHeader();
-            }
-            if (format.getProfile().getCommentMarker() != 0){
-                builder.setCommentMarker(format.getProfile().getCommentMarker());
             }
             this.csvParser = builder.get().parse(reader);
 

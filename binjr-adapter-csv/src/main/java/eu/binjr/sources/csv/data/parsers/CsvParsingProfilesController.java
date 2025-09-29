@@ -38,7 +38,6 @@ import javafx.scene.control.*;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import org.controlsfx.control.textfield.TextFields;
-import org.fxmisc.richtext.CodeArea;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -124,7 +123,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
         this.trimCellsCheckbox.setSelected(profile.isTrimCellValues());
         this.onParseFailureChoiceBox.getSelectionModel().select(profile.onParsingFailure());
-        this.commentTextField.setText(StringUtils.charToString(profile.getCommentMarker()));
+        this.commentTextField.setText(StringUtils.CharacterToString(profile.getCommentMarker()));
     }
 
     public record ColumnPosition(int index) {
@@ -315,11 +314,6 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
             TextFieldValidator.fail(delimiterTextField, true);
             errors.add("Delimiting character for CSV parsing cannot be empty");
         }
-        if (this.quoteCharacterTextField.getText().isBlank()) {
-            TextFieldValidator.fail(quoteCharacterTextField, true);
-            errors.add("Quote character for CSV parsing cannot be empty");
-        }
-
         try {
             var bld = new Locale.Builder();
             bld.setLanguageTag(parsingLocaleTextField.getText());
@@ -337,15 +331,15 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 profileId,
                 groups,
                 lineExpression,
-                this.delimiterTextField.getText(),
-                StringUtils.stringToEscapeSequence(this.quoteCharacterTextField.getText()).charAt(0),
+                StringUtils.stringToEscapeSequence(this.delimiterTextField.getText()),
+                StringUtils.stringToCharacter(this.quoteCharacterTextField.getText()),
                 this.timeColumnTextField.getValue().index(),
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
                 Locale.forLanguageTag(parsingLocaleTextField.getText()),
                 this.trimCellsCheckbox.isSelected(),
                 onParsingFailure,
-                StringUtils.stringToChar(this.commentTextField.getText())));
+                StringUtils.stringToCharacter(this.commentTextField.getText())));
     }
 
     private String formatToDouble(String value) {
