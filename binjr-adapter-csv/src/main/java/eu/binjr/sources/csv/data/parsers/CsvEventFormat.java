@@ -71,11 +71,13 @@ public class CsvEventFormat implements EventFormat<InputStream> {
      */
     public List<String> getDataColumnHeaders(InputStream in) throws IOException, DecodingDataFromAdapterException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-            CSVFormat csvFormat = CSVFormat.Builder.create()
+            Iterable<CSVRecord> records = CSVFormat.Builder.create()
                     .setAllowMissingColumnNames(false)
                     .setDelimiter(StringUtils.stringToEscapeSequence(getProfile().getDelimiter()))
-                    .build();
-            Iterable<CSVRecord> records = csvFormat.parse(reader);
+                    .setTrim(profile.isTrimCellValues())
+                    .setQuote(profile.getQuoteCharacter())
+                    .setCommentMarker(profile.getCommentMarker())
+                    .get().parse(reader);
             CSVRecord record = records.iterator().next();
             if (record == null) {
                 throw new DecodingDataFromAdapterException("CSV stream does not contains column header");
