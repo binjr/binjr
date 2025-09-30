@@ -920,8 +920,6 @@ public class XYChartsWorksheetController extends WorksheetController {
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, false));
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
-            getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(15));
-            getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(15));
 
             Label label = new Label();
             getBindingManager().bind(label.textProperty(), currentViewPort.getDataStore().nameProperty());
