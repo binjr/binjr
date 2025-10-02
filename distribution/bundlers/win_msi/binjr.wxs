@@ -73,6 +73,7 @@
             <ComponentRef Id="StartMenuShortcuts"/>
             <ComponentRef Id="binjrDir"/>
             <ComponentGroupRef Id="binjrFiles"/>
+            <ComponentRef Id="binjr.exe"/>
             <ComponentRef Id="comp_env_path"/>
         </Feature>
 
@@ -175,7 +176,13 @@
                         </Extension>
                     </ProgId>
                 </Component>
+                <Component Id="binjr.exe" Guid="{7436DAD6-9A63-44A1-A41F-86F7E439BB5D}">
+                    <File Id="binjr.exe" KeyPath="yes" Source="$(var.buildSourceDir)\binjr.exe"/>
+                </Component>
             </Directory>
         </StandardDirectory>
+        <ComponentGroup Directory="APPLICATIONFOLDER" Id="binjrFiles">
+            <Files Include="$(var.buildSourceDir)\**"/>
+        </ComponentGroup>
     </Package>
 </Wix>

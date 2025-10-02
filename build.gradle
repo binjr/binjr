@@ -518,27 +518,8 @@ tasks.register('packageDistributionTar', Exec) {
     outputs.dir ARTIFACTS_PATH_TGZ
 }
 
-tasks.register('wixRunHeat', Exec) {
-    dependsOn prepareAppBundle
-    doFirst {
-        Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
-                Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
-                StandardCopyOption.REPLACE_EXISTING)
-    }
-    workingDir project.projectDir
-    commandLine = [
-            "${WIX_HOME}x64/heat.exe",
-            "dir", "${APP_IMAGE_PATH}",
-            "-cg", "binjrFiles",
-            "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
-            "-dr", "APPLICATIONFOLDER",
-            "-var", "var.buildSourceDir",
-            "-out", "${buildDir}/wix/binjrFiles.wxs"
-    ]
-}
-
 tasks.register('wixAddUiExt', Exec) {
-    dependsOn wixRunHeat
+    dependsOn prepareAppBundle
     commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
 }
 
@@ -549,11 +530,16 @@ tasks.register('wixAddUtilExt', Exec) {
 
 tasks.register('wixRunBuild', Exec) {
     dependsOn wixAddUtilExt
+    doFirst {
+        Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
+                Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
+                StandardCopyOption.REPLACE_EXISTING)
+    }
+
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}wix.exe", "build", "-arch", "${getArch()}",
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
-            "${buildDir}/wix/binjrFiles.wxs",
             "-ext", "WixToolset.UI.wixext",
             "-ext", "WixToolset.Util.wixext",
             "-d", "binjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
