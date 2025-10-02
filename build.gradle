@@ -98,7 +98,6 @@ ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.JPACKAGE_IMAGE_PATH = "${buildDir}/jpackage_image/${DISTRIBUTION_NAME}"
 ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX6")
-ext.WIX_VERSION = "6.0.1"
 ext.ARTIFACTS_ROOT_PATH = "${buildDir}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")
@@ -154,8 +153,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:5.13.4')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.13.4')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:6.0.0')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:6.0.0')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
@@ -537,23 +536,15 @@ tasks.register('wixRunHeat', Exec) {
             "-out", "${buildDir}/wix/binjrFiles.wxs"
     ]
 }
-tasks.register('getWixVer', Exec) {
-    dependsOn wixRunHeat
-    commandLine = ["${WIX_HOME}wix.exe", "--version"]
-    standardOutput = new ByteArrayOutputStream()
-    doLast {
-        WIX_VERSION = standardOutput.toString()
-    }
-}
 
 tasks.register('wixAddUiExt', Exec) {
-    dependsOn getWixVer
-    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext/${WIX_VERSION}"]
+    dependsOn wixRunHeat
+    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
 }
 
 tasks.register('wixAddUtilExt', Exec) {
     dependsOn wixAddUiExt
-    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext/${WIX_VERSION}"]
+    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
 }
 
 tasks.register('wixRunBuild', Exec) {

@@ -43,7 +43,7 @@ jobs:
     with:
       name: app_bundle_windows_x64
       chosen-os: windows-2022
-      wixVersion: 6.0.1
+      wixVersion: 6.0.2
     secrets: inherit
   deploy_site-deploy_site:
     needs:
