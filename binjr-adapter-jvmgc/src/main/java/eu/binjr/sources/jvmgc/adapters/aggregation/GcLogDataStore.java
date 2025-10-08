@@ -48,7 +48,6 @@ public class GcLogDataStore extends GcAggregation {
                             UnitPrefixes prefix,
                             ChartType chartType,
                             Color color,
-                            GarbageCollectionTypes gcType,
                             DateTimeStamp timeStamp,
                             double value) {
         var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(categories, key, label, unit, prefix, chartType, color));

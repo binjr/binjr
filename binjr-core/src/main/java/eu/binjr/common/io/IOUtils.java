@@ -29,9 +29,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -230,6 +228,12 @@ public class IOUtils {
         System.arraycopy(array, 0, first, 0, len);
         System.arraycopy(array, len, second, 0, second.length);
         return new ByteArrayTuple(first, second);
+    }
+
+    public static <T> List<T> concat(List<T> list, T... elements) {
+        var concatenated = new ArrayList<>(list);
+        concatenated.addAll(Arrays.stream(elements).toList());
+        return concatenated;
     }
 
     public record ByteArrayTuple(byte[] first, byte[] second) {

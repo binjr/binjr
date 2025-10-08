@@ -37,10 +37,10 @@ public abstract class GcAggregation extends Aggregation {
                             UnitPrefixes prefix,
                             ChartType chartType,
                             Color color,
-                            GarbageCollectionTypes gcType,
+
                             DateTimeStamp timeStamp,
                             double value) {
-        storeSample(List.of(category), key, label, unit, prefix, chartType, color, gcType, timeStamp, value);
+        storeSample(List.of(category), key, label, unit, prefix, chartType, color,  timeStamp, value);
     }
 
     public void storeSample(String category,
@@ -49,10 +49,10 @@ public abstract class GcAggregation extends Aggregation {
                             String unit,
                             UnitPrefixes prefix,
                             ChartType chartType,
-                            GarbageCollectionTypes gcType,
+
                             DateTimeStamp timeStamp,
                             double value) {
-        storeSample(List.of(category), key, label, unit, prefix, chartType, null, gcType, timeStamp, value);
+        storeSample(List.of(category), key, label, unit, prefix, chartType, null,  timeStamp, value);
     }
 
     public void storeSample(List<String> categories,
@@ -61,10 +61,10 @@ public abstract class GcAggregation extends Aggregation {
                             String unit,
                             UnitPrefixes prefix,
                             ChartType chartType,
-                            GarbageCollectionTypes gcType,
+
                             DateTimeStamp timeStamp,
                             double value) {
-        storeSample(categories, key, label, unit, prefix, chartType, null, gcType, timeStamp, value);
+        storeSample(categories, key, label, unit, prefix, chartType, null,  timeStamp, value);
     }
 
     public abstract void storeSample(List<String> categories,
@@ -74,7 +74,7 @@ public abstract class GcAggregation extends Aggregation {
                                      UnitPrefixes prefix,
                                      ChartType chartType,
                                      Color color,
-                                     GarbageCollectionTypes gcType,
+
                                      DateTimeStamp timeStamp,
                                      double value);
 }

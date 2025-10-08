@@ -134,9 +134,11 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
             sortedDataStores.forEach((s, m) -> {
                 FilterableTreeItem<SourceBinding> node = tree;
+                String catPath = "/";
                 for (var category : m.category()) {
                     var nodecopy = node;
-                    node = poolDict.computeIfAbsent(category, k -> attachNode(k, nodecopy.getValue().getLabel(), k, m.unit(), m.prefix(), m.chartType(), m.color(), nodecopy));
+                    catPath = catPath + category + "/";
+                    node = poolDict.computeIfAbsent(catPath, k -> attachNode(k, nodecopy.getValue().getLabel(), category, m.unit(), m.prefix(), m.chartType(), m.color(), nodecopy));
                 }
                 attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), m.color(), node);
 
@@ -235,6 +237,11 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
+    public boolean isSortingRequired() {
+        return true;
+    }
+
+    @Override
     public String getSourceName() {
         return "[GC Logs] " + (gcLogPath != null ? gcLogPath.getFileName() : "???" + (detectRollingLogs ? "(rolling)" : ""));
     }
@@ -257,7 +264,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
         this.zoneId = mapParameter(params, ZONE_ID, ZoneId::of);
         this.gcLogPath = mapParameter(params, GC_FILE_PATH, Path::of);
         this.encoding = mapParameter(params, ENCODING);
-        this.detectRollingLogs =  mapParameter(params,ROLLING_LOGS, Boolean::valueOf);
+        this.detectRollingLogs = mapParameter(params, ROLLING_LOGS, Boolean::valueOf);
         Path workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.gcLogPath.getRoot();
         if (workspaceRootPath != null) {
             this.gcLogPath = workspaceRootPath.resolve(gcLogPath);

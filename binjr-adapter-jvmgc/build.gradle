@@ -15,13 +15,20 @@
  */
 
 ext.GCTOOLKIT_VERSION = "3.7.0"
+ext.GCTOOLKIT_SNAPSHOT_VERSION = "3.8.0-beta"
 
 dependencies {
     implementation project(path: ':binjr-adapter-logs')
     compileOnly project(':binjr-core')
-    implementation("com.microsoft.gctoolkit:gctoolkit-api:$GCTOOLKIT_VERSION")
-    implementation("com.microsoft.gctoolkit:gctoolkit-parser:$GCTOOLKIT_VERSION")
-    implementation("com.microsoft.gctoolkit:gctoolkit-vertx:$GCTOOLKIT_VERSION")
+//    implementation("com.microsoft.gctoolkit:gctoolkit-api:$GCTOOLKIT_VERSION")
+//    implementation("com.microsoft.gctoolkit:gctoolkit-parser:$GCTOOLKIT_VERSION")
+//    implementation("com.microsoft.gctoolkit:gctoolkit-vertx:$GCTOOLKIT_VERSION")
+
+    implementation files("deps/gctoolkit-api-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
+    implementation files("deps/gctoolkit-parser-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
+    implementation files("deps/gctoolkit-vertx-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
+    implementation 'io.vertx:vertx-core:4.5.14'
+
 }
 
 jar {

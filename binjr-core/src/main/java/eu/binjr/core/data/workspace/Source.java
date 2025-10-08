@@ -190,7 +190,7 @@ public class Source implements Dirtyable, Closeable {
             adapter.close();
             status.close();
         } catch (Exception e) {
-            logger.warn("An error occuured while closing the source " + (this.getName() != null ? getName() : "null"), e);
+            logger.warn("An error occurred while closing the source " + (this.getName() != null ? getName() : "null"), e);
         }
     }
 
