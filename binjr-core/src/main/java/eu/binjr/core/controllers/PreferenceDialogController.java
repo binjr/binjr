@@ -55,6 +55,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,7 +72,9 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
-    private  ToggleSwitch closeEmptyTabPaneCheckbox;
+    private ChoiceBox<TimelineDisplayMode> defaultTimelineModeChoiceBox;
+    @FXML
+    private ToggleSwitch closeEmptyTabPaneCheckbox;
     @FXML
     private ChoiceBox<ScalingFactor> uiScaleChoiceBox;
     @FXML
@@ -178,7 +181,7 @@ public class PreferenceDialogController implements Initializable {
     private Slider areaChartOpacitySlider = new Slider();
     @FXML
     private Label areaChartsOpacityText = new Label();
-    
+
     private final UserPreferences userPrefs = UserPreferences.getInstance();
 
     @Override
@@ -305,8 +308,9 @@ public class PreferenceDialogController implements Initializable {
         fontSizeformatter.valueProperty().bindBidirectional(userPrefs.defaultTextViewFontSize.property());
         bindEnumToChoiceBox(userPrefs.defaultDateTimeAnchor, dateTimeAnchorChoiceBox, DateTimeAnchor.values());
         bindEnumToChoiceBox(userPrefs.defaultChartType, defaultChartTypeChoiceBox, ChartType.definedValues());
+        bindEnumToChoiceBox(userPrefs.defaultTimelineDisplayMode, defaultTimelineModeChoiceBox, TimelineDisplayMode.values());
         bindEnumToChoiceBox(userPrefs.defaultUnitPrefix, defaultUnitPrefixChoiceBox, UnitPrefixes.definedValues());
-        bindEnumToChoiceBox(userPrefs.userInterfaceTheme,uiThemeChoiceBox, UserInterfaceThemes.values());
+        bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.hardwareAcceleration, hwAccelerationChoiceBox, HardwareAccelerationSupport.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());

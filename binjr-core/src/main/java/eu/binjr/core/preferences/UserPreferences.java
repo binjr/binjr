@@ -17,12 +17,14 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
+import eu.binjr.common.concurrent.BlockingPromise;
 import eu.binjr.common.io.SSLContextUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
+import eu.binjr.core.controllers.TimelineDisplayMode;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
@@ -429,6 +431,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Boolean> useParallelIndexFetch = booleanPreference("useParallelIndexFetch", true);
 
     public final ObservablePreference<String> userAgentString = stringPreference("userAgentString", "");
+
+    public ObservablePreference<TimelineDisplayMode> defaultTimelineDisplayMode = enumPreference(TimelineDisplayMode.class, "defaultTimelineDisplayMode", TimelineDisplayMode.DATE_TIME);
 
     public final ObservablePreference<SSLContextUtils.PlatformKeyStore> platformKeyStore = enumPreference(SSLContextUtils.PlatformKeyStore.class, "platformKeyStore", SSLContextUtils.PlatformKeyStore.AUTO);
 

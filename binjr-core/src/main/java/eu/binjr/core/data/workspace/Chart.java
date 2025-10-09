@@ -122,7 +122,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
                 0.0,
                 100.0,
-                TimelineDisplayMode.DATE_TIME);
+                UserPreferences.getInstance().defaultTimelineDisplayMode.get());
     }
 
     /**

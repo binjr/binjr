@@ -138,6 +138,9 @@
                             <LabelWithInlineHelp text="Default unit prefix"
                                                  inlineHelp="Select the default unit prefix to use for series if their source does not specify it."/>
                             <ChoiceBox fx:id="defaultUnitPrefixChoiceBox" maxWidth="1.7976931348623157E308"/>
+                            <LabelWithInlineHelp text="Default Timeline display mode"
+                                                 inlineHelp="Select the default timeline display mode for new charts"/>
+                            <ChoiceBox fx:id="defaultTimelineModeChoiceBox" maxWidth="1.7976931348623157E308"/>
                             <LabelWithInlineHelp text="Show outline on area charts"
                                                  inlineHelp="Check this option if you want newly created area charts to display a brighter coloured outline for each series."/>
                             <VBox fillWidth="false">

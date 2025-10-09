@@ -78,7 +78,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
                 LogQueryParameters.empty(),
                 true,
                 false,
-                TimelineDisplayMode.DATE_TIME);
+                UserPreferences.getInstance().defaultTimelineDisplayMode.get());
     }
 
     protected LogWorksheet(String name,
