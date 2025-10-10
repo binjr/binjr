@@ -117,7 +117,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     protected void loadParserParameters(CsvParsingProfile profile) {
         super.loadParserParameters(profile);
         this.delimiterTextField.setText(profile.getDelimiter());
-        this.quoteCharacterTextField.setText(String.valueOf(profile.getQuoteCharacter()));
+        this.quoteCharacterTextField.setText(StringUtils.CharacterToString(profile.getQuoteCharacter()));
         this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, profile.getTimestampColumn()));
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
