@@ -18,6 +18,7 @@ package eu.binjr.sources.json.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
@@ -32,7 +33,7 @@ import eu.binjr.sources.json.data.parsers.CustomJsonParsingProfile;
  * @author Frederic Thevenet
  */
 public class JsonAdapterPreferences extends DataAdapterPreferences {
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
     /**
      * The default text panel font size preference.
      */
@@ -44,8 +45,8 @@ public class JsonAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> folderFilters = objectPreference(String[].class,
             "folderFilters",
             new String[]{"*"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * The filters used to prune file extensions to scan in the source filesystem.
@@ -53,8 +54,8 @@ public class JsonAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "extensionFilters",
             new String[]{"*.json"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * The most recently used {@link ParsingProfile}
@@ -66,8 +67,8 @@ public class JsonAdapterPreferences extends DataAdapterPreferences {
             objectPreference(JsonParsingProfile[].class,
                     "jsonTimestampParsingProfiles",
                     new JsonParsingProfile[0],
-                    s -> gson.toJson(s),
-                    s -> gson.fromJson(s, CustomJsonParsingProfile[].class)
+                    s -> GSON.toJson(s),
+                    s -> GSON.fromJson(s, CustomJsonParsingProfile[].class)
             );
     public ObservablePreference<String> mruEncoding = stringPreference("mruEncoding", "utf-8");
 

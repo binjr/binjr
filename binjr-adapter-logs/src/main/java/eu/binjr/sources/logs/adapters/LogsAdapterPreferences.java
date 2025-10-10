@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.sources.logs.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
@@ -32,7 +33,7 @@ import java.nio.charset.StandardCharsets;
  * @author Frederic Thevenet
  */
 public class LogsAdapterPreferences extends DataAdapterPreferences {
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
     /**
      * The default text panel font size preference.
      */
@@ -44,8 +45,8 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> folderFilters = objectPreference(String[].class,
             "folderFilters",
             new String[]{"*"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * The filters used to prune file extensions to scan in the source filesystem.
@@ -53,8 +54,8 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "extensionFilters",
             new String[]{"*.log", "*.txt"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * The most recently used {@link ParsingProfile}

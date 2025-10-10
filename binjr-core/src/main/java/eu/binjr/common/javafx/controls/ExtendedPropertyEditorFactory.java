@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2024 Frederic Thevenet
+ *    Copyright 2019-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.common.javafx.controls;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
 import javafx.scene.Node;
@@ -46,7 +47,7 @@ import java.util.function.Function;
 
 public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory {
     private static final Logger logger = Logger.create(ExtendedPropertyEditorFactory.class);
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
     private final ObfuscatedString.Obfuscator obfuscator;
 
     public ExtendedPropertyEditorFactory() {
@@ -103,12 +104,12 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                     if (object == null) {
                         object = new String[0];
                     }
-                    return gson.toJson(object);
+                    return GSON.toJson(object);
                 }
 
                 @Override
                 public String[] fromString(String string) {
-                    var res = gson.fromJson(string, String[].class);
+                    var res = GSON.fromJson(string, String[].class);
                     return res != null ? res : new String[0];
                 }
             }));
@@ -121,12 +122,12 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                     if (object == null) {
                         object = new double[0];
                     }
-                    return gson.toJson(object);
+                    return GSON.toJson(object);
                 }
 
                 @Override
                 public double[] fromString(String string) {
-                    var res = gson.fromJson(string, double[].class);
+                    var res = GSON.fromJson(string, double[].class);
                     return res != null ? res : new double[0];
                 }
 

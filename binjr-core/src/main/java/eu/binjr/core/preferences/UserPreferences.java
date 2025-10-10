@@ -17,7 +17,7 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
-import eu.binjr.common.concurrent.BlockingPromise;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.io.SSLContextUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
@@ -52,7 +52,7 @@ import java.util.prefs.InvalidPreferencesFormatException;
  */
 public class UserPreferences extends ObservablePreferenceFactory {
     private static final Logger logger = Logger.create(UserPreferences.class);
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
 
@@ -214,8 +214,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Rectangle2D> windowLastPosition = objectPreference(Rectangle2D.class,
             "windowLastPosition",
             new Rectangle2D(Double.MAX_VALUE, Double.MAX_VALUE, 0, 0),
-            gson::toJson,
-            s -> gson.fromJson(s, Rectangle2D.class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, Rectangle2D.class));
 
     /**
      * Display a warning if the number of series a user attempts to drop onto a worksheet in a single operation
@@ -381,8 +381,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
             objectPreference(ParsingProfile[].class,
                     "userParsingProfiles",
                     new ParsingProfile[0],
-                    s -> gson.toJson(s),
-                    s -> gson.fromJson(s, CustomParsingProfile[].class)
+                    s -> GSON.toJson(s),
+                    s -> GSON.fromJson(s, CustomParsingProfile[].class)
             );
 
     public final ObservablePreference<DateFormat> labelDateFormat = enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
@@ -440,16 +440,16 @@ public class UserPreferences extends ObservablePreferenceFactory {
             double[].class,
             "decimalAxisTickDividers",
             new double[]{1.0, 2.5, 5.0},
-            gson::toJson,
-            s -> gson.fromJson(s, double[].class)
+            GSON::toJson,
+            s -> GSON.fromJson(s, double[].class)
     );
 
     public ObservablePreference<double[]> binaryAxisTickDividers = objectPreference(
             double[].class,
             "binaryAxisTickDividers",
             new double[]{1.0, 2.0, 4.0, 8.0},
-            gson::toJson,
-            s -> gson.fromJson(s, double[].class)
+            GSON::toJson,
+            s -> GSON.fromJson(s, double[].class)
     );
 
     public static class UserFavorites extends MruFactory {

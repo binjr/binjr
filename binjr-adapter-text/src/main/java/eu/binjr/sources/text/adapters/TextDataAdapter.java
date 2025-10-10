@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.sources.text.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
@@ -55,7 +56,7 @@ import java.util.stream.Collectors;
  */
 public class TextDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(TextDataAdapter.class);
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private Path rootPath;
     private FileSystemBrowser fileBrowser;
@@ -90,8 +91,8 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>();
         params.put("rootPath", rootPath.toString());
-        params.put("folderFilters", gson.toJson(folderFilters));
-        params.put("fileExtensionsFilters", gson.toJson(fileExtensionsFilters));
+        params.put("folderFilters", GSON.toJson(folderFilters));
+        params.put("fileExtensionsFilters", GSON.toJson(fileExtensionsFilters));
         return params;
     }
 
@@ -102,8 +103,8 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
             params.forEach((s, s2) -> logger.debug(() -> "key=" + s + ", value=" + s2));
         }
         initParams(Paths.get(validateParameterNullity(params, "rootPath")),
-                gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
-                gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class));
+                GSON.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
+                GSON.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class));
     }
 
     private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {

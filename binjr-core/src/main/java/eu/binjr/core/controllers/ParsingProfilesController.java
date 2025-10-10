@@ -16,6 +16,7 @@
 package eu.binjr.core.controllers;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
@@ -67,7 +68,7 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 public abstract class ParsingProfilesController<T extends ParsingProfile> implements Initializable {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
     protected static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
-    protected static final Gson gson = new Gson();
+    protected static final Gson GSON = new GsonBuilder().serializeNulls().create();
     protected final T[] builtinParsingProfiles;
     protected final T defaultProfile;
     @FXML
@@ -169,7 +170,7 @@ public abstract class ParsingProfilesController<T extends ParsingProfile> implem
                 this.applyChanges();
                 Files.deleteIfExists(exportPath.toPath());
                 UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
-                Files.writeString(exportPath.toPath(), gson.toJson(profileComboBox.getItems().stream()
+                Files.writeString(exportPath.toPath(), GSON.toJson(profileComboBox.getItems().stream()
                         .filter(p -> !p.isBuiltIn())
                         .toList()));
                 logger.info("Parsing profiles successfully exported to " + exportPath);

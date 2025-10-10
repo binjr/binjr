@@ -17,6 +17,7 @@
 package eu.binjr.core.data.adapters;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
@@ -49,7 +50,7 @@ import java.util.stream.Collectors;
 
 public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>, P extends ParsingProfile> extends BaseDataAdapter<Double> implements Reloadable<Double> {
     private static final Logger logger = Logger.create(IndexBackedFileAdapter.class);
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     protected static final String ZONE_ID = "zoneId";
     protected static final String ENCODING = "encoding";
     protected static final String PARSING_PROFILE = "parsingProfile";

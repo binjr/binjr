@@ -179,7 +179,7 @@ public class JsonParsingProfilesController extends ParsingProfilesController<Jso
     protected List<JsonParsingProfile> deSerializeProfiles(String profileString) {
         Type profileListType = new TypeToken<ArrayList<CustomJsonParsingProfile>>() {
         }.getType();
-        return gson.fromJson(profileString, profileListType);
+        return GSON.fromJson(profileString, profileListType);
     }
 
     @Override

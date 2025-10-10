@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2023 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.sources.text.adapters;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -56,7 +57,7 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
     private static final Logger logger = Logger.create(TextDataAdapterDialog.class);
     private final TextField extensionFiltersTextField;
     private final TextAdapterPreferences prefs;
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
 
     /**
      * Initializes a new instance of the {@link TextDataAdapterDialog} class.
@@ -68,7 +69,7 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
         super(owner, Mode.PATH, "mostRecentTextArchives", false);
         this.prefs = (TextAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(TextDataAdapter.class.getName());
         setDialogHeaderText("Add a TExt File, Zip Archive or Folder");
-        extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));
+        extensionFiltersTextField = new TextField(GSON.toJson(prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions:");
         GridPane.setConstraints(label, 0, 1, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 1, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
@@ -134,7 +135,7 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("The provided path is not valid.");
         }
         getMostRecentList().push(path);
-        prefs.fileExtensionFilters.set(gson.fromJson(extensionFiltersTextField.getText(), String[].class));
+        prefs.fileExtensionFilters.set(GSON.fromJson(extensionFiltersTextField.getText(), String[].class));
         return List.of(new TextDataAdapter(path, prefs.folderFilters.get(), prefs.fileExtensionFilters.get()));
     }
 }

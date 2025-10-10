@@ -217,7 +217,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     protected List<CsvParsingProfile> deSerializeProfiles(String profileString) {
         Type profileListType = new TypeToken<ArrayList<CustomCsvParsingProfile>>() {
         }.getType();
-        return gson.fromJson(profileString, profileListType);
+        return GSON.fromJson(profileString, profileListType);
     }
 
     @Override

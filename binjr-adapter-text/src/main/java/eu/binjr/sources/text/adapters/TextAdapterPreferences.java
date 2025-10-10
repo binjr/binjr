@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.sources.text.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
@@ -26,7 +27,7 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
  * Defines the preferences associated with the Text files adapter.
  */
 public class TextAdapterPreferences extends DataAdapterPreferences {
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
 
     /**
      * The default text panel font size preference.
@@ -39,8 +40,8 @@ public class TextAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> folderFilters = objectPreference(String[].class,
             "folderFilters",
             new String[]{"*"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * The filters used to prune file extensions to scan in the source filesystem.
@@ -48,8 +49,8 @@ public class TextAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "fileExtensionFilters",
             new String[]{".xml", ".txt", ".env", ".properties", ".csv", ".log", "md", ".json", ".yml"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * Initialize a new instance of the {@link TextAdapterPreferences} class associated to

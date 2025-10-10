@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.adapters;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
@@ -46,7 +47,7 @@ import java.util.Map;
  */
 public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvParsingProfile> {
     private static final Logger logger = Logger.create(CsvFileAdapter.class);
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
     protected static final String CSV_PATH = "csvPath";
     private final ThreadLocal<NumberFormat> numberFormatters;
 
@@ -124,7 +125,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = super.getParams();
-        params.put(PARSING_PROFILE, gson.toJson(CustomCsvParsingProfile.of(parsingProfile)));
+        params.put(PARSING_PROFILE, GSON.toJson(CustomCsvParsingProfile.of(parsingProfile)));
         return params;
     }
 
@@ -137,7 +138,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
             params.remove(CSV_PATH);
         }
         super.loadParams(params, context);
-        this.parsingProfile = mapParameter(params, PARSING_PROFILE, (p -> gson.fromJson(p, CustomCsvParsingProfile.class)));
+        this.parsingProfile = mapParameter(params, PARSING_PROFILE, (p -> GSON.fromJson(p, CustomCsvParsingProfile.class)));
     }
 
     @Override

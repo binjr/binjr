@@ -74,7 +74,7 @@ public class LogParsingProfilesController extends ParsingProfilesController<Pars
     protected List<ParsingProfile> deSerializeProfiles(String profileString) {
         Type profileListType = new TypeToken<ArrayList<CustomParsingProfile>>() {
         }.getType();
-        return gson.fromJson(profileString, profileListType);
+        return GSON.fromJson(profileString, profileListType);
     }
 
     @Override

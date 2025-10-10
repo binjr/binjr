@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2024 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.common.github;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.io.ProxyConfiguration;
@@ -50,7 +51,7 @@ public class GitHubApiHelper implements Closeable {
     protected final HttpClient httpClient;
     private final URI apiEndpoint;
     protected String userCredentials;
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 
     private final static Type ghReleaseArrayType = new TypeToken<ArrayList<GithubRelease>>() {
     }.getType();

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.data.indexes.parser.profile;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 
@@ -26,7 +27,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  * @author Frederic Thevenet
  */
 public class CustomParsingProfileXmlAdapter extends XmlAdapter<String, CustomParsingProfile> {
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     /**
      * Initializes a new instance of the CustomParsingProfile class
      */

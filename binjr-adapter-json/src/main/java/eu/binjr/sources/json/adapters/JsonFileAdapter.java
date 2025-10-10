@@ -17,6 +17,7 @@
 package eu.binjr.sources.json.adapters;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.JarFsPathResolver;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
@@ -44,7 +45,7 @@ import java.util.Map;
  * @author Frederic Thevenet
  */
 public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, JsonParsingProfile> {
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
 
     /**
      * Initializes a new instance of the {@link JsonFileAdapter} class with a set of default values.
@@ -93,14 +94,14 @@ public class JsonFileAdapter extends IndexBackedFileAdapter<JsonEventFormat, Jso
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = super.getParams();
-        params.put(PARSING_PROFILE, gson.toJson(CustomJsonParsingProfile.of(parsingProfile)));
+        params.put(PARSING_PROFILE, GSON.toJson(CustomJsonParsingProfile.of(parsingProfile)));
         return params;
     }
 
     @Override
     public void loadParams(Map<String, String> params, LoadingContext context) throws DataAdapterException {
         super.loadParams(params, context);
-        this.parsingProfile = mapParameter(params, PARSING_PROFILE, p -> gson.fromJson(p, CustomJsonParsingProfile.class));
+        this.parsingProfile = mapParameter(params, PARSING_PROFILE, p -> GSON.fromJson(p, CustomJsonParsingProfile.class));
     }
 
 

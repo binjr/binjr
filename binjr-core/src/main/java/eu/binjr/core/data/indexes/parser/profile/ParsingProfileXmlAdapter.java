@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022 Frederic Thevenet
+ *    Copyright 2022-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.data.indexes.parser.profile;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 
@@ -26,7 +27,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  * @author Frederic Thevenet
  */
 public class ParsingProfileXmlAdapter extends XmlAdapter<String, ParsingProfile> {
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
 
     /**
      * Initializes a new instance of the CustomParsingProfile class
@@ -36,13 +37,13 @@ public class ParsingProfileXmlAdapter extends XmlAdapter<String, ParsingProfile>
 
     @Override
     public ParsingProfile unmarshal(String stringValue) {
-        if (stringValue == null || stringValue.isBlank()){
-            return  BuiltInParsingProfile.ALL;
+        if (stringValue == null || stringValue.isBlank()) {
+            return BuiltInParsingProfile.ALL;
         }
-        if (stringValue.startsWith(BuiltInParsingProfile.class.getTypeName())){
+        if (stringValue.startsWith(BuiltInParsingProfile.class.getTypeName())) {
             return BuiltInParsingProfile.valueOf(stringValue.replace(BuiltInParsingProfile.class.getTypeName() + ":", ""));
         }
-        return  GSON.fromJson(stringValue, CustomParsingProfile.class);
+        return GSON.fromJson(stringValue, CustomParsingProfile.class);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2023 Frederic Thevenet
+ *    Copyright 2023-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package eu.binjr.sources.jfr.adapters;
 
-import com.google.gson.Gson;
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -47,7 +46,6 @@ public class JfrDataAdapterDialog extends DataAdapterDialog<Path> {
     private static final Logger logger = Logger.create(JfrDataAdapterDialog.class);
     // private final TextField extensionFiltersTextField;
     private final JfrAdapterPreferences prefs;
-    private static final Gson gson = new Gson();
 
     /**
      * Initializes a new instance of the {@link JfrDataAdapterDialog} class.

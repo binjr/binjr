@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2023 Frederic Thevenet
+ *    Copyright 2016-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.xml.XmlUtils;
@@ -64,7 +65,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     private static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
     private static final Logger logger = Logger.create(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
-    private final Gson gson;
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     private CsvDecoder decoder;
     private String filter;
     private ZoneId zoneId;
@@ -97,7 +98,6 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
         this.treeViewTab = treeViewTab;
         this.filter = filter;
         this.decoder = decoderFactory(zoneId);
-        gson = new Gson();
     }
 
     /**
@@ -117,7 +117,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         try {
-            JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
+            JsonJrdsTree t = GSON.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
             Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                     new JrdsBindingBuilder()
@@ -218,7 +218,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
      */
     public Collection<String> discoverFilters() throws DataAdapterException, URISyntaxException {
         try {
-            JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonJrdsTree.class);
+            JsonJrdsTree t = GSON.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonJrdsTree.class);
             return Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_FILTER.equals(jsonJrdsItem.type)).map(i -> i.filter).collect(Collectors.toList());
         } catch (JsonParseException e) {
             throw new DataAdapterException("An error occurred while parsing the json response to getBindingTree request", e);
@@ -386,7 +386,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
             if (newValue) {
                 try {
-                    JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), JRDS_FILTER, n.name), JsonJrdsTree.class);
+                    JsonJrdsTree t = GSON.fromJson(getJsonTree(treeViewTab.getCommand(), JRDS_FILTER, n.name), JsonJrdsTree.class);
                     Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
                     for (JsonJrdsItem branch : Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type)).collect(Collectors.toList())) {
                         attachNode(newBranch, branch.id, m);

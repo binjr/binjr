@@ -18,6 +18,7 @@ package eu.binjr.core.controllers;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.colors.ColorPalette;
 import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
@@ -115,7 +116,7 @@ public class LogWorksheetController extends WorksheetController {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final PseudoClass DRAGGED_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("draggedover");
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     public static final String PSEUDOCLASS_FAVORITES = "favorites";
     public static final String PSEUDOCLASS_HISTORY = "history";
     public static final String PSEUDOCLASS_CATEGORY = "category";
@@ -832,7 +833,7 @@ public class LogWorksheetController extends WorksheetController {
         heatmapArea.getChildren().add(timelineModeBtn);
         var axisLabel = new Label("No Events");
         axisLabel.setRotate(-90);
-      //  axisLabel.setStyle("-fx-border-width: 1 1 1 1; -fx-border-color: blue;");
+        //  axisLabel.setStyle("-fx-border-width: 1 1 1 1; -fx-border-color: blue;");
         var parent = new VBox(axisLabel);
         parent.setAlignment(Pos.CENTER);
         //parent.setStyle("-fx-border-width: 1 1 1 1; -fx-border-color: red;");
@@ -1458,7 +1459,7 @@ public class LogWorksheetController extends WorksheetController {
             }
             return false;
         });
-        var queryArgs = gson.toJson(filter);
+        var queryArgs = GSON.toJson(filter);
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {

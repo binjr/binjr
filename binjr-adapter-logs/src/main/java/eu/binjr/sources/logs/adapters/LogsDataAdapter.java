@@ -18,6 +18,7 @@ package eu.binjr.sources.logs.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.function.CheckedFunction;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
@@ -72,7 +73,7 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
  */
 public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloadable<SearchHit> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     private static final String DEFAULT_PREFIX = "[Logs]";
     private static final String ZONE_ID_PARAM_NAME = "zoneId";
     private static final String ROOT_PATH_PARAM_NAME = "rootPath";
@@ -195,9 +196,9 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
         params.put(LOG_FILE_ENCODING, getEncoding());
         params.put(ROOT_PATH_PARAM_NAME, rootPath.toString());
         params.put(ZONE_ID_PARAM_NAME, zoneId.toString());
-        params.put(FOLDER_FILTERS_PARAM_NAME, gson.toJson(folderFilters));
-        params.put(EXTENSIONS_FILTERS_PARAM_NAME, gson.toJson(fileExtensionsFilters));
-        params.put(PARSING_PROFILE_PARAM_NAME, gson.toJson(CustomParsingProfile.of(parsingProfile)));
+        params.put(FOLDER_FILTERS_PARAM_NAME, GSON.toJson(folderFilters));
+        params.put(EXTENSIONS_FILTERS_PARAM_NAME, GSON.toJson(fileExtensionsFilters));
+        params.put(PARSING_PROFILE_PARAM_NAME, GSON.toJson(CustomParsingProfile.of(parsingProfile)));
         return params;
     }
 
@@ -209,9 +210,9 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Reloa
         }
         initParams(Paths.get(mapParameter(params, ROOT_PATH_PARAM_NAME)),
                 mapParameter(params, ZONE_ID_PARAM_NAME, ZoneId::of, Optional.of(ZoneId.systemDefault())),
-                mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> gson.fromJson(p, String[].class)),
-                mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> gson.fromJson(p, String[].class)),
-                mapParameter(params, PARSING_PROFILE_PARAM_NAME, p -> gson.fromJson(p, CustomParsingProfile.class)));
+                mapParameter(params, FOLDER_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class)),
+                mapParameter(params, EXTENSIONS_FILTERS_PARAM_NAME, p -> GSON.fromJson(p, String[].class)),
+                mapParameter(params, PARSING_PROFILE_PARAM_NAME, p -> GSON.fromJson(p, CustomParsingProfile.class)));
         var workspaceRootPath = context.savedWorkspacePath() != null ? context.savedWorkspacePath().getParent() : this.rootPath.getRoot();
         if (workspaceRootPath != null) {
             this.rootPath = workspaceRootPath.resolve(rootPath);

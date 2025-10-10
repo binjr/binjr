@@ -1,5 +1,5 @@
 /*
- *    Copyright 2023 Frederic Thevenet
+ *    Copyright 2023-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.sources.jfr.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
@@ -26,7 +27,7 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
  * Defines the preferences associated with the Text files adapter.
  */
 public class JfrAdapterPreferences extends DataAdapterPreferences {
-    private static final Gson gson = new Gson();
+    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
 
     /**
      * The default text panel font size preference.
@@ -39,8 +40,8 @@ public class JfrAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> folderFilters = objectPreference(String[].class,
             "folderFilters",
             new String[]{"*"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
 
     /**
@@ -49,8 +50,8 @@ public class JfrAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "fileExtensionFilters",
             new String[]{".jfr"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * A list of value types for the event payload that should be included
@@ -58,8 +59,8 @@ public class JfrAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> includedEventsDataTypes = objectPreference(String[].class,
             "includedEventsDataTypes",
             new String[]{"short", "int", "long", "float", "double"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * A list of names of events that should be excluded
@@ -67,8 +68,8 @@ public class JfrAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String[]> excludedEventsNames = objectPreference(String[].class,
             "excludedEventsByName",
             new String[]{"gcId", "javaThreadId", "osThreadId", "modifiers"},
-            gson::toJson,
-            s -> gson.fromJson(s, String[].class));
+            GSON::toJson,
+            s -> GSON.fromJson(s, String[].class));
 
     /**
      * Initialize a new instance of the {@link JfrAdapterPreferences} class associated to
