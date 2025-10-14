@@ -1,7 +1,5 @@
 # [![binjr](https://binjr.eu/assets/images/binjr_readme_title.png)](https://binjr.eu)
 
----
-
 [![trailer](https://binjr.eu/assets/images/binjr_landing_poster.png)](https://binjr.eu/trailer.html)
 
 ## Contents

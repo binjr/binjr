@@ -41,7 +41,7 @@ jobs:
       name: Install JDK
       with:
           distribution: 'temurin'
-          java-version:  ${{ vars.BUILD_JAVA_VERSION}}
+          java-version:  '24'
           check-latest: true
           cache: 'gradle'
     - if: success() && runner.os == 'windows'

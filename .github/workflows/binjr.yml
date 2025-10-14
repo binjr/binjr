@@ -62,7 +62,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: "${{ vars.BUILD_JAVA_VERSION}}"
+          java-version: '24'
           check-latest: true
           cache: 'gradle'
     - name: expandTemplates
@@ -186,7 +186,7 @@ jobs:
     - uses: actions/setup-java@v4
       with:
           distribution: 'temurin'
-          java-version: "${{ vars.BUILD_JAVA_VERSION}}"
+          java-version: '24'
           check-latest: true
           cache: 'gradle'
     - env:
