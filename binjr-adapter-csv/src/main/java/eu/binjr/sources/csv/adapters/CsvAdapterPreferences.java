@@ -76,6 +76,8 @@ public class CsvAdapterPreferences extends DataAdapterPreferences {
 
     public ObservablePreference<Number> mruDateColumnPosition = integerPreference("mruDateColumnPosition", 0);
 
+    public ObservablePreference<Number> NumberFormatMaxFactionDigits= integerPreference("NumberFormatMaxFactionDigits", 40);
+
     /**
      * Initialize a new instance of the {@link CsvAdapterPreferences} class associated to
      * a {@link DataAdapter} instance.

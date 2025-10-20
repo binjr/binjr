@@ -50,6 +50,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
     private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
     protected static final String CSV_PATH = "csvPath";
     private final ThreadLocal<NumberFormat> numberFormatters;
+    private final CsvAdapterPreferences adapterPrefs =  (CsvAdapterPreferences) getAdapterInfo().getPreferences();
 
 
     /**
@@ -89,7 +90,11 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
                           String[] fileExtensionsFilters)
             throws DataAdapterException {
         super(filePath, zoneId, encoding, parsingProfile, folderFilters, fileExtensionsFilters);
-        numberFormatters = ThreadLocal.withInitial(() -> NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale()));
+        numberFormatters = ThreadLocal.withInitial(() -> {
+            var format = NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale());
+            format.setMaximumFractionDigits(adapterPrefs.NumberFormatMaxFactionDigits.get().intValue());
+            return format;
+        });
     }
 
     @Override

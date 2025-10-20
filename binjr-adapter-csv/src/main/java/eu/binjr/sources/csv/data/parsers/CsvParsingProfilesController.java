@@ -89,6 +89,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         return c;
     };
     private NumberFormat numberFormat = NumberFormat.getNumberInstance();
+    private CsvAdapterPreferences adapterPrefs;
 
 
     @Override
@@ -106,6 +107,11 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
         commentTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
         quoteCharacterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
+        try {
+            this.adapterPrefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
+        } catch (NoAdapterFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -315,10 +321,9 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
             errors.add("Delimiting character for CSV parsing cannot be empty");
         }
         try {
-            var bld = new Locale.Builder();
-            bld.setLanguageTag(parsingLocaleTextField.getText());
-            var parsingLocale = bld.build();
+            var parsingLocale = Locale.forLanguageTag((parsingLocaleTextField.getText()));
             this.numberFormat = NumberFormat.getNumberInstance(parsingLocale);
+            this.numberFormat.setMaximumFractionDigits(adapterPrefs.NumberFormatMaxFactionDigits.get().intValue());
         } catch (IllformedLocaleException e) {
             errors.add("The locale for number parsing is invalid: " + e.getMessage());
         }
