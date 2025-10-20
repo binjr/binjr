@@ -4,10 +4,11 @@
 * _[New] [CSV Adpater]_ CSV parser now supports comments.  
 * _[New] [HTTP Adapters]_ User Agent string can now be overridden.  
 * _[New] [UI]_ Added a user preference to select the default timeline display mode on charts.  
+* _[New] [CSV Adapter]_ Only use localized number parser if mandated in a parsing profile, as the unlocalized parser is more lenient.
 * _[Fixed] [Installers]_ MacOS PKG installer does not associate the ".bjr" extension to binjr.  
 * _[Fixed] [Core]_ Extra TemporalField endless loop when using adjustInto method.  
 * _[Fixed] [HTTP Adapters]_ SSL context builder ignores user certificate keystore when validating certification paths on Windows and MacOS.  
 * _[Fixed] [CSV Adapter]_ The wrong field is highlighted when the time pattern field is empty in CSV parsing profile dialog.  
 * _[Fixed] [CSV Adapter]_ The number parser only takes three decimal digits into account when parsing CSV data.  
-* _[Fixed] [CSV Adapter]_ The number parser does not recognize lower case 'e' as an exponent symbol.  
+* _[Fixed] [CSV Adapter]_ The number parser does not recognize lower case 'e' as an exponent symbol when override locale for number parsing.  
 

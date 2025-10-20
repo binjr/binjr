@@ -18,6 +18,7 @@ package eu.binjr.sources.csv.adapters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.binjr.common.function.CheckedFunction;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
@@ -47,10 +48,10 @@ import java.util.Map;
  */
 public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvParsingProfile> {
     private static final Logger logger = Logger.create(CsvFileAdapter.class);
-    private static final  Gson GSON = new GsonBuilder().serializeNulls().create();
+    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     protected static final String CSV_PATH = "csvPath";
-    private final ThreadLocal<NumberFormat> numberFormatters;
-    private final CsvAdapterPreferences adapterPrefs =  (CsvAdapterPreferences) getAdapterInfo().getPreferences();
+    CheckedFunction<String, Double, Exception> parseDouble;
+    private final CsvAdapterPreferences adapterPrefs = (CsvAdapterPreferences) getAdapterInfo().getPreferences();
 
 
     /**
@@ -90,11 +91,21 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
                           String[] fileExtensionsFilters)
             throws DataAdapterException {
         super(filePath, zoneId, encoding, parsingProfile, folderFilters, fileExtensionsFilters);
-        numberFormatters = ThreadLocal.withInitial(() -> {
-            var format = NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale());
-            format.setMaximumFractionDigits(adapterPrefs.NumberFormatMaxFactionDigits.get().intValue());
-            return format;
-        });
+
+        if (parsingProfile.isOverrideParsingLocale()) {
+            ThreadLocal<NumberFormat> numberFormatters = ThreadLocal.withInitial(() -> {
+                var format = NumberFormat.getNumberInstance(parsingProfile.getNumberFormattingLocale());
+                format.setMaximumFractionDigits(adapterPrefs.NumberFormatMaxFactionDigits.get().intValue());
+                return format;
+            });
+            parseDouble = (s -> {
+                // Needed to parse exponent separator noted as "e" instead of "E"
+                var upValue = s.toUpperCase(parsingProfile.getNumberFormattingLocale());
+                return numberFormatters.get().parse(upValue).doubleValue();
+            });
+        } else {
+            parseDouble = Double::parseDouble;
+        }
     }
 
     @Override
@@ -155,9 +166,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
     private double formatToDouble(String value) {
         if (value != null) {
             try {
-                // Needed to parse exponent separator noted as "e" instead of "E"
-                var upValue = value.toUpperCase(parsingProfile.getNumberFormattingLocale());
-                return numberFormatters.get().parse(upValue).doubleValue();
+                return parseDouble.apply(value);
             } catch (Exception e) {
                 logger.trace(() -> "Failed to convert '" + value + "' to double");
             }

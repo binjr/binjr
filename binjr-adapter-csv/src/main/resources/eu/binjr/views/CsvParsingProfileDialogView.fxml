@@ -174,9 +174,11 @@
                                            maxHeight="1.7976931348623157E308"
                                            maxWidth="1.7976931348623157E308"/>
                             </HBox>
-                            <HBox spacing="10.0">
-                                <LabelWithInlineHelp text="Locale for parsing numbers"
-                                                     inlineHelp="Indicates which regional settings should be applied when parsing column content as numbers."
+                            <HBox  alignment="CENTER_LEFT" spacing="10.0">
+                                <CheckBox fx:id="overrideParsingLocaleCheckBox"
+                                          text="Override locale for parsing numbers:"/>
+                                <LabelWithInlineHelp text=""
+                                                     inlineHelp="Always use the specified regional settings when parsing column content as numbers."
                                                      alignment="CENTER_RIGHT"/>
                                 <TextField fx:id="parsingLocaleTextField" maxWidth="120.0" prefHeight="24.0"/>
                             </HBox>

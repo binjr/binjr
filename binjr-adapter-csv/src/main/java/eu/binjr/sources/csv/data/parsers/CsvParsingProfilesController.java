@@ -71,6 +71,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     @FXML
     private CheckBox readColumnNameCheckBox;
     @FXML
+    private CheckBox overrideParsingLocaleCheckBox;
+    @FXML
     private TextField parsingLocaleTextField;
     @FXML
     private CheckBox trimCellsCheckbox;
@@ -95,15 +97,17 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         super.initialize(location, resources);
-    //    onParseFailureChoiceBox.getItems().setAll(UnparseableLinesBehavior.ABORT,UnparseableLinesBehavior.IGNORE);
+        //    onParseFailureChoiceBox.getItems().setAll(UnparseableLinesBehavior.ABORT,UnparseableLinesBehavior.IGNORE);
         delimiterTextField.textProperty().addListener((observable) -> resetTest());
         commentTextField.textProperty().addListener(observable -> resetTest());
         timeColumnTextField.valueProperty().addListener(observable -> resetTest());
         readColumnNameCheckBox.selectedProperty().addListener(observable -> resetTest());
+        overrideParsingLocaleCheckBox.selectedProperty().addListener(observable -> resetTest());
         trimCellsCheckbox.selectedProperty().addListener(observable -> resetTest());
         onParseFailureChoiceBox.getSelectionModel().selectedItemProperty().addListener(observable -> resetTest());
         TextFields.bindAutoCompletion(parsingLocaleTextField,
                 Arrays.stream(Locale.getAvailableLocales()).map(Locale::toLanguageTag).toList());
+        parsingLocaleTextField.disableProperty().bind(overrideParsingLocaleCheckBox.selectedProperty().not());
         delimiterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
         commentTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
         quoteCharacterTextField.setTextFormatter(new TextFormatter<>(clampToSingleChar));
@@ -116,7 +120,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
 
     @Override
     protected ParsingFailureMode[] getSupportedUnparseableBehaviors() {
-        return new ParsingFailureMode[] { ParsingFailureMode.ABORT, ParsingFailureMode.IGNORE};
+        return new ParsingFailureMode[]{ParsingFailureMode.ABORT, ParsingFailureMode.IGNORE};
     }
 
     @Override
@@ -126,6 +130,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
         this.quoteCharacterTextField.setText(StringUtils.CharacterToString(profile.getQuoteCharacter()));
         this.timeColumnTextField.setValueFactory(new ColumnPositionFactory(-1, 999999, profile.getTimestampColumn()));
         this.readColumnNameCheckBox.setSelected(profile.isReadColumnNames());
+        this.overrideParsingLocaleCheckBox.setSelected(profile.isOverrideParsingLocale());
         this.parsingLocaleTextField.setText(profile.getNumberFormattingLocale().toLanguageTag());
         this.trimCellsCheckbox.setSelected(profile.isTrimCellValues());
         this.onParseFailureChoiceBox.getSelectionModel().select(profile.onParsingFailure());
@@ -341,6 +346,7 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
                 this.timeColumnTextField.getValue().index(),
                 new int[0],
                 this.readColumnNameCheckBox.isSelected(),
+                this.overrideParsingLocaleCheckBox.isSelected(),
                 Locale.forLanguageTag(parsingLocaleTextField.getText()),
                 this.trimCellsCheckbox.isSelected(),
                 onParsingFailure,
@@ -350,8 +356,12 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private String formatToDouble(String value) {
         if (value != null) {
             try {
-                var parsingLocale = Locale.forLanguageTag((parsingLocaleTextField.getText()));
-                return numberFormat.format(numberFormat.parse(value.toUpperCase(parsingLocale)));
+                if (overrideParsingLocaleCheckBox.isSelected()) {
+                    var parsingLocale = Locale.forLanguageTag((parsingLocaleTextField.getText()));
+                    return numberFormat.format(numberFormat.parse(value.toUpperCase(parsingLocale)));
+                } else {
+                    return Double.valueOf(value).toString();
+                }
             } catch (Exception e) {
                 // Do nothing
             }

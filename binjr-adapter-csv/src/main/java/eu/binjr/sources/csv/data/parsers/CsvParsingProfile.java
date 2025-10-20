@@ -36,4 +36,8 @@ public interface CsvParsingProfile extends ParsingProfile {
     boolean isTrimCellValues();
 
     Character getCommentMarker();
+
+    default boolean isOverrideParsingLocale(){
+        return false;
+    }
 }

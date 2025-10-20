@@ -37,9 +37,10 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
     private final Locale formattingLocale;
     private final boolean trimCellValues;
     private final Character commentMarker;
+    private final boolean overrideParsingLocale;
 
     public CustomCsvParsingProfile() {
-        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, Locale.getDefault(), false, ParsingFailureMode.ABORT, '#');
+        this("", UUID.randomUUID().toString(), new HashMap<>(), "", ",", '"', 0, new int[0], true, false, Locale.getDefault(), false, ParsingFailureMode.ABORT, '#');
     }
 
 
@@ -53,6 +54,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                 parsingProfile.getTimestampColumn(),
                 parsingProfile.getExcludedColumns(),
                 parsingProfile.isReadColumnNames(),
+                parsingProfile.isOverrideParsingLocale(),
                 parsingProfile.getNumberFormattingLocale(),
                 parsingProfile.isTrimCellValues(),
                 parsingProfile.onParsingFailure(),
@@ -70,6 +72,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
                                    int timestampColumn,
                                    int[] excludedColumns,
                                    boolean readColumnNames,
+                                   boolean  overrideParsingLocale,
                                    Locale formattingLocale,
                                    boolean trimCellValues,
                                    ParsingFailureMode onParsingFailure,
@@ -80,6 +83,7 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         this.timestampColumn = timestampColumn;
         this.excludedColumns = excludedColumns;
         this.readColumnNames = readColumnNames;
+        this.overrideParsingLocale = overrideParsingLocale;
         this.formattingLocale = formattingLocale;
         this.trimCellValues = trimCellValues;
         this.commentMarker = commentMarker;
@@ -125,4 +129,8 @@ public class CustomCsvParsingProfile extends CustomParsingProfile implements Csv
         return commentMarker;
     }
 
+    @Override
+    public boolean isOverrideParsingLocale() {
+        return this.overrideParsingLocale;
+    }
 }
