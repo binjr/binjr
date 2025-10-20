@@ -350,7 +350,8 @@ public class CsvParsingProfilesController extends ParsingProfilesController<CsvP
     private String formatToDouble(String value) {
         if (value != null) {
             try {
-                return numberFormat.format(numberFormat.parse(value));
+                var parsingLocale = Locale.forLanguageTag((parsingLocaleTextField.getText()));
+                return numberFormat.format(numberFormat.parse(value.toUpperCase(parsingLocale)));
             } catch (Exception e) {
                 // Do nothing
             }

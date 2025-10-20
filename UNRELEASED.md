@@ -9,5 +9,5 @@
 * _[Fixed] [HTTP Adapters]_ SSL context builder ignores user certificate keystore when validating certification paths on Windows and MacOS.  
 * _[Fixed] [CSV Adapter]_ The wrong field is highlighted when the time pattern field is empty in CSV parsing profile dialog.  
 * _[Fixed] [CSV Adapter]_ The number parser only takes three decimal digits into account when parsing CSV data.  
-
+* _[Fixed] [CSV Adapter]_ The number parser does not recognize lower case 'e' as an exponent symbol.  
 

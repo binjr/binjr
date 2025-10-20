@@ -155,7 +155,9 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
     private double formatToDouble(String value) {
         if (value != null) {
             try {
-                return numberFormatters.get().parse(value).doubleValue();
+                // Needed to parse exponent separator noted as "e" instead of "E"
+                var upValue = value.toUpperCase(parsingProfile.getNumberFormattingLocale());
+                return numberFormatters.get().parse(upValue).doubleValue();
             } catch (Exception e) {
                 logger.trace(() -> "Failed to convert '" + value + "' to double");
             }
