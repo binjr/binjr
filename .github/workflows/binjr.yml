@@ -70,18 +70,13 @@ jobs:
         IS_TAG: 'true'
         REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: ./gradlew expandMdTemplates --no-daemon
-    - env:
+    - name: Update website
+      env:
         GH_ACCESS_TOKEN: "${{ secrets.GH_ACCESS_TOKEN }}"
         REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: |-
-        python3 --version
-        python3 -m pip --version
-        python3 -m pip install --upgrade pip setuptools
-        python3 -m pip install mkdocs
-        python3 -m pip install mkdocs-material==9.*
-        python3 -m pip install mkdocs-rss-plugin
-        git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
-        cd  build/tmp/binjr-site
+        git clone -b main https://github.com/binjr/binjr-website build/tmp/binjr-website
+        cd  build/tmp/binjr-website
         cp ../expanded/CHANGELOG docs/download/CHANGELOG.md
         cp ../expanded/latest_release.md docs/download/latest_release.md
         cp ../expanded/binjr-tagName-is-now-available!.md docs/blog/posts/binjr-$REPO_TAG_NAME-is-now-available!.md
@@ -93,7 +88,6 @@ jobs:
         git add docs/blog/posts/binjr-$REPO_TAG_NAME-is-now-available!.md
         git commit -am "Release $REPO_TAG_NAME"
         git push
-        python3 -m mkdocs gh-deploy --no-history --remote-branch master
         git config credential.helper cache
         shred -fuz "$HOME/.git-credentials"
       shell: bash
