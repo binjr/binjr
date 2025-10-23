@@ -16,15 +16,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-All source code for the project is available in the following source code repository:
+---
+## Source Code
 
-* [https://github.com/binjr/binjr](https://github.com/binjr/binjr)
+All source code for the project is mirrored in the following source code repositories:
+
+- [https://github.com/binjr/binjr](https://github.com/binjr/binjr)
+- [https://codeberg.org/binjr/binjr](https://codeberg.org/binjr/binjr)
 
 More info at:
 
 * [https://binjr.eu](https://binjr.eu)  
 
-## Third-party
+---
+## Third Party Software
 
 This software uses material from several third party open source software projects, listed below.  
 A copy of the licenses used by these projects is distributed as part of this software in `resources/licences/`
