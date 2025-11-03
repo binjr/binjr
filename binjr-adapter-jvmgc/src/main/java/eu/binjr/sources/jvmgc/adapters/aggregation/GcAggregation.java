@@ -18,7 +18,6 @@ package eu.binjr.sources.jvmgc.adapters.aggregation;
 
 import com.microsoft.gctoolkit.aggregator.Aggregation;
 import com.microsoft.gctoolkit.aggregator.Collates;
-import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
@@ -37,7 +36,6 @@ public abstract class GcAggregation extends Aggregation {
                             UnitPrefixes prefix,
                             ChartType chartType,
                             Color color,
-
                             DateTimeStamp timeStamp,
                             double value) {
         storeSample(List.of(category), key, label, unit, prefix, chartType, color,  timeStamp, value);
@@ -49,7 +47,6 @@ public abstract class GcAggregation extends Aggregation {
                             String unit,
                             UnitPrefixes prefix,
                             ChartType chartType,
-
                             DateTimeStamp timeStamp,
                             double value) {
         storeSample(List.of(category), key, label, unit, prefix, chartType, null,  timeStamp, value);
@@ -61,7 +58,6 @@ public abstract class GcAggregation extends Aggregation {
                             String unit,
                             UnitPrefixes prefix,
                             ChartType chartType,
-
                             DateTimeStamp timeStamp,
                             double value) {
         storeSample(categories, key, label, unit, prefix, chartType, null,  timeStamp, value);
@@ -74,7 +70,6 @@ public abstract class GcAggregation extends Aggregation {
                                      UnitPrefixes prefix,
                                      ChartType chartType,
                                      Color color,
-
                                      DateTimeStamp timeStamp,
                                      double value);
 }
