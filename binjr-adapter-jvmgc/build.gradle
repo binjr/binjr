@@ -27,7 +27,7 @@ dependencies {
     implementation files("deps/gctoolkit-api-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
     implementation files("deps/gctoolkit-parser-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
     implementation files("deps/gctoolkit-vertx-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
-    implementation 'io.vertx:vertx-core:4.5.14'
+    implementation 'io.vertx:vertx-core:4.5.22'
 
 }
 
