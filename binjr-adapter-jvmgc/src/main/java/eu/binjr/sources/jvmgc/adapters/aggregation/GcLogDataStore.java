@@ -78,12 +78,7 @@ public class GcLogDataStore extends GcAggregation {
 
     public void computeAllocationStats(){
         computeAllocationStats(GcAggregator.POOL_HEAP, Color.ORANGERED);
-//        computeAllocationStats(GcAggregator.POOL_TENURED, Color.SEAGREEN);
-//        computeAllocationStats(GcAggregator.POOL_METASPACE, Color.CHOCOLATE);
-//        computeAllocationStats(GcAggregator.POOL_SURVIVOR, Color.STEELBLUE);
-//
         computeAllocationStats(GcAggregator.POOL_EDEN, Color.GOLD);
-//        computeAllocationStats(GcAggregator.POOL_YOUNG, Color.GOLD);
     }
 
     private void computeAllocationStats(String poolName, Color color) {
@@ -110,7 +105,7 @@ public class GcLogDataStore extends GcAggregation {
                                     poolName,
                                     GcAggregator.UNIT_BYTES,
                                     UnitPrefixes.BINARY,
-                                    ChartType.LINE,
+                                    ChartType.AREA,
                                     color));
                     allocSizeData.data().put(current.getKey(),
                             new TsSample(current.getValue().timestamp(), allocatedBytes));
