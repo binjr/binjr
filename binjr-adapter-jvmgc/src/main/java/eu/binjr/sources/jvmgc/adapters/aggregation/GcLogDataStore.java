@@ -78,7 +78,6 @@ public class GcLogDataStore extends GcAggregation {
 
     public void computeAllocationStats(){
         computeAllocationStats(GcAggregator.POOL_HEAP, Color.ORANGERED);
-        computeAllocationStats(GcAggregator.POOL_EDEN, Color.GOLD);
     }
 
     private void computeAllocationStats(String poolName, Color color) {
@@ -102,7 +101,7 @@ public class GcLogDataStore extends GcAggregation {
                     var allocSizeData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_SIZE,
                             a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_SIZE),
                                     poolName + GcAggregator.ID_ALLOCATION_SIZE,
-                                    poolName,
+                                    poolName + " allocation size",
                                     GcAggregator.UNIT_BYTES,
                                     UnitPrefixes.BINARY,
                                     ChartType.AREA,
@@ -112,7 +111,7 @@ public class GcLogDataStore extends GcAggregation {
                     var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_RATE,
                             a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_RATE),
                                     poolName + GcAggregator.ID_ALLOCATION_RATE,
-                                    poolName,
+                                    poolName + " allocation rate",
                                     GcAggregator.UNIT_BYTES_PER_SECOND,
                                     UnitPrefixes.BINARY,
                                     ChartType.LINE,
