@@ -81,12 +81,12 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     public static final String CAT_REFERENCES_COUNT = "References (Count)";
     public static final String CAT_REFERENCES_PAUSE_TIME = "References (Pause Time)";
     public static final String CAT_DETAILED_AFTER_GC = "Detailed (After GC)";
-    public static final String CAT_DETAILED_MERGED = "Detailed (Merged)";
+    public static final String CAT_DETAILED_MERGED = "Detailed";
     public static final String CAT_DETAILED_BEFORE_GC = "Detailed (Before GC)";
     public static final String CAT_SIZE_AFTER_GC = "Size (After GC)";
     public static final String CAT_SIZE_BEFORE_GC = "Size (Before GC)";
     public static final String CAT_TOTAL_HEAP = "Total Heap";
-    public static final String CAT_HEAP_MERGED = "Heap (Merged)";
+    public static final String CAT_HEAP_MERGED = "Heap";
     public static final String CAT_HEAP_AFTER_GC = "Heap (After GC)";
     public static final String CAT_HEAP_BEFORE_GC = "Heap (Before GC)";
     public static final String ID_ALLOCATION_SIZE = "AllocationSize";
