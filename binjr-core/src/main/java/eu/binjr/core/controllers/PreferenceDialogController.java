@@ -71,6 +71,9 @@ import java.util.prefs.BackingStoreException;
  */
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
+
+    @FXML
+    private ToggleSwitch highlightCurrentSwitch;
     @FXML
     private ChoiceBox<TimelineDisplayMode> defaultTimelineModeChoiceBox;
     @FXML
@@ -319,6 +322,7 @@ public class PreferenceDialogController implements Initializable {
         bindEnumToChoiceBox(userPrefs.indexingTokenizer, indexingModeChoiceBox, IndexingTokenizer.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
+        highlightCurrentSwitch.selectedProperty().bindBidirectional(userPrefs.highlightCurrentColumn.property());
         showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
         filterBarVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logFilterBarVisible.property());
         findBarVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logFindBarVisible.property());

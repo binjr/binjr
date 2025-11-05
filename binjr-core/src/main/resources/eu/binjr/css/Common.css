@@ -25,6 +25,11 @@
 ;
 }
 
+.column-bold-text {
+    -fx-background-color: -fx-accent-translucide;
+    -fx-font-weight: bold;
+}
+
 .pagination > .pagination-control .right-arrow,
 .pagination > .pagination-control .left-arrow {
     -fx-background-color: -fx-mark-color;

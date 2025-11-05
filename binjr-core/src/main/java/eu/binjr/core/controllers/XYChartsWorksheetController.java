@@ -858,7 +858,16 @@ public class XYChartsWorksheetController extends WorksheetController {
             currentColumn.setSortable(false);
             currentColumn.setPrefWidth(75);
             currentColumn.setCellFactory(alignRightCellFactory);
-            currentColumn.getStyleClass().add("column-bold-text");
+            if (userPrefs.highlightCurrentColumn.get()) {
+                currentColumn.getStyleClass().add("column-bold-text");
+            }
+            userPrefs.highlightCurrentColumn.property().addListener((obs, oldVal, newVal) -> {
+                if (newVal){
+                    currentColumn.getStyleClass().add("column-bold-text");
+                }else{
+                    currentColumn.getStyleClass().remove("column-bold-text");
+                }
+            });
 
             TableColumn<TimeSeriesInfo<Double>, String> pathColumn = new TableColumn<>("Path");
             pathColumn.setSortable(false);

@@ -210,6 +210,11 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="forceNaNtoZeroSwitch" prefWidth="1.0"/>
                             </VBox>
+                            <LabelWithInlineHelp text="Highlight current values in table"
+                                                 inlineHelp="Highlight the 'current' column the table view, which displays the Y values for each series on the selected chart at the time currently marked by the crosshair. "/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="highlightCurrentSwitch" prefWidth="1.0"/>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

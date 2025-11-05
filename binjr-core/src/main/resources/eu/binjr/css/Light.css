@@ -52,18 +52,13 @@
 
     -fx-accent: -binjr-lighter-blue-color
 ;
-    -fx-accent-translucide: rgba(183, 222, 232, 0.2)
+    -fx-accent-translucide: rgba(183, 222, 232, 0.3)
 ;
 
 }
 
 .root {
     -fx-box-border: transparent;
-}
-
-.column-bold-text {
-    /*-fx-text-fill: -binjr-background-color;*/
-    -fx-font-weight: bold;
 }
 
 /********************************

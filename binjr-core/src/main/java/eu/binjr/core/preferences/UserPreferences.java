@@ -55,6 +55,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     private static final Gson GSON = new GsonBuilder().serializeNulls().create();
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
+    public ObservablePreference<Boolean> highlightCurrentColumn = booleanPreference("highlightCurrentColumn", true);
 
     private static class LocalKeyring extends AesKeyring {
         private LocalKeyring() {
