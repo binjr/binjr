@@ -98,23 +98,13 @@ public class GcLogDataStore extends GcAggregation {
                     var previous = prevIterator.next();
                     var allocatedBytes = current.getValue().value() - previous.getValue().value();
                     double secondsSinceLastGc = (current.getKey() - previous.getKey()) / 1000d;
-                    var allocSizeData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_SIZE,
-                            a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_SIZE),
-                                    poolName + GcAggregator.ID_ALLOCATION_SIZE,
-                                    poolName + " allocation size",
-                                    GcAggregator.UNIT_BYTES,
-                                    UnitPrefixes.BINARY,
-                                    ChartType.AREA,
-                                    color));
-                    allocSizeData.data().put(current.getKey(),
-                            new TsSample(current.getValue().timestamp(), allocatedBytes));
                     var allocRateData = this.aggregations.computeIfAbsent(poolName + GcAggregator.ID_ALLOCATION_RATE,
-                            a -> new AggregationInfo(List.of(GcAggregator.CAT_ALLOCATION_RATE),
+                            a -> new AggregationInfo(List.of(GcAggregator.CAT_HEAP, GcAggregator.CAT_ALLOCATION_RATE),
                                     poolName + GcAggregator.ID_ALLOCATION_RATE,
                                     poolName + " allocation rate",
                                     GcAggregator.UNIT_BYTES_PER_SECOND,
                                     UnitPrefixes.BINARY,
-                                    ChartType.LINE,
+                                    ChartType.SCATTER,
                                     color));
                     allocRateData.data().put(current.getKey(),
                             new TsSample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));

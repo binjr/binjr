@@ -194,30 +194,9 @@ public abstract class SourceBinding<T> {
                 Objects.equals(adapterId, filter.adapterId);
     }
 
-
     public abstract Class<? extends Worksheet<T>> getWorksheetClass();
 
     protected abstract ColorPalette getDefaultColorPalette();
-
-//    protected Color computeDefaultColor(String key) {
-//        long targetNum = getHashValue(key) % getDefaultColorPalette().length;
-//        if (targetNum < 0) {
-//            targetNum = targetNum * -1;
-//        }
-//        return getDefaultColorPalette()[((int) targetNum)];
-//    }
-//
-//    private long getHashValue(final String value) {
-//        long hashVal;
-//        var md = threadLocalMessageDigest.get();
-//        if (md == null) {
-//            return value.hashCode();
-//        }
-//        md.update((value).getBytes(StandardCharsets.UTF_8));
-//        hashVal = new BigInteger(1, md.digest()).longValue();
-//        return hashVal;
-//    }
-
 
     public abstract static class Builder<T, S extends SourceBinding<T>, B extends Builder<T, S, B>> {
         private String label = "";

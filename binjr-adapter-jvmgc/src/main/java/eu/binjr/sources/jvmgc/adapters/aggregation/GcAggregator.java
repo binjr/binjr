@@ -19,10 +19,7 @@ package eu.binjr.sources.jvmgc.adapters.aggregation;
 import com.microsoft.gctoolkit.aggregator.Aggregates;
 import com.microsoft.gctoolkit.aggregator.Aggregator;
 import com.microsoft.gctoolkit.aggregator.EventSource;
-import com.microsoft.gctoolkit.event.CPUSummary;
-import com.microsoft.gctoolkit.event.GCEvent;
-import com.microsoft.gctoolkit.event.MemoryPoolSummary;
-import com.microsoft.gctoolkit.event.ReferenceGCSummary;
+import com.microsoft.gctoolkit.event.*;
 import com.microsoft.gctoolkit.event.g1gc.G1GCPauseEvent;
 import com.microsoft.gctoolkit.event.generational.GenerationalGCPauseEvent;
 import com.microsoft.gctoolkit.event.shenandoah.ShenandoahCycle;
@@ -35,7 +32,6 @@ import javafx.scene.paint.Color;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.IntStream;
 
 
 @Aggregates({EventSource.G1GC, EventSource.GENERATIONAL, EventSource.ZGC, EventSource.SHENANDOAH})
@@ -80,13 +76,11 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     public static final String UNIT_BYTES_PER_SECOND = "bytes/s";
     public static final String CAT_REFERENCES_COUNT = "References (Count)";
     public static final String CAT_REFERENCES_PAUSE_TIME = "References (Pause Time)";
-    public static final String CAT_DETAILED_AFTER_GC = "Detailed (After GC)";
-    public static final String CAT_DETAILED_MERGED = "Detailed";
-    public static final String CAT_DETAILED_BEFORE_GC = "Detailed (Before GC)";
-    public static final String CAT_SIZE_AFTER_GC = "Size (After GC)";
-    public static final String CAT_SIZE_BEFORE_GC = "Size (Before GC)";
+    public static final String CAT_GENERATIONS_AFTER_GC = "Generations (After GC)";
+    public static final String CAT_GENERATIONS_BEFORE_GC = "Generations (Before GC)";
+    public static final String SUFFIX_AFTER_GC = " (After GC)";
+    public static final String SUFFIX_BEFORE_GC = " (Before GC)";
     public static final String CAT_TOTAL_HEAP = "Total Heap";
-    public static final String CAT_HEAP_MERGED = "Heap";
     public static final String CAT_HEAP_AFTER_GC = "Heap (After GC)";
     public static final String CAT_HEAP_BEFORE_GC = "Heap (Before GC)";
     public static final String ID_ALLOCATION_SIZE = "AllocationSize";
@@ -127,6 +121,13 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     public static final String MIN_CAPACITY = "Min Capacity";
     public static final String MAX_CAPACITY = "Max Capacity";
     public static final String SOFT_MAX_CAPACITY = "Soft Max Capacity";
+    public static final String POOL_OLD = "Old";
+    public static final String POOL_HUMONGOUS = "Humongous";
+    public static final String CAT_HEAP = "Heap";
+    public static final String CAT_METASPACE = "Metaspace";
+    public static final String CAT_CLASS_SPACE = "Class Space";
+    private static final String SUFFIX_SIZE = " Size";
+    private static final String CAT_NON_CLASS_SPACE = "Non Class Space";
 
 
     public GcAggregator(GcAggregation results) {
@@ -135,23 +136,6 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         register(G1GCPauseEvent.class, this::processEvent);
         register(ZGCCollection.class, this::processEvent);
         register(ShenandoahCycle.class, this::processEvent);
-    }
-
-    private void recordMemPoolStats(String poolName,
-                                    MemoryPoolSummary memPool,
-                                    DateTimeStamp tsBeforeGc,
-                                    DateTimeStamp tsAfterGC,
-                                    Color color) {
-        if (memPool != null) {
-            recordMemPoolStats(poolName,
-                    memPool.getSizeBeforeCollection(),
-                    memPool.getSizeAfterCollection(),
-                    memPool.getOccupancyBeforeCollection(),
-                    memPool.getOccupancyAfterCollection(),
-                    tsBeforeGc,
-                    tsAfterGC,
-                    color);
-        }
     }
 
 
@@ -672,16 +656,18 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         }
     }
 
-    private void recordTotalHeapStats(MemoryPoolSummary memPool, DateTimeStamp tsBeforeGc, DateTimeStamp tsAfterGC) {
+    private void recordTotalHeapStats(MemoryPoolSummary memPool,
+                                      DateTimeStamp tsBeforeGc,
+                                      DateTimeStamp tsAfterGC) {
         if (memPool != null) {
             var occupancyBeforeGc = memPool.getOccupancyBeforeCollection();
             if (occupancyBeforeGc >= 0) {
-                aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_TOTAL_HEAP),
-                        POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP_MERGED,
+                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                        POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP,
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
                         tsBeforeGc,
                         occupancyBeforeGc * 1024L);
-                aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
                         POOL_HEAP + ID_OCCUPANCY_BEFORE_COLLECTION, CAT_HEAP_BEFORE_GC,
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.SEAGREEN,
                         tsBeforeGc,
@@ -689,64 +675,116 @@ public class GcAggregator extends Aggregator<GcAggregation> {
             }
             var occupancyAfterGc = memPool.getOccupancyAfterCollection();
             if (occupancyAfterGc >= 0) {
-                aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
                         POOL_HEAP + ID_OCCUPANCY_AFTER_COLLECTION, CAT_HEAP_AFTER_GC,
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.TOMATO,
                         tsAfterGC,
                         occupancyAfterGc * 1024L);
 
-                aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_TOTAL_HEAP),
-                        POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP_MERGED,
+                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                        POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP,
                         UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
                         tsAfterGC,
                         occupancyAfterGc * 1024L);
             }
         }
-
     }
 
-    private void recordMemPoolStats(String poolName,
-                                    long sizeBeforeGc,
-                                    long sizeAfterGc,
-                                    long occupancyBeforeGc,
-                                    long occupancyAfterGc,
-                                    DateTimeStamp tsBeforeGc,
-                                    DateTimeStamp tsAfterGC,
-                                    Color color) {
-        if (sizeBeforeGc >= 0) {
-            aggregation().storeSample(List.of(CAT_SIZE, CAT_SIZE_BEFORE_GC),
-                    poolName + ID_SIZE_BEFORE_COLLECTION, poolName,
-                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, color,
+    private void recordMetaspaceStats(GenerationalGCPauseEvent event,
+                                      DateTimeStamp tsBeforeGc,
+                                      DateTimeStamp tsAfterGC) {
+      if (event != null) {
+          recordMetaspaceStats(CAT_METASPACE, event.getPermOrMetaspace(), tsBeforeGc, tsAfterGC);
+          recordMetaspaceStats(CAT_CLASS_SPACE, event.getClassspace(), tsBeforeGc, tsAfterGC);
+          recordMetaspaceStats(CAT_NON_CLASS_SPACE, event.getNonClassspace(), tsBeforeGc, tsAfterGC);
+      }
+    }
+
+    private void recordMetaspaceStats(G1GCPauseEvent event,
+                                      DateTimeStamp tsBeforeGc,
+                                      DateTimeStamp tsAfterGC) {
+        if (event != null) {
+            recordMetaspaceStats(CAT_METASPACE, event.getPermOrMetaspace(), tsBeforeGc, tsAfterGC);
+            recordMetaspaceStats(CAT_CLASS_SPACE, event.getClassSpace(), tsBeforeGc, tsAfterGC);
+        }
+    }
+
+    private void recordMetaspaceStats(String poolName,
+                                      MemoryPoolSummary memPool,
+                                      DateTimeStamp tsBeforeGc,
+                                      DateTimeStamp tsAfterGC) {
+        if (memPool != null) {
+            var occupancyBeforeGc = memPool.getOccupancyBeforeCollection();
+            if (occupancyBeforeGc >= 0) {
+                aggregation().storeSample(List.of(CAT_METASPACE),
+                        poolName + ID_OCCUPANCY_BEFORE_COLLECTION, poolName + " Occupancy" + SUFFIX_BEFORE_GC,
+                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE,
+                        tsBeforeGc,
+                        occupancyBeforeGc * 1024L);
+            }
+
+            var occupancyAfterGc = memPool.getOccupancyAfterCollection();
+            if (occupancyAfterGc >= 0) {
+                aggregation().storeSample(List.of(CAT_METASPACE),
+                        poolName + ID_OCCUPANCY_AFTER_COLLECTION, poolName + " Occupancy" +  SUFFIX_AFTER_GC,
+                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE,
+                        tsAfterGC,
+                        occupancyAfterGc * 1024L);
+            }
+
+            var sizeAfterGc = memPool.getSizeAfterCollection();
+            if (sizeAfterGc >= 0) {
+                aggregation().storeSample(List.of(CAT_METASPACE),
+                        poolName + ID_SIZE_AFTER_COLLECTION, poolName + SUFFIX_SIZE,
+                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE,
+                        tsAfterGC,
+                        sizeAfterGc * 1024L);
+            }
+        }
+    }
+
+    private void recordHeapGenerationStats(String poolName,
+                                           MemoryPoolSummary memPool,
+                                           DateTimeStamp tsBeforeGc,
+                                           DateTimeStamp tsAfterGC,
+                                           Color color) {
+        if (memPool != null) {
+            recordHeapGenerationStats(
+                    poolName,
+                    memPool.getOccupancyBeforeCollection(),
+                    memPool.getOccupancyAfterCollection(),
                     tsBeforeGc,
-                    sizeBeforeGc * 1024L);
-        }
-        if (sizeAfterGc >= 0) {
-            aggregation().storeSample(List.of(CAT_SIZE, CAT_SIZE_AFTER_GC),
-                    poolName + ID_SIZE_AFTER_COLLECTION, poolName,
-                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, color,
                     tsAfterGC,
-                    sizeAfterGc * 1024L);
+                    color);
         }
+    }
+
+    private void recordHeapGenerationStats(String poolName,
+                                           long occupancyBeforeGc,
+                                           long occupancyAfterGc,
+                                           DateTimeStamp tsBeforeGc,
+                                           DateTimeStamp tsAfterGC,
+                                           Color color) {
         if (occupancyBeforeGc >= 0) {
-            aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_DETAILED_MERGED),
+            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_GENERATIONS),
                     poolName + ID_OCCUPANCY_MERGED, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
                     tsBeforeGc,
                     occupancyBeforeGc * 1024L);
-            aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_DETAILED_BEFORE_GC),
+            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_GENERATIONS_BEFORE_GC),
                     poolName + ID_OCCUPANCY_BEFORE_COLLECTION, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
                     tsBeforeGc,
                     occupancyBeforeGc * 1024L);
         }
         if (occupancyAfterGc >= 0) {
-            aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_DETAILED_MERGED),
+            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_GENERATIONS),
                     poolName + ID_OCCUPANCY_MERGED, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY,
                     ChartType.STACKED, color,
                     tsAfterGC,
                     occupancyAfterGc * 1024L);
-            aggregation().storeSample(List.of(CAT_OCCUPANCY, CAT_DETAILED_AFTER_GC),
+            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_GENERATIONS_AFTER_GC),
                     poolName + ID_OCCUPANCY_AFTER_COLLECTION, poolName,
                     UNIT_BYTES, UnitPrefixes.BINARY,
                     ChartType.STACKED, color,
@@ -855,11 +893,11 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         recordGcPauseEvent(event);
         recordCpuStats(event, event.getCpuSummary());
         recordTotalHeapStats(event.getHeap(), tsBeforeGc, tsAfterGC);
-        recordMemPoolStats(POOL_METASPACE, event.getPermOrMetaspace(), tsBeforeGc, tsAfterGC, Color.CHOCOLATE);
-        recordMemPoolStats(POOL_NON_CLASS_SPACE, event.getNonClassspace(), tsBeforeGc, tsAfterGC, Color.MEDIUMPURPLE);
-        recordMemPoolStats(POOL_CLASS_SPACE, event.getClassspace(), tsBeforeGc, tsAfterGC, Color.AQUAMARINE);
-        recordMemPoolStats(POOL_TENURED, event.getTenured(), tsBeforeGc, tsAfterGC, Color.SEAGREEN);
-        recordMemPoolStats(POOL_YOUNG, event.getYoung(), tsBeforeGc, tsAfterGC, Color.GOLD);
+        recordMetaspaceStats(event, tsBeforeGc, tsAfterGC);
+        recordHeapGenerationStats(POOL_NON_CLASS_SPACE, event.getNonClassspace(), tsBeforeGc, tsAfterGC, Color.MEDIUMPURPLE);
+        recordHeapGenerationStats(POOL_CLASS_SPACE, event.getClassspace(), tsBeforeGc, tsAfterGC, Color.AQUAMARINE);
+        recordHeapGenerationStats(POOL_TENURED, event.getTenured(), tsBeforeGc, tsAfterGC, Color.SEAGREEN);
+        recordHeapGenerationStats(POOL_YOUNG, event.getYoung(), tsBeforeGc, tsAfterGC, Color.GOLD);
         recordCpuStats(event, event.getCpuSummary());
         recordReferenceStats(event, event.getReferenceGCSummary());
     }
@@ -869,20 +907,20 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         var tsBeforeGc = event.getDateTimeStamp();
         var tsAfterGC = shiftDateTimeSamp(tsBeforeGc, event.getDuration());
         recordGcPauseEvent(event);
+        recordMetaspaceStats(event, tsBeforeGc, tsAfterGC);
         recordTotalHeapStats(event.getHeap(), tsBeforeGc, tsAfterGC);
-        recordMemPoolStats(POOL_METASPACE, event.getPermOrMetaspace(), tsBeforeGc, tsAfterGC, Color.CHOCOLATE);
-        recordMemPoolStats(POOL_TENURED, event.getTenured(), tsBeforeGc, tsAfterGC, Color.SEAGREEN);
+        recordHeapGenerationStats(POOL_HUMONGOUS, event.getHumongous(), tsBeforeGc, tsAfterGC, Color.DARKOLIVEGREEN);
+        recordHeapGenerationStats(POOL_OLD, event.getOld(), tsBeforeGc, tsAfterGC, Color.SEAGREEN);
         if (event.getSurvivor() != null) {
-            recordMemPoolStats(POOL_SURVIVOR,
-                    event.getSurvivor().getSize(),
-                    event.getSurvivor().getSize(),
+            recordHeapGenerationStats(
+                    POOL_SURVIVOR,
                     event.getSurvivor().getOccupancyBeforeCollection(),
                     event.getSurvivor().getOccupancyAfterCollection(),
                     tsBeforeGc,
                     tsAfterGC,
                     Color.DEEPSKYBLUE);
         }
-        recordMemPoolStats(POOL_EDEN, event.getEden(), tsBeforeGc, tsAfterGC, Color.GOLD);
+        recordHeapGenerationStats(POOL_EDEN, event.getEden(), tsBeforeGc, tsAfterGC, Color.GOLD);
         recordCpuStats(event, event.getCpuSummary());
         recordReferenceStats(event, event.getReferenceGCSummary());
     }
