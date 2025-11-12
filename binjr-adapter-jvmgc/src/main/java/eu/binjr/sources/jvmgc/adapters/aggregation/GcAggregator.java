@@ -148,7 +148,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     label,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
-                    ChartType.SCATTER,
+                    ChartType.BAR,
                     null,
                     timeStamp,
                     duration / 1000.0);
@@ -221,7 +221,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     }
 
     private void storeZgcCountPoint(List<String> categories, String label, DateTimeStamp timeStamp, double count) {
-        storeZgcCount(categories, label, ChartType.SCATTER, timeStamp, count);
+        storeZgcCount(categories, label, ChartType.BAR, timeStamp, count);
     }
 
     private void storeZgcCountLine(List<String> categories, String label, DateTimeStamp timeStamp, double count) {
@@ -807,7 +807,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
             aggregation().storeSample(CAT_PAUSE_TIME,
                     event.getGarbageCollectionType().name(),
                     event.getGarbageCollectionType().getLabel(),
-                    UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.SCATTER,
+                    UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.BAR,
                     event.getDateTimeStamp(),
                     event.getDuration());
         }
@@ -852,7 +852,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     refType,
                     "#",
                     UnitPrefixes.METRIC,
-                    ChartType.SCATTER,
+                    ChartType.BAR,
                     color,
                     event.getDateTimeStamp(),
                     refCount);
@@ -866,7 +866,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     refType,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
-                    ChartType.SCATTER,
+                    ChartType.BAR,
                     color,
                     event.getDateTimeStamp(),
                     refPauseTime);

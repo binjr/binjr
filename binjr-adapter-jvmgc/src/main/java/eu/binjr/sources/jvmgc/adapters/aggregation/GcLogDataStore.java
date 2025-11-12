@@ -104,7 +104,7 @@ public class GcLogDataStore extends GcAggregation {
                                     poolName + " allocation rate",
                                     GcAggregator.UNIT_BYTES_PER_SECOND,
                                     UnitPrefixes.BINARY,
-                                    ChartType.SCATTER,
+                                    ChartType.BAR,
                                     color));
                     allocRateData.data().put(current.getKey(),
                             new TsSample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));
