@@ -64,6 +64,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -361,6 +362,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     yield v;
                 }
                 case SCATTER -> new ScatterChart<>(xAxis, yAxis);
+                case BAR -> new ValueAxisBarChart<>(xAxis, yAxis);
                 case UNDEFINED ->
                         throw new UnsupportedOperationException("Cannot render of viewport with an undefined chart type");
             };
@@ -862,9 +864,9 @@ public class XYChartsWorksheetController extends WorksheetController {
                 currentColumn.getStyleClass().add("column-bold-text");
             }
             userPrefs.highlightCurrentColumn.property().addListener((obs, oldVal, newVal) -> {
-                if (newVal){
+                if (newVal) {
                     currentColumn.getStyleClass().add("column-bold-text");
-                }else{
+                } else {
                     currentColumn.getStyleClass().remove("column-bold-text");
                 }
             });
@@ -1475,6 +1477,13 @@ public class XYChartsWorksheetController extends WorksheetController {
                     var c = new Circle();
                     getBindingManager().bind(c.radiusProperty(), currentChart.strokeWidthProperty());
                     getBindingManager().bind(c.fillProperty(), series.displayColorProperty());
+                    data.setNode(c);
+                }
+            } else if (currentChart.getChartType() == ChartType.BAR) {
+                for (var data : newSeries.getData()) {
+                    var c = new Rectangle();
+                    getBindingManager().bind(c.strokeWidthProperty(), currentChart.strokeWidthProperty());
+                    getBindingManager().bind(c.strokeProperty(), series.displayColorProperty());
                     data.setNode(c);
                 }
             } else {

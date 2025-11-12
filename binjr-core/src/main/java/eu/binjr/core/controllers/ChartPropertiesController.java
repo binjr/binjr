@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -114,9 +114,9 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.bind(opacityText.textProperty(), Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());
         bindingManager.bind(strokeWidthText.textProperty(), Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-        adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
+        adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER || chart.getChartType() == ChartType.BAR);
         bindingManager.attachListener(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
-            adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
+            adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER || chart.getChartType() == ChartType.BAR);
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
@@ -168,6 +168,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         var strokeWithEditable = Bindings.createBooleanBinding(() ->
                         (chart.chartTypeProperty().getValue() == ChartType.LINE ||
                                 chart.chartTypeProperty().getValue() == ChartType.SCATTER ||
+                                chart.getChartType() == ChartType.BAR ||
                                 chart.showAreaOutlineProperty().getValue()),
                 chart.chartTypeProperty(),
                 chart.showAreaOutlineProperty());

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2024 Frederic Thevenet
+ *    Copyright 2016-2025 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -203,7 +203,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
         });
 
         final var isStackedChart = this.chartType.getValue() == ChartType.STACKED;
-        final var isScatterChart = this.chartType.getValue() == ChartType.SCATTER;
+        final var isScatterChart = (this.chartType.getValue() == ChartType.SCATTER) ||
+                (this.chartType.getValue() == ChartType.BAR);
         var align = new AlignBoundariesTransform(startTime, endTime, !isStackedChart, !isScatterChart);
         // Stacked area charts in javaFX do not properly support NaN values,
         // so NanToZeroTransform is always enabled for such charts
