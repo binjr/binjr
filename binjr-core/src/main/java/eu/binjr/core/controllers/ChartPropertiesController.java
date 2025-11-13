@@ -114,9 +114,13 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.bind(opacityText.textProperty(), Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());
         bindingManager.bind(strokeWidthText.textProperty(), Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-        adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER || chart.getChartType() == ChartType.BAR);
+        boolean enableCtrls = !(chart.getChartType() == ChartType.LINE ||
+                chart.getChartType() == ChartType.SCATTER ||
+                chart.getChartType() == ChartType.EVENT ||
+                chart.getChartType() == ChartType.BAR);
+        adaptToChartType(enableCtrls);
         bindingManager.attachListener(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
-            adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER || chart.getChartType() == ChartType.BAR);
+            adaptToChartType(enableCtrls);
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
@@ -169,6 +173,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
                         (chart.chartTypeProperty().getValue() == ChartType.LINE ||
                                 chart.chartTypeProperty().getValue() == ChartType.SCATTER ||
                                 chart.getChartType() == ChartType.BAR ||
+                                chart.getChartType() == ChartType.EVENT ||
                                 chart.showAreaOutlineProperty().getValue()),
                 chart.chartTypeProperty(),
                 chart.showAreaOutlineProperty());
@@ -195,17 +200,17 @@ public class ChartPropertiesController implements Initializable, Closeable {
         });
     }
 
-    private void adaptToChartType(boolean disable) {
-        showAreaOutline.setManaged(!disable);
-        showAreaOutlineLabel.setManaged(!disable);
-        graphOpacitySlider.setManaged(!disable);
-        graphOpacityLabel.setManaged(!disable);
-        opacityText.setManaged(!disable);
-        showAreaOutline.setVisible(!disable);
-        showAreaOutlineLabel.setVisible(!disable);
-        graphOpacitySlider.setVisible(!disable);
-        graphOpacityLabel.setVisible(!disable);
-        opacityText.setVisible(!disable);
+    private void adaptToChartType(boolean enable) {
+        showAreaOutline.setManaged(enable);
+        showAreaOutlineLabel.setManaged(enable);
+        graphOpacitySlider.setManaged(enable);
+        graphOpacityLabel.setManaged(enable);
+        opacityText.setManaged(enable);
+        showAreaOutline.setVisible(enable);
+        showAreaOutlineLabel.setVisible(enable);
+        graphOpacitySlider.setVisible(enable);
+        graphOpacityLabel.setVisible(enable);
+        opacityText.setVisible(enable);
     }
 
     @Override

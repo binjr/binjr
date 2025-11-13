@@ -25,18 +25,18 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.Iterator;
 
-public class ValueAxisBarChart<X, Y> extends ScatterChart<X, Y> {
-    public ValueAxisBarChart(Axis<X> xAxis, Axis<Y> yAxis) {
+public class ValueAxisBarChart<X> extends ScatterChart<X, Double> {
+
+    public ValueAxisBarChart(Axis<X> xAxis, Axis<Double> yAxis) {
         super(xAxis, yAxis);
     }
 
-    public ValueAxisBarChart(Axis<X> xAxis, Axis<Y> yAxis, ObservableList<Series<X, Y>> data) {
+    public ValueAxisBarChart(Axis<X> xAxis, Axis<Double> yAxis, ObservableList<Series<X, Double>> data) {
         super(xAxis, yAxis, data);
     }
 
-
     @Override
-    protected void dataItemAdded(Series<X, Y> series, int itemIndex, Data<X, Y> item) {
+    protected void dataItemAdded(Series<X, Double> series, int itemIndex, Data<X, Double> item) {
         Node symbol = item.getNode();
         if (symbol == null) {
             symbol = new Rectangle(1, 1);
@@ -51,21 +51,44 @@ public class ValueAxisBarChart<X, Y> extends ScatterChart<X, Y> {
     @Override
     protected void layoutPlotChildren() {
         var dataSize = (getData() != null) ? getData().size() : 0;
-        // update symbol positions
         for (int seriesIndex = 0; seriesIndex < dataSize; seriesIndex++) {
-            Series<X, Y> series = getData().get(seriesIndex);
-            for (Iterator<Data<X, Y>> it = getDisplayedDataIterator(series); it.hasNext(); ) {
-                Data<X, Y> item = it.next();
+            Series<X, Double> series = getData().get(seriesIndex);
+            for (Iterator<Data<X, Double>> it = getDisplayedDataIterator(series); it.hasNext(); ) {
+                Data<X, Double> item = it.next();
+                // Re-enable symbol that were previously hidden because out of bound
+                item.getNode().setVisible(true);
                 double x = getXAxis().getDisplayPosition(item.getXValue());
-                double y = getYAxis().getDisplayPosition(item.getYValue());
+                double y;
+                double bottom = getYAxis().getValueForDisplay(getYAxis().getHeight());
+                double top = getYAxis().getValueForDisplay(0);
+                if (bottom > item.getYValue()) {
+                    y = getYAxis().getHeight();
+                } else if (top < item.getYValue()) {
+                    y = 0;
+                } else {
+                    y = getYAxis().getDisplayPosition(item.getYValue());
+                }
+                double height;
+                if (bottom > 0) {
+                    height = getYAxis().getHeight() - y;
+                } else if (top < 0) {
+                    height = 0 - y;
+                } else {
+                    height = getYAxis().getZeroPosition() - y;
+                }
                 if (Double.isNaN(x) || Double.isNaN(y)) {
+                    // Hide because out of bound symbol to avoid visual artefacts
+                    item.getNode().setVisible(false);
                     continue;
                 }
+                if (height < 0) {
+                    height = Math.abs(height);
+                    y = y - height;
+                }
                 if (item.getNode() instanceof Rectangle symbol) {
-                    symbol.setHeight(getYAxis().getZeroPosition() - y);
-                    final double w = symbol.getWidth();
-                    final double h = symbol.getHeight();
-                    symbol.resizeRelocate(x - (w / 2), y, w, h);
+                    symbol.setHeight(height);
+                    final double width = symbol.getWidth();
+                    symbol.resizeRelocate(x - (width / 2), y, width, height);
                 }
             }
         }

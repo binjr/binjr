@@ -204,7 +204,9 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
 
         final var isStackedChart = this.chartType.getValue() == ChartType.STACKED;
         final var isScatterChart = (this.chartType.getValue() == ChartType.SCATTER) ||
-                (this.chartType.getValue() == ChartType.BAR);
+                (this.chartType.getValue() == ChartType.BAR) ||
+                (this.chartType.getValue() == ChartType.EVENT) ||
+                (this.chartType.getValue() == ChartType.DURATION);
         var align = new AlignBoundariesTransform(startTime, endTime, !isStackedChart, !isScatterChart);
         // Stacked area charts in javaFX do not properly support NaN values,
         // so NanToZeroTransform is always enabled for such charts

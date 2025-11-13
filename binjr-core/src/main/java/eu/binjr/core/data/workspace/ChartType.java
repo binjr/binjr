@@ -29,7 +29,9 @@ public enum ChartType {
     AREA("Area chart"),
     LINE("Line chart"),
     SCATTER("Scatter chart"),
-    BAR("Bar chart");
+    BAR("Bar chart"),
+    EVENT("Vertical markers"),
+    DURATION("Duration markers");
 
     private final String label;
 

@@ -541,21 +541,24 @@ public class UserPreferences extends ObservablePreferenceFactory {
     }
 
     public boolean getDefaultChartOutlineVisibility(ChartType chartType) {
-        return defineChartType(chartType) == ChartType.STACKED ?
-                showOutlineOnStackedAreaCharts.get() :
-                showOutlineOnAreaCharts.get();
+        return switch (chartType) {
+            case STACKED, DURATION -> showOutlineOnStackedAreaCharts.get();
+            case null, default -> showOutlineOnAreaCharts.get();
+        };
     }
 
     public double getDefaultChartOpacity(ChartType chartType) {
-        return defineChartType(chartType) == ChartType.STACKED ?
-                defaultOpacityStackedAreaCharts.get().doubleValue() :
-                defaultOpacityAreaCharts.get().doubleValue();
+        return switch (chartType) {
+            case STACKED, DURATION ->   defaultOpacityStackedAreaCharts.get().doubleValue();
+            case null, default -> defaultOpacityAreaCharts.get().doubleValue();
+        };
     }
 
     public double getDefaultChartStrokeWidth(ChartType chartType) {
-        return defineChartType(chartType) == ChartType.SCATTER ?
-                defaultStrokeWidthScatterCharts.get().doubleValue() :
-                defaultStrokeWidthLineCharts.get().doubleValue();
+        return switch (chartType) {
+            case SCATTER, BAR, EVENT -> defaultStrokeWidthScatterCharts.get().doubleValue();
+            case null, default -> defaultStrokeWidthLineCharts.get().doubleValue();
+        };
     }
 
 

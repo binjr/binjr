@@ -361,8 +361,10 @@ public class XYChartsWorksheetController extends WorksheetController {
                     v.setCreateSymbols(false);
                     yield v;
                 }
-                case SCATTER -> new ScatterChart<>(xAxis, yAxis);
+                case SCATTER -> new NaNScatterChart<>(xAxis, yAxis);
                 case BAR -> new ValueAxisBarChart<>(xAxis, yAxis);
+                case DURATION -> new VerticalMarkerChart(xAxis, yAxis, true);
+                case EVENT -> new VerticalMarkerChart(xAxis, yAxis, false);
                 case UNDEFINED ->
                         throw new UnsupportedOperationException("Cannot render of viewport with an undefined chart type");
             };
@@ -1479,11 +1481,21 @@ public class XYChartsWorksheetController extends WorksheetController {
                     getBindingManager().bind(c.fillProperty(), series.displayColorProperty());
                     data.setNode(c);
                 }
-            } else if (currentChart.getChartType() == ChartType.BAR) {
+            } else if (currentChart.getChartType() == ChartType.BAR ||
+                    currentChart.getChartType() == ChartType.DURATION ||
+                    currentChart.getChartType() == ChartType.EVENT) {
                 for (var data : newSeries.getData()) {
                     var c = new Rectangle();
-                    getBindingManager().bind(c.strokeWidthProperty(), currentChart.strokeWidthProperty());
+                    getBindingManager().bind(c.strokeWidthProperty(), Bindings.createDoubleBinding(
+                            () -> (currentChart.showAreaOutlineProperty().get() || currentChart.getChartType() != ChartType.DURATION) ?
+                                    currentChart.strokeWidthProperty().get() : 0.0,
+                            currentChart.showAreaOutlineProperty(),
+                            currentChart.strokeWidthProperty()));
                     getBindingManager().bind(c.strokeProperty(), series.displayColorProperty());
+                    getBindingManager().bind(c.fillProperty(), Bindings.createObjectBinding(
+                            () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
+                            series.displayColorProperty(),
+                            currentChart.graphOpacityProperty()));
                     data.setNode(c);
                 }
             } else {
