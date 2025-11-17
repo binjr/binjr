@@ -53,7 +53,8 @@ public class VerticalMarkerChart extends ValueAxisBarChart<ZonedDateTime> {
                 // Re-enable symbol that were previously hidden because out of bound
                 item.getNode().setVisible(true);
                 double x = getXAxis().getDisplayPosition(item.getXValue());
-                if (Double.isNaN(x)) {
+                double y = getYAxis().getValueForDisplay(item.getYValue());
+                if (Double.isNaN(x) || Double.isNaN(y)) {
                     // Hide because out of bound symbol to avoid visual artefacts
                     item.getNode().setVisible(false);
                     continue;
