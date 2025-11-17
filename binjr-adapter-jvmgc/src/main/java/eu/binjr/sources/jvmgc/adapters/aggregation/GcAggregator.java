@@ -148,7 +148,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     label,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
-                    ChartType.BAR,
+                    ChartType.DURATION,
                     null,
                     timeStamp,
                     duration / 1000.0);
@@ -172,15 +172,15 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
     private void storeZgcPageSummary(String pageSize, ZGCPageSummary pageSummary, DateTimeStamp timeStamp) {
         if (pageSummary != null && timeStamp != null) {
-            storeZgcCountLine(List.of("Pages", "Count", pageSize),
+            storeZgcCountPoint(List.of("Pages", "Count", pageSize),
                     pageSize + " Candidates",
                     timeStamp,
                     pageSummary.getCandidates());
-            storeZgcCountLine(List.of("Pages", "Count", pageSize),
+            storeZgcCountPoint(List.of("Pages", "Count", pageSize),
                     pageSize + " Selected",
                     timeStamp,
                     pageSummary.getSelected());
-            storeZgcCountLine(List.of("Pages", "Count", pageSize),
+            storeZgcCountPoint(List.of("Pages", "Count", pageSize),
                     pageSize + "  In-Place",
                     timeStamp,
                     pageSummary.getInPlace());
@@ -205,15 +205,15 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
     private void storeZgcReferenceSummary(String referenceType, ZGCReferenceSummary referenceSummary, DateTimeStamp timeStamp) {
         if (referenceSummary != null && timeStamp != null) {
-            storeZgcCountLine(List.of("References", referenceType),
+            storeZgcCountPoint(List.of("References", referenceType),
                     referenceType + " Encountered",
                     timeStamp,
                     referenceSummary.getEncountered());
-            storeZgcCountLine(List.of("References", referenceType),
+            storeZgcCountPoint(List.of("References", referenceType),
                     referenceType + " Discovered",
                     timeStamp,
                     referenceSummary.getDiscovered());
-            storeZgcCountLine(List.of("References", referenceType),
+            storeZgcCountPoint(List.of("References", referenceType),
                     referenceType + " Enqueued",
                     timeStamp,
                     referenceSummary.getEnqueued());
@@ -628,11 +628,11 @@ public class GcAggregator extends Aggregator<GcAggregation> {
 
         var nMethodSummary = zgcCollection.getNMethodSummary();
         if (nMethodSummary != null) {
-            storeZgcCountLine(List.of("NMethods"),
+            storeZgcCountPoint(List.of("NMethods"),
                     "Registered",
                     zgcCollection.getDateTimeStamp(),
                     nMethodSummary.getRegistered());
-            storeZgcCountLine(List.of("NMethods"),
+            storeZgcCountPoint(List.of("NMethods"),
                     "Unregistered",
                     zgcCollection.getDateTimeStamp(),
                     nMethodSummary.getUnregistered());
@@ -643,14 +643,14 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         for (int i = 0; i < mmuLabels.length; i++) {
             storeZgcPercentage(catMmu,
                     mmuLabels[i],
-                    ChartType.LINE,
+                    ChartType.BAR,
                     zgcCollection.getDateTimeStamp(),
                     zgcCollection.getMmu()[i]);
         }
         var catLoad = List.of("Load Average");
         String[] loadLabels = new String[]{"5", "10", "15"};
         for (int i = 0; i < loadLabels.length; i++) {
-            storeZgcCountLine(catLoad,
+            storeZgcCountPoint(catLoad,
                     loadLabels[i],
                     zgcCollection.getDateTimeStamp(),
                     zgcCollection.getLoad()[i]);
@@ -807,7 +807,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
             aggregation().storeSample(CAT_PAUSE_TIME,
                     event.getGarbageCollectionType().name(),
                     event.getGarbageCollectionType().getLabel(),
-                    UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.BAR,
+                    UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.DURATION,
                     event.getDateTimeStamp(),
                     event.getDuration());
         }
@@ -866,7 +866,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     refType,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
-                    ChartType.BAR,
+                    ChartType.DURATION,
                     color,
                     event.getDateTimeStamp(),
                     refPauseTime);
