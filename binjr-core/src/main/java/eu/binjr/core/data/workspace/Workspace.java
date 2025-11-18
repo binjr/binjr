@@ -53,7 +53,7 @@ import java.util.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final Version WORKSPACE_SCHEMA_VERSION = new Version("3.2");
+    public static final Version WORKSPACE_SCHEMA_VERSION = new Version("3.3");
     public static final Version MINIMUM_WORKSPACE_SCHEMA_VERSION = new Version("3.0");
 
     @XmlTransient
