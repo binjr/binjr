@@ -363,7 +363,11 @@ public class XYChartsWorksheetController extends WorksheetController {
                 }
                 case SCATTER -> new NaNScatterChart<>(xAxis, yAxis);
                 case BAR -> new ValueAxisBarChart<>(xAxis, yAxis);
-                case DURATION -> new VerticalMarkerChart(xAxis, yAxis, true);
+                case DURATION -> {
+                    var v = new VerticalMarkerChart(xAxis, yAxis, true);
+                    getBindingManager().bind(v.durationUnitProperty(), currentChart.durationUnitProperty());
+                    yield v;
+                }
                 case EVENT -> new VerticalMarkerChart(xAxis, yAxis, false);
                 case UNDEFINED ->
                         throw new UnsupportedOperationException("Cannot render of viewport with an undefined chart type");

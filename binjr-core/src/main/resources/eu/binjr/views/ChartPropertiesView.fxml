@@ -51,6 +51,10 @@
                     <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
                 </children>
             </VBox>
+            <LabelWithInlineHelp fx:id="durationUnitLabel" text="Duration unit:"
+                                 inlineHelp="The temporal unit used to encode durations for a series of events"/>
+            <ChoiceBox fx:id="durationUnitChoiceBox"
+                       maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
             <LabelWithInlineHelp fx:id="showAreaOutlineLabel" text="Show outline"
                                  inlineHelp="Check this option if you want this chart to display a brighter coloured outline for each series."/>
             <VBox fillWidth="false">

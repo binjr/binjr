@@ -37,6 +37,8 @@ import org.controlsfx.control.ToggleSwitch;
 import java.io.Closeable;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -91,6 +93,10 @@ public class ChartPropertiesController implements Initializable, Closeable {
     private Label minChartHeightText;
     @FXML
     private ChoiceBox<TimelineDisplayMode> timelineModeChoiceBox;
+    @FXML
+    private LabelWithInlineHelp durationUnitLabel;
+    @FXML
+    private ChoiceBox<ChronoUnit> durationUnitChoiceBox;
 
     public ChartPropertiesController(XYChartsWorksheet worksheet, Chart chart) {
         this.worksheet = worksheet;
@@ -114,13 +120,9 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.bind(opacityText.textProperty(), Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());
         bindingManager.bind(strokeWidthText.textProperty(), Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-        boolean enableCtrls = !(chart.getChartType() == ChartType.LINE ||
-                chart.getChartType() == ChartType.SCATTER ||
-                chart.getChartType() == ChartType.EVENT ||
-                chart.getChartType() == ChartType.BAR);
-        adaptToChartType(enableCtrls);
+        adaptToChartType(chart.getChartType());
         bindingManager.attachListener(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
-            adaptToChartType(enableCtrls);
+            adaptToChartType(chart.getChartType());
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
@@ -198,9 +200,26 @@ public class ChartPropertiesController implements Initializable, Closeable {
                 return timelineModeChoiceBox.getValue();
             }
         });
+        bindingManager.bindBidirectional(durationUnitChoiceBox.valueProperty(), chart.durationUnitProperty());
+        this.durationUnitChoiceBox.getItems().setAll(Arrays.stream(ChronoUnit.values()).filter(c -> c.compareTo(ChronoUnit.HOURS) <= 0).toList());
+        this.durationUnitChoiceBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(ChronoUnit o) {
+                return o != null ? o.toString() : "";
+            }
+
+            @Override
+            public ChronoUnit fromString(String s) {
+                return durationUnitChoiceBox.getValue();
+            }
+        });
     }
 
-    private void adaptToChartType(boolean enable) {
+    private void adaptToChartType(ChartType chartType) {
+        var enable = !(chartType == ChartType.LINE ||
+                chartType == ChartType.SCATTER ||
+                chartType == ChartType.EVENT ||
+                chartType == ChartType.BAR);
         showAreaOutline.setManaged(enable);
         showAreaOutlineLabel.setManaged(enable);
         graphOpacitySlider.setManaged(enable);
@@ -211,6 +230,12 @@ public class ChartPropertiesController implements Initializable, Closeable {
         graphOpacitySlider.setVisible(enable);
         graphOpacityLabel.setVisible(enable);
         opacityText.setVisible(enable);
+
+        var isDuration = chartType == ChartType.DURATION;
+        durationUnitChoiceBox.setManaged(isDuration);
+        durationUnitLabel.setManaged(isDuration);
+        durationUnitChoiceBox.setVisible(isDuration);
+        durationUnitLabel.setVisible(isDuration);
     }
 
     @Override

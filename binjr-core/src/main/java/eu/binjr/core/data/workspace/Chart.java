@@ -41,6 +41,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -87,12 +88,12 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     private final DoubleProperty yAxisMaxValue;
     @IsDirtyable
     private final ObjectProperty<TimelineDisplayMode> timelineDisplayMode;
-
+    @IsDirtyable
+    private final Property<ChronoUnit> durationUnit;
 
     private final transient ChangeWatcher status;
     private final transient BooleanProperty showProperties;
     private final transient UserPreferences userPref;
-
 
     /**
      * Initializes a new instance of the {@link Chart} class
@@ -122,7 +123,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 UserPreferences.getInstance().defaultForceZeroInYAxisAutoRange.get(),
                 0.0,
                 100.0,
-                UserPreferences.getInstance().defaultTimelineDisplayMode.get());
+                UserPreferences.getInstance().defaultTimelineDisplayMode.get(),
+                ChronoUnit.SECONDS);
     }
 
     /**
@@ -145,7 +147,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 initChart.isAlwaysIncludeOriginInAutoScale(),
                 initChart.getyAxisMinValue(),
                 initChart.getyAxisMaxValue(),
-                initChart.getTimelineDisplayMode());
+                initChart.getTimelineDisplayMode(),
+                initChart.getDurationUnit());
     }
 
     private Chart(String name,
@@ -160,7 +163,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                   boolean alwaysIncludeOriginInAutoScale,
                   double yAxisMinValue,
                   double yAxisMaxValue,
-                  TimelineDisplayMode timelineDisplayMode) {
+                  TimelineDisplayMode timelineDisplayMode,
+                  ChronoUnit durationUnit) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(UserPreferences.getInstance().defineChartType(chartType));
@@ -175,6 +179,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
         this.yAxisMaxValue = new SimpleDoubleProperty(yAxisMaxValue);
         this.timelineDisplayMode = new SimpleObjectProperty<>(timelineDisplayMode);
         this.showProperties = new SimpleBooleanProperty(false);
+        this.durationUnit = new SimpleObjectProperty<>(durationUnit);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
@@ -661,6 +666,19 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
 
     public void setTimelineDisplayMode(TimelineDisplayMode timelineDisplayMode) {
         this.timelineDisplayMode.set(timelineDisplayMode);
+    }
+
+    @XmlAttribute
+    public ChronoUnit getDurationUnit() {
+        return durationUnit.getValue();
+    }
+
+    public Property<ChronoUnit> durationUnitProperty() {
+        return durationUnit;
+    }
+
+    public void setDurationUnit(ChronoUnit durationUnit) {
+        this.durationUnit.setValue(durationUnit);
     }
 }
 
