@@ -28,7 +28,7 @@ jobs:
     uses: "./.github/workflows/build_job.yml"
     with:
       name: app_bundle_mac_x64
-      chosen-os: macOS-13
+      chosen-os: macos-15-intel
     secrets: inherit
   build_job_mac_aarch64:
     name: build_job_mac_aarch64
