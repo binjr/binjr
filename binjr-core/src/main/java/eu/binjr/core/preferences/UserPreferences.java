@@ -453,6 +453,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
             s -> GSON.fromJson(s, double[].class)
     );
 
+    public final ObservablePreference<Number> defaultOpacityDurationCharts = doublePreference("defaultOpacityDurationCharts", 0.30d);
+
+    public final ObservablePreference<Number> defaultStrokeWidthDurationCharts = doublePreference("defaultDurationWidthScatterCharts", 0.5d);
+
+    public final ObservablePreference<Boolean> showOutlineOnDurationCharts = booleanPreference("showOutlineOnDurationCharts", true);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
@@ -542,22 +548,28 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public boolean getDefaultChartOutlineVisibility(ChartType chartType) {
         return switch (chartType) {
-            case STACKED, DURATION -> showOutlineOnStackedAreaCharts.get();
-            case null, default -> showOutlineOnAreaCharts.get();
+            case STACKED -> showOutlineOnStackedAreaCharts.get();
+            case DURATION -> showOutlineOnDurationCharts.get();
+            case AREA -> showOutlineOnAreaCharts.get();
+            case null, default -> true;
         };
     }
 
     public double getDefaultChartOpacity(ChartType chartType) {
         return switch (chartType) {
-            case STACKED, DURATION ->   defaultOpacityStackedAreaCharts.get().doubleValue();
-            case null, default -> defaultOpacityAreaCharts.get().doubleValue();
+            case STACKED -> defaultOpacityStackedAreaCharts.get().doubleValue();
+            case DURATION -> defaultOpacityDurationCharts.get().doubleValue();
+            case AREA -> defaultOpacityAreaCharts.get().doubleValue();
+            case null, default -> 0.4;
         };
     }
 
     public double getDefaultChartStrokeWidth(ChartType chartType) {
         return switch (chartType) {
-            case SCATTER, BAR, EVENT -> defaultStrokeWidthScatterCharts.get().doubleValue();
-            case null, default -> defaultStrokeWidthLineCharts.get().doubleValue();
+            case SCATTER, BAR -> defaultStrokeWidthScatterCharts.get().doubleValue();
+            case DURATION, EVENT -> defaultStrokeWidthDurationCharts.get().doubleValue();
+            case LINE, AREA -> defaultStrokeWidthLineCharts.get().doubleValue();
+            case null, default -> 1.0;
         };
     }
 
