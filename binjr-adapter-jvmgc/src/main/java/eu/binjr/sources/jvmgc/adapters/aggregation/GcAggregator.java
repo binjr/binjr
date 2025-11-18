@@ -148,7 +148,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     label,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
-                    ChartType.DURATION,
+                    ChartType.SCATTER,
                     null,
                     timeStamp,
                     duration / 1000.0);
@@ -221,7 +221,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     }
 
     private void storeZgcCountPoint(List<String> categories, String label, DateTimeStamp timeStamp, double count) {
-        storeZgcCount(categories, label, ChartType.BAR, timeStamp, count);
+        storeZgcCount(categories, label, ChartType.SCATTER, timeStamp, count);
     }
 
     private void storeZgcCountLine(List<String> categories, String label, DateTimeStamp timeStamp, double count) {
@@ -643,7 +643,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
         for (int i = 0; i < mmuLabels.length; i++) {
             storeZgcPercentage(catMmu,
                     mmuLabels[i],
-                    ChartType.BAR,
+                    ChartType.LINE,
                     zgcCollection.getDateTimeStamp(),
                     zgcCollection.getMmu()[i]);
         }
@@ -852,7 +852,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     refType,
                     "#",
                     UnitPrefixes.METRIC,
-                    ChartType.BAR,
+                    ChartType.SCATTER,
                     color,
                     event.getDateTimeStamp(),
                     refCount);
