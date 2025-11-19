@@ -29,7 +29,7 @@ public enum ChartType {
     AREA("Area chart"),
     LINE("Line chart"),
     SCATTER("Scatter chart"),
-    BAR("Bar chart"),
+    IMPULSE("Impulse chart"),
     EVENT("Vertical markers"),
     DURATION("Duration markers");
 

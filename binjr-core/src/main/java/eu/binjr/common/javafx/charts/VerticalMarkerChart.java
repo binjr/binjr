@@ -26,7 +26,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 
-public class VerticalMarkerChart extends ValueAxisBarChart<ZonedDateTime> {
+public class VerticalMarkerChart extends ImpulseChart<ZonedDateTime> {
     private final boolean hasDuration;
     private final Property<ChronoUnit> durationUnit = new SimpleObjectProperty<>(ChronoUnit.SECONDS);
 

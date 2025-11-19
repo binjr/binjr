@@ -362,7 +362,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     yield v;
                 }
                 case SCATTER -> new NaNScatterChart<>(xAxis, yAxis);
-                case BAR -> new ValueAxisBarChart<>(xAxis, yAxis);
+                case IMPULSE -> new ImpulseChart<>(xAxis, yAxis);
                 case DURATION -> {
                     var v = new VerticalMarkerChart(xAxis, yAxis, true);
                     getBindingManager().bind(v.durationUnitProperty(), currentChart.durationUnitProperty());
@@ -1485,7 +1485,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     getBindingManager().bind(c.fillProperty(), series.displayColorProperty());
                     data.setNode(c);
                 }
-            } else if (currentChart.getChartType() == ChartType.BAR ||
+            } else if (currentChart.getChartType() == ChartType.IMPULSE ||
                     currentChart.getChartType() == ChartType.DURATION ||
                     currentChart.getChartType() == ChartType.EVENT) {
                 for (var data : newSeries.getData()) {

@@ -16,7 +16,6 @@
 
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
-import com.microsoft.gctoolkit.event.GarbageCollectionTypes;
 import com.microsoft.gctoolkit.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
@@ -104,7 +103,7 @@ public class GcLogDataStore extends GcAggregation {
                                     poolName + " allocation rate",
                                     GcAggregator.UNIT_BYTES_PER_SECOND,
                                     UnitPrefixes.BINARY,
-                                    ChartType.BAR,
+                                    ChartType.IMPULSE,
                                     color));
                     allocRateData.data().put(current.getKey(),
                             new TsSample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));

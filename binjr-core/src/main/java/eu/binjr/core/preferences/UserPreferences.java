@@ -566,7 +566,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public double getDefaultChartStrokeWidth(ChartType chartType) {
         return switch (chartType) {
-            case SCATTER, BAR -> defaultStrokeWidthScatterCharts.get().doubleValue();
+            case SCATTER, IMPULSE -> defaultStrokeWidthScatterCharts.get().doubleValue();
             case DURATION, EVENT -> defaultStrokeWidthDurationCharts.get().doubleValue();
             case LINE, AREA -> defaultStrokeWidthLineCharts.get().doubleValue();
             case null, default -> 1.0;

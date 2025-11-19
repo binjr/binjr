@@ -174,7 +174,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         var strokeWithEditable = Bindings.createBooleanBinding(() ->
                         (chart.chartTypeProperty().getValue() == ChartType.LINE ||
                                 chart.chartTypeProperty().getValue() == ChartType.SCATTER ||
-                                chart.getChartType() == ChartType.BAR ||
+                                chart.getChartType() == ChartType.IMPULSE ||
                                 chart.getChartType() == ChartType.EVENT ||
                                 chart.showAreaOutlineProperty().getValue()),
                 chart.chartTypeProperty(),
@@ -219,7 +219,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         var enable = !(chartType == ChartType.LINE ||
                 chartType == ChartType.SCATTER ||
                 chartType == ChartType.EVENT ||
-                chartType == ChartType.BAR);
+                chartType == ChartType.IMPULSE);
         showAreaOutline.setManaged(enable);
         showAreaOutlineLabel.setManaged(enable);
         graphOpacitySlider.setManaged(enable);

@@ -25,13 +25,13 @@ import javafx.scene.shape.Rectangle;
 
 import java.util.Iterator;
 
-public class ValueAxisBarChart<X> extends ScatterChart<X, Double> {
+public class ImpulseChart<X> extends ScatterChart<X, Double> {
 
-    public ValueAxisBarChart(Axis<X> xAxis, Axis<Double> yAxis) {
+    public ImpulseChart(Axis<X> xAxis, Axis<Double> yAxis) {
         super(xAxis, yAxis);
     }
 
-    public ValueAxisBarChart(Axis<X> xAxis, Axis<Double> yAxis, ObservableList<Series<X, Double>> data) {
+    public ImpulseChart(Axis<X> xAxis, Axis<Double> yAxis, ObservableList<Series<X, Double>> data) {
         super(xAxis, yAxis, data);
     }
 
