@@ -7,3 +7,4 @@
 * _[Fixed] [UI]_ NaN value show as phantom sample in top left corner of scatter charts.  
 * _[Fixed] [JVM GC Logs Adapter]_ Heap generation sizes are not extracted from G1 GC logs.  
 * _[Fixed] [JVM GC Logs Adapter]_ GC allocation rate calculation is incorrect.  
+* _[Fixed] [Core]_ Pressing `Reset Time Range` sometimes fails to correctly identify the lowest timestamp for the current series.    

@@ -67,7 +67,7 @@ public interface Rangeable<T> {
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();
                 }
-                if (beginning == null || timeRange.getEnd().isBefore(beginning)) {
+                if (beginning == null || timeRange.getBeginning().isBefore(beginning)) {
                     beginning = timeRange.getBeginning();
                 }
             }
