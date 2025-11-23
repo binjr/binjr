@@ -129,6 +129,8 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private static final String SUFFIX_SIZE = " Size";
     private static final String CAT_NON_CLASS_SPACE = "Non Class Space";
     public static final String POOL_TOTAL_METASPACE = "Total Metaspace";
+    public static final String CAT_BY_GC_CAUSES = "By GC causes";
+    public static final String CAT_BY_GC_TYPE = "By GC type";
 
 
     public GcAggregator(GcAggregation results) {
@@ -694,11 +696,11 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private void recordMetaspaceStats(GenerationalGCPauseEvent event,
                                       DateTimeStamp tsBeforeGc,
                                       DateTimeStamp tsAfterGC) {
-      if (event != null) {
-          recordMetaspaceStats(CAT_METASPACE, event.getPermOrMetaspace(), tsBeforeGc, tsAfterGC);
-          recordMetaspaceStats(CAT_CLASS_SPACE, event.getClassspace(), tsBeforeGc, tsAfterGC);
-          recordMetaspaceStats(CAT_NON_CLASS_SPACE, event.getNonClassspace(), tsBeforeGc, tsAfterGC);
-      }
+        if (event != null) {
+            recordMetaspaceStats(CAT_METASPACE, event.getPermOrMetaspace(), tsBeforeGc, tsAfterGC);
+            recordMetaspaceStats(CAT_CLASS_SPACE, event.getClassspace(), tsBeforeGc, tsAfterGC);
+            recordMetaspaceStats(CAT_NON_CLASS_SPACE, event.getNonClassspace(), tsBeforeGc, tsAfterGC);
+        }
     }
 
     private void recordMetaspaceStats(G1GCPauseEvent event,
@@ -802,11 +804,11 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                 timeStamp.getTimeStamp() + shift);
     }
 
-    private void recordGcPauseEvent(GCEvent event) {
+    private void recordGcPauseEvent(GCEvent event, boolean detailed) {
         if (event.getDuration() >= 0) {
-            aggregation().storeSample(CAT_PAUSE_TIME,
-                    event.getGarbageCollectionType().name(),
-                    event.getGarbageCollectionType().getLabel(),
+            aggregation().storeSample(List.of(CAT_PAUSE_TIME, (detailed ? CAT_BY_GC_CAUSES : CAT_BY_GC_TYPE)),
+                    event.getGarbageCollectionType().name() + (detailed ? "_" + event.getGCCause() : ""),
+                    event.getGarbageCollectionType().getLabel() + (detailed ? " (" + event.getGCCause().getLabel() + ")" : ""),
                     UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.IMPULSE,
                     mapColorToPauseType(event),
                     event.getDateTimeStamp(),
@@ -904,7 +906,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private void processEvent(GenerationalGCPauseEvent event) {
         var tsBeforeGc = event.getDateTimeStamp();
         var tsAfterGC = shiftDateTimeSamp(tsBeforeGc, event.getDuration());
-        recordGcPauseEvent(event);
+        recordGcPauseEvent(event, false);
         recordCpuStats(event, event.getCpuSummary());
         recordTotalHeapStats(event.getHeap(), tsBeforeGc, tsAfterGC);
         recordMetaspaceStats(event, tsBeforeGc, tsAfterGC);
@@ -920,7 +922,8 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     private void processEvent(G1GCPauseEvent event) {
         var tsBeforeGc = event.getDateTimeStamp();
         var tsAfterGC = shiftDateTimeSamp(tsBeforeGc, event.getDuration());
-        recordGcPauseEvent(event);
+        recordGcPauseEvent(event, false);
+        recordGcPauseEvent(event, true);
         recordMetaspaceStats(event, tsBeforeGc, tsAfterGC);
         recordTotalHeapStats(event.getHeap(), tsBeforeGc, tsAfterGC);
         recordHeapGenerationStats(POOL_HUMONGOUS, event.getHumongous(), tsBeforeGc, tsAfterGC, Color.DARKOLIVEGREEN);
@@ -940,7 +943,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     }
 
     private void processEvent(ShenandoahCycle event) {
-        recordGcPauseEvent(event);
+        recordGcPauseEvent(event, false);
     }
 
 }
