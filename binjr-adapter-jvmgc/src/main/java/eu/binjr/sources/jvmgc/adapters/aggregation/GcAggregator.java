@@ -807,10 +807,23 @@ public class GcAggregator extends Aggregator<GcAggregation> {
             aggregation().storeSample(CAT_PAUSE_TIME,
                     event.getGarbageCollectionType().name(),
                     event.getGarbageCollectionType().getLabel(),
-                    UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.DURATION,
+                    UNIT_SECONDS, UnitPrefixes.METRIC, ChartType.IMPULSE,
+                    mapColorToPauseType(event),
                     event.getDateTimeStamp(),
                     event.getDuration());
         }
+    }
+
+    private Color mapColorToPauseType(GCEvent event) {
+        return switch (event.getGarbageCollectionType()) {
+            case Full, FullGC, G1GCFull, ZGCFull, ZGCMajorOld -> Color.RED;
+            case Young, ZGCMajorYoung, ZGCMinorYoung -> Color.GREEN;
+            case Mixed -> Color.DARKCYAN;
+            case Initial_Mark, InitialMark, G1GCYoungInitialMark -> Color.ORANGE;
+            case Remark, G1GCRemark -> Color.MAGENTA;
+            case G1GCCleanup, G1GCConcurrentCleanup -> Color.CORNFLOWERBLUE;
+            default -> null;
+        };
     }
 
     private void recordCpuStats(GCEvent event, CPUSummary cpuSummary) {
@@ -866,7 +879,7 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                     refType,
                     UNIT_SECONDS,
                     UnitPrefixes.METRIC,
-                    ChartType.DURATION,
+                    ChartType.IMPULSE,
                     color,
                     event.getDateTimeStamp(),
                     refPauseTime);
