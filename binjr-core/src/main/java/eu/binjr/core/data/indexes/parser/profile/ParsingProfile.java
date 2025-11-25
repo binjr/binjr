@@ -23,7 +23,9 @@ import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.preferences.TemporalAnchor;
 import eu.binjr.core.preferences.UserPreferences;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -58,20 +60,25 @@ public interface ParsingProfile {
         return regexString[0];
     }
 
-    default ZonedDateTime parseDateTime(String text, ZoneId zoneId) {
+    default ZonedDateTime parseDateTime(String text, ZoneId defaultZoneId) {
         var m = getParsingRegex().matcher(text);
-        ZonedDateTime timestamp = ZonedDateTime.of(getTemporalAnchor().resolve(), zoneId);
+        ZoneId zoneId = defaultZoneId;
+        LocalDateTime timestamp = getTemporalAnchor().resolve();
         if (m.find()) {
             for (Map.Entry<NamedCaptureGroup, String> entry : getCaptureGroups().entrySet()) {
                 var captureGroup = entry.getKey();
                 var parsed = m.group(captureGroup.name());
                 if (parsed != null && !parsed.isBlank()) {
                     if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                        if (temporalGroup == TemporalCaptureGroup.OFFSET) {
+                            zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
+                        } else {
+                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                        }
                     }
                 }
             }
-            return timestamp;
+            return ZonedDateTime.of(timestamp, zoneId);
         }
         return null;
     }
@@ -80,7 +87,7 @@ public interface ParsingProfile {
         return UserPreferences.getInstance().defaultDateTimeAnchor.get();
     }
 
-    default ParsingFailureMode onParsingFailure(){
+    default ParsingFailureMode onParsingFailure() {
         return ParsingFailureMode.ABORT;
     }
 

@@ -41,8 +41,9 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     TemporalCaptureGroup.MINUTE, "\\d{2}",
                     TemporalCaptureGroup.SECOND, "\\d{2}",
                     TemporalCaptureGroup.FRACTION, "\\d{3}",
+                    TemporalCaptureGroup.OFFSET, "Z|[+-]\\d{2}:?(\\d{2})?",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
-            "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*",
+            "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?($OFFSET)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*",
             ParsingFailureMode.CONCAT),
     BINJR_STRICT("binjr logs",
             "BUILTIN_BJR",
@@ -58,17 +59,18 @@ public enum BuiltInParsingProfile implements ParsingProfile {
             ParsingFailureMode.CONCAT),
     JVM("JVM Unified Logging",
             "BUILTIN_JVM",
-            Map.of(TemporalCaptureGroup.YEAR, "\\d{4}",
-                    TemporalCaptureGroup.MONTH, "\\d{2}",
-                    TemporalCaptureGroup.DAY, "\\d{2}",
-                    TemporalCaptureGroup.HOUR, "\\d{2}",
-                    TemporalCaptureGroup.MINUTE, "\\d{2}",
-                    TemporalCaptureGroup.SECOND, "\\d{2}",
-                    TemporalCaptureGroup.MILLI, "\\d{3}",
-                    TemporalCaptureGroup.ELAPSEDSECONDS, "\\d+",
-                    TemporalCaptureGroup.FRACTION, "\\d{3}",
-                    CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|INFO|WARNING|ERROR"),
-            "(\\[$YEAR-$MONTH-$DAY(T)$HOUR:$MINUTE:$SECOND\\.$MILLI([+-]\\d+)?\\])?(\\[($ELAPSEDSECONDS[\\.,]$FRACTION(s))\\s*\\])?(\\[$SEVERITY\\s*\\])?.*",
+            Map.ofEntries(Map.entry(TemporalCaptureGroup.YEAR, "\\d{4}"),
+                    Map.entry(TemporalCaptureGroup.MONTH, "\\d{2}"),
+                    Map.entry(TemporalCaptureGroup.DAY, "\\d{2}"),
+                    Map.entry(TemporalCaptureGroup.HOUR, "\\d{2}"),
+                    Map.entry(TemporalCaptureGroup.MINUTE, "\\d{2}"),
+                    Map.entry(TemporalCaptureGroup.SECOND, "\\d{2}"),
+                    Map.entry(TemporalCaptureGroup.MILLI, "\\d{3}"),
+                    Map.entry(TemporalCaptureGroup.ELAPSEDSECONDS, "\\d+"),
+                    Map.entry(TemporalCaptureGroup.FRACTION, "\\d{3}"),
+                    Map.entry(TemporalCaptureGroup.OFFSET, "Z|[+-]\\d{2}:?(\\d{2})?"),
+                    Map.entry(CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|INFO|WARNING|ERROR")),
+            "(\\[$YEAR-$MONTH-$DAY(T)$HOUR:$MINUTE:$SECOND\\.$MILLI($OFFSET)?\\])?(\\[($ELAPSEDSECONDS[\\.,]$FRACTION(s))\\s*\\])?(\\[$SEVERITY\\s*\\])?.*",
             ParsingFailureMode.CONCAT),
     QUARKUS("Quarkus logs",
             "BUILTIN_QRK",
@@ -175,7 +177,5 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     public String toString() {
         return profileName;
     }
-
-
 
 }

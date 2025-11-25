@@ -56,6 +56,24 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     NANO(ChronoField.NANO_OF_SECOND),
     FRACTION(ChronoField.MILLI_OF_SECOND),
     ELAPSEDSECONDS(ChronoField.SECOND_OF_DAY),
+    OFFSET(ChronoField.OFFSET_SECONDS, s -> {
+        if (s.equals("Z")) {
+            return 0;
+        }
+        if (s.matches("[+-]\\d{2}")) {
+            // Assume offset format +-HH
+            return Long.parseLong(s) * 3600;
+        }
+        if (s.matches("[+-]\\d{2}:?\\d{2}")) {
+            // Assume offset format +-HHMM or +-HH:MM
+            var num = Long.parseLong(s.replace(":", ""));
+            var hours = num / 100;
+            var minutes = num - (hours * 100);
+            return hours * 3600 + minutes * 60;
+        }
+        // Assume offset in seconds
+        return Long.parseLong(s);
+    }),
     ELAPSEDMILLIS(ExtraChronoField.MILLI_OF_DAY),
     ELAPSEDMICROS(ExtraChronoField.INSTANT_MICROS),
     ELAPSEDNANOS(ExtraChronoField.INSTANT_NANOS),
@@ -65,9 +83,9 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     EPOCHNANOS(ExtraChronoField.INSTANT_NANOS);
 
     private final TemporalField temporalMapping;
-    private final Function<String, Long> tranformer;
+    private final Function<String, Number> tranformer;
 
-    TemporalCaptureGroup(TemporalField temporalMapping, Function<String, Long> translator) {
+    TemporalCaptureGroup(TemporalField temporalMapping, Function<String, Number> translator) {
         this.temporalMapping = temporalMapping;
         this.tranformer = translator;
     }
@@ -81,6 +99,10 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     }
 
     public long parseLong(String input) {
-        return tranformer.apply(input);
+        return tranformer.apply(input).longValue();
+    }
+
+    public int parseInt(String input) {
+        return tranformer.apply(input).intValue();
     }
 }

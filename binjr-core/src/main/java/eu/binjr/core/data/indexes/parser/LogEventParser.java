@@ -27,6 +27,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -119,7 +122,7 @@ public class LogEventParser implements EventParser {
                             buffered.getTextFields());
                 }
             } else if (format.getProfile().onParsingFailure() == ParsingFailureMode.ABORT) {
-                throw new FatalParsingEventException("Parsing aborted because of unparseable data at line "+ lineNumber +
+                throw new FatalParsingEventException("Parsing aborted because of unparseable data at line " + lineNumber +
                         ": \"" + StringUtils.sanitizeNotificationMessage(line) + "\"");
             }
             return null;
@@ -134,20 +137,25 @@ public class LogEventParser implements EventParser {
     private ParsedEvent parse(long lineNumber, String text) {
         var m = format.getProfile().getParsingRegex().matcher(text);
         if (m.find()) {
-            ZonedDateTime timestamp = ZonedDateTime.of(format.getProfile().getTemporalAnchor().resolve(), format.getZoneId());
+            LocalDateTime timestamp = format.getProfile().getTemporalAnchor().resolve();
             final Map<String, String> sections = new HashMap<>();
+            ZoneId zoneId = format.getZoneId();
             for (Map.Entry<NamedCaptureGroup, String> entry : format.getProfile().getCaptureGroups().entrySet()) {
                 var captureGroup = entry.getKey();
                 var parsed = m.group(captureGroup.name());
                 if (parsed != null && !parsed.isBlank()) {
                     if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                        if (temporalGroup == TemporalCaptureGroup.OFFSET) {
+                            zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
+                        } else {
+                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                        }
                     } else {
                         sections.put(captureGroup.name(), parsed);
                     }
                 }
             }
-            return ParsedEvent.withTextFields(lineNumber, timestamp, text, sections);
+            return ParsedEvent.withTextFields(lineNumber, ZonedDateTime.of(timestamp, zoneId), text, sections);
         }
         return null;
     }
