@@ -26,10 +26,10 @@ dependencies {
     api 'org.apache.commons:commons-csv:1.14.1'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.4'
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.6'
-    implementation 'org.bouncycastle:bcpg-jdk18on:1.82'
-    implementation 'org.bouncycastle:bcutil-jdk18on:1.82'
+    implementation 'org.bouncycastle:bcpg-jdk18on:1.83'
+    implementation 'org.bouncycastle:bcutil-jdk18on:1.83'
     implementation 'org.reflections:reflections:0.10.2'
-    api('org.fxmisc.richtext:richtextfx:0.11.6') {
+    api('org.fxmisc.richtext:richtextfx:0.11.7') {
         exclude group: 'org.openjfx'
     }
     api 'org.apache.lucene:lucene-core:10.3.2'
