@@ -131,6 +131,9 @@ public class GcAggregator extends Aggregator<GcAggregation> {
     public static final String POOL_TOTAL_METASPACE = "Total Metaspace";
     public static final String CAT_BY_GC_CAUSES = "By GC causes";
     public static final String CAT_BY_GC_TYPE = "By GC type";
+    public static final String METASPACE_OCCUPANCY_BEFORE_COLLECTION = "MetaspaceOccupancyBeforeCollection";
+    public static final String METASPACE_OCCUPANCY_AFTER_COLLECTION = "MetaspaceOccupancyAfterCollection";
+    public static final String METASPACE_SIZE_AFTER_COLLECTION = "MetaspaceSizeAfterCollection";
 
 
     public GcAggregator(GcAggregation results) {
@@ -664,32 +667,28 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                                       DateTimeStamp tsAfterGC) {
         if (memPool != null) {
             var occupancyBeforeGc = memPool.getOccupancyBeforeCollection();
-            if (occupancyBeforeGc >= 0) {
-                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
-                        POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
-                        tsBeforeGc,
-                        occupancyBeforeGc * 1024L);
-                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
-                        POOL_HEAP + ID_OCCUPANCY_BEFORE_COLLECTION, CAT_HEAP_BEFORE_GC,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.SEAGREEN,
-                        tsBeforeGc,
-                        occupancyBeforeGc * 1024L);
-            }
-            var occupancyAfterGc = memPool.getOccupancyAfterCollection();
-            if (occupancyAfterGc >= 0) {
-                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
-                        POOL_HEAP + ID_OCCUPANCY_AFTER_COLLECTION, CAT_HEAP_AFTER_GC,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.TOMATO,
-                        tsAfterGC,
-                        occupancyAfterGc * 1024L);
+            aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                    POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
+                    tsBeforeGc,
+                    occupancyBeforeGc * 1024L);
+            aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                    POOL_HEAP + ID_OCCUPANCY_BEFORE_COLLECTION, CAT_HEAP_BEFORE_GC,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.SEAGREEN,
+                    tsBeforeGc,
+                    occupancyBeforeGc * 1024L);
 
-                aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
-                        POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
-                        tsAfterGC,
-                        occupancyAfterGc * 1024L);
-            }
+            var occupancyAfterGc = memPool.getOccupancyAfterCollection();
+            aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                    POOL_HEAP + ID_OCCUPANCY_AFTER_COLLECTION, CAT_HEAP_AFTER_GC,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.TOMATO,
+                    tsAfterGC,
+                    occupancyAfterGc * 1024L);
+            aggregation().storeSample(List.of(CAT_HEAP, CAT_OCCUPANCY, CAT_TOTAL_HEAP),
+                    POOL_HEAP + ID_OCCUPANCY_MERGED, CAT_HEAP,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.LINE, Color.STEELBLUE,
+                    tsAfterGC,
+                    occupancyAfterGc * 1024L);
         }
     }
 
@@ -718,31 +717,23 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                                       DateTimeStamp tsAfterGC) {
         if (memPool != null) {
             var occupancyBeforeGc = memPool.getOccupancyBeforeCollection();
-            if (occupancyBeforeGc >= 0) {
-                aggregation().storeSample(List.of(CAT_METASPACE, CAT_OCCUPANCY + SUFFIX_BEFORE_GC),
-                        poolName + ID_OCCUPANCY_BEFORE_COLLECTION, poolName + SUFFIX_BEFORE_GC,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.AREA,
-                        tsBeforeGc,
-                        occupancyBeforeGc * 1024L);
-            }
-
+            aggregation().storeSample(List.of(CAT_METASPACE, CAT_OCCUPANCY + SUFFIX_BEFORE_GC),
+                    poolName + METASPACE_OCCUPANCY_BEFORE_COLLECTION, poolName + SUFFIX_BEFORE_GC,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.AREA,
+                    tsBeforeGc,
+                    occupancyBeforeGc * 1024L);
             var occupancyAfterGc = memPool.getOccupancyAfterCollection();
-            if (occupancyAfterGc >= 0) {
-                aggregation().storeSample(List.of(CAT_METASPACE, CAT_OCCUPANCY + SUFFIX_AFTER_GC),
-                        poolName + ID_OCCUPANCY_AFTER_COLLECTION, poolName + SUFFIX_AFTER_GC,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.AREA,
-                        tsAfterGC,
-                        occupancyAfterGc * 1024L);
-            }
-
+            aggregation().storeSample(List.of(CAT_METASPACE, CAT_OCCUPANCY + SUFFIX_AFTER_GC),
+                    poolName + METASPACE_OCCUPANCY_AFTER_COLLECTION, poolName + SUFFIX_AFTER_GC,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.AREA,
+                    tsAfterGC,
+                    occupancyAfterGc * 1024L);
             var sizeAfterGc = memPool.getSizeAfterCollection();
-            if (sizeAfterGc >= 0) {
-                aggregation().storeSample(List.of(CAT_METASPACE, CAT_SIZE),
-                        poolName + ID_SIZE_AFTER_COLLECTION, poolName + SUFFIX_SIZE,
-                        UNIT_BYTES, UnitPrefixes.BINARY, ChartType.AREA,
-                        tsAfterGC,
-                        sizeAfterGc * 1024L);
-            }
+            aggregation().storeSample(List.of(CAT_METASPACE, CAT_SIZE),
+                    poolName + METASPACE_SIZE_AFTER_COLLECTION, poolName + SUFFIX_SIZE,
+                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.AREA,
+                    tsAfterGC,
+                    sizeAfterGc * 1024L);
         }
     }
 
@@ -768,32 +759,28 @@ public class GcAggregator extends Aggregator<GcAggregation> {
                                            DateTimeStamp tsBeforeGc,
                                            DateTimeStamp tsAfterGC,
                                            Color color) {
-        if (occupancyBeforeGc >= 0) {
-            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS),
-                    poolName + ID_OCCUPANCY_MERGED, poolName,
-                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
-                    tsBeforeGc,
-                    occupancyBeforeGc * 1024L);
-            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS_BEFORE_GC),
-                    poolName + ID_OCCUPANCY_BEFORE_COLLECTION, poolName,
-                    UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
-                    tsBeforeGc,
-                    occupancyBeforeGc * 1024L);
-        }
-        if (occupancyAfterGc >= 0) {
-            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS),
-                    poolName + ID_OCCUPANCY_MERGED, poolName,
-                    UNIT_BYTES, UnitPrefixes.BINARY,
-                    ChartType.STACKED, color,
-                    tsAfterGC,
-                    occupancyAfterGc * 1024L);
-            aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS_AFTER_GC),
-                    poolName + ID_OCCUPANCY_AFTER_COLLECTION, poolName,
-                    UNIT_BYTES, UnitPrefixes.BINARY,
-                    ChartType.STACKED, color,
-                    tsAfterGC,
-                    occupancyAfterGc * 1024L);
-        }
+        aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS),
+                poolName + ID_OCCUPANCY_MERGED, poolName,
+                UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
+                tsBeforeGc,
+                occupancyBeforeGc * 1024L);
+        aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS_BEFORE_GC),
+                poolName + ID_OCCUPANCY_BEFORE_COLLECTION, poolName,
+                UNIT_BYTES, UnitPrefixes.BINARY, ChartType.STACKED, color,
+                tsBeforeGc,
+                occupancyBeforeGc * 1024L);
+        aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS),
+                poolName + ID_OCCUPANCY_MERGED, poolName,
+                UNIT_BYTES, UnitPrefixes.BINARY,
+                ChartType.STACKED, color,
+                tsAfterGC,
+                occupancyAfterGc * 1024L);
+        aggregation().storeSample(List.of(GcAggregator.CAT_HEAP, CAT_OCCUPANCY, CAT_REGIONS_AFTER_GC),
+                poolName + ID_OCCUPANCY_AFTER_COLLECTION, poolName,
+                UNIT_BYTES, UnitPrefixes.BINARY,
+                ChartType.STACKED, color,
+                tsAfterGC,
+                occupancyAfterGc * 1024L);
     }
 
     private DateTimeStamp shiftDateTimeSamp(DateTimeStamp timeStamp, double shift) {

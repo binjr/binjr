@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Frederic Thevenet
+ * Copyright 2024-2025 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
 import com.microsoft.gctoolkit.time.DateTimeStamp;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.core.preferences.UserPreferences;
@@ -34,6 +35,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public class GcLogDataStore extends GcAggregation {
     private final Map<String, AggregationInfo> aggregations = new LinkedHashMap<>();
     private final ZonedDateTime timeStampAnchor;
+    private static final Logger logger = Logger.create(GcLogDataStore.class);
 
     public GcLogDataStore() {
         timeStampAnchor = UserPreferences.getInstance().defaultDateTimeAnchor.get().resolve().atZone(ZoneId.systemDefault());
@@ -49,11 +51,14 @@ public class GcLogDataStore extends GcAggregation {
                             Color color,
                             DateTimeStamp timeStamp,
                             double value) {
-        var info = this.aggregations.computeIfAbsent(key, aggregationInfo -> new AggregationInfo(categories, key, label, unit, prefix, chartType, color));
+        var info = this.aggregations.computeIfAbsent(key, k -> new AggregationInfo(categories, k, label, unit, prefix, chartType, color));
         var ts = timeStamp.hasDateStamp() ? timeStamp.getDateTime() :
                 timeStampAnchor.plus(Math.round(timeStamp.getTimeStamp() * 1000), ChronoUnit.MILLIS);
-        info.data().put(ts.toInstant().toEpochMilli(), new TsSample(ts, value));
-
+        var collidingTs = info.data().put(ts.toInstant().toEpochMilli(), new TsSample(ts, value));
+        if (collidingTs != null) {
+            // attempt to disambiguate colliding timestamps for effectively different events
+            info.data().put(ts.toInstant().toEpochMilli() + 1, new TsSample(ts, value));
+        }
     }
 
     public Map<String, AggregationInfo> get() {
@@ -75,21 +80,28 @@ public class GcLogDataStore extends GcAggregation {
         return "Collected " + aggregations.size() + " different collection types";
     }
 
-    public void computeAllocationStats(){
+    public void computeAllocationStats() {
         computeAllocationStats(GcAggregator.POOL_HEAP, Color.ORANGERED);
     }
 
     private void computeAllocationStats(String poolName, Color color) {
         var beforeGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_BEFORE_COLLECTION);
         var afterGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_AFTER_COLLECTION);
-        if (beforeGc == null || afterGc == null){
+        if (beforeGc == null) {
+            logger.error("Cannot compute heap allocation rate: heap occupancy before GC not captured.");
+            return;
+        }
+        if (afterGc == null) {
+            logger.error("Cannot compute heap allocation rate: heap occupancy after GC not captured.");
             return;
         }
         if (beforeGc.data().size() != afterGc.data().size()) {
-            throw new IllegalStateException("After collection and Before collection series do no not match for memory pool " + poolName);
+            logger.error("Cannot compute heap allocation rate: number of samples captured before ({}) and after ({}) GC do not match.",
+                    beforeGc.data().size(),
+                    afterGc.data().size());
+            return;
         }
-
-        var prevIterator =  afterGc.data().entrySet().iterator();
+        var prevIterator = afterGc.data().entrySet().iterator();
         boolean firstSkipped = false;
         for (var current : beforeGc.data().entrySet()) {
             if (firstSkipped) {
@@ -109,12 +121,13 @@ public class GcLogDataStore extends GcAggregation {
                             new TsSample(current.getValue().timestamp(), allocatedBytes / secondsSinceLastGc));
 
                 }
+            } else {
+                firstSkipped = true;
             }
-            firstSkipped = true;
         }
     }
 
-    public record TsSample(ZonedDateTime timestamp, double value){
+    public record TsSample(ZonedDateTime timestamp, double value) {
 
     }
 
@@ -133,8 +146,9 @@ public class GcLogDataStore extends GcAggregation {
                                UnitPrefixes prefix,
                                ChartType chartType,
                                Color color) {
-            this(List.of(category), name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
+            this(List.of(category), name, label, unit, prefix, chartType, color, new ConcurrentSkipListMap<>());
         }
+
         public AggregationInfo(List<String> categories,
                                String name,
                                String label,
@@ -142,7 +156,7 @@ public class GcLogDataStore extends GcAggregation {
                                UnitPrefixes prefix,
                                ChartType chartType,
                                Color color) {
-            this(categories, name, label, unit, prefix, chartType,color, new ConcurrentSkipListMap<>());
+            this(categories, name, label, unit, prefix, chartType, color, new ConcurrentSkipListMap<>());
         }
 
     }

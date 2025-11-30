@@ -29,7 +29,6 @@ import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.codec.csv.DataSample;
-import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
@@ -41,9 +40,7 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
@@ -118,6 +115,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
             gcToolKit.loadAggregation(gcDataStore);
 
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);
+
 
             gcDataStore.computeAllocationStats();
 
