@@ -20,6 +20,8 @@ import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingFailureMode;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.preferences.TemporalAnchor;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;
 
@@ -27,14 +29,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 
 public class LogEventParser implements EventParser {
     public static final int CHAR_READ_PROGRESS_STEP = 10240;
@@ -145,10 +145,13 @@ public class LogEventParser implements EventParser {
                 var parsed = m.group(captureGroup.name());
                 if (parsed != null && !parsed.isBlank()) {
                     if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        if (temporalGroup == TemporalCaptureGroup.OFFSET) {
-                            zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
-                        } else {
-                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                        switch (captureGroup) {
+                            case TemporalCaptureGroup.OFFSET ->
+                                    zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
+                            case TemporalCaptureGroup.EPOCHMILLIS ->
+                                    timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(temporalGroup.parseLong(parsed)), zoneId);
+                            default ->
+                                    timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
                         }
                     } else {
                         sections.put(captureGroup.name(), parsed);

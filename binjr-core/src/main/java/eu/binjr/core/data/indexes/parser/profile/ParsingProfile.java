@@ -17,16 +17,14 @@
 package eu.binjr.core.data.indexes.parser.profile;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.time.ExtraChronoField;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.preferences.TemporalAnchor;
 import eu.binjr.core.preferences.UserPreferences;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -65,15 +63,17 @@ public interface ParsingProfile {
         ZoneId zoneId = defaultZoneId;
         LocalDateTime timestamp = getTemporalAnchor().resolve();
         if (m.find()) {
-            for (Map.Entry<NamedCaptureGroup, String> entry : getCaptureGroups().entrySet()) {
-                var captureGroup = entry.getKey();
+            for (var captureGroup : getCaptureGroups().keySet()) {
                 var parsed = m.group(captureGroup.name());
                 if (parsed != null && !parsed.isBlank()) {
                     if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
-                        if (temporalGroup == TemporalCaptureGroup.OFFSET) {
-                            zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
-                        } else {
-                            timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
+                        switch (captureGroup) {
+                            case TemporalCaptureGroup.OFFSET ->
+                                    zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
+                            case TemporalCaptureGroup.EPOCHMILLIS ->
+                                    timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(temporalGroup.parseLong(parsed)), zoneId);
+                            default ->
+                                    timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
                         }
                     }
                 }
