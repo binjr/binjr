@@ -1,1 +1,0 @@
-* _[Fixed] [JVM GC Logs]_ Malformed GC logs completely fail to load if allocation rate cannot be calculated.

@@ -1,3 +1,8 @@
+## [binjr v3.26.1](https://github.com/binjr/binjr/releases/tag/v3.26.1)
+Released on Sun, 30 November 2025
+
+* _[Fixed] [JVM GC Logs]_ Malformed GC logs completely fail to load if allocation rate cannot be calculated.
+
 ## [binjr v3.26.0](https://github.com/binjr/binjr/releases/tag/v3.26.0)
 Released on Sat, 29 November 2025
 
