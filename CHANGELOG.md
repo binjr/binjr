@@ -1,3 +1,8 @@
+## [binjr v3.26.2](https://github.com/binjr/binjr/releases/tag/v3.26.2)
+Released on Thu, 04 December 2025
+
+* _[Fixed] [CSV, Logs]_ Parsing timestamps using the $EPOCHMILLIS capture group fails with an "Unsupported field: InstantSeconds" error message.
+
 ## [binjr v3.26.1](https://github.com/binjr/binjr/releases/tag/v3.26.1)
 Released on Sun, 30 November 2025
 

@@ -1,1 +1,0 @@
-* _[Fixed] [CSV, Logs]_ Parsing timestamps using the $EPOCHMILLIS capture group fails with an "Unsupported field: InstantSeconds" error message.  
