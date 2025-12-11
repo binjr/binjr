@@ -664,8 +664,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             chart.getYAxis().setMaxWidth(Y_AXIS_WIDTH);
         }
         var scrollPane = new ScrollPane(vBox);
+        scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
-        scrollPane.getStyleClass().add("skinnable-pane-border");
         chartParent.getChildren().add(scrollPane);
 
         // setup crosshair

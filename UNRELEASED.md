@@ -1,0 +1,1 @@
+* _[Fixed] [UI]_ Blinking vertical scrollbar when resizing chart view.
