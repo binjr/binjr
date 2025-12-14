@@ -265,7 +265,15 @@ public class Dialogs {
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(owner)
-                .action(new Action("Restart now", event -> AppEnvironment.getInstance().restartApp(owner)))
+                .action(new Action("Restart now", event -> {
+                    Dialogs.dismissParentNotificationPopup((Node) event.getSource());
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                    Platform.runLater(() -> AppEnvironment.getInstance().restartApp(owner));
+                }))
                 .showInformation());
     }
 
@@ -476,7 +484,7 @@ public class Dialogs {
         labelFailedLogin.getStyleClass().add("notification-error");
 
         ChangeListener<String> invalideErrorMessage = (observableValue, newVal, oldVal) -> {
-            if (!newVal.equals(oldVal)){
+            if (!newVal.equals(oldVal)) {
                 labelFailedLogin.setVisible(false);
                 labelFailedLogin.setManaged(false);
             }

@@ -27,12 +27,10 @@ import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.scene.Node;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.Level;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
@@ -288,7 +286,7 @@ public class AppEnvironment {
     }
 
     public String normalizeArchName(String archName) {
-        return archName == null ? "unsupported" : switch (archName.toLowerCase()) {
+        return archName == null ? "unsupported" : switch (archName.toLowerCase(Locale.ROOT)) {
             case "x64", "amd64", "x86_64" -> "x86_64";
             case "x86", "x86_32", "i386", "i586", "i686" -> "x86";
             case "arm64", "aarch64" -> "aarch64";
@@ -481,11 +479,11 @@ public class AppEnvironment {
     public JvmImplementation getRunningJvm() {
         String vmName = System.getProperty("java.vm.name");
         if (vmName != null) {
-            if (vmName.toLowerCase(Locale.US).contains("OpenJDK".toLowerCase(Locale.US)) ||
-                    vmName.toLowerCase(Locale.US).contains("Hotspot".toLowerCase(Locale.US))) {
+            if (vmName.toLowerCase(Locale.ROOT).contains("openjdk") ||
+                    vmName.toLowerCase(Locale.ROOT).contains("hotspot")) {
                 return JvmImplementation.HOTSPOT;
             }
-            if (vmName.toLowerCase(Locale.US).contains("OpenJ9".toLowerCase(Locale.US))) {
+            if (vmName.toLowerCase(Locale.ROOT).contains("openj9")) {
                 return JvmImplementation.OPENJ9;
             }
         }
@@ -519,10 +517,8 @@ public class AppEnvironment {
                 ProcessHandle.current().info().arguments().ifPresent(args -> {
                     Collections.addAll(cmdline, args);
                 });
-                var processBuilder = new ProcessBuilder();
-                processBuilder.command(cmdline);
-                logger.debug(() -> "Restarting application: " + processBuilder.command());
-                processBuilder.start();
+                logger.info(() -> "Restarting application: " + cmdline);
+                new ProcessBuilder().command(cmdline).start();
             } catch (Exception e) {
                 logger.fatal("Could not restart application: " + e.getMessage());
                 logger.debug(() -> "Stack trace", e);
