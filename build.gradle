@@ -461,7 +461,8 @@ tasks.register('createRuntimeImage', Exec) {
             '--no-man-pages',
             "--vm=server",
             "--verbose",
-            "--compress=zip-6",
+            "--compress=zip-9",
+            "--strip-native-commands",
             '--output', "${APP_IMAGE_PATH}/runtime"
     ]
     doLast {
