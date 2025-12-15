@@ -69,7 +69,8 @@ ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
 ext.IS_JAVAFX_BUNDLED = ModuleLayer.boot().findModule("javafx.controls").isPresent()
-ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
+ext.BUILD_DIR = layout.buildDirectory.get().toString()
+ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${BUILD_DIR}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
         "javafx.swing," +
@@ -94,11 +95,12 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${TARGET_ARCH}"
-ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
+ext.APP_IMAGE_ROOT = "${BUILD_DIR}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
-ext.JPACKAGE_IMAGE_PATH = "${buildDir}/jpackage_image/${DISTRIBUTION_NAME}"
+ext.JPACKAGE_IMAGE_PATH = "${BUILD_DIR}/jpackage_image/${DISTRIBUTION_NAME}"
+ext.FLATPAK_IMAGE_PATH = "${BUILD_DIR}/flatpak/"
 ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX6")
-ext.ARTIFACTS_ROOT_PATH = "${buildDir}/artifacts/"
+ext.ARTIFACTS_ROOT_PATH = "${BUILD_DIR}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")
 ext.ARTIFACTS_PATH_DMG = file("${ARTIFACTS_ROOT_PATH}/dmg/")
@@ -320,7 +322,7 @@ tasks.register('copyPluginLibs', Copy) {
 }
 
 tasks.register('copyJpackageInputLibs', Copy) {
-    into "${buildDir}/tmp/input"
+    into "${BUILD_DIR}/tmp/input"
     from(project(":binjr-core").configurations.runtimeClasspath) {
         exclude "javafx-*.jar"
     }
@@ -375,7 +377,7 @@ tasks.register('copyResources', Copy) {
 
 tasks.register('expandMdTemplates', Copy) {
     from "${projectDir}/distribution/templates"
-    into "${buildDir}/tmp/expanded"
+    into "${BUILD_DIR}/tmp/expanded"
     filteringCharset = 'UTF-8'
     def changeHistory = new File("${project.projectDir}/CHANGELOG.md").getText("UTF-8")
     def currentChanges = new File("${project.projectDir}/UNRELEASED.md").getText("UTF-8")
@@ -393,10 +395,10 @@ tasks.register('expandMdTemplates', Copy) {
 tasks.register('copyInfo', Copy) {
     dependsOn expandMdTemplates
     from {
-        ["${buildDir}/tmp/expanded/CHANGELOG",
-         "${buildDir}/tmp/expanded/LICENSE",
-         "${buildDir}/tmp/expanded/NOTICE",
-         "${buildDir}/tmp/expanded/README"]
+        ["${BUILD_DIR}/tmp/expanded/CHANGELOG",
+         "${BUILD_DIR}/tmp/expanded/LICENSE",
+         "${BUILD_DIR}/tmp/expanded/NOTICE",
+         "${BUILD_DIR}/tmp/expanded/README"]
     }
     into "${APP_IMAGE_PATH}"
 }
@@ -416,19 +418,19 @@ tasks.register('downloadJlinkOpenJdk', Download) {
 tasks.register('unzipOpenJfxModules', Copy) {
     dependsOn downloadOpenJfxModules
     from zipTree(downloadOpenJfxModules.dest)
-    into "${buildDir}/jmods/"
+    into "${BUILD_DIR}/jmods/"
 }
 
 tasks.register('unzipJlinkOpenJdk', Copy) {
     dependsOn downloadJlinkOpenJdk
     from zipTree(downloadJlinkOpenJdk.dest)
-    into "${buildDir}/jlinkOpenJDK/"
+    into "${BUILD_DIR}/jlinkOpenJDK/"
 }
 
 tasks.register('untarJlinkOpenJdk', Copy) {
     dependsOn downloadJlinkOpenJdk
     from tarTree(downloadJlinkOpenJdk.dest)
-    into "${buildDir}/jlinkOpenJDK/"
+    into "${BUILD_DIR}/jlinkOpenJDK/"
 }
 
 tasks.register('createRuntimeImage', Exec) {
@@ -447,7 +449,7 @@ tasks.register('createRuntimeImage', Exec) {
         } else {
             dependsOn untarJlinkOpenJdk
         }
-        targetJlinkDir = "${buildDir}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}-jmods".replace("-ea-beta", "")
+        targetJlinkDir = "${BUILD_DIR}/jlinkOpenJDK/${BUNDLE_JDK_VERSION}-jmods".replace("-ea-beta", "")
     }
 
 
@@ -558,7 +560,7 @@ tasks.register('jpackageAppWin', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -591,7 +593,7 @@ tasks.register('jpackageAppMac', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -626,7 +628,7 @@ tasks.register('jpackageAppLinux', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -649,9 +651,7 @@ tasks.register('jpackageAppLinux', Exec) {
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "--add-modules=jdk.incubator.vector",
-            "--arguments", "--system-plugins-path=/opt/binjr/plugins",
-            "--arguments", "--packaging=LINUX_TAR",
-            "--verbose"
+            "--arguments", "--packaging=LINUX_RPM"
     ]
     outputs.dir JPACKAGE_IMAGE_PATH
 }
@@ -662,7 +662,7 @@ tasks.register('jpackageDmg', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -702,7 +702,7 @@ tasks.register('jpackagePkg', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -742,7 +742,7 @@ tasks.register('jpackageDeb', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -777,7 +777,7 @@ tasks.register('jpackageDeb', Exec) {
             "--linux-menu-group", "Utility",
             "--linux-rpm-license-type", "Apache-2.0",
             "--linux-shortcut",
-            "--temp", "${buildDir}/tmp/apt",
+            "--temp", "${BUILD_DIR}/tmp/apt",
             "--verbose"
     ]
     doLast {
@@ -793,7 +793,7 @@ tasks.register('jpackageRpm', Exec) {
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${buildDir}/tmp/input",
+            "--input", "${BUILD_DIR}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Bootstrap",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
@@ -826,7 +826,7 @@ tasks.register('jpackageRpm', Exec) {
             "--linux-menu-group", "Utility;Utilities;Development;Profiling;",
             "--linux-rpm-license-type", "Apache-2.0",
             "--linux-shortcut",
-            "--temp", "${buildDir}/tmp/rpm",
+            "--temp", "${BUILD_DIR}/tmp/rpm",
             "--verbose"
     ]
     doLast {
