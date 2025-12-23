@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=binjr
+Comment=A Time Series Browser
+Categories=Utility;
+TryExec=binjr
+Exec=binjr %F
+Icon=eu.binjr.binjr
+MimeType=application/x-binjr
+

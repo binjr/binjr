@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+    <id>eu.binjr.binjr</id>
+
+    <name>binjr</name>
+    <summary>Browse time series</summary>
+
+    <metadata_license>CC-BY-4.0</metadata_license>
+    <project_license>Apache-2.0</project_license>
+
+    <developer id="eu.fthevenet">
+        <name>Frederic Thevenet</name>
+    </developer>
+
+    <description>
+        <p>
+            binjr is a time series browser; it renders time series produced by other applications as dynamically
+            editable graphical representations and provides advanced features to navigate the data smoothly and efficiently
+            (drag &amp; drop, zoom, history, detachable tabs, advanced time-range picker).
+        </p>
+        <p>
+            It can be use to visualize data from many different sources at once, mixed as part of a single representation or
+            on separate but synchronised views, which is especially useful to correlate events of different kinds and from
+            multiple sources but sharing a common timeline.
+        </p>
+        <p>
+            It aims to be the missing link between the collection of disparate tools (text editors, graphing &amp;
+            CLI utilities) traditionally used by developers and researcher to analyse data locally and full-blown analytics
+            platforms that centralize logs and telemetry for entire organizations.
+        </p>
+    </description>
+
+    <launchable type="desktop-id">eu.binjr.binjr.desktop</launchable>
+
+    <categories>
+        <category>Utility</category>
+    </categories>
+
+    <keywords>
+        <keyword>visualization</keyword>
+        <keyword>time-series</keyword>
+        <keyword>analytics</keyword>
+        <keyword>logs</keyword>
+        <keyword>rrd</keyword>
+        <keyword>jfr</keyword>
+        <keyword>jmc</keyword>
+        <keyword>jvm</keyword>
+        <keyword>java</keyword>
+        <keyword>logviewer</keyword>
+        <keyword>charts</keyword>
+    </keywords>
+
+    <content_rating type="oars-1.1" />
+
+    <url type="bugtracker">https://github.com/binjr/binjr/issues</url>
+    <url type="homepage">https://binjr.eu/</url>
+    <url type="contact">https://social.binjr.eu/@binjr</url>
+    <url type="contribute">https://github.com/binjr/binjr?tab=readme-ov-file#contributing</url>
+    <url type="vcs-browser">https://github.com/binjr/binjr</url>
+
+    <branding>
+        <color type="primary" scheme_preference="light">#204656</color>
+        <color type="primary" scheme_preference="dark">#204656</color>
+    </branding>
+
+    <screenshots>
+        <screenshot type="default">
+            <image>https://binjr.eu/assets/images/screenshot-01.png</image>
+            <caption>A screenshot of binjr used to browse time series data from a Netdata monitoring instance</caption>
+        </screenshot>
+        <screenshot>
+            <image>https://binjr.eu/assets/images/screenshot-02.png</image>
+            <caption>A screenshot of binjr used to browse time series data from a Java Virtual Machine garbage collector log file</caption>
+        </screenshot>
+        <screenshot>
+            <image>https://binjr.eu/assets/images/screenshot-03.png</image>
+            <caption>A screenshot of binjr used to browse time series data from application log files</caption>
+        </screenshot>
+    </screenshots>
+
+    <releases>
+        <release version="3.26.2" date="2025-12-04">
+            <url type="details">https://binjr.eu/download/CHANGELOG/#binjr-v3262</url>
+        </release>
+    </releases>
+
+
+    <recommends>
+        <control>keyboard</control>
+        <control>pointing</control>
+        <control>touch</control>
+    </recommends>
+
+    <requires>
+        <display_length compare="ge">768</display_length>
+    </requires>
+
+</component>

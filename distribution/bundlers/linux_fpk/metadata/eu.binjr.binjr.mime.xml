@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+    <mime-type type="application/x-binjr">
+        <comment>binjr workspace</comment>
+        <sub-class-of type="text/xml"/>
+        <generic-icon name="eu.binjr.binjr"/>
+        <glob pattern="*.bjr" />
+    </mime-type>
+</mime-info>
