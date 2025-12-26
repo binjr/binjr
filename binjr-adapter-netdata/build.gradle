@@ -13,29 +13,29 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-plugins {
-    id "org.openapi.generator" version "7.17.0"
-}
-
+//plugins {
+//    id "org.openapi.generator" version "7.17.0"
+//}
+//
 dependencies {
     compileOnly project(':binjr-core')
 }
-
-openApiValidate {
-    inputSpec = "${projectDir}/specs/netdata-openapi.json"
-}
-
-openApiGenerate {
-    generatorName = "java"
-    inputSpec = "${projectDir}/specs/netdata-openapi.json"
-    outputDir = "${buildDir}/generated"
-    apiPackage = "org.openapi.netdata.api"
-    invokerPackage = "org.openapi.netdata.invoker"
-    modelPackage = "org.openapi.netdata.model"
-    configOptions = [
-            dateLibrary: "java8"
-    ]
-}
+//
+//openApiValidate {
+//    inputSpec = "${projectDir}/specs/netdata-openapi.json"
+//}
+//
+//openApiGenerate {
+//    generatorName = "java"
+//    inputSpec = "${projectDir}/specs/netdata-openapi.json"
+//    outputDir = "${buildDir}/generated"
+//    apiPackage = "org.openapi.netdata.api"
+//    invokerPackage = "org.openapi.netdata.invoker"
+//    modelPackage = "org.openapi.netdata.model"
+//    configOptions = [
+//            dateLibrary: "java8"
+//    ]
+//}
 
 
 jar {

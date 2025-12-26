@@ -30,6 +30,7 @@ import java.time.temporal.ChronoField
 plugins {
     id "de.undercouch.download" version "5.6.0"
     id "com.github.ben-manes.versions" version "0.53.0"
+    id "io.github.jwharm.flatpak-gradle-generator" version "1.5.0"
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0" apply true
     id "signing"
     id 'maven-publish'
@@ -62,7 +63,7 @@ ext.IS_64 = TARGET_ARCH.toLowerCase().contains("64")
 ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "25"
-ext.USE_BUILD_JDK_IN_BUNDLE = false
+ext.USE_BUILD_JDK_IN_BUNDLE = System.getenv('USE_BUILD_JDK_IN_BUNDLE') != null ? System.getenv('USE_BUILD_JDK_IN_BUNDLE') == "true" : false
 ext.BUNDLE_JDK_VERSION = "jdk-25.0.1+8"
 ext.BUNDLE_JDK_PATH = null
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
@@ -70,7 +71,14 @@ ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
 ext.IS_JAVAFX_BUNDLED = ModuleLayer.boot().findModule("javafx.controls").isPresent()
 ext.BUILD_DIR = layout.buildDirectory.get().toString()
-ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${BUILD_DIR}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
+ext.JFX_JMOD_PATH = System.getenv('JFX_JMOD_PATH')
+ext.ADDITIONAL_JMOD_PATH = ""
+if (JFX_JMOD_PATH != null){
+    IS_JAVAFX_BUNDLED = true
+    ADDITIONAL_JMOD_PATH = "${File.pathSeparator}${JFX_JMOD_PATH}/javafx-jmods-${OPENJFX_VERSION_STEM}"
+} else {
+    ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${BUILD_DIR}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
+}
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
         "javafx.swing," +
@@ -108,10 +116,15 @@ ext.ARTIFACTS_PATH_PKG = file("${ARTIFACTS_ROOT_PATH}/pkg/")
 ext.ARTIFACTS_PATH_RPM = file("${ARTIFACTS_ROOT_PATH}/rpm/")
 ext.ARTIFACTS_PATH_DEB = file("${ARTIFACTS_ROOT_PATH}/deb/")
 ext.ARTIFACTS_PATH_TGZ = file("${ARTIFACTS_ROOT_PATH}/tgz/")
+ext.ARTIFACTS_PATH_DEP = file("${ARTIFACTS_ROOT_PATH}/dep/")
+
+ext.DEP_CACHE_NAME = "build-dependencies-${BINJR_VERSION}_${OS_FAMILY}-${TARGET_ARCH}.zip"
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = System.getenv('GPG_KEYRING_PATH')
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
+
+ext.ROOT_DIR = "${projectDir}"
 
 System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag: ${IS_TAG}")
@@ -122,10 +135,18 @@ if (IS_TAG && !System.getenv('REPO_TAG_NAME').endsWith("v${BINJR_VERSION}")) {
 }
 
 configure(subprojects) {
-    if (project == project(':binjr-app'))
+    if (project == project(':binjr-app')) {
         apply plugin: 'application'
-    else
+        apply plugin: 'io.github.jwharm.flatpak-gradle-generator'
+
+        tasks.flatpakGradleGenerator {
+            outputFile = file("${BUILD_DIR}/${project.name}-sources.json")
+            downloadDirectory = "./offline-repository"
+            excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
+        }
+    } else {
         apply plugin: 'java-library'
+    }
     apply plugin: "maven-publish"
     apply plugin: "signing"
     group = GROUP_ID
@@ -172,6 +193,7 @@ configure(subprojects) {
             name = 'Central Portal Snapshots'
             url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
+    maven { url "${ROOT_DIR}/offline-repository" }
     }
 
     publishing {
@@ -261,6 +283,13 @@ nexusPublishing {
         }
     }
 }
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("${BUILD_DIR}/binjr-plugins-sources.json")
+    downloadDirectory = "./offline-repository"
+    excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
+}
+
 
 tasks.register('publishArtifacts') {
     dependsOn publishToSonatype

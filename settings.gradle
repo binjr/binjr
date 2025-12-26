@@ -14,6 +14,17 @@
  *    limitations under the License.
  */
 
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven {
+            name = 'offline repo'
+            url "./offline-repository"
+        }
+    }
+}
+
 rootProject.name = 'binjr'
 include 'binjr-adapter-csv'
 include 'binjr-adapter-jfr'
