@@ -651,7 +651,7 @@ tasks.register('jpackageAppMac', Exec) {
     outputs.dir JPACKAGE_IMAGE_PATH
 }
 
-tasks.register('jpackageAppLinux', Exec) {
+tasks.register('jpackageLinuxFlatpak', Exec) {
     dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir JPACKAGE_IMAGE_PATH
     commandLine = [
@@ -680,7 +680,7 @@ tasks.register('jpackageAppLinux', Exec) {
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics",
             "--java-options", "--add-modules=jdk.incubator.vector",
-            "--arguments", "--packaging=LINUX_RPM"
+            "--arguments", "--packaging=LINUX_FPK"
     ]
     outputs.dir JPACKAGE_IMAGE_PATH
 }

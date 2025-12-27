@@ -25,6 +25,7 @@ import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.AppPackaging;
 import eu.binjr.core.preferences.UserPreferences;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.application.Platform;
@@ -259,22 +260,25 @@ public class Dialogs {
 
     public static void notifyRestartNeeded(String title, String message, Node owner) {
         logger.info(message + " - " + title);
-        runOnFXThread(() -> Notifications.create()
+        var notif = Notifications.create()
                 .title(title)
                 .text(StringUtils.sanitizeNotificationMessage(message))
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
-                .owner(owner)
-                .action(new Action("Restart now", event -> {
-                    Dialogs.dismissParentNotificationPopup((Node) event.getSource());
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    Platform.runLater(() -> AppEnvironment.getInstance().restartApp(owner));
-                }))
-                .showInformation());
+                .owner(owner);
+        //Restarting the app whith the following doesn't work inside flatpak's sandbox
+        if (AppEnvironment.getInstance().getPackaging() != AppPackaging.LINUX_FPK) {
+            notif.action(new Action("Restart now", event -> {
+                Dialogs.dismissParentNotificationPopup((Node) event.getSource());
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                Platform.runLater(() -> AppEnvironment.getInstance().restartApp(owner));
+            }));
+        }
+        runOnFXThread(notif::showInformation);
     }
 
 

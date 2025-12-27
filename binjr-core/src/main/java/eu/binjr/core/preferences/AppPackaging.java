@@ -27,6 +27,7 @@ public enum AppPackaging {
     LINUX_DEB("Linux DEB", "deb"),
     LINUX_RPM("Linux RPM", "deb"),
     LINUX_AUR("Linux AUR", "tar.gz"),
+    LINUX_FPK("Linux Flatpak", "flatpak"),
     MAC_DMG("macOS DMG", "dmg"),
     MAC_TAR("macOS Tarball", "tar.gz");
 

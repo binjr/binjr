@@ -111,7 +111,8 @@ public class UpdateManager {
         platformUpdater = switch (appEnv.getPackaging()) {
             case LINUX_TAR -> new LinuxTarballUpdater();
             case WIN_MSI -> new WindowsMsiUpdater();
-            case MAC_DMG, MAC_TAR, WIN_ZIP, LINUX_DEB, LINUX_RPM, LINUX_AUR, UNKNOWN -> new NotifyOnlyUpdater();
+            case MAC_DMG, MAC_TAR, WIN_ZIP, LINUX_DEB, LINUX_RPM, LINUX_AUR, LINUX_FPK, UNKNOWN ->
+                    new NotifyOnlyUpdater();
         };
     }
 
