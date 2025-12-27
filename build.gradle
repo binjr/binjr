@@ -653,7 +653,7 @@ tasks.register('jpackageAppMac', Exec) {
 
 tasks.register('jpackageLinuxFlatpak', Exec) {
     dependsOn prepareAppBundle, copyJpackageInputLibs
-    workingDir JPACKAGE_IMAGE_PATH
+    workingDir FLATPAK_IMAGE_PATH
     commandLine = [
             "jpackage",
             "--name", project.name,
@@ -682,7 +682,7 @@ tasks.register('jpackageLinuxFlatpak', Exec) {
             "--java-options", "--add-modules=jdk.incubator.vector",
             "--arguments", "--packaging=LINUX_FPK"
     ]
-    outputs.dir JPACKAGE_IMAGE_PATH
+    outputs.dir FLATPAK_IMAGE_PATH
 }
 
 tasks.register('jpackageDmg', Exec) {
