@@ -26,6 +26,16 @@ import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
+buildscript{
+    repositories{
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies{
+        classpath files('/home/Fred/sources/flatpak-gradle-generator/plugin/build/libs/plugin-1.5.0.jar')
+    }
+}
 
 plugins {
     id "de.undercouch.download" version "5.6.0"
@@ -143,6 +153,7 @@ configure(subprojects) {
             outputFile = file("${BUILD_DIR}/${project.name}-sources.json")
             downloadDirectory = "./offline-repository"
             excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
+            onlyArches = convertArchName(getArch(), 'rpm')
         }
     } else {
         apply plugin: 'java-library'
