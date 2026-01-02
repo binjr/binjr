@@ -33,7 +33,7 @@ buildscript{
     }
 
     dependencies{
-        classpath files('/home/Fred/sources/flatpak-gradle-generator/plugin/build/libs/plugin-1.5.0.jar')
+        classpath files("${projectDir}/plugin-1.5.0.jar")
     }
 }
 
