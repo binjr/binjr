@@ -71,7 +71,7 @@ jobs:
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
       name: Gradle build
-      run: ./gradlew clean flatpakGradleGenerator signPackageDistribution --no-daemon --info
+      run: ./gradlew clean flatpakGradleGenerator signPackageDistribution --no-configuration-cache --no-daemon --info
     - env:
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       name: Cleanup keyring
