@@ -150,10 +150,10 @@ configure(subprojects) {
         apply plugin: 'io.github.jwharm.flatpak-gradle-generator'
 
         tasks.flatpakGradleGenerator {
-            outputFile = file("${BUILD_DIR}/${project.name}-sources.json")
+            outputFile = file("${BUILD_DIR}/bom/${project.name}-sources-${OS_FAMILY}-${TARGET_ARCH}.json")
             downloadDirectory = "./offline-repository"
             excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
-            onlyArches = convertArchName(getArch(), 'rpm')
+            onlyArches = TARGET_ARCH
         }
     } else {
         apply plugin: 'java-library'
@@ -296,7 +296,7 @@ nexusPublishing {
 }
 
 tasks.flatpakGradleGenerator {
-    outputFile = file("${BUILD_DIR}/binjr-plugins-sources.json")
+    outputFile = file("${BUILD_DIR}/bom/binjr-plugins-sources.json")
     downloadDirectory = "./offline-repository"
     excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
 }
