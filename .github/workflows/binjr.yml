@@ -45,31 +45,6 @@ jobs:
       chosen-os: windows-2022
       wixVersion: 6.0.2
     secrets: inherit
-  generate_build_dependencies_manifest:
-    needs:
-    - build_job_linux_x64
-    - build_job_linux_aarch64
-    runs-on: ubuntu-22.04
-    steps:
-    - name: checkout
-      uses: actions/checkout@v4.1.0
-    - name: get tag name
-      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-    - if: success() && startsWith(github.ref, 'refs/tags/')
-      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
-    - uses: actions/setup-java@v4
-      with:
-        distribution: 'temurin'
-        java-version: '25'
-        check-latest: true
-        cache: 'gradle'
-    - env:
-        IS_TAG: "${{ env.IS_TAG }}"
-        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
-        BINJR_BUILD_NUMBER: "${{ github.run_number }}"
-      run: ./gradlew flatpakGradleGenerator --no-configuration-cache --no-daemon
-      shell: bash
-    - run: cat "${{ github.workspace }}/build/binjr-app-sources.json"
   deploy_site-deploy_site:
     needs:
     - build_job_linux_x64

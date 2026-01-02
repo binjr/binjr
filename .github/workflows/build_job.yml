@@ -78,6 +78,16 @@ jobs:
       run: |
         rm -rf $KEYRING_PATH
       shell: bash
+    - name: Generate build dependencies manifest
+      if: success() && runner.os == 'linux'
+      env:
+        IS_TAG: "${{ env.IS_TAG }}"
+        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
+        BINJR_BUILD_NUMBER: "${{ github.run_number }}"
+      run: ./gradlew flatpakGradleGenerator --no-configuration-cache --no-daemon
+      shell: bash
+    - if: success() && runner.os == 'linux'
+      run: cat "${{ github.workspace }}/build/binjr-app-sources.json"
     - name: Release
       uses: softprops/action-gh-release@v2
       if: github.ref_type == 'tag'
