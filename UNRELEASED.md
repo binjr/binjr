@@ -1,0 +1,1 @@
+* _[Fixed] [Packaging]_ Linux portable bundle is broken (missing launcher).  
