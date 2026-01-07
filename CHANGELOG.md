@@ -1,3 +1,8 @@
+## [binjr v3.27.1](https://github.com/binjr/binjr/releases/tag/v3.27.1)
+Released on Tue, 06 January 2026
+
+* _[Fixed] [Packaging]_ Linux portable bundle is broken (missing launcher).
+
 ## [binjr v3.27.0](https://github.com/binjr/binjr/releases/tag/v3.27.0)
 Released on Sun, 28 December 2025
 
