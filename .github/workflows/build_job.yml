@@ -71,7 +71,7 @@ jobs:
         REPO_TAG_NAME: "${{ github.ref }}"
         WIX_HOME: "${{ runner.tool_cache }}\\wix-cli\\bin\\"
       name: Gradle build
-      run: ./gradlew clean signPackageDistribution --no-daemon --info
+      run: ./gradlew clean flatpakGradleGenerator signPackageDistribution --no-configuration-cache --no-daemon --info
     - env:
         KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
       name: Cleanup keyring
@@ -88,6 +88,8 @@ jobs:
         make_latest: ${{ !env.IS_SNAPSHOT }}
         prerelease:  ${{ env.IS_SNAPSHOT }}
         files: |
+          ${{ github.workspace }}/build/bom/*.json
+          ${{ github.workspace }}/build/bom/*.json.asc
           ${{ github.workspace }}/build/artifacts/deb/*.deb
           ${{ github.workspace }}/build/artifacts/deb/*.deb.asc
           ${{ github.workspace }}/build/artifacts/rpm/*.rpm

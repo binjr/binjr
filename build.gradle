@@ -26,6 +26,16 @@ import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
+buildscript{
+    repositories{
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies{
+        classpath files("${projectDir}/plugin-1.5.0.jar")
+    }
+}
 
 plugins {
     id "de.undercouch.download" version "5.6.0"
@@ -75,7 +85,7 @@ ext.JFX_JMOD_PATH = System.getenv('JFX_JMOD_PATH')
 ext.ADDITIONAL_JMOD_PATH = ""
 if (JFX_JMOD_PATH != null){
     IS_JAVAFX_BUNDLED = true
-    ADDITIONAL_JMOD_PATH = "${File.pathSeparator}${JFX_JMOD_PATH}/javafx-jmods-${OPENJFX_VERSION_STEM}"
+    ADDITIONAL_JMOD_PATH = "${File.pathSeparator}${JFX_JMOD_PATH}"
 } else {
     ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${BUILD_DIR}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
 }
@@ -140,9 +150,10 @@ configure(subprojects) {
         apply plugin: 'io.github.jwharm.flatpak-gradle-generator'
 
         tasks.flatpakGradleGenerator {
-            outputFile = file("${BUILD_DIR}/${project.name}-sources.json")
+            outputFile = file("${BUILD_DIR}/bom/bom-${project.name}-${OS_FAMILY}-${TARGET_ARCH}.json")
             downloadDirectory = "./offline-repository"
             excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
+            onlyArches = TARGET_ARCH
         }
     } else {
         apply plugin: 'java-library'
@@ -285,7 +296,7 @@ nexusPublishing {
 }
 
 tasks.flatpakGradleGenerator {
-    outputFile = file("${BUILD_DIR}/binjr-plugins-sources.json")
+    outputFile = file("${BUILD_DIR}/bom/bom-gradle-plugins.json")
     downloadDirectory = "./offline-repository"
     excludeConfigurations = ["testCompileClasspath", "testRuntimeClasspath"]
 }
