@@ -1,0 +1,1 @@
+_[Fixed] [Core]_ Built-in plugins are loaded twice on startup
