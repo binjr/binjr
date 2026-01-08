@@ -53,14 +53,13 @@ public class DataAdapterFactory {
         try {
             var pluginPaths = new ArrayList<Path>();
             var adapters = new HashSet<DataAdapterInfo>();
-            // Load from classpath
-            ServiceLoaderHelper.loadFromClasspath(DataAdapterInfo.class, adapters);
             // Add system plugin location
             pluginPaths.add(AppEnvironment.getInstance().getSystemPluginPath());
             // Add user plugin location
             if (UserPreferences.getInstance().loadPluginsFromExternalLocation.get()) {
                 pluginPaths.add(UserPreferences.getInstance().userPluginsLocation.get());
             }
+            // Load from classpath and plugin locations
             var ucl = ServiceLoaderHelper.loadFromPaths(DataAdapterInfo.class,adapters,  pluginPaths);
             // Scan loaded plugins for serialisable types
             ReflectionHelper.INSTANCE.scanClassLoader(ucl);
