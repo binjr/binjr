@@ -109,8 +109,9 @@ public final class ServiceLoaderHelper {
         for (Iterator<T> iterator = sl.iterator(); iterator.hasNext(); ) {
             try {
                 T res = iterator.next();
-                loadedServices.add(res);
-                logger.debug(() -> "Successfully registered resource " + res.toString() + " from external JAR.");
+              if (loadedServices.add(res)) {
+                  logger.debug(() -> "Successfully registered resource " + res.toString() + " from external JAR.");
+              }
             } catch (ServiceConfigurationError sce) {
                 logger.error("Failed to load resource", sce);
             } catch (Exception e) {

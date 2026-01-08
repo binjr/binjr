@@ -25,6 +25,7 @@ import javafx.scene.control.Dialog;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * An immutable representation of a {@link BaseDataAdapter}'s metadata
@@ -79,7 +80,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         try {
             var ctor = meta.preferencesClass().getDeclaredConstructor(Class.class);
             adapterPreferences = ctor.newInstance(adapterClass);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new CannotInitializeDataAdapterException("Failed to instantiate data adapter preference class", e);
         }
         this.jarLocation = adapterClass.getResource('/' + adapterClass.getName().replace('.', '/') + ".class").toExternalForm();
@@ -98,6 +100,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
 
     /**
      * Returns the category of the data adapter.
+     *
      * @return the category of the data adapter.
      */
     @Override
@@ -202,8 +205,42 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     }
 
     @Override
-    public VisualizationType getVisualizationType(){
+    public VisualizationType getVisualizationType() {
         return this.visualizationType;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof BaseDataAdapterInfo that)) return false;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(version, that.version) &&
+                Objects.equals(copyright, that.copyright) &&
+                Objects.equals(license, that.license) &&
+                Objects.equals(jarLocation, that.jarLocation) &&
+                Objects.equals(siteUrl, that.siteUrl) &&
+                Objects.equals(adapterClass, that.adapterClass) &&
+                Objects.equals(adapterDialog, that.adapterDialog) &&
+                Objects.equals(apiLevel, that.apiLevel) &&
+                sourceLocality == that.sourceLocality &&
+                visualizationType == that.visualizationType &&
+                Objects.equals(category, that.category);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name,
+                description,
+                version,
+                copyright,
+                license,
+                jarLocation,
+                siteUrl,
+                adapterClass,
+                adapterDialog,
+                apiLevel,
+                sourceLocality,
+                visualizationType,
+                category);
+    }
 }
