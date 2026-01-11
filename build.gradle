@@ -679,7 +679,8 @@ tasks.register('jpackageLinuxFlatpak', Exec) {
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics,ALL-UNNAMED",
             "--java-options", "--add-modules=jdk.incubator.vector",
-            "--arguments", "--packaging=LINUX_FPK"
+            "--arguments", "--packaging=LINUX_FPK",
+            "--arguments", "--disable-update-check=true"
     ]
     outputs.dir FLATPAK_IMAGE_PATH
 }
