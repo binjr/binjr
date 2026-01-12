@@ -5,11 +5,11 @@ binjr is developed and distributed as a free and open source software.
 The project accepts contributions via pull requests to its code repository:
 https://github.com/binjr/binjr/pulls
 
-Contributions of new features should be discussed beforehand by opening
+Contribution of a new feature should be discussed beforehand by opening
 a discussion thread on the project's site: 
 https://github.com/orgs/binjr/discussions
 
-Contributions of no trivial fixes should be logged beforehand in the
+Contribution of a non-trivial fix should be logged beforehand in the
 project's issue tracker:
 https://github.com/binjr/binjr/issues
 
