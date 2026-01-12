@@ -73,7 +73,7 @@ ext.IS_JAVAFX_BUNDLED = ModuleLayer.boot().findModule("javafx.controls").isPrese
 ext.BUILD_DIR = layout.buildDirectory.get().toString()
 ext.JFX_JMOD_PATH = System.getenv('JFX_JMOD_PATH')
 ext.ADDITIONAL_JMOD_PATH = ""
-if (JFX_JMOD_PATH != null){
+if (JFX_JMOD_PATH != null) {
     IS_JAVAFX_BUNDLED = true
     ADDITIONAL_JMOD_PATH = "${File.pathSeparator}${JFX_JMOD_PATH}/javafx-jmods-${OPENJFX_VERSION_STEM}"
 } else {
@@ -193,7 +193,7 @@ configure(subprojects) {
             name = 'Central Portal Snapshots'
             url = 'https://central.sonatype.com/repository/maven-snapshots/'
         }
-    maven { url "${ROOT_DIR}/offline-repository" }
+        maven { url "${ROOT_DIR}/offline-repository" }
     }
 
     publishing {
@@ -417,8 +417,26 @@ tasks.register('expandMdTemplates', Copy) {
             "currentChanges": "$currentChanges",
             "tagName"       : "v${BINJR_VERSION}",
             "copyright"     : "${BINJR_COPYRIGHT}",
-            "isDraft"       : "${IS_RELEASE ? "false" : "true"}"
+            "isDraft"       : "${IS_RELEASE ? "false" : "true"}",
+            "changeLogUrl"  : "https://binjr.eu/download/CHANGELOG/#binjr-v${BINJR_VERSION.replace(".", "")}"
     ])
+}
+
+tasks.register('expandFlatpakManifest', Copy) {
+    from "${projectDir}/distribution/bundlers/linux_fpk/manifest/eu.binjr.binjr.yml"
+    into "${BUILD_DIR}/tmp/expanded"
+
+    def jfxJmodUrl_x64 = "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_linux-x64_bin-jmods.zip"
+    def jfxJmodSha_x64 = ((jfxJmodUrl_x64 + ".sha256").toURL().text =~ /[a-f0-9]{64}/)[0]
+    def jfxJmodUrl_aarch64 = "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_linux-aarch64_bin-jmods.zip"
+    def jfxJmodSha_aarch64 = ((jfxJmodUrl_aarch64 + ".sha256").toURL().text =~ /[a-f0-9]{64}/)[0]
+
+    expand([
+            "tagName"         : "v${BINJR_VERSION}",
+            jfxJmodUrl_x64    : jfxJmodUrl_x64,
+            jfxJmodSha_x64    : jfxJmodSha_x64,
+            jfxJmodUrl_aarch64: jfxJmodUrl_aarch64,
+            jfxJmodSha_aarch64: jfxJmodSha_aarch64])
 }
 
 tasks.register('copyInfo', Copy) {
@@ -616,7 +634,7 @@ tasks.register('jpackageAppWin', Exec) {
 }
 
 tasks.register('jpackageAppMac', Exec) {
-    dependsOn createRuntimeImage, copyJpackageInputLibs
+    dependsOn prepareAppBundle, copyJpackageInputLibs
     workingDir JPACKAGE_IMAGE_PATH
     commandLine = [
             "jpackage",

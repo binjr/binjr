@@ -20,7 +20,7 @@
         </p>
         <p>
             It can be use to visualize data from many different sources at once, mixed as part of a single representation or
-            on separate but synchronised views, which is especially useful to correlate events of different kinds and from
+            on separate but synchronized views, which is especially useful to correlate events of different kinds and from
             multiple sources but sharing a common timeline.
         </p>
         <p>
@@ -55,7 +55,7 @@
     <url type="bugtracker">https://github.com/binjr/binjr/issues</url>
     <url type="homepage">https://binjr.eu/</url>
     <url type="contact">https://social.binjr.eu/@binjr</url>
-    <url type="contribute">https://github.com/binjr/binjr?tab=readme-ov-file#contributing</url>
+    <url type="contribute">https://github.com/binjr/binjr/blob/master/CONTRIBUTING.md</url>
     <url type="vcs-browser">https://github.com/binjr/binjr</url>
 
     <branding>
@@ -79,8 +79,8 @@
     </screenshots>
 
     <releases>
-        <release version="3.27.0" date="2025-12-28">
-            <url type="details">https://binjr.eu/download/CHANGELOG/#binjr-v3270</url>
+        <release version="${version}" date="${releaseDate}">
+            <url type="details">${changeLogUrl}</url>
         </release>
     </releases>
 
