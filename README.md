@@ -8,8 +8,8 @@
 * [Getting started](#getting-started)
 * [Trying it out](#trying-it-out)
 * [Getting help](#getting-help)
-* [Contributing](#contributing)
 * [How is it licensed?](#how-is-it-licensed)
+* [Contributing](#contributing)
 
 
 
@@ -144,14 +144,7 @@ If you encounter an issue, or would like to suggest an enhancement or a new feat
 
 ## Contributing
 
-This project accepts contributions made via either [GitHub pull requests](https://github.com/binjr/binjr/pulls) or [Codeberg pull requests](https://codeberg.org/binjr/binjr/pulls), at your convenience.  
-
-### Certificate of Origin
-
-By contributing to this project you agree to the Developer Certificate of
-Origin (DCO). This document was created by the Linux Kernel community and is a
-simple statement that you, as a contributor, have the legal right to make the
-contribution. See the [DCO](DCO) file for details.
+See the [CONTRIBUTING](CONTRIBUTING.md) file for details.
 
 
 
