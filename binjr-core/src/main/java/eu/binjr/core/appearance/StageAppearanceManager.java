@@ -199,15 +199,17 @@ public class StageAppearanceManager {
     }
 
     private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<AppearanceOptions> options) {
-        if (options.contains(AppearanceOptions.SET_NONE)) {
-            return;
-        }
-        if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_THEME)) {
-            setUiTheme(stage.getScene(), theme);
-        }
-        if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_ICON)) {
-            setIcon(stage);
-        }
+        Dialogs.runOnFXThread(()-> {
+            if (options.contains(AppearanceOptions.SET_NONE)) {
+                return;
+            }
+            if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_THEME)) {
+                setUiTheme(stage.getScene(), theme);
+            }
+            if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_ICON)) {
+                setIcon(stage);
+            }
+        });
     }
 
     private void setIcon(Stage stage) {
