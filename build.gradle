@@ -698,6 +698,7 @@ tasks.register('jpackageLinuxFlatpak', Exec) {
             "--java-options", "--add-opens=javafx.graphics/javafx.scene.paint=ALL-UNNAMED",
             "--java-options", "--enable-native-access=javafx.graphics,ALL-UNNAMED",
             "--java-options", "--add-modules=jdk.incubator.vector",
+            "--java-options", '-Djava.util.prefs.userRoot=$HOME/.var/app/eu.binjr.binjr/config',
             "--arguments", "--packaging=LINUX_FPK",
             "--arguments", "--disable-update-check=true"
     ]
