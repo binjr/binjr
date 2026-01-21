@@ -31,6 +31,7 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
+import eu.binjr.portalfx.Portal;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -68,6 +69,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
     private Collection<DataAdapter> result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final ComboBox<String> uriField;
+    private T sourceUri;
     private final TextField timezoneField;
     private final LabelWithInlineHelp timezoneLabel;
     private final DialogPane parent;
@@ -95,6 +97,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
      * @param mostRecentListName the name of the {@link MostRecentlyUsedList} preference associated with this dialog.
      */
     public DataAdapterDialog(Node owner, Mode mode, String mostRecentListName, boolean showTimezone) {
+
         if (owner != null) {
             this.initOwner(NodeUtils.getStage(owner));
         }
@@ -134,9 +137,15 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         Button browseButton = (Button) parent.lookup("#browseButton");
         LabelWithInlineHelp uriLabel = (LabelWithInlineHelp) parent.lookup("#uriLabel");
         uriField = (ComboBox<String>) parent.lookup("#uriField");
+        this.uriField.setEditable(false);
 
+        uriField.setItems(FXCollections.observableArrayList(mostRecentList.getAll().stream().map(t -> {
+            if (t instanceof Path p) {
+                return Portal.toHostFsPath(p).toString();
+            }
+            return t.toString();
+        }).collect(Collectors.toList())));
 
-        uriField.setItems(FXCollections.observableArrayList(mostRecentList.getAll().stream().map(Object::toString).collect(Collectors.toList())));
         uriField.showingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 autoCompletionBinding.dispose();
@@ -148,6 +157,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             if (!uri.isEmpty()) {
                 validateUri(uri);
             }
+            this.sourceUri = (T) Path.of(uri);
         });
         timezoneField = (TextField) parent.lookup("#timezoneField");
         timezoneLabel = (LabelWithInlineHelp) parent.lookup("#timeZoneLabel");
@@ -174,7 +184,9 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         browseButton.setOnAction(event -> {
             File selectedFile = displayFileChooser((Node) event.getSource());
             if (selectedFile != null) {
-                uriField.setValue(selectedFile.getPath());
+                uriField.setValue(Portal.toHostFsPath(selectedFile.toPath()).toString());
+                sourceUri = (T) selectedFile.toPath();
+
             }
         });
         Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
@@ -185,12 +197,12 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
                 result = getDataAdapters();
                 switch (mode) {
-                    case PATH:
-                        mostRecentList.push((T) Path.of(uriField.getEditor().getText()));
+                    case PATH, URI:
+                        mostRecentList.push(sourceUri);
                         break;
-                    case URI:
-                        mostRecentList.push((T) URI.create(uriField.getEditor().getText()));
-                        break;
+//                    case URI:
+//                        mostRecentList.push((T) URI.create(uriField.getValue()));
+//                        break;
                     default:
                         throw new UnsupportedOperationException("Unknown mode type");
                 }
@@ -252,7 +264,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
     }
 
     public String getSourceUri() {
-        return this.uriField.getEditor().getText();
+        return this.sourceUri.toString();// this.uriField.getEditor().getText();
     }
 
     public void setSourceUri(String value) {

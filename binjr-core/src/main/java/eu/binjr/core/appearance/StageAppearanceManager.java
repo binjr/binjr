@@ -20,7 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
-import eu.binjr.portal.DesktopPortal;
+import eu.binjr.portalfx.Portal;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -95,7 +95,7 @@ public class StageAppearanceManager {
             }
         });
         //Refresh appearance on change in system-wide preferences
-        DesktopPortal.getSettings().colorSchemeProperty().addListener((observableValue, colorScheme, t1) -> {
+        Portal.getSettings().colorSchemeProperty().addListener((observableValue, colorScheme, t1) -> {
             registeredStages.forEach((stage, options) ->
                     setAppearance(stage, UserPreferences.getInstance().userInterfaceTheme.get(), options));
         });

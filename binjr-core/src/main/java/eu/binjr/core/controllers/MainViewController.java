@@ -34,6 +34,7 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.update.UpdateManager;
+import eu.binjr.portalfx.Portal;
 import jakarta.xml.bind.JAXBException;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
@@ -367,7 +368,7 @@ public class MainViewController implements Initializable {
         stage.titleProperty().bind(Bindings.createStringBinding(
                 () -> String.format("%s%s - %s",
                         (workspace.isDirty() ? "*" : ""),
-                        workspace.pathProperty().getValue().toString(),
+                        Portal.toHostFsPath(workspace.pathProperty().getValue()).toString(),
                         AppEnvironment.APP_NAME
                 ),
                 workspace.pathProperty(),
@@ -604,9 +605,9 @@ public class MainViewController implements Initializable {
         Collection<Path> recentPath = UserHistory.getInstance().mostRecentWorkspaces.getAll();
         if (!recentPath.isEmpty()) {
             menu.getItems().setAll(recentPath.stream().map(s -> {
-                MenuItem m = new MenuItem(s.toString());
+                MenuItem m = new MenuItem(Portal.toHostFsPath(s).toString());
                 m.setMnemonicParsing(false);
-                m.setOnAction(e -> loadWorkspace(new File(((MenuItem) e.getSource()).getText())));
+                m.setOnAction(_ -> loadWorkspace(s.toFile()));
                 return m;
             }).collect(Collectors.toList()));
         } else {
