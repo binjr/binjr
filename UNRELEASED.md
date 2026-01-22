@@ -1,3 +1,4 @@
+_[New] [Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 25.0.2.
 _[Fixed] [Flatpak]_ Disable in-app update checks when the binjr runs as a flatpak.  
 _[Fixed] [Flatpak]_ The "System" UI theme ignores system-wide color scheme setting when binjr runs as a flatpak.  
 _[Fixed] [Flatpak]_ Config files should not be stored outside the application's sandbox.
