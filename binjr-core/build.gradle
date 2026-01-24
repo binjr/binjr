@@ -37,7 +37,9 @@ dependencies {
     implementation 'org.apache.lucene:lucene-queryparser:10.3.2'
     implementation 'org.apache.lucene:lucene-analysis-common:10.3.2'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.3'
-    implementation 'eu.binjr:portalfx:0.1'
+    implementation('eu.binjr:portalfx:0.1') {
+        exclude group: 'org.openjfx'
+    }
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
     compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"

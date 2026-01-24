@@ -46,9 +46,9 @@ modules:
         only-arches:
         - aarch64
       - type: file
-        url: https://repo.maven.apache.org/maven2/io/netty/netty-bom/4.1.128.Final/netty-bom-4.1.128.Final.pom
-        sha512: be6c1a60d7625c4f24609545e5151c47ee2e09027b3814a42cbc169e8d5e95b3318b02273ad648da30acca56c9bda22caceb176715f9ce52eb8f98b361045e42
-        dest: ./offline-repository/io/netty/netty-bom/4.1.128.Final
+        url: https://repo.maven.apache.org/maven2/io/netty/netty-bom/4.1.130.Final/netty-bom-4.1.130.Final.pom
+        sha512: cb4a8b3fc9419b3d9c1d829a4abed446034dc0ca56c75ff6dfaf4d03809e89087bea619c7451f6a666119b1256391c59f82b0a60d22609d35b6d15acc1dcf8bf
+        dest: ./offline-repository/io/netty/netty-bom/4.1.130.Final
       - bom-gradle-plugins.json
       - bom-binjr-app-linux-x86_64.json
       - bom-binjr-app-linux-x86_64.json
