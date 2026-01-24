@@ -79,7 +79,7 @@
     </screenshots>
 
     <releases>
-        <release version="${version}" date="${releaseDate}">
+        <release version="${version}" date="${releaseDateIso}">
             <url type="details">${changeLogUrl}</url>
         </release>
     </releases>
