@@ -162,45 +162,45 @@ jobs:
         REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
       run: wingetcreate.exe update binjr.core-x64 --urls https://github.com/binjr/binjr/releases/download/${REPO_TAG_NAME}/binjr-${REPO_TAG_NAME//v}_windows-x86_64.msi --version ${REPO_TAG_NAME//v} --token $GH_ACCESS_TOKEN --submit
       shell: bash
-  maven_publish-maven_publish:
-    needs:
-      - build_job_linux_x64
-      - build_job_linux_aarch64
-      - build_job_mac_x64
-      - build_job_mac_aarch64
-      - build_job_windows_x64
-    runs-on: ubuntu-22.04
-    steps:
-    - name: checkout
-      uses: actions/checkout@v4.1.0
-    - name: get tag name
-      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-    - if: success() && startsWith(github.ref, 'refs/tags/')
-      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
-    - uses: actions/setup-java@v4
-      with:
-          distribution: 'temurin'
-          java-version: '25'
-          check-latest: true
-          cache: 'gradle'
-    - env:
-        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
-        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
-      run: |
-        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
-      shell: bash
-    - env:
-        IS_TAG: "${{ env.IS_TAG }}"
-        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
-        BINJR_BUILD_NUMBER: "${{ github.run_number }}"
-        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
-        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
-        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
-        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
-        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
-      run: ./gradlew publishArtifacts --no-daemon
-    - env:
-        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
-      run: |
-        shred -fuz $KEYRING_PATH
-      shell: bash
+#  maven_publish-maven_publish:
+#    needs:
+#      - build_job_linux_x64
+#      - build_job_linux_aarch64
+#      - build_job_mac_x64
+#      - build_job_mac_aarch64
+#      - build_job_windows_x64
+#    runs-on: ubuntu-22.04
+#    steps:
+#    - name: checkout
+#      uses: actions/checkout@v4.1.0
+#    - name: get tag name
+#      run: echo "REPO_TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+#    - if: success() && startsWith(github.ref, 'refs/tags/')
+#      run: echo "IS_TAG=true" >> "$GITHUB_ENV"
+#    - uses: actions/setup-java@v4
+#      with:
+#          distribution: 'temurin'
+#          java-version: '25'
+#          check-latest: true
+#          cache: 'gradle'
+#    - env:
+#        KEYRING_GPG_BASE64: "${{ secrets.KEYRING_GPG_BASE64 }}"
+#        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+#      run: |
+#        echo $KEYRING_GPG_BASE64 | base64 --decode > $KEYRING_PATH
+#      shell: bash
+#    - env:
+#        IS_TAG: "${{ env.IS_TAG }}"
+#        REPO_TAG_NAME: "${{ env.REPO_TAG_NAME }}"
+#        BINJR_BUILD_NUMBER: "${{ github.run_number }}"
+#        GPG_KEY_NAME: "${{ secrets.GPG_KEY_NAME }}"
+#        GPG_PASSPHRASE: "${{ secrets.GPG_PASSPHRASE }}"
+#        GPG_KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+#        ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.MCR_AUTH_PASSWORD }}"
+#        ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.MCR_AUTH_USERNAME }}"
+#      run: ./gradlew publishArtifacts --no-daemon
+#    - env:
+#        KEYRING_PATH: "${{ github.workspace }}/keyring.gpg"
+#      run: |
+#        shred -fuz $KEYRING_PATH
+#      shell: bash
