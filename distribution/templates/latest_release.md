@@ -32,13 +32,13 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 ## Package managers
 binjr can be installed and updated using various package managers, depending on you operating system.
 
-| Version          | Operating System                                                 | Architecture         | Package manager                                              |
-|------------------|------------------------------------------------------------------|----------------------|--------------------------------------------------------------|
-| binjr ${tagName} | **Linux** ([supported distributions](https://flathub.org/setup)) | ` x86_64`, `aarch64` | [Flathub](https://flathub.org/apps/eu.binjr.binjr)           |
-| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+)                          | `x86_64`             | [binjr APT Repository](https://repos.binjr.eu/apt)           |
-| binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)                                 | `x86_64`             | [binjr RPM Repository](https://repos.binjr.eu/rpm)           |
-| binjr ${tagName} | **ArchLinux**                                                    | `x86_64`             | [Arch User Repository](https://repos.binjr.eu/aur)           |
-| binjr ${tagName} | **Windows** (10[^2] or 11)                                       | `x86_64`             | [Winget Community Repository](https://repos.binjr.eu/winget) |
+| Version          | Operating System                                               | Architecture         | Package manager                                              |
+|------------------|----------------------------------------------------------------|----------------------|--------------------------------------------------------------|
+| binjr ${tagName} | **Flatpak** ([supported platforms](https://flathub.org/setup)) | ` x86_64`, `aarch64` | [Flathub](https://flathub.org/apps/eu.binjr.binjr)           |
+| binjr ${tagName} | **Debian** (10,11), **Ubuntu** (22.04+)                        | `x86_64`             | [binjr APT Repository](https://repos.binjr.eu/apt)           |
+| binjr ${tagName} | **RHEL** (8,9), **Fedora** (36+)                               | `x86_64`             | [binjr RPM Repository](https://repos.binjr.eu/rpm)           |
+| binjr ${tagName} | **ArchLinux**                                                  | `x86_64`             | [Arch User Repository](https://repos.binjr.eu/aur)           |
+| binjr ${tagName} | **Windows** (10[^2] or 11)                                     | `x86_64`             | [Winget Community Repository](https://repos.binjr.eu/winget) |
 
 
 ## Installable bundles
