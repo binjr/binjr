@@ -17,7 +17,7 @@
 package eu.binjr.core.appearance;
 
 
-import eu.binjr.portal.DesktopPortal;
+import eu.binjr.portalfx.Portal;
 import javafx.application.ColorScheme;
 
 import java.util.Objects;
@@ -29,10 +29,10 @@ import java.util.function.Supplier;
  * @author Frederic Thevenet
  */
 public enum BuiltInUserInterfaceThemes implements UserInterfaceThemes {
-    SYSTEM("System", () -> switch (DesktopPortal.getSettings().colorSchemeProperty().get()) {
+    SYSTEM("System", () -> switch (Portal.settings().colorSchemeProperty().get()) {
         case DARK -> "/eu/binjr/css/Dark.css";
         case LIGHT -> "/eu/binjr/css/Light.css";
-    }, () -> switch (DesktopPortal.getSettings().colorSchemeProperty().get()) {
+    }, () -> switch (Portal.settings().colorSchemeProperty().get()) {
         case DARK -> ColorScheme.DARK;
         case LIGHT -> ColorScheme.LIGHT;
     }),

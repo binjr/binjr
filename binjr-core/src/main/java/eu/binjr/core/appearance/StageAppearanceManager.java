@@ -20,7 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
-import eu.binjr.portal.DesktopPortal;
+import eu.binjr.portalfx.Portal;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -89,13 +89,13 @@ public class StageAppearanceManager {
      */
     private StageAppearanceManager() {
         // Apply user-selected appearance settings
-        UserPreferences.getInstance().userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
+        UserPreferences.getInstance().userInterfaceTheme.property().addListener((_, _, newValue) -> {
             if (newValue != null) {
                 registeredStages.forEach((stage, options) -> setAppearance(stage, newValue, options));
             }
         });
         //Refresh appearance on change in system-wide preferences
-        DesktopPortal.getSettings().colorSchemeProperty().addListener((observableValue, colorScheme, t1) -> {
+        Portal.settings().colorSchemeProperty().addListener((_, _, _) -> {
             registeredStages.forEach((stage, options) ->
                     setAppearance(stage, UserPreferences.getInstance().userInterfaceTheme.get(), options));
         });
@@ -200,7 +200,7 @@ public class StageAppearanceManager {
     }
 
     private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<AppearanceOptions> options) {
-        Dialogs.runOnFXThread(()-> {
+        Dialogs.runOnFXThread(() -> {
             if (options.contains(AppearanceOptions.SET_NONE)) {
                 return;
             }
