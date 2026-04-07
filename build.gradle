@@ -568,18 +568,8 @@ tasks.register('packageDistributionTar', Exec) {
     outputs.dir ARTIFACTS_PATH_TGZ
 }
 
-tasks.register('wixAddUiExt', Exec) {
-    dependsOn prepareAppBundle
-    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.UI.wixext"]
-}
-
-tasks.register('wixAddUtilExt', Exec) {
-    dependsOn wixAddUiExt
-    commandLine = ["${WIX_HOME}wix.exe", "extension", "add", "-g", "WixToolset.Util.wixext"]
-}
-
 tasks.register('wixRunBuild', Exec) {
-    dependsOn wixAddUtilExt
+    dependsOn prepareAppBundle
     doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
                 Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
