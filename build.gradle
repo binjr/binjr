@@ -30,7 +30,7 @@ import java.time.temporal.ChronoField
 plugins {
     id "de.undercouch.download" version "5.7.0"
     id "com.github.ben-manes.versions" version "0.53.0"
-    id "io.github.jwharm.flatpak-gradle-generator" version "1.6.0"
+    id "io.github.jwharm.flatpak-gradle-generator" version "1.7.0"
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0" apply true
     id "signing"
     id 'maven-publish'
@@ -62,7 +62,7 @@ ext.TARGET_ARCH = convertArchName(isNullOrBlank(System.getenv('TARGET_ARCH')) ? 
 ext.IS_64 = TARGET_ARCH.toLowerCase().contains("64")
 ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "25.0.2"
+ext.OPENJFX_VERSION = "26"
 ext.USE_BUILD_JDK_IN_BUNDLE = System.getenv('USE_BUILD_JDK_IN_BUNDLE') != null ? System.getenv('USE_BUILD_JDK_IN_BUNDLE') == "true" : false
 ext.BUNDLE_JDK_VERSION = "jdk-25.0.2+10"
 ext.BUNDLE_JDK_PATH = null
