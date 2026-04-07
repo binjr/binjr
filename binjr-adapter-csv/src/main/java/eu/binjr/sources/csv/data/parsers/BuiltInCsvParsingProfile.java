@@ -1,5 +1,5 @@
 /*
- *    Copyright 2022-2025 Frederic Thevenet
+ *    Copyright 2022-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
     EPOCH("Seconds since 01/01/1970",
             "EPOCH",
             Map.of(TemporalCaptureGroup.EPOCHSECONDS, "\\d+"),
-            "$EPOCH",
+            "$EPOCHSECONDS",
             ",",
             '"',
             0,

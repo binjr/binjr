@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2025 Frederic Thevenet
+ *    Copyright 2020-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -72,6 +72,8 @@ public interface ParsingProfile {
                                     zoneId = ZoneId.ofOffset("UTC", ZoneOffset.ofTotalSeconds(temporalGroup.parseInt(parsed)));
                             case TemporalCaptureGroup.EPOCHMILLIS ->
                                     timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(temporalGroup.parseLong(parsed)), zoneId);
+                            case TemporalCaptureGroup.EPOCHSECONDS ->
+                                    timestamp = LocalDateTime.ofInstant(Instant.ofEpochSecond(temporalGroup.parseLong(parsed)), zoneId);
                             default ->
                                     timestamp = timestamp.with(temporalGroup.getMapping(), temporalGroup.parseLong(parsed));
                         }
