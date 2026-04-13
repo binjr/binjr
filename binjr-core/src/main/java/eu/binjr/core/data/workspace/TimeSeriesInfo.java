@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2017-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,9 +46,10 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     protected final SourceBinding<T> binding;
     protected final ChangeWatcher status;
     protected final Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
+    protected final Property<LoadingStatus> loadingStatus = new SimpleObjectProperty<>(LoadingStatus.OK);
 
     /**
-     * Parameter-less constructor (needed for XMl serialization)
+     * Parameter-less constructor (needed for XML serialization)
      */
     private TimeSeriesInfo() {
         this("",
@@ -89,7 +90,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
-        // Change watcher must be initialized after dirtyable properties or they will not be tracked.
+        // Change watcher must be initialized after dirtyable properties, or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
 
@@ -238,6 +239,20 @@ public class TimeSeriesInfo<T> implements Dirtyable {
                 this.getProcessor().getMaxValue().toString(),
                 this.getProcessor().getAverageValue().toString(),
                 this.getBinding().getTreeHierarchy());
+    }
+
+
+    @XmlTransient
+    public LoadingStatus getLoadingStatus() {
+        return loadingStatus.getValue();
+    }
+
+    public Property<LoadingStatus> loadingStatusProperty() {
+        return loadingStatus;
+    }
+
+    public void setLoadingStatus(LoadingStatus loadingStatus) {
+        this.loadingStatus.setValue(loadingStatus);
     }
 
     @XmlTransient

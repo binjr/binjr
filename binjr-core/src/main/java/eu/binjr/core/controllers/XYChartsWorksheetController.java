@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2025 Frederic Thevenet
+ *    Copyright 2016-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,10 +23,7 @@ import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.text.*;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.ReloadPolicy;
-import eu.binjr.core.data.adapters.SourceBinding;
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.Chart;
@@ -838,7 +835,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             TableColumn<TimeSeriesInfo<Double>, String> nameColumn = new TableColumn<>("Name");
             nameColumn.setSortable(false);
-            nameColumn.setPrefWidth(160);
+            nameColumn.setPrefWidth(200);
             getBindingManager().bind(nameColumn.editableProperty(), currentViewPort.getDataStore().showPropertiesProperty());
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
             nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -846,6 +843,36 @@ public class XYChartsWorksheetController extends WorksheetController {
                     t -> t.getTableView().getItems().get(
                             t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
             );
+
+            TableColumn<TimeSeriesInfo<Double>, LoadingStatus> statusColumn = new TableColumn<>();
+            statusColumn.setEditable(false);
+            statusColumn.setSortable(false);
+            statusColumn.setResizable(false);
+            statusColumn.setPrefWidth(40);
+            statusColumn.setCellValueFactory(p -> p.getValue().loadingStatusProperty());
+            statusColumn.setCellFactory(param -> new TableCell<>() {
+                @Override
+                protected void updateItem(LoadingStatus item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(null);
+                    if (empty || item == null || !item.error()) {
+                        setGraphic(null);
+                    } else {
+                        setGraphic(new ToolButtonBuilder<Button>(getBindingManager())
+                                .setText("error")
+                                .setTooltip(StringUtils.sanitizeNotificationMessage(item.errorMessage()))
+                                .setStyleClass("dialog-button")
+                                .setIconStyleClass("error-icon", "medium-icon")
+                                .setFocusTraversable(false)
+                                .setIconColor(Color.RED)
+                                .setAction(event -> Dialogs.displayException(
+                                        "An error occurred while fetching data from source",
+                                        item.cause(),
+                                        (Node) event.getSource()))
+                                .build(Button::new));
+                    }
+                }
+            });
 
             TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
             minColumn.setSortable(false);
@@ -923,7 +950,15 @@ public class XYChartsWorksheetController extends WorksheetController {
             }));
 
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
-            currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
+            currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn,
+                    colorColumn,
+                    nameColumn,
+                    statusColumn,
+                    minColumn,
+                    maxColumn,
+                    avgColumn,
+                    currentColumn,
+                    pathColumn);
             TableViewUtils.autoFillTableWidthWithLastColumn(currentViewPort.getSeriesTable());
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
             newPane.setMinHeight(90.0);

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2025 Frederic Thevenet
+ *    Copyright 2016-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
-import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
@@ -240,6 +239,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                                 logger.trace("Fetch sub-task '" + path + "' started");
                                 // Get data from the adapter
                                 Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> data;
+                                LoadingStatus status = LoadingStatus.OK;
                                 try {
                                     if (adapter instanceof Reloadable<Double> reloadable) {
                                         reloadable.reload(path, byPathEntry.getValue(), reloadPolicy, null, new SimpleObjectProperty<>(ReloadStatus.OK));
@@ -250,14 +250,20 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                                             endTime.toInstant(),
                                             byPathEntry.getValue(),
                                             bypassCache);
+
                                 } catch (DataAdapterException e) {
-                                    Dialogs.notifyException("An error occurred while fetching data from source", e);
+                                    logger.error("An error occurred while fetching data from source - " + e.getMessage());
+                                    if (logger.isDebugEnabled()) {
+                                        logger.debug("Stack traces", e);
+                                    }
                                     data = new HashMap<>();
+                                    status = LoadingStatus.error(e);
                                 }
                                 if (data.isEmpty()) {
                                     // initialize processors with at least boundaries samples in it
                                     for (var info : byPathEntry.getValue()) {
-                                        var proc = new DoubleTimeSeriesProcessor();
+                                        info.setLoadingStatus(status);
+                                        var proc = new DoubleTimeSeriesProcessor(2);
                                         proc.addSample(startTime, Double.NaN);
                                         proc.addSample(endTime, Double.NaN);
                                         data.put(info, proc);
