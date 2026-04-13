@@ -17,6 +17,7 @@
 package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 
@@ -47,6 +48,7 @@ public class ColorTableCell<T> extends TableCell<T, Color> {
             }
         }));
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        setAlignment(Pos.CENTER);
     }
 
     @Override
