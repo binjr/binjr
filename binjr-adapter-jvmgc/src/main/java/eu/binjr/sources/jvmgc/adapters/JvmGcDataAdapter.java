@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Frederic Thevenet
+ * Copyright 2024-2026 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -106,6 +107,9 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+        if (Files.notExists(gcLogPath)) {
+            throw new DataAdapterException("Cannot find file " + gcLogPath);
+        }
 
         ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
         try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
@@ -113,12 +117,8 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
             GCToolKit gcToolKit = new GCToolKit();
             var gcDataStore = new GcLogDataStore();
             gcToolKit.loadAggregation(gcDataStore);
-
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);
-
-
             gcDataStore.computeAllocationStats();
-
             this.sortedDataStores = gcDataStore.get();
 
             FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
@@ -129,22 +129,25 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                             .build());
 
             var poolDict = new HashMap<String, FilterableTreeItem<SourceBinding>>();
-
             sortedDataStores.forEach((s, m) -> {
                 FilterableTreeItem<SourceBinding> node = tree;
                 String catPath = "/";
                 for (var category : m.category()) {
                     var nodecopy = node;
                     catPath = catPath + category + "/";
-                    node = poolDict.computeIfAbsent(catPath, k -> attachNode(k, nodecopy.getValue().getLabel(), category, m.unit(), m.prefix(), m.chartType(), m.color(), nodecopy));
+                    node = poolDict.computeIfAbsent(catPath, k -> attachNode(k,
+                            nodecopy.getValue().getLabel(),
+                            category, m.unit(),
+                            m.prefix(),
+                            m.chartType(),
+                            m.color(),
+                            nodecopy));
                 }
                 attachNode(m.name(), m.name(), m.label(), m.unit(), m.prefix(), m.chartType(), m.color(), node);
 
             });
-
-
             return tree;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new DataAdapterException(e);
         }
     }
@@ -276,8 +279,16 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     }
 
     private ConcurrentNavigableMap<Long, GcLogDataStore.TsSample> getDataStore(String path) throws DataAdapterException {
+        Objects.requireNonNull(path, "Path cannot be null");
         var storeKey = path.split("/")[0];
-        return sortedDataStores.get(storeKey).data();
+        if (sortedDataStores == null) {
+            throw new DataAdapterException("Data adapter contains no data store");
+        }
+        var store = sortedDataStores.get(storeKey);
+        if (store == null) {
+            throw new DataAdapterException("Cannot retrieve data store for path " + path);
+        }
+        return store.data();
     }
 
 }
