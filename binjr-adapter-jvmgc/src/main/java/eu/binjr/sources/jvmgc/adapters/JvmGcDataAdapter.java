@@ -28,7 +28,6 @@ import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
-import eu.binjr.core.data.codec.csv.DataSample;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
@@ -39,14 +38,12 @@ import javafx.scene.paint.Color;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * A {@link DataAdapter} implementation used to feed {@link XYChartsWorksheet} instances
@@ -111,7 +108,6 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
             throw new DataAdapterException("Cannot find file " + gcLogPath);
         }
 
-        ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
         try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
             GCLogFile logFile = detectRollingLogs ? new RotatingGCLogFile(gcLogPath) : new SingleGCLogFile(gcLogPath);
             GCToolKit gcToolKit = new GCToolKit();
@@ -129,7 +125,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
                             .build());
 
             var poolDict = new HashMap<String, FilterableTreeItem<SourceBinding>>();
-            sortedDataStores.forEach((s, m) -> {
+            sortedDataStores.forEach((_, m) -> {
                 FilterableTreeItem<SourceBinding> node = tree;
                 String catPath = "/";
                 for (var category : m.category()) {
@@ -208,7 +204,11 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path,
+                                                                              Instant begin,
+                                                                              Instant end,
+                                                                              List<TimeSeriesInfo<Double>> seriesInfo,
+                                                                              boolean bypassCache) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
