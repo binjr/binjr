@@ -1,0 +1,1 @@
+* _[Fixed] [UI]_ When restarting, the application no longer remembers the position of the main window from the last session.   

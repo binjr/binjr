@@ -18,6 +18,7 @@ package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.InstanceCreator;
 import eu.binjr.common.io.SSLContextUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.*;
@@ -52,7 +53,10 @@ import java.util.prefs.InvalidPreferencesFormatException;
  */
 public class UserPreferences extends ObservablePreferenceFactory {
     private static final Logger logger = Logger.create(UserPreferences.class);
-    private static final Gson GSON = new GsonBuilder().serializeNulls().create();
+    private static final Gson GSON = new GsonBuilder()
+            .serializeNulls()
+            .registerTypeAdapter(Rectangle2D.class, (InstanceCreator<Rectangle2D>) _ -> new Rectangle2D(0, 0, 0, 0))
+            .create();
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
     public ObservablePreference<Boolean> highlightCurrentColumn = booleanPreference("highlightCurrentColumn", true);
