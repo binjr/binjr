@@ -1,3 +1,8 @@
+## [binjr v3.29.1](https://github.com/binjr/binjr/releases/tag/v3.29.1)
+Released on Sat, 30 May 2026
+
+* _[Fixed] [UI]_ When restarting, the application no longer remembers the position of the main window from the last session.
+
 ## [binjr v3.29.0](https://github.com/binjr/binjr/releases/tag/v3.29.0)
 Released on Fri, 15 May 2026
 
