@@ -30,7 +30,7 @@ import java.time.temporal.ChronoField
 plugins {
     id "de.undercouch.download" version "5.7.0"
     id "com.github.ben-manes.versions" version "0.54.0"
-    id "io.github.jwharm.flatpak-gradle-generator" version "1.7.0"
+    id "io.github.jwharm.flatpak-gradle-generator" version "1.8.0"
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0" apply true
     id "signing"
     id 'maven-publish'
@@ -176,8 +176,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:6.0.3')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:6.0.3')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:6.1.0')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:6.1.0')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
