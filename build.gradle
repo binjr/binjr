@@ -106,7 +106,7 @@ ext.APP_IMAGE_ROOT = "${BUILD_DIR}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.JPACKAGE_IMAGE_PATH = "${BUILD_DIR}/jpackage_image/${DISTRIBUTION_NAME}"
 ext.FLATPAK_IMAGE_PATH = "${BUILD_DIR}/flatpak/"
-ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX6")
+ext.WIX_HOME = System.getenv("WIX_HOME") != null ? System.getenv("WIX_HOME") : System.getenv("WIX7")
 ext.ARTIFACTS_ROOT_PATH = "${BUILD_DIR}/artifacts/"
 ext.ARTIFACTS_PATH_ZIP = file("${ARTIFACTS_ROOT_PATH}/zip/")
 ext.ARTIFACTS_PATH_MSI = file("${ARTIFACTS_ROOT_PATH}/msi/")
@@ -576,7 +576,7 @@ tasks.register('wixRunBuild', Exec) {
 
     workingDir project.projectDir
     commandLine = [
-            "${WIX_HOME}wix.exe", "build", "-arch", "${getArch()}",
+            "${WIX_HOME}wix.exe", "build", "-acceptEula", "wix7",  "-arch", "${getArch()}",
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "-ext", "WixToolset.UI.wixext",
             "-ext", "WixToolset.Util.wixext",
