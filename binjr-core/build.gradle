@@ -16,10 +16,10 @@
 
 
 dependencies {
-    api 'org.apache.logging.log4j:log4j-core:2.26.0'
-    api 'org.apache.logging.log4j:log4j-jcl:2.26.0'
-    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.26.0'
-    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.26.0'
+    api 'org.apache.logging.log4j:log4j-core:2.26.1'
+    api 'org.apache.logging.log4j:log4j-jcl:2.26.1'
+    implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.26.1'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.26.1'
     api 'org.controlsfx:controlsfx:11.2.3'
     implementation 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.14.0'
@@ -32,10 +32,10 @@ dependencies {
     api('org.fxmisc.richtext:richtextfx:0.11.7') {
         exclude group: 'org.openjfx'
     }
-    api 'org.apache.lucene:lucene-core:10.4.0'
-    api 'org.apache.lucene:lucene-facet:10.4.0'
-    implementation 'org.apache.lucene:lucene-queryparser:10.4.0'
-    implementation 'org.apache.lucene:lucene-analysis-common:10.4.0'
+    api 'org.apache.lucene:lucene-core:10.5.0'
+    api 'org.apache.lucene:lucene-facet:10.5.0'
+    implementation 'org.apache.lucene:lucene-queryparser:10.5.0'
+    implementation 'org.apache.lucene:lucene-analysis-common:10.5.0'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.2.4'
     implementation('eu.binjr:portalfx:0.2') {
         exclude group: 'org.openjfx'
