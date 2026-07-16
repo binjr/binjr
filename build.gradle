@@ -29,7 +29,7 @@ import java.time.temporal.ChronoField
 
 plugins {
     id "de.undercouch.download" version "5.7.0"
-    id "com.github.ben-manes.versions" version "0.54.0"
+    id "io.github.ben-manes.versions" version "0.56.0"
     id "io.github.jwharm.flatpak-gradle-generator" version "1.8.0"
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0" apply true
     id "signing"
@@ -61,7 +61,7 @@ ext.OS_ARCH = convertArchName(System.getProperty("os.arch"), "${OS_FAMILY}")
 ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
 ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "26.0.1"
+ext.OPENJFX_VERSION = "26.0.2"
 ext.USE_BUILD_JDK_IN_BUNDLE = System.getenv('USE_BUILD_JDK_IN_BUNDLE') != null ? System.getenv('USE_BUILD_JDK_IN_BUNDLE') == "true" : false
 ext.BUNDLE_JDK_VERSION = "jdk-26.0.1+8"
 ext.BUNDLE_JDK_PATH = null
@@ -176,8 +176,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:6.1.1')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:6.1.1')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:6.1.2')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:6.1.2')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
