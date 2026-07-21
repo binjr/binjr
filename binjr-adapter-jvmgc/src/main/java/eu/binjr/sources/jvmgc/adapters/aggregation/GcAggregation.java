@@ -16,9 +16,10 @@
 
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
-import com.microsoft.gctoolkit.aggregator.Aggregation;
-import com.microsoft.gctoolkit.aggregator.Collates;
-import com.microsoft.gctoolkit.time.DateTimeStamp;
+
+import com.kodewerk.gcsee.aggregator.Aggregation;
+import com.kodewerk.gcsee.aggregator.Collates;
+import com.kodewerk.gcsee.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;

@@ -16,7 +16,8 @@
 
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
-import com.microsoft.gctoolkit.time.DateTimeStamp;
+
+import com.kodewerk.gcsee.time.DateTimeStamp;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;

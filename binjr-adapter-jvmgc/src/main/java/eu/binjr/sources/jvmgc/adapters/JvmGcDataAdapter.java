@@ -16,11 +16,16 @@
 
 package eu.binjr.sources.jvmgc.adapters;
 
-import com.microsoft.gctoolkit.GCToolKit;
-import com.microsoft.gctoolkit.io.GCLogFile;
-import com.microsoft.gctoolkit.io.RotatingGCLogFile;
-import com.microsoft.gctoolkit.io.SingleGCLogFile;
-import com.microsoft.gctoolkit.jvm.JavaVirtualMachine;
+//import com.microsoft.gctoolkit.GCToolKit;
+//import com.microsoft.gctoolkit.io.GCLogFile;
+//import com.microsoft.gctoolkit.io.RotatingGCLogFile;
+//import com.microsoft.gctoolkit.io.SingleGCLogFile;
+//import com.microsoft.gctoolkit.jvm.JavaVirtualMachine;
+import com.kodewerk.gcsee.*;
+import com.kodewerk.gcsee.io.GCLogFile;
+import com.kodewerk.gcsee.io.RotatingGCLogFile;
+import com.kodewerk.gcsee.io.SingleGCLogFile;
+import com.kodewerk.gcsee.jvm.JavaVirtualMachine;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -110,7 +115,7 @@ public class JvmGcDataAdapter extends BaseDataAdapter<Double> {
 
         try (Profiler ignored = Profiler.start("Building seekable datastore for GC log file", logger::perf)) {
             GCLogFile logFile = detectRollingLogs ? new RotatingGCLogFile(gcLogPath) : new SingleGCLogFile(gcLogPath);
-            GCToolKit gcToolKit = new GCToolKit();
+            var gcToolKit = new GCSee();
             var gcDataStore = new GcLogDataStore();
             gcToolKit.loadAggregation(gcDataStore);
             JavaVirtualMachine machine = gcToolKit.analyze(logFile);

@@ -16,15 +16,19 @@
 
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
-import com.microsoft.gctoolkit.aggregator.Aggregates;
-import com.microsoft.gctoolkit.aggregator.Aggregator;
-import com.microsoft.gctoolkit.aggregator.EventSource;
-import com.microsoft.gctoolkit.event.*;
-import com.microsoft.gctoolkit.event.g1gc.G1GCPauseEvent;
-import com.microsoft.gctoolkit.event.generational.GenerationalGCPauseEvent;
-import com.microsoft.gctoolkit.event.shenandoah.ShenandoahCycle;
-import com.microsoft.gctoolkit.event.zgc.*;
-import com.microsoft.gctoolkit.time.DateTimeStamp;
+
+import com.kodewerk.gcsee.aggregator.Aggregates;
+import com.kodewerk.gcsee.aggregator.Aggregator;
+import com.kodewerk.gcsee.aggregator.EventSource;
+import com.kodewerk.gcsee.event.CPUSummary;
+import com.kodewerk.gcsee.event.GCEvent;
+import com.kodewerk.gcsee.event.MemoryPoolSummary;
+import com.kodewerk.gcsee.event.ReferenceGCSummary;
+import com.kodewerk.gcsee.event.g1gc.G1GCPauseEvent;
+import com.kodewerk.gcsee.event.generational.GenerationalGCPauseEvent;
+import com.kodewerk.gcsee.event.shenandoah.ShenandoahCycle;
+import com.kodewerk.gcsee.event.zgc.*;
+import com.kodewerk.gcsee.time.DateTimeStamp;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
