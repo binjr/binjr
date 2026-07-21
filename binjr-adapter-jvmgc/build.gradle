@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Frederic Thevenet
+ * Copyright 2024-2026 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-ext.GCTOOLKIT_VERSION = "3.7.0"
-ext.GCTOOLKIT_SNAPSHOT_VERSION = "3.8.0-beta"
+ext.GCSEE_VERSION = "0.2.0"
 
 dependencies {
     implementation project(path: ':binjr-adapter-logs')
     compileOnly project(':binjr-core')
-//    implementation("com.microsoft.gctoolkit:gctoolkit-api:$GCTOOLKIT_VERSION")
-//    implementation("com.microsoft.gctoolkit:gctoolkit-parser:$GCTOOLKIT_VERSION")
-//    implementation("com.microsoft.gctoolkit:gctoolkit-vertx:$GCTOOLKIT_VERSION")
 
-    implementation files("deps/gctoolkit-api-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
-    implementation files("deps/gctoolkit-parser-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
-    implementation files("deps/gctoolkit-vertx-${GCTOOLKIT_SNAPSHOT_VERSION}.jar")
-    implementation 'io.vertx:vertx-core:4.5.31'
-
+    implementation("com.kodewerk.gcsee:gcsee-api:${GCSEE_VERSION}")
+    implementation("com.kodewerk.gcsee:gcsee-parser:${GCSEE_VERSION}")
+    implementation("com.kodewerk.gcsee:gcsee-vertx:${GCSEE_VERSION}")
 }
 
 jar {

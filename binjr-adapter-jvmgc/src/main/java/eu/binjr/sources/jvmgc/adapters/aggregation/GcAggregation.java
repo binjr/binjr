@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Frederic Thevenet
+ * Copyright 2024-2026 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package eu.binjr.sources.jvmgc.adapters.aggregation;
 
-import com.microsoft.gctoolkit.aggregator.Aggregation;
-import com.microsoft.gctoolkit.aggregator.Collates;
-import com.microsoft.gctoolkit.time.DateTimeStamp;
+import com.kodewerk.gcsee.aggregator.Aggregation;
+import com.kodewerk.gcsee.aggregator.Collates;
+import com.kodewerk.gcsee.time.DateTimeStamp;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;

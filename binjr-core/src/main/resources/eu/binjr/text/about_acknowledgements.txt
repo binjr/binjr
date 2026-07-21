@@ -42,6 +42,10 @@ This Font Software is licensed under the SIL Open Font License, Version 1.1 (htt
 by @fontawesome - https://fontawesome.com
 License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
 
+^bGCSee
+Copyright (c) The GCSee authors.
+Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+
 ^bGoogle Gson
 Copyright 2008 Google Inc
 Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
@@ -57,10 +61,6 @@ Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/L
 ^bLato Fonts
 Copyright (c) 2010-2014 by tyPoland Lukasz Dziedzic (team@latofonts.com) with Reserved Font Name "Lato"
 This Font Software is licensed under the SIL Open Font License, Version 1.1 (http://scripts.sil.org/OFL)
-
-^bMicrosoft GCToolkit
-Copyright (c) Microsoft Corporation.
-Licensed under the MIT License (https://opensource.org/licenses/MIT).
 
 ^bRichTextFX
 Copyright (c) 2013-2017, Tomas Mikula and contributors
