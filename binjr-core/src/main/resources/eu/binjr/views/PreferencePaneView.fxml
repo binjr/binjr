@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2024
+  ~    Copyright 2017-2026
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
   ~    You may obtain a copy of the License at
@@ -214,6 +214,11 @@
                                                  inlineHelp="Highlight the 'current' column the table view, which displays the Y values for each series on the selected chart at the time currently marked by the crosshair. "/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="highlightCurrentSwitch" prefWidth="1.0"/>
+                            </VBox>
+                            <LabelWithInlineHelp text="Show chart settings on new worksheets"
+                                                 inlineHelp="Always makes the chart settings display panel visible when a new worksheet is created."/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="alwaysShowChartSettingsSwitch" prefWidth="1.0"/>
                             </VBox>
                         </VBox>
                     </AnchorPane>

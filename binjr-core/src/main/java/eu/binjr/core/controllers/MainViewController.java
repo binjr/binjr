@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2025 Frederic Thevenet
+ *    Copyright 2016-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -1087,7 +1087,7 @@ public class MainViewController implements Initializable {
     }
 
     private boolean loadWorksheet(Worksheet<?> worksheet) throws CannotLoadWorksheetException {
-        EditableTab newTab = loadWorksheetInTab(worksheet, false);
+        EditableTab newTab = loadWorksheetInTab(worksheet);
         tearableTabPane.getTabs().add(newTab);
         tearableTabPane.getSelectionModel().select(newTab);
         return false;
@@ -1102,7 +1102,7 @@ public class MainViewController implements Initializable {
     }
 
     private boolean editWorksheet(TabPane targetTabPane, Worksheet<?> worksheet) throws CannotLoadWorksheetException {
-        var newTab = loadWorksheetInTab(worksheet, true);
+        var newTab = loadWorksheetInTab(worksheet);
         targetTabPane.getTabs().add(newTab);
         targetTabPane.getSelectionModel().select(newTab);
         return true;
@@ -1128,10 +1128,10 @@ public class MainViewController implements Initializable {
         seriesControllers.remove(tab);
         tab.setContent(null);
         worksheetCtrl.close();
-        loadWorksheet(worksheet, tab, false);
+        loadWorksheet(worksheet, tab);
     }
 
-    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode)
+    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab)
             throws CannotLoadWorksheetException {
         try {
             WorksheetController current = worksheet.getControllerClass()
@@ -1190,7 +1190,7 @@ public class MainViewController implements Initializable {
                 );
             }
             current.getBindingManager().bindBidirectional(newTab.nameProperty(), worksheet.nameProperty());
-            if (setToEditMode) {
+            if (UserPreferences.getInstance().showChartsSettingsByDefault.get()) {
                 logger.trace("Toggle edit mode for worksheet");
                 current.setShowPropertiesPane(true);
             }
@@ -1208,7 +1208,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private EditableTab loadWorksheetInTab(Worksheet<?> worksheet, boolean editMode) throws CannotLoadWorksheetException {
+    private EditableTab loadWorksheetInTab(Worksheet<?> worksheet) throws CannotLoadWorksheetException {
         workspace.setPresentationMode(false);
         var buttons = new ArrayList<ButtonBase>();
         if (worksheet instanceof Syncable syncable) {
@@ -1231,7 +1231,7 @@ public class MainViewController implements Initializable {
                 worksheet.getVisualizationType().getIconStyleClass(),
                 "small-icon");
         EditableTab newTab = new EditableTab(icon, "New worksheet", buttons.toArray(ButtonBase[]::new));
-        loadWorksheet(worksheet, newTab, editMode);
+        loadWorksheet(worksheet, newTab);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
         return newTab;
     }
@@ -1629,7 +1629,7 @@ public class MainViewController implements Initializable {
 
     private Optional<Tab> worksheetTabFactory() {
         try {
-            return Optional.of(loadWorksheetInTab(new XYChartsWorksheet(), true));
+            return Optional.of(loadWorksheetInTab(new XYChartsWorksheet()));
         } catch (CannotLoadWorksheetException e) {
             logger.error(e);
             return Optional.empty();

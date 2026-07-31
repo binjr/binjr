@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2024 Frederic Thevenet
+ *    Copyright 2020-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -190,7 +190,6 @@ public abstract class WorksheetController implements Initializable, Closeable {
         getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             setEditChartMode(newValue);
         });
-        setEditChartMode(getWorksheet().isEditModeEnabled());
     }
 
     public BindingManager getBindingManager() {

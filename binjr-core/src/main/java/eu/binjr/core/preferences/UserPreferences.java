@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2025 Frederic Thevenet
+ *    Copyright 2019-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -462,6 +462,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Number> defaultStrokeWidthDurationCharts = doublePreference("defaultDurationWidthScatterCharts", 0.5d);
 
     public final ObservablePreference<Boolean> showOutlineOnDurationCharts = booleanPreference("showOutlineOnDurationCharts", true);
+
+    public final ObservablePreference<Boolean> showChartsSettingsByDefault = booleanPreference("showChartsSettingsByDefault", true);
 
     public static class UserFavorites extends MruFactory {
 

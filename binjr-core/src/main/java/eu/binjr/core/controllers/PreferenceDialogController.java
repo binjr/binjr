@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2025 Frederic Thevenet
+ *    Copyright 2017-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -55,7 +55,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,6 +71,8 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
 
+    @FXML
+    private ToggleSwitch alwaysShowChartSettingsSwitch;
     @FXML
     private ToggleSwitch highlightCurrentSwitch;
     @FXML
@@ -323,6 +324,7 @@ public class PreferenceDialogController implements Initializable {
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
         highlightCurrentSwitch.selectedProperty().bindBidirectional(userPrefs.highlightCurrentColumn.property());
+        alwaysShowChartSettingsSwitch.selectedProperty().bindBidirectional(userPrefs.showChartsSettingsByDefault.property());
         showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
         filterBarVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logFilterBarVisible.property());
         findBarVisibleToggle.selectedProperty().bindBidirectional(userPrefs.logFindBarVisible.property());
