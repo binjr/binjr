@@ -1,0 +1,1 @@
+* _[New] [Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 26.0.2.
