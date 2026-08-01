@@ -1,2 +1,3 @@
-* _[New] [UI]_ By default, binjr always makes the chart settings panel visible when a new worksheet is created or a chart is added. There is now a general toggle in `Charts > Show chart settings on new worksheets` to override that behaviour.  
+* _[New] [UI]_ By default, binjr always makes the chart properties panel visible when a new worksheet is created or a chart is added. There is now a general toggle in `Charts > Show chart settings on new worksheets` to override that behaviour.  
+* _[New] [UI]_ New keyboard shortcut `Crtl+e` to show/dismiss chart properties on chart worksheet.  
 * _[New] [Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 26.0.2.

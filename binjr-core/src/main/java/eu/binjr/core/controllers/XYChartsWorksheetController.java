@@ -1059,6 +1059,12 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .bindBidirectionnal(ToggleButton::selectedProperty, currentViewPort.getDataStore().showPropertiesProperty())
                     .build(ToggleButton::new);
 
+            root.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(event -> {
+                if (event.getCode() == KeyCode.E && event.isControlDown()) {
+                    editButton.setSelected(!editButton.isSelected());
+                    event.consume();
+                }
+            }));
             editButtonsGroup.getToggles().add(editButton);
 
             Button moveUpButton = new ToolButtonBuilder<Button>(getBindingManager())
