@@ -215,8 +215,8 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="highlightCurrentSwitch" prefWidth="1.0"/>
                             </VBox>
-                            <LabelWithInlineHelp text="Show chart settings on new worksheets"
-                                                 inlineHelp="Always makes the chart settings display panel visible when a new worksheet is created."/>
+                            <LabelWithInlineHelp text="Open properties on new charts"
+                                                 inlineHelp="Always open the chart properties display panel when a new worksheet is created or anew chart added."/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="alwaysShowChartSettingsSwitch" prefWidth="1.0"/>
                             </VBox>
