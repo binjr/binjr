@@ -1,3 +1,11 @@
+## [binjr v3.30.0](https://github.com/binjr/binjr/releases/tag/v3.30.0)
+Released on Sun, 9 Aug 2026
+
+* _[New] [UI]_ By default, the chart properties panel is automatically opened when a new worksheet is created or a chart is added. There is now an option in `Charts > Show chart settings on new worksheets` to override that behaviour.
+* _[New] [UI]_ New keyboard shortcut `Crtl+e` to show/dismiss chart properties on chart worksheet.
+* _[New] [Dependencies]_ Updated the embedded runtimes for Java and JavaFX to version 26.0.2.
+
+
 ## [binjr v3.29.1](https://github.com/binjr/binjr/releases/tag/v3.29.1)
 Released on Sat, 30 May 2026
 
