@@ -1,0 +1,1 @@
+* _[New] [Dependencies]_ Updated the embedded Java runtime to 26.0.2.1 (August security update)
