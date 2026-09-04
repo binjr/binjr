@@ -1,3 +1,8 @@
+## [binjr v3.30.1](https://github.com/binjr/binjr/releases/tag/v3.30.1)
+Released on Mon, 31 Aug 2026
+
+* _[New] [Dependencies]_ Updated the embedded Java runtime to 26.0.2.1 (August security update)
+
 ## [binjr v3.30.0](https://github.com/binjr/binjr/releases/tag/v3.30.0)
 Released on Sun, 9 Aug 2026
 
