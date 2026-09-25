@@ -23,6 +23,7 @@ dependencies {
     implementation("com.kodewerk.gcsee:gcsee-api:${GCSEE_VERSION}")
     implementation("com.kodewerk.gcsee:gcsee-parser:${GCSEE_VERSION}")
     implementation("com.kodewerk.gcsee:gcsee-vertx:${GCSEE_VERSION}")
+    implementation 'io.vertx:vertx-core:5.2.0'
 }
 
 jar {
