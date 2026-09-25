@@ -88,11 +88,11 @@ public class GcLogDataStore extends GcAggregation {
         var beforeGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_BEFORE_COLLECTION);
         var afterGc = this.aggregations.get(poolName + GcAggregator.ID_OCCUPANCY_AFTER_COLLECTION);
         if (beforeGc == null) {
-            logger.error("Cannot compute heap allocation rate: heap occupancy before GC not captured.");
+            logger.warn("Cannot compute heap allocation rate: heap occupancy before GC not captured.");
             return;
         }
         if (afterGc == null) {
-            logger.error("Cannot compute heap allocation rate: heap occupancy after GC not captured.");
+            logger.warn("Cannot compute heap allocation rate: heap occupancy after GC not captured.");
             return;
         }
         if (beforeGc.data().size() != afterGc.data().size()) {
