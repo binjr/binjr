@@ -15,6 +15,7 @@
  */
 
 ext.GCSEE_VERSION = "0.2.0"
+ext.VERTX_VERSION = "5.2.0"
 
 dependencies {
     implementation project(path: ':binjr-adapter-logs')
@@ -23,8 +24,8 @@ dependencies {
     implementation("com.kodewerk.gcsee:gcsee-api:${GCSEE_VERSION}")
     implementation("com.kodewerk.gcsee:gcsee-parser:${GCSEE_VERSION}")
     implementation("com.kodewerk.gcsee:gcsee-vertx:${GCSEE_VERSION}")
-    implementation 'io.vertx:vertx-core:5.2.0'
-    implementation('io.vertx:vertx-dependencies:5.2.0')
+    implementation("io.vertx:vertx-core:${VERTX_VERSION}")
+    implementation("io.vertx:vertx-dependencies:${VERTX_VERSION}")
 }
 
 jar {
