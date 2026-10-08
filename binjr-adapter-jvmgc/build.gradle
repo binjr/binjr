@@ -15,7 +15,7 @@
  */
 
 ext.GCSEE_VERSION = "0.2.0"
-ext.VERTX_VERSION = "5.2.0"
+ext.VERTX_VERSION = "5.2.1"
 
 dependencies {
     implementation project(path: ':binjr-adapter-logs')
