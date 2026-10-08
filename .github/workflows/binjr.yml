@@ -23,13 +23,6 @@ jobs:
       name: app_bundle_linux_aarch64
       chosen-os: ubuntu-22.04-arm
     secrets: inherit
-  build_job_mac_x64:
-    name: build_job_mac_x64
-    uses: "./.github/workflows/build_job.yml"
-    with:
-      name: app_bundle_mac_x64
-      chosen-os: macos-15-intel
-    secrets: inherit
   build_job_mac_aarch64:
     name: build_job_mac_aarch64
     uses: "./.github/workflows/build_job.yml"
@@ -49,7 +42,6 @@ jobs:
     needs:
     - build_job_linux_x64
     - build_job_linux_aarch64
-    - build_job_mac_x64
     - build_job_mac_aarch64
     - build_job_windows_x64
     runs-on: ubuntu-22.04
@@ -95,7 +87,6 @@ jobs:
     needs:
     - build_job_linux_x64
     - build_job_linux_aarch64
-    - build_job_mac_x64
     - build_job_mac_aarch64
     - build_job_windows_x64
     runs-on: ubuntu-22.04
@@ -137,7 +128,6 @@ jobs:
     needs:
       - build_job_linux_x64
       - build_job_linux_aarch64
-      - build_job_mac_x64
       - build_job_mac_aarch64
       - build_job_windows_x64
     runs-on: windows-2022
@@ -166,7 +156,6 @@ jobs:
 #    needs:
 #      - build_job_linux_x64
 #      - build_job_linux_aarch64
-#      - build_job_mac_x64
 #      - build_job_mac_aarch64
 #      - build_job_windows_x64
 #    runs-on: ubuntu-22.04
