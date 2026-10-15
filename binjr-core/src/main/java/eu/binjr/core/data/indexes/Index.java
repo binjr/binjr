@@ -81,7 +81,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -110,7 +109,7 @@ public class Index implements Indexable {
     private final UserPreferences userPref = UserPreferences.getInstance();
     private final Map<String, ReloadStatus> indexedFiles = new ConcurrentHashMap<>();
 
-    private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
+    private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper();
     protected DirectoryReader indexReader;
     protected IndexSearcher searcher;
     protected TaxonomyReader taxonomyReader;
@@ -743,6 +742,7 @@ public class Index implements Indexable {
                     if (prefs.useParallelIndexFetch.get()) {
                         scoreDocStream = scoreDocStream.parallel();
                     }
+
                     scoreDocStream.forEach(CheckedLambdas.wrap(scoreDoc -> {
                         var doc = searcher.storedFields().document(scoreDoc.doc, fieldsToLoad);
                         var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(doc.getField(TIMESTAMP).numericValue().longValue()), zoneId);

@@ -1417,7 +1417,8 @@ public class XYChartsWorksheetController extends WorksheetController {
 
 
     public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
-        return invalidate(saveToHistory, dontPlotChart, forceRefresh, ReloadPolicy.UNLOADED);
+        this.renderingDiffered = getDifferRendering();
+        return invalidate(saveToHistory, dontPlotChart || renderingDiffered, forceRefresh, ReloadPolicy.UNLOADED);
     }
 
     public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh, ReloadPolicy reloadPolicy) {
@@ -1451,7 +1452,9 @@ public class XYChartsWorksheetController extends WorksheetController {
         logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
         nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
         return AsyncTaskManager.getInstance().submit(() -> {
-                    viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh, reloadPolicy);
+                    try (Profiler _ = Profiler.start("Fetching data for " + getWorksheet().getName() + "/" + viewPort.getDataStore().getName(), logger::perf)) {
+                        viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh, reloadPolicy);
+                    }
                     return viewPort.getDataStore().getSeries()
                             .stream()
                             .filter(series -> {

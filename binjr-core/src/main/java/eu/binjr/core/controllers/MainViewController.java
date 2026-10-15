@@ -746,7 +746,7 @@ public class MainViewController implements Initializable {
                     Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
                     Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e, root);
-                } catch (Exception e){
+                } catch (Exception e) {
                     Dialogs.notifyException("Unexpected error while initializing source adapter " + adapterInfo.getName(), e, root);
                 }
             });
@@ -1089,6 +1089,7 @@ public class MainViewController implements Initializable {
     private boolean loadWorksheet(Worksheet<?> worksheet) throws CannotLoadWorksheetException {
         EditableTab newTab = loadWorksheetInTab(worksheet);
         tearableTabPane.getTabs().add(newTab);
+//        seriesControllers.get(newTab).setParentTab(newTab);
         tearableTabPane.getSelectionModel().select(newTab);
         return false;
     }
@@ -1104,6 +1105,7 @@ public class MainViewController implements Initializable {
     private boolean editWorksheet(TabPane targetTabPane, Worksheet<?> worksheet) throws CannotLoadWorksheetException {
         var newTab = loadWorksheetInTab(worksheet);
         targetTabPane.getTabs().add(newTab);
+//        seriesControllers.get(newTab).setParentTab(newTab);
         targetTabPane.getSelectionModel().select(newTab);
         return true;
     }
@@ -1150,6 +1152,8 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
+                current.getBindingManager().attachListener(newTab.selectedProperty(),
+                        (ChangeListener<Boolean>) (_, _, newValue) -> current.setDifferRendering(!newValue));
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }

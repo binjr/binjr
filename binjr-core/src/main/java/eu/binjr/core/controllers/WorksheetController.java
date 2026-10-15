@@ -17,20 +17,17 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
-import eu.binjr.common.javafx.controls.NodeUtils;
-import eu.binjr.common.javafx.controls.TimeRange;
-import eu.binjr.common.javafx.controls.ToolButtonBuilder;
+import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.SourceBinding;
-import eu.binjr.core.data.workspace.Rangeable;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import eu.binjr.core.data.workspace.Worksheet;
-import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -42,7 +39,6 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.*;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -67,6 +63,8 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     @FXML
     public Button toggleChartDisplayModeButton;
+
+    private final BooleanProperty differRendering = new SimpleBooleanProperty(true);
 
     protected WorksheetController(MainViewController parentController) {
         this.parentController = parentController;
@@ -184,12 +182,24 @@ public abstract class WorksheetController implements Initializable, Closeable {
         //Noop
     }
 
+    protected boolean renderingDiffered = false;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(event -> getParentController().handleTogglePresentationMode()));
-        getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-            setEditChartMode(newValue);
-        });
+        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(_ -> getParentController().handleTogglePresentationMode()));
+        getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(),
+                (ChangeListener<Boolean>) (_, _, newValue) -> setEditChartMode(newValue));
+
+        getBindingManager().attachListener(differRenderingProperty(),
+                (ChangeListener<Boolean>) (_, _, newValue) -> {
+                    if (renderingDiffered && !newValue) {
+                        try {
+                            this.refresh();
+                        } finally {
+                            renderingDiffered = false;
+                        }
+                    }
+                });
     }
 
     public BindingManager getBindingManager() {
@@ -364,4 +374,15 @@ public abstract class WorksheetController implements Initializable, Closeable {
         return row;
     }
 
+    public boolean getDifferRendering() {
+        return differRendering.get();
+    }
+
+    public BooleanProperty differRenderingProperty() {
+        return differRendering;
+    }
+
+    public void setDifferRendering(boolean differRendering) {
+        this.differRendering.set(differRendering);
+    }
 }
