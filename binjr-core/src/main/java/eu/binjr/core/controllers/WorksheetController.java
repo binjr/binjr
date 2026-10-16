@@ -190,7 +190,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
         getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(),
                 (ChangeListener<Boolean>) (_, _, newValue) -> setEditChartMode(newValue));
 
-        getBindingManager().attachListener(differRenderingProperty(),
+        getBindingManager().attachListener(differRendering,
                 (ChangeListener<Boolean>) (_, _, newValue) -> {
                     if (renderingDiffered && !newValue) {
                         try {
@@ -375,11 +375,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
     }
 
     public boolean getDifferRendering() {
-        return differRendering.get();
-    }
-
-    public BooleanProperty differRenderingProperty() {
-        return differRendering;
+        return UserPreferences.getInstance().enableWorksheetDifferedRendering.get() && differRendering.get();
     }
 
     public void setDifferRendering(boolean differRendering) {

@@ -465,6 +465,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> showChartsSettingsByDefault = booleanPreference("showChartsSettingsByDefault", true);
 
+    public final ObservablePreference<Boolean> enableWorksheetDifferedRendering = booleanPreference("enableWorksheetDifferedRendering", true);;
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
