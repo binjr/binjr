@@ -1089,7 +1089,6 @@ public class MainViewController implements Initializable {
     private boolean loadWorksheet(Worksheet<?> worksheet) throws CannotLoadWorksheetException {
         EditableTab newTab = loadWorksheetInTab(worksheet);
         tearableTabPane.getTabs().add(newTab);
-//        seriesControllers.get(newTab).setParentTab(newTab);
         tearableTabPane.getSelectionModel().select(newTab);
         return false;
     }
@@ -1105,7 +1104,6 @@ public class MainViewController implements Initializable {
     private boolean editWorksheet(TabPane targetTabPane, Worksheet<?> worksheet) throws CannotLoadWorksheetException {
         var newTab = loadWorksheetInTab(worksheet);
         targetTabPane.getTabs().add(newTab);
-//        seriesControllers.get(newTab).setParentTab(newTab);
         targetTabPane.getSelectionModel().select(newTab);
         return true;
     }

@@ -236,7 +236,7 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                         () -> {
                             try {
                                 String path = byPathEntry.getKey();
-                                logger.trace("Fetch sub-task '" + path + "' started");
+                                logger.debug("Fetch sub-task '" + path + "' started");
                                 // Get data from the adapter
                                 Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> data;
                                 LoadingStatus status = LoadingStatus.OK;

@@ -64,7 +64,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
     @FXML
     public Button toggleChartDisplayModeButton;
 
-    private final BooleanProperty differRendering = new SimpleBooleanProperty(true);
+    private final BooleanProperty differRendering = new SimpleBooleanProperty(false);
 
     protected WorksheetController(MainViewController parentController) {
         this.parentController = parentController;
