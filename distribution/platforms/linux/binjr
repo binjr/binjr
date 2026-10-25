@@ -10,7 +10,6 @@ exec "$JAVACMD" \
   -Xmx4096M \
   -XX:+UnlockExperimentalVMOptions \
   -XX:+UseShenandoahGC \
-  -XX:ShenandoahGCMode=generational \
   -XX:ShenandoahGCHeuristics=compact \
   -XX:ShenandoahAllocationThreshold=20 \
   -XX:+UseCompactObjectHeaders \
