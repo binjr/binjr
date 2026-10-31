@@ -64,7 +64,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
     @FXML
     public Button toggleChartDisplayModeButton;
 
-    private final BooleanProperty differRendering = new SimpleBooleanProperty(false);
+    private final BooleanProperty displayed = new SimpleBooleanProperty(true);
 
     protected WorksheetController(MainViewController parentController) {
         this.parentController = parentController;
@@ -186,13 +186,16 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(_ -> getParentController().handleTogglePresentationMode()));
+        toggleChartDisplayModeButton.setOnAction(
+                getBindingManager().registerHandler(_ -> getParentController().handleTogglePresentationMode()));
         getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(),
                 (ChangeListener<Boolean>) (_, _, newValue) -> setEditChartMode(newValue));
 
-        getBindingManager().attachListener(differRendering,
-                (ChangeListener<Boolean>) (_, _, newValue) -> {
-                    if (renderingDiffered && !newValue) {
+        getBindingManager().attachListener(displayed,
+                (ChangeListener<Boolean>) (_, _, displayed) -> {
+                    if (renderingDiffered && displayed) {
+                        // Trigger an explicit refresh of the worksheet if its rendering had been
+                        // differed on account of it not being displayed on screen until now.
                         try {
                             this.refresh();
                         } finally {
@@ -374,11 +377,11 @@ public abstract class WorksheetController implements Initializable, Closeable {
         return row;
     }
 
-    public boolean getDifferRendering() {
-        return UserPreferences.getInstance().enableWorksheetDifferedRendering.get() && differRendering.get();
+    public boolean differRendering() {
+        return UserPreferences.getInstance().enableWorksheetDifferedRendering.get() && !displayed.get();
     }
 
-    public void setDifferRendering(boolean differRendering) {
-        this.differRendering.set(differRendering);
+    public void setDisplayed(boolean displayed) {
+        this.displayed.set(displayed);
     }
 }

@@ -1417,7 +1417,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
 
     public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
-        this.renderingDiffered = getDifferRendering();
+        this.renderingDiffered = differRendering();
         return invalidate(saveToHistory, dontPlotChart || renderingDiffered, forceRefresh, ReloadPolicy.UNLOADED);
     }
 

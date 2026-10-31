@@ -1151,7 +1151,7 @@ public class MainViewController implements Initializable {
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
                 current.getBindingManager().attachListener(newTab.selectedProperty(),
-                        (ChangeListener<Boolean>) (_, _, newValue) -> current.setDifferRendering(!newValue));
+                        (ChangeListener<Boolean>) (_, _, newValue) -> current.setDisplayed(newValue));
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }
