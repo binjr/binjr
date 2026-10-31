@@ -1,0 +1,1 @@
+* _[Fixed] [Core]_ Charts are not refreshed when adding series to an empty chart whose default time range is the same as the one currently selected.  

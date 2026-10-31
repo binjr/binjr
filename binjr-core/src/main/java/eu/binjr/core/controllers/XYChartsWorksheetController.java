@@ -1209,7 +1209,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 if (worksheet.getTotalNumberOfSeries() == 0) {
                     // Set the time range of the whole worksheet to accommodate the new bindings
                     // if there are no other series present.
-                    asyncResetToInitialTimerange(() -> XYChartsWorksheet.mergeInitialTimeRange(charts))
+                    asyncResetToInitialTimerange(() -> XYChartsWorksheet.mergeInitialTimeRange(charts), true)
                             .whenComplete((o, throwable) -> Dialogs.runOnFXThread(() -> worksheet.getCharts().addAll(charts)));
                 } else {
                     worksheet.getCharts().addAll(charts);
@@ -1220,14 +1220,19 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-    private CompletableFuture<?> asyncResetToInitialTimerange(Supplier<TimeRange> rangeSupplier) {
+    private CompletableFuture<?> asyncResetToInitialTimerange(Supplier<TimeRange> rangeSupplier, boolean forceRefresh) {
         logger.debug(() -> "Reset worksheet time range to initial value");
         nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
         return AsyncTaskManager.getInstance().submit(
                 rangeSupplier::get,
                 event -> {
                     nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
-                    this.timeRangePicker.selectedRangeProperty().setValue((TimeRange) event.getSource().getValue());
+                    TimeRange newRange = (TimeRange) event.getSource().getValue();
+                    if (forceRefresh && this.timeRangePicker.getSelectedRange().equals(newRange)) {
+                        this.invalidate(false, false, false);
+                    } else {
+                        this.timeRangePicker.selectedRangeProperty().setValue(newRange);
+                    }
                 },
                 event -> {
                     nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
@@ -1372,7 +1377,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         if (worksheet.getTotalNumberOfSeries() == timeSeriesBindings.size()) {
             // Set the time range of the whole worksheet to accommodate the new bindings
             // if there are no other series present.
-            asyncResetToInitialTimerange(targetChart::getInitialTimeRange);
+            asyncResetToInitialTimerange(targetChart::getInitialTimeRange, true);
         } else {
             invalidate(false, false, false);
         }
