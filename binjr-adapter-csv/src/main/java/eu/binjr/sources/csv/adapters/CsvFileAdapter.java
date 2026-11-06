@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2025 Frederic Thevenet
+ *    Copyright 2017-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import eu.binjr.sources.csv.data.parsers.CsvEventFormat;
 import eu.binjr.sources.csv.data.parsers.CsvParsingProfile;
 import eu.binjr.sources.csv.data.parsers.CustomCsvParsingProfile;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.DoubleDocValuesField;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.InputStream;
@@ -159,7 +159,9 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
 
     @Override
     protected Document mapEventToDocument(Document doc, ParsedEvent event) {
-        event.getTextFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value))));
+        //event.getTextFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value))));
+        event.getTextFields().forEach((key, value) -> doc.add(new DoubleDocValuesField(key, formatToDouble(value))));
+
         return doc;
     }
 

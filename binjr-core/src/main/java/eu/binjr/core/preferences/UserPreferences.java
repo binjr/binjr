@@ -232,7 +232,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The timeout value in ms for asynchronous tasks (an exception will be thrown past this delay).
      */
-    public final ObservablePreference<Number> asyncTasksTimeOutMs = longPreference("asyncTasksTimeOutMs", 120000L);
+    public final ObservablePreference<Number> asyncTasksTimeOutMs = longPreference("asyncTasksTimeOutMs", 120_000L);
 
     /**
      * Only trigger treeview filter after this amount of characters have been entered into the text field.
@@ -302,7 +302,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> parsingThreadNumber = integerPreference("parsingThreadNumber", 0);
 
-    public final ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
+    public final ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10_000);
 
     public final ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
 
@@ -359,13 +359,13 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> maxSnapshotSnippetWidth = integerPreference("maxSnapshotSnippetWidth", 300);
 
-    public final ObservablePreference<Number> httpSocketTimeoutMs = integerPreference("httpSocketTimeoutMs", 30000);
+    public final ObservablePreference<Number> httpSocketTimeoutMs = integerPreference("httpSocketTimeoutMs", 30-000);
 
-    public final ObservablePreference<Number> httpConnectionTimeoutMs = integerPreference("httpConnectionTimeoutMs", 30000);
+    public final ObservablePreference<Number> httpConnectionTimeoutMs = integerPreference("httpConnectionTimeoutMs", 30_000);
 
-    public final ObservablePreference<Number> httpResponseTimeoutMs = integerPreference("httpResponseTimeoutMs", 30000);
+    public final ObservablePreference<Number> httpResponseTimeoutMs = integerPreference("httpResponseTimeoutMs", 30_000);
 
-    public final ObservablePreference<Number> httpSSLConnectionTTLMs = integerPreference("httpSSLConnectionTTLMs", 120000);
+    public final ObservablePreference<Number> httpSSLConnectionTTLMs = integerPreference("httpSSLConnectionTTLMs", 120_000);
 
     public final ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB = integerPreference("dataAdapterFetchCacheMaxSizeMiB", 32);
 
@@ -392,7 +392,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<DateFormat> labelDateFormat = enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
 
-    public final ObservablePreference<Number> numIdxMaxPageSize = integerPreference("numIdxMaxPageSize", 200000);
+    public final ObservablePreference<Number> numericIndexPageSize = integerPreference("numericIndexPageSize", 100_000);
 
     public final ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultFontSize", 9);
 
@@ -433,7 +433,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> singleMinTickThreshold = doublePreference("singleMinTickThreshold", 36.0);
 
-    public final ObservablePreference<Boolean> useParallelIndexFetch = booleanPreference("useParallelIndexFetch", true);
+    public final ObservablePreference<Number> fetchFromIndexSamplingThreshold = integerPreference("fetchFromIndexSamplingThreshold", 2000);
 
     public final ObservablePreference<String> userAgentString = stringPreference("userAgentString", "");
 

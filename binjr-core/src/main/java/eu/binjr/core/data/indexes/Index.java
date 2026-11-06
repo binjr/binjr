@@ -22,6 +22,7 @@ import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.javafx.charts.LargestTriangleThreeBuckets;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -30,8 +31,6 @@ import eu.binjr.core.data.indexes.parser.*;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
-import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.IndexingTokenizer;
 import eu.binjr.core.preferences.UserPreferences;
@@ -58,10 +57,7 @@ import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
@@ -84,7 +80,6 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
@@ -113,12 +108,14 @@ public class Index implements Indexable {
     protected DirectoryReader indexReader;
     protected IndexSearcher searcher;
     protected TaxonomyReader taxonomyReader;
+    protected boolean forceMergeOnCommit;
 
 
     private final Cache<String, SearchHitsProcessor> facetResultCache;
     private final Cache<String, SearchHitsProcessor> hitResultCache;
 
-    public Index() throws IOException {
+    public Index(boolean forceMergeOnCommit) throws IOException {
+        this.forceMergeOnCommit = forceMergeOnCommit;
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
@@ -462,7 +459,6 @@ public class Index implements Indexable {
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             final AtomicLong nbLogEvents = new AtomicLong(0);
             try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + nbLogEvents.get() + " events: " + e.toMilliString()))) {
-
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
                 final AtomicBoolean taskAborted = new AtomicBoolean(false);
                 final BlockingQueue<ParsedEvent> queue = new LinkedBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
@@ -559,6 +555,9 @@ public class Index implements Indexable {
             try (Profiler p = Profiler.start("Commit index", logger::perf)) {
                 taxonomyWriter.commit();
                 indexWriter.commit();
+                if (forceMergeOnCommit) {
+                    indexWriter.forceMerge(1);
+                }
             }
             try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
                 var updatedReader = DirectoryReader.openIfChanged(indexReader);
@@ -713,10 +712,8 @@ public class Index implements Indexable {
                     .forEach(path -> drillDownQuery.add(PATH, path));
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
-            var reduceTransform = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
-            var sortTransform = new SortTransform<Double>();
             AtomicLong hitsCollected = new AtomicLong(0);
-            int pageSize = prefs.numIdxMaxPageSize.get().intValue();
+            int pageSize = prefs.numericIndexPageSize.get().intValue();
             FieldDoc lastHit = null;
             try (Profiler p = Profiler.start(() -> "Retrieved " + hitsCollected.get() + " samples for " + seriesToFill.size() + " series", logger::perf)) {
                 for (int pageNumber = 0; true; pageNumber++) {
@@ -732,48 +729,72 @@ public class Index implements Indexable {
                             .stream()
                             .map(k -> k.getBinding().getLabel())
                             .collect(Collectors.toSet());
-                    fieldsToLoad.add(TIMESTAMP);
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new ConcurrentHashMap<>();
                     // fill the buffer with data for the current page
                     var nbHits = result.collectorResult.scoreDocs.length;
                     var lastHitAcc = new FieldDoc[1];
                     var timestampAcc = new ZonedDateTime[]{ZonedDateTime.of(-999999999, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())};
-                    Stream<ScoreDoc> scoreDocStream = Arrays.stream(result.collectorResult.scoreDocs);
-                    if (prefs.useParallelIndexFetch.get()) {
-                        scoreDocStream = scoreDocStream.parallel();
-                    }
-                    scoreDocStream.forEach(CheckedLambdas.wrap(scoreDoc -> {
-                        var doc = searcher.storedFields().document(scoreDoc.doc, fieldsToLoad);
-                        var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(doc.getField(TIMESTAMP).numericValue().longValue()), zoneId);
+                    int reduceThreshold = userPref.fetchFromIndexSamplingThreshold.get().intValue();
+                    Map<String, long[]> buffers = new HashMap<>(fieldsToLoad.size());
+                    int[] docIDs = new int[nbHits];
+                    // <!> All segments must be merged for this to work <!>
+                    var timestampValues = MultiDocValues.getSortedNumericValues(indexReader, TIMESTAMP);
+                    ZonedDateTime[] timestamps = new ZonedDateTime[nbHits];
+                    // Retrieve all timestamps
+                    for (int i = 0; i < nbHits; i++) {
+                        docIDs[i] = result.collectorResult.scoreDocs[i].doc;
+                        var scoreDoc = result.collectorResult.scoreDocs[i];
+                        timestampValues.advanceExact(scoreDoc.doc);
+                        var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestampValues.nextValue()), zoneId);
                         if (timestamp.isAfter(timestampAcc[0])) {
                             lastHitAcc[0] = (FieldDoc) scoreDoc;
                             timestampAcc[0] = timestamp;
                         }
-                        seriesToFill.forEach((info, proc) -> {
-                            var field = doc.getField(info.getBinding().getLabel());
-                            if (field != null) {
-                                var value = field.numericValue();
-                                if (value != null) {
-                                    pageDataBuffer.computeIfAbsent(info, doubleTimeSeriesInfo -> new DoubleTimeSeriesProcessor(nbHits))
-                                            .addSample(timestamp, value.doubleValue());
-                                }
-                            }
-                        });
-                    }));
-                    lastHit = lastHitAcc[0];
-                    // Apply downsampling to buffered data and append reduced dataset to processor
-                    var entryStream = seriesToFill.entrySet().stream();
-                    if (prefs.useParallelIndexFetch.get()) {
-                        entryStream = entryStream.parallel();
+                        timestamps[i] = timestamp;
                     }
-                    entryStream.forEach(entry -> {
+                    lastHit = lastHitAcc[0];
+                    // Retrieve all numeric values
+                    for (var series : seriesToFill.entrySet()) {
+                        var field = series.getKey().getBinding().getLabel();
+                        buffers.put(field, new long[nbHits]);
+                        var values = MultiDocValues.getNumericValues(indexReader, field);
+                        if (values != null) {
+                            values.longValues(nbHits, docIDs, buffers.get(field), 0);
+                        }
+                    }
+                    // Apply downsampling to reduce the number of samples
+                    BitSet samplesToKeep = LargestTriangleThreeBuckets.computeKeepList(
+                            reduceThreshold,
+                            Double::longBitsToDouble,
+                            timestamps,
+                            buffers.values().toArray(long[][]::new));
+                    // Iterate the bitset from downsampling and populate timeseries processors with the filtered data
+                    for (int i = samplesToKeep.nextSetBit(0); i >= 0; i = samplesToKeep.nextSetBit(i + 1)) {
+                        for (var e : seriesToFill.entrySet()) {
+                            var fieldBuffer = buffers.get(e.getKey().getBinding().getLabel());
+                            if (fieldBuffer != null) {
+                                // re-encode values from long to double
+                                var value = Double.longBitsToDouble(fieldBuffer[i]);
+                                pageDataBuffer.computeIfAbsent(e.getKey(), _ -> new DoubleTimeSeriesProcessor(nbHits))
+                                        .addSample(timestamps[i], value);
+                            }
+                        }
+                        if (i == Integer.MAX_VALUE) {
+                            break; // or (i+1) would overflow
+                        }
+                    }
+                    // Append results from the current page to global results
+                    for (var entry : seriesToFill.entrySet()) {
                         var pageProc = pageDataBuffer.get(entry.getKey());
                         if (pageProc != null) {
+                            logger.debug(() -> "series name=" + entry.getKey().getDisplayName() +
+                                    ", page size=" + nbHits +
+                                    ", downsampling threshold=" + reduceThreshold +
+                                    ", samples kept=" + pageProc.size());
                             var fullQueryProc = entry.getValue();
-                            pageProc.applyTransforms(sortTransform, reduceTransform);
                             fullQueryProc.appendData(pageProc);
                         }
-                    });
+                    }
                     hitsCollected.accumulateAndGet(result.collectorResult.scoreDocs.length, Long::sum);
                     // End the loop once all hits have been collected
                     if (hitsCollected.get() >= result.collectorResult.totalHits.value()) {
@@ -785,7 +806,8 @@ public class Index implements Indexable {
         });
     }
 
-    private ZonedDateTime getTimeRangeBoundary(boolean getMax, List<String> files, ZoneId zoneId) throws IOException {
+    private ZonedDateTime getTimeRangeBoundary(boolean getMax, List<String> files, ZoneId zoneId) throws
+            IOException {
         return indexLock.read().lock(() -> {
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
             var dq = new DrillDownQuery(facetsConfig);

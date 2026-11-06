@@ -86,7 +86,7 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform<Double> {
             }
             if (!isBufferCoherent) {
                 logger.debug(() -> "Collected series data are not coherent: falling back to single pass lttb");
-                return new LargestTriangleThreeBucketsTransform(threshold);
+                return new LttbReduceTransform(threshold);
             }
             return new SecondPassLttbTransform(this, threshold);
         });

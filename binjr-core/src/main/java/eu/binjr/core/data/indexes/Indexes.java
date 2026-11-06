@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2026 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package eu.binjr.core.data.indexes;
 import eu.binjr.common.concurrent.CloseableResourceManager;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.function.CheckedSupplier;
+import eu.binjr.core.preferences.UserPreferences;
 
 
 import java.io.IOException;
 
 public enum Indexes {
-    LOG_FILES("log_file_index", Index::new),
-    NUM_SERIES("numerical_series_index", Index::new);
+    LOG_FILES("log_file_index", () -> new Index(false)),
+    NUM_SERIES("numerical_series_index", () -> new Index(true));
 
     private final CloseableResourceManager<Index> indexManager;
     private final String key;
