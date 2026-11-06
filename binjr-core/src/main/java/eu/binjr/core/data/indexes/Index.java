@@ -49,7 +49,6 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.analysis.util.CharTokenizer;
-import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRange;
@@ -59,7 +58,10 @@ import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
-import org.apache.lucene.index.*;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.flexible.standard.StandardQueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
@@ -117,10 +119,6 @@ public class Index implements Indexable {
     private final Cache<String, SearchHitsProcessor> hitResultCache;
 
     public Index() throws IOException {
-        this(null);
-    }
-
-    public Index(Codec codec) throws IOException {
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
@@ -164,9 +162,6 @@ public class Index implements Indexable {
         IndexWriterConfig iwc = new IndexWriterConfig(new PerFieldAnalyzerWrapper(new StandardAnalyzer(),
                 Map.of(FIELD_CONTENT, getContentFieldAnalyzer())));
         iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-        if (codec != null) {
-            iwc.setCodec(codec);
-        }
         this.indexWriter = new IndexWriter(indexDirectory, iwc);
         this.taxonomyWriter = new DirectoryTaxonomyWriter(taxonomyDirectory);
         indexReader = DirectoryReader.open(indexWriter);
@@ -721,7 +716,7 @@ public class Index implements Indexable {
             var reduceTransform = new LargestTriangleThreeBucketsTransform(userPref.downSamplingThreshold.get().intValue());
             var sortTransform = new SortTransform<Double>();
             AtomicLong hitsCollected = new AtomicLong(0);
-            int pageSize = prefs.numericIndexPageSize.get().intValue();
+            int pageSize = prefs.numIdxMaxPageSize.get().intValue();
             FieldDoc lastHit = null;
             try (Profiler p = Profiler.start(() -> "Retrieved " + hitsCollected.get() + " samples for " + seriesToFill.size() + " series", logger::perf)) {
                 for (int pageNumber = 0; true; pageNumber++) {
