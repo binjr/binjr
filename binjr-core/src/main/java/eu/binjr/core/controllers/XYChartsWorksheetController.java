@@ -496,10 +496,15 @@ public class XYChartsWorksheetController extends WorksheetController {
             case OVERLAID -> setupOverlayChartLayout(screenshotCanvas);
             case STACKED -> setupStackedChartLayout(screenshotCanvas);
         }
-        var delay = new PauseTransition(Duration.millis(userPrefs.chartZoomTriggerDelayMs.get().doubleValue()));
+        PauseTransition delay = new PauseTransition(Duration.millis(userPrefs.chartZoomTriggerDelayMs.get().intValue()));
         ZonedDateTime[] zoomTimeRange = new ZonedDateTime[]{worksheet.getFromDateTime(), worksheet.getToDateTime()};
         delay.setOnFinished(getBindingManager().registerHandler(e -> selectedRangeProperty()
                 .setValue(TimeRange.of(zoomTimeRange[0], zoomTimeRange[1]))));
+
+        getBindingManager().attachListener(userPrefs.chartZoomTriggerDelayMs.property(), (ChangeListener<Number>) (p, o, n)->{
+             delay.setDuration(Duration.millis(n.intValue()));
+        }) ;
+
         screenshotCanvas.setOnScroll(getBindingManager().registerHandler(event -> {
             if (event.isShiftDown()) {
                 worksheet.setMinChartHeight(Math.min(Math.max(worksheet.getMinChartHeight() + event.getDeltaX(),
