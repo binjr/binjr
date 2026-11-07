@@ -146,6 +146,7 @@ public class Binjr extends Application {
             System.setProperty("jdk.gtk.verbose", "true");
             System.setProperty("prism.verbose", "true");
         }
+        System.setProperty("javafx.dnd.deserializeObjectGraph", "true");
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().isEmpty()) {
