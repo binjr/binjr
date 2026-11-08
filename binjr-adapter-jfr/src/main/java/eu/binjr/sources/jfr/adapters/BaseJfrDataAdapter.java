@@ -201,6 +201,7 @@ public abstract class BaseJfrDataAdapter<T> extends BaseDataAdapter<T> {
                     (source) -> source.eventTypes().stream().map(type -> BuiltInParsingProfile.NONE.getProfileId() + "/" + source.recordingPath().toString() + "|" + type).toList());
         }
         if (isCommitNecessary) {
+            logger.debug("Commit on 'ensureIndexed'");
             index.commitIndexAndTaxonomy();
         }
     }

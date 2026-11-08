@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>, P extends ParsingProfile> extends BaseDataAdapter<Double> implements Reloadable<Double> {
@@ -190,6 +191,7 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
     @Override
     public void reload(String path, List<TimeSeriesInfo<Double>> seriesInfo, ReloadPolicy reloadPolicy, DoubleProperty progress, Property<ReloadStatus> reloadStatus) throws DataAdapterException {
         try {
+            logger.debug("Reload: {}", reloadPolicy);
             ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), reloadPolicy);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching data from " + path, e);
@@ -198,16 +200,23 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
 
     private synchronized void ensureIndexed(Set<SourceBinding<Double>> bindings, ReloadPolicy reloadPolicy) throws IOException {
         if (reloadPolicy == ReloadPolicy.ALL) {
-            bindings.stream().map(SourceBinding::getPath).forEach(indexedFiles::remove);
+            for (SourceBinding<Double> binding : bindings) {
+                String path = binding.getPath();
+                logger.debug("Clearing the following path from index: {}", path);
+                indexedFiles.remove(path);
+            }
         }
         final LongProperty charRead = new SimpleLongProperty(0);
+        AtomicBoolean isCommitNecessary = new AtomicBoolean(false);
         for (var binding : bindings) {
             String path = binding.getPath();
+            logger.debug("Ensure {} is indexed", path);
             indexedFiles.computeIfAbsent(path, CheckedLambdas.wrap(p -> {
+                isCommitNecessary.set(true);
                 try (var inputStream = fileBrowser.getData(p.replace(getId() + "/", ""))) {
                     index.add(p,
                             inputStream,
-                            true,
+                            false,
                             eventFormat,
                             this::mapEventToDocument,
                             charRead,
@@ -215,6 +224,10 @@ public abstract class IndexBackedFileAdapter<F extends EventFormat<InputStream>,
                     return ReloadStatus.OK;
                 }
             }));
+        }
+        if (isCommitNecessary.get()) {
+            logger.debug("Commit on 'ensureIndexed'");
+            index.commitIndexAndTaxonomy();
         }
     }
 

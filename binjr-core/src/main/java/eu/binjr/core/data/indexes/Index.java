@@ -556,7 +556,8 @@ public class Index implements Indexable {
                 taxonomyWriter.commit();
                 indexWriter.commit();
                 if (forceMergeOnCommit) {
-                    indexWriter.forceMerge(1);
+                    logger.debug("Force merge index");
+                    indexWriter.forceMerge(1, true);
                 }
             }
             try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
@@ -575,6 +576,7 @@ public class Index implements Indexable {
                         this.taxonomyReader = updatedTaxoReader;
                     }
                 }
+                logger.debug("Number of segment(s) in index: {}", indexReader.leaves().size());
             }
         });
     }
