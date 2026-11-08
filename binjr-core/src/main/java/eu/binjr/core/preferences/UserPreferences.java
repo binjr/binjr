@@ -322,7 +322,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> chartZoomFactor = doublePreference("chartZoomFactor", 200.0);
 
-    public final ObservablePreference<Number> chartZoomTriggerDelayMs = integerPreference("chartZoomTriggerDelayMs", 500);
+    public final ObservablePreference<Number> chartZoomTriggerDelayMs = integerPreference("chartZoomTriggerDelayMs", 100);
 
     public final ObservablePreference<Number> logHeatmapNbBuckets = integerPreference("logHeatmapNbBuckets", 150);
 
