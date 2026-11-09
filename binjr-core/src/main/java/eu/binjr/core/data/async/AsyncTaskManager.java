@@ -32,17 +32,27 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AsyncTaskManager {
     private static final Logger logger = Logger.create(AsyncTaskManager.class);
-    private final ExecutorService mainthreadPool;
+    private final ExecutorService mainThreadPool;
     private final ExecutorService subTaskThreadPool;
 
     private AsyncTaskManager() {
         UserPreferences prefs = UserPreferences.getInstance();
-        mainthreadPool = threadPoolFactory("binjr-async",
+
+        int taskParallelism = prefs.maxAsyncTasksParallelism.get().intValue();
+        if (taskParallelism <= 0) {
+            taskParallelism = Math.min(Runtime.getRuntime().availableProcessors() / 2, 1);
+        }
+        int subTaskParallelism = prefs.maxSubTasksParallelism.get().intValue();
+        if (subTaskParallelism <= 0) {
+            subTaskParallelism = taskParallelism * 2;
+        }
+
+        mainThreadPool = threadPoolFactory("binjr-async",
                 prefs.asyncThreadPoolPolicy.get(),
-                prefs.maxAsyncTasksParallelism.get().intValue());
+                taskParallelism);
         subTaskThreadPool = threadPoolFactory("binjr-sub-tasks",
                 prefs.subTasksThreadPoolPolicy.get(),
-                prefs.maxSubTasksParallelism.get().intValue());
+                subTaskParallelism);
     }
 
     /**
@@ -63,7 +73,7 @@ public class AsyncTaskManager {
      */
     public <V> CompletableFuture<?> submit(Task<V> task) {
         logger.trace("Task {} submitted", task);
-        return CompletableFuture.runAsync(task, mainthreadPool);
+        return CompletableFuture.runAsync(task, mainThreadPool);
     }
 
     /**
@@ -85,7 +95,7 @@ public class AsyncTaskManager {
         t.setOnSucceeded(onSucceeded);
         t.setOnFailed(onFailed);
         logger.trace("Task {} submitted", t);
-        return CompletableFuture.runAsync(t, mainthreadPool);
+        return CompletableFuture.runAsync(t, mainThreadPool);
     }
 
     public CompletableFuture<?> submitSubTask(Runnable action) {
