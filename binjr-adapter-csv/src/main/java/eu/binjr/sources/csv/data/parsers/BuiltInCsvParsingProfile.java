@@ -71,6 +71,19 @@ public enum BuiltInCsvParsingProfile implements CsvParsingProfile {
             Locale.US,
             false,
             ParsingFailureMode.ABORT,
+            '#'),
+    LINE_NUM("Line numbers",
+            "LINE_NUM",
+            Map.of(),
+            ".",
+            ",",
+            '"',
+            -1,
+            new int[0],
+            true,
+            Locale.US,
+            false,
+            ParsingFailureMode.ABORT,
             '#');
 
     private final String profileName;
