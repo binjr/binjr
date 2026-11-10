@@ -59,8 +59,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
             .create();
     public static final String BINJR_GLOBAL = "binjr/global";
     private static final LocalKeyring keyring = new LocalKeyring();
-    public ObservablePreference<Boolean> highlightCurrentColumn = booleanPreference("highlightCurrentColumn", true);
-
     private static class LocalKeyring extends AesKeyring {
         private LocalKeyring() {
             super("binjr/local");
@@ -466,6 +464,10 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Boolean> showChartsSettingsByDefault = booleanPreference("showChartsSettingsByDefault", true);
 
     public final ObservablePreference<Boolean> enableWorksheetDifferedRendering = booleanPreference("enableWorksheetDifferedRendering", true);;
+
+    public final ObservablePreference<Boolean> highlightCurrentColumn = booleanPreference("highlightCurrentColumn", true);
+
+    public final ObservablePreference<Boolean> forceMergeNumIndex = booleanPreference("forceMergeNumIndex", false);
 
     public static class UserFavorites extends MruFactory {
 

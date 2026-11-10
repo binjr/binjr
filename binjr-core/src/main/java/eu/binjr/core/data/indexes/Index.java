@@ -108,13 +108,13 @@ public class Index implements Indexable {
     protected DirectoryReader indexReader;
     protected IndexSearcher searcher;
     protected TaxonomyReader taxonomyReader;
-    protected boolean forceMergeOnCommit;
+    protected Property<Boolean> forceMergeOnCommit;
 
 
     private final Cache<String, SearchHitsProcessor> facetResultCache;
     private final Cache<String, SearchHitsProcessor> hitResultCache;
 
-    public Index(boolean forceMergeOnCommit) throws IOException {
+    public Index(Property<Boolean> forceMergeOnCommit) throws IOException {
         this.forceMergeOnCommit = forceMergeOnCommit;
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
@@ -555,7 +555,7 @@ public class Index implements Indexable {
             try (Profiler p = Profiler.start("Commit index", logger::perf)) {
                 taxonomyWriter.commit();
                 indexWriter.commit();
-                if (forceMergeOnCommit) {
+                if (forceMergeOnCommit.getValue()) {
                     logger.debug("Force merge index");
                     indexWriter.forceMerge(1, true);
                 }
@@ -629,7 +629,7 @@ public class Index implements Indexable {
                                                           Map<String, Collection<String>> params,
                                                           int minOccurrence) throws IOException {
         var facetEntryMap = new TreeMap<String, FacetEntry>();
-        var synthesis = facets.getAllChildren(facetName); //facets.getTopChildren(100, facetName);
+        var synthesis = facets.getAllChildren(facetName);
         var labels = new ArrayList<String>();
         if (synthesis != null) {
             for (var f : synthesis.labelValues) {
