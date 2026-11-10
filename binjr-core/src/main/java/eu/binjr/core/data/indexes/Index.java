@@ -734,34 +734,37 @@ public class Index implements Indexable {
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new ConcurrentHashMap<>();
                     // fill the buffer with data for the current page
                     var nbHits = result.collectorResult.scoreDocs.length;
-                    var lastHitAcc = new FieldDoc[1];
-                    var timestampAcc = new ZonedDateTime[]{ZonedDateTime.of(-999999999, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())};
+                    // Get the last doc from the current page
+                    lastHit = (FieldDoc) result.collectorResult.scoreDocs[nbHits - 1];
                     int reduceThreshold = userPref.fetchFromIndexSamplingThreshold.get().intValue();
                     Map<String, long[]> buffers = new HashMap<>(fieldsToLoad.size());
-                    int[] docIDs = new int[nbHits];
-                    // <!> All segments must be merged for this to work <!>
+                    // Doc IDs must be sorted in ascending order for 'advanceExact' to work properly.
+                    DocID[] docIDs = new DocID[nbHits];
+                    for (int i = 0; i < nbHits; i++) {
+                        docIDs[i] = new DocID(i, result.collectorResult.scoreDocs[i].doc);
+                    }
+                    Arrays.sort(docIDs);
+                    // Retrieve all timestamps
                     var timestampValues = MultiDocValues.getSortedNumericValues(indexReader, TIMESTAMP);
                     ZonedDateTime[] timestamps = new ZonedDateTime[nbHits];
-                    // Retrieve all timestamps
                     for (int i = 0; i < nbHits; i++) {
-                        docIDs[i] = result.collectorResult.scoreDocs[i].doc;
-                        var scoreDoc = result.collectorResult.scoreDocs[i];
-                        timestampValues.advanceExact(scoreDoc.doc);
+                        timestampValues.advanceExact(docIDs[i].value);
                         var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestampValues.nextValue()), zoneId);
-                        if (timestamp.isAfter(timestampAcc[0])) {
-                            lastHitAcc[0] = (FieldDoc) scoreDoc;
-                            timestampAcc[0] = timestamp;
-                        }
-                        timestamps[i] = timestamp;
+                        timestamps[docIDs[i].position] = timestamp;
                     }
-                    lastHit = lastHitAcc[0];
                     // Retrieve all numeric values
                     for (var series : seriesToFill.entrySet()) {
                         var field = series.getKey().getBinding().getLabel();
                         buffers.put(field, new long[nbHits]);
-                        var values = MultiDocValues.getNumericValues(indexReader, field);
-                        if (values != null) {
-                            values.longValues(nbHits, docIDs, buffers.get(field), 0);
+                        var valuesItor = MultiDocValues.getNumericValues(indexReader, field);
+                        for (int i = 0; i < nbHits; ++i) {
+                            long value;
+                            if (valuesItor.advanceExact(docIDs[i].value)) {
+                                value = valuesItor.longValue();
+                            } else {
+                                value = 0;
+                            }
+                            buffers.get(field)[docIDs[i].position] = value;
                         }
                     }
                     // Apply downsampling to reduce the number of samples
@@ -836,5 +839,12 @@ public class Index implements Indexable {
     @Override
     public Map<String, ReloadStatus> getIndexedFiles() {
         return indexedFiles;
+    }
+
+    private record DocID(int position, int value) implements Comparable<DocID> {
+        @Override
+        public int compareTo(DocID other) {
+            return Integer.compare(this.value, other.value);
+        }
     }
 }

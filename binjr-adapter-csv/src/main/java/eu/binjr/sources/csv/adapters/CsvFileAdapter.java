@@ -159,9 +159,7 @@ public class CsvFileAdapter extends IndexBackedFileAdapter<CsvEventFormat, CsvPa
 
     @Override
     protected Document mapEventToDocument(Document doc, ParsedEvent event) {
-        //event.getTextFields().forEach((key, value) -> doc.add(new StoredField(key, formatToDouble(value))));
         event.getTextFields().forEach((key, value) -> doc.add(new DoubleDocValuesField(key, formatToDouble(value))));
-
         return doc;
     }
 
