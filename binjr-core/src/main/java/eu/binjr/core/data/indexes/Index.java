@@ -734,70 +734,72 @@ public class Index implements Indexable {
                     Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new ConcurrentHashMap<>();
                     // fill the buffer with data for the current page
                     var nbHits = result.collectorResult.scoreDocs.length;
-                    // Get the last doc from the current page
-                    lastHit = (FieldDoc) result.collectorResult.scoreDocs[nbHits - 1];
-                    int reduceThreshold = userPref.fetchFromIndexSamplingThreshold.get().intValue();
-                    Map<String, long[]> buffers = new HashMap<>(fieldsToLoad.size());
-                    // Doc IDs must be sorted in ascending order for 'advanceExact' to work properly.
-                    DocID[] docIDs = new DocID[nbHits];
-                    for (int i = 0; i < nbHits; i++) {
-                        docIDs[i] = new DocID(i, result.collectorResult.scoreDocs[i].doc);
-                    }
-                    Arrays.sort(docIDs);
-                    // Retrieve all timestamps
-                    var timestampValues = MultiDocValues.getSortedNumericValues(indexReader, TIMESTAMP);
-                    ZonedDateTime[] timestamps = new ZonedDateTime[nbHits];
-                    for (int i = 0; i < nbHits; i++) {
-                        timestampValues.advanceExact(docIDs[i].value);
-                        var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestampValues.nextValue()), zoneId);
-                        timestamps[docIDs[i].position] = timestamp;
-                    }
-                    // Retrieve all numeric values
-                    for (var series : seriesToFill.entrySet()) {
-                        var field = series.getKey().getBinding().getLabel();
-                        buffers.put(field, new long[nbHits]);
-                        var valuesItor = MultiDocValues.getNumericValues(indexReader, field);
-                        for (int i = 0; i < nbHits; ++i) {
-                            long value;
-                            if (valuesItor.advanceExact(docIDs[i].value)) {
-                                value = valuesItor.longValue();
-                            } else {
-                                value = 0;
-                            }
-                            buffers.get(field)[docIDs[i].position] = value;
+                    if (nbHits > 0) {
+                        // Get the last doc from the current page
+                        lastHit = (FieldDoc) result.collectorResult.scoreDocs[nbHits - 1];
+                        int reduceThreshold = userPref.fetchFromIndexSamplingThreshold.get().intValue();
+                        Map<String, long[]> buffers = new HashMap<>(fieldsToLoad.size());
+                        // Doc IDs must be sorted in ascending order for 'DocValuesIterator::advanceExact' to work.
+                        DocID[] docIDs = new DocID[nbHits];
+                        for (int i = 0; i < nbHits; i++) {
+                            docIDs[i] = new DocID(i, result.collectorResult.scoreDocs[i].doc);
                         }
-                    }
-                    // Apply downsampling to reduce the number of samples
-                    BitSet samplesToKeep = LargestTriangleThreeBuckets.computeKeepList(
-                            reduceThreshold,
-                            Double::longBitsToDouble,
-                            timestamps,
-                            buffers.values().toArray(long[][]::new));
-                    // Iterate the bitset from downsampling and populate timeseries processors with the filtered data
-                    for (int i = samplesToKeep.nextSetBit(0); i >= 0; i = samplesToKeep.nextSetBit(i + 1)) {
-                        for (var e : seriesToFill.entrySet()) {
-                            var fieldBuffer = buffers.get(e.getKey().getBinding().getLabel());
-                            if (fieldBuffer != null) {
-                                // re-encode values from long to double
-                                var value = Double.longBitsToDouble(fieldBuffer[i]);
-                                pageDataBuffer.computeIfAbsent(e.getKey(), _ -> new DoubleTimeSeriesProcessor(nbHits))
-                                        .addSample(timestamps[i], value);
+                        Arrays.sort(docIDs);
+                        // Retrieve all timestamps
+                        var timestampItor = MultiDocValues.getSortedNumericValues(indexReader, TIMESTAMP);
+                        ZonedDateTime[] timestamps = new ZonedDateTime[nbHits];
+                        for (int i = 0; i < nbHits; i++) {
+                            timestampItor.advanceExact(docIDs[i].value);
+                            var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestampItor.nextValue()), zoneId);
+                            timestamps[docIDs[i].position] = timestamp;
+                        }
+                        // Retrieve all numeric values
+                        for (var series : seriesToFill.entrySet()) {
+                            var field = series.getKey().getBinding().getLabel();
+                            buffers.put(field, new long[nbHits]);
+                            var valuesItor = MultiDocValues.getNumericValues(indexReader, field);
+                            for (int i = 0; i < nbHits; ++i) {
+                                long value;
+                                if (valuesItor.advanceExact(docIDs[i].value)) {
+                                    value = valuesItor.longValue();
+                                } else {
+                                    value = 0;
+                                }
+                                buffers.get(field)[docIDs[i].position] = value;
                             }
                         }
-                        if (i == Integer.MAX_VALUE) {
-                            break; // or (i+1) would overflow
+                        // Apply downsampling to reduce the number of samples
+                        BitSet samplesToKeep = LargestTriangleThreeBuckets.computeKeepList(
+                                reduceThreshold,
+                                Double::longBitsToDouble,
+                                timestamps,
+                                buffers.values().toArray(long[][]::new));
+                        // Iterate the bitset from downsampling and populate timeseries processors with the filtered data
+                        for (int i = samplesToKeep.nextSetBit(0); i >= 0; i = samplesToKeep.nextSetBit(i + 1)) {
+                            for (var e : seriesToFill.entrySet()) {
+                                var fieldBuffer = buffers.get(e.getKey().getBinding().getLabel());
+                                if (fieldBuffer != null) {
+                                    // re-encode values from long to double
+                                    var value = Double.longBitsToDouble(fieldBuffer[i]);
+                                    pageDataBuffer.computeIfAbsent(e.getKey(), _ -> new DoubleTimeSeriesProcessor(nbHits))
+                                            .addSample(timestamps[i], value);
+                                }
+                            }
+                            if (i == Integer.MAX_VALUE) {
+                                break; // or (i+1) would overflow
+                            }
                         }
-                    }
-                    // Append results from the current page to global results
-                    for (var entry : seriesToFill.entrySet()) {
-                        var pageProc = pageDataBuffer.get(entry.getKey());
-                        if (pageProc != null) {
-                            logger.debug(() -> "series name=" + entry.getKey().getDisplayName() +
-                                    ", page size=" + nbHits +
-                                    ", downsampling threshold=" + reduceThreshold +
-                                    ", samples kept=" + pageProc.size());
-                            var fullQueryProc = entry.getValue();
-                            fullQueryProc.appendData(pageProc);
+                        // Append results from the current page to global results
+                        for (var entry : seriesToFill.entrySet()) {
+                            var pageProc = pageDataBuffer.get(entry.getKey());
+                            if (pageProc != null) {
+                                logger.debug(() -> "series name=" + entry.getKey().getDisplayName() +
+                                        ", page size=" + nbHits +
+                                        ", downsampling threshold=" + reduceThreshold +
+                                        ", samples kept=" + pageProc.size());
+                                var fullQueryProc = entry.getValue();
+                                fullQueryProc.appendData(pageProc);
+                            }
                         }
                     }
                     hitsCollected.accumulateAndGet(result.collectorResult.scoreDocs.length, Long::sum);
