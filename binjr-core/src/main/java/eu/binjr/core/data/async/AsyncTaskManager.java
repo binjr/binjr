@@ -40,7 +40,7 @@ public class AsyncTaskManager {
 
         int taskParallelism = prefs.maxAsyncTasksParallelism.get().intValue();
         if (taskParallelism <= 0) {
-            taskParallelism = Math.min(Runtime.getRuntime().availableProcessors() / 2, 1);
+            taskParallelism = Math.max(Runtime.getRuntime().availableProcessors() / 2, 1);
         }
         int subTaskParallelism = prefs.maxSubTasksParallelism.get().intValue();
         if (subTaskParallelism <= 0) {
