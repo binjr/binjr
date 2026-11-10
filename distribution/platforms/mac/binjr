@@ -24,8 +24,10 @@ exec $JAVACMD \
   -Xmx4096M \
   -XX:+UseG1GC \
   -XX:G1PeriodicGCInterval=5000 \
-  -XX:-G1PeriodicGCInvokesConcurrent \
-  -XX:+UseCompactObjectHeaders \
+  -XX:+G1PeriodicGCInvokesConcurrent \
+  -XX:MaxHeapFreeRatio=10 \
+  -XX:MinHeapFreeRatio=10 \
+  -XX:G1PeriodicGCSystemLoadThreshold=0.0 \
   -XX:+UseCompactObjectHeaders \
   --add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED \
   --add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED \
