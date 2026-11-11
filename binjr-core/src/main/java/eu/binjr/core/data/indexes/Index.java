@@ -783,9 +783,6 @@ public class Index implements Indexable {
                                 pageDataProcs.computeIfAbsent(tsInfo, _ -> new DoubleTimeSeriesProcessor(nbHits))
                                         .addSample(timestamps[h], value);
                             }
-                            if (h == Integer.MAX_VALUE) {
-                                break; // or (i+1) would overflow
-                            }
                         }
                         // Append results from the current page to global results
                         seriesToFill.forEach((tsInfo, globalProc) -> {
