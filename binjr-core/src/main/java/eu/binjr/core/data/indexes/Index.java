@@ -705,21 +705,22 @@ public class Index implements Indexable {
                        boolean ignoreCache) throws Exception {
         return getIndexMonitor().read().lock(() -> {
             Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
-            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
-            var drillDownQuery = new DrillDownQuery(facetsConfig, rangeQuery);
+            DrillSideways drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
+            DrillDownQuery drillDownQuery = new DrillDownQuery(facetsConfig, rangeQuery);
             seriesToFill.keySet()
                     .stream()
                     .map(ts -> ts.getBinding().getPath())
                     .distinct()
                     .forEach(path -> drillDownQuery.add(PATH, path));
-            var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
+            Sort sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             AtomicLong hitsCollected = new AtomicLong(0);
             int pageSize = prefs.numericIndexPageSize.get().intValue();
             FieldDoc lastHit = null;
-            try (Profiler p = Profiler.start(() -> "Retrieved " + hitsCollected.get() + " samples for " + seriesToFill.size() + " series", logger::perf)) {
+            try (Profiler _ = Profiler.start(() -> "Retrieved " + hitsCollected.get() +
+                    " samples for " + seriesToFill.size() + " series", logger::perf)) {
                 for (int pageNumber = 0; true; pageNumber++) {
-                    var collectorManager = (lastHit == null) ?
+                    TopFieldCollectorManager collectorManager = (lastHit == null) ?
                             new TopFieldCollectorManager(sort, pageSize, Integer.MAX_VALUE) :
                             new TopFieldCollectorManager(sort, pageSize, lastHit, Integer.MAX_VALUE);
                     logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
@@ -727,45 +728,44 @@ public class Index implements Indexable {
                     try (Profiler ignored = Profiler.start("Executing query for page " + pageNumber, logger::debug)) {
                         result = drill.search(drillDownQuery, collectorManager);
                     }
-                    var fieldsToLoad = seriesToFill.keySet()
-                            .stream()
-                            .map(k -> k.getBinding().getLabel())
-                            .collect(Collectors.toSet());
-                    Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataBuffer = new ConcurrentHashMap<>();
                     // fill the buffer with data for the current page
-                    var nbHits = result.collectorResult.scoreDocs.length;
-                    if (nbHits > 0) {
+                    List<TimeSeriesInfo<Double>> fieldsToLoad = seriesToFill.keySet().stream().toList();
+                    int nbFields = fieldsToLoad.size();
+                    Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> pageDataProcs = new ConcurrentHashMap<>();
+                    int nbHits = result.collectorResult.scoreDocs.length;
+                    if (nbHits > 0 && nbFields > 0) {
                         // Get the last doc from the current page
                         lastHit = (FieldDoc) result.collectorResult.scoreDocs[nbHits - 1];
                         int reduceThreshold = userPref.fetchFromIndexSamplingThreshold.get().intValue();
-                        Map<String, long[]> buffers = new HashMap<>(fieldsToLoad.size());
+                        long[][] buffers = new long[nbFields][nbHits];
                         // Doc IDs must be sorted in ascending order for 'DocValuesIterator::advanceExact' to work.
                         DocID[] docIDs = new DocID[nbHits];
-                        for (int i = 0; i < nbHits; i++) {
-                            docIDs[i] = new DocID(i, result.collectorResult.scoreDocs[i].doc);
+                        for (int h = 0; h < nbHits; h++) {
+                            docIDs[h] = new DocID(h, result.collectorResult.scoreDocs[h].doc);
                         }
                         Arrays.sort(docIDs);
                         // Retrieve all timestamps
-                        var timestampItor = MultiDocValues.getSortedNumericValues(indexReader, TIMESTAMP);
+                        SortedNumericDocValues timestampIterator =
+                                MultiDocValues.getSortedNumericValues(indexReader, TIMESTAMP);
                         ZonedDateTime[] timestamps = new ZonedDateTime[nbHits];
-                        for (int i = 0; i < nbHits; i++) {
-                            timestampItor.advanceExact(docIDs[i].value);
-                            var timestamp = ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestampItor.nextValue()), zoneId);
-                            timestamps[docIDs[i].position] = timestamp;
+                        for (int h = 0; h < nbHits; h++) {
+                            timestampIterator.advanceExact(docIDs[h].value);
+                            var timestamp = ZonedDateTime.ofInstant(
+                                    Instant.ofEpochMilli(timestampIterator.nextValue()), zoneId);
+                            timestamps[docIDs[h].position] = timestamp;
                         }
                         // Retrieve all numeric values
-                        for (var series : seriesToFill.entrySet()) {
-                            var field = series.getKey().getBinding().getLabel();
-                            buffers.put(field, new long[nbHits]);
-                            var valuesItor = MultiDocValues.getNumericValues(indexReader, field);
-                            for (int i = 0; i < nbHits; ++i) {
+                        for (int f = 0; f < nbFields; f++) {
+                            String field = fieldsToLoad.get(f).getBinding().getLabel();
+                            NumericDocValues valuesIterator = MultiDocValues.getNumericValues(indexReader, field);
+                            for (int h = 0; h < nbHits; ++h) {
                                 long value;
-                                if (valuesItor.advanceExact(docIDs[i].value)) {
-                                    value = valuesItor.longValue();
+                                if (valuesIterator.advanceExact(docIDs[h].value)) {
+                                    value = valuesIterator.longValue();
                                 } else {
                                     value = 0;
                                 }
-                                buffers.get(field)[docIDs[i].position] = value;
+                                buffers[f][docIDs[h].position] = value;
                             }
                         }
                         // Apply downsampling to reduce the number of samples
@@ -773,34 +773,31 @@ public class Index implements Indexable {
                                 reduceThreshold,
                                 Double::longBitsToDouble,
                                 timestamps,
-                                buffers.values().toArray(long[][]::new));
-                        // Iterate the bitset from downsampling and populate timeseries processors with the filtered data
-                        for (int i = samplesToKeep.nextSetBit(0); i >= 0; i = samplesToKeep.nextSetBit(i + 1)) {
-                            for (var e : seriesToFill.entrySet()) {
-                                var fieldBuffer = buffers.get(e.getKey().getBinding().getLabel());
-                                if (fieldBuffer != null) {
-                                    // re-encode values from long to double
-                                    var value = Double.longBitsToDouble(fieldBuffer[i]);
-                                    pageDataBuffer.computeIfAbsent(e.getKey(), _ -> new DoubleTimeSeriesProcessor(nbHits))
-                                            .addSample(timestamps[i], value);
-                                }
+                                buffers);
+                        // Iterate the bitset from downsampling to populate timeseries processors with the filtered data
+                        for (int h = samplesToKeep.nextSetBit(0); h >= 0; h = samplesToKeep.nextSetBit(h + 1)) {
+                            for (int f = 0; f < nbFields; f++) {
+                                TimeSeriesInfo<Double> tsInfo = fieldsToLoad.get(f);
+                                // re-encode values from long to double
+                                double value = Double.longBitsToDouble(buffers[f][h]);
+                                pageDataProcs.computeIfAbsent(tsInfo, _ -> new DoubleTimeSeriesProcessor(nbHits))
+                                        .addSample(timestamps[h], value);
                             }
-                            if (i == Integer.MAX_VALUE) {
+                            if (h == Integer.MAX_VALUE) {
                                 break; // or (i+1) would overflow
                             }
                         }
                         // Append results from the current page to global results
-                        for (var entry : seriesToFill.entrySet()) {
-                            var pageProc = pageDataBuffer.get(entry.getKey());
+                        seriesToFill.forEach((tsInfo, globalProc) -> {
+                            var pageProc = pageDataProcs.get(tsInfo);
                             if (pageProc != null) {
-                                logger.debug(() -> "series name=" + entry.getKey().getDisplayName() +
+                                logger.debug(() -> "series name=" + tsInfo.getDisplayName() +
                                         ", page size=" + nbHits +
                                         ", downsampling threshold=" + reduceThreshold +
                                         ", samples kept=" + pageProc.size());
-                                var fullQueryProc = entry.getValue();
-                                fullQueryProc.appendData(pageProc);
+                                globalProc.appendData(pageProc);
                             }
-                        }
+                        });
                     }
                     hitsCollected.accumulateAndGet(result.collectorResult.scoreDocs.length, Long::sum);
                     // End the loop once all hits have been collected
