@@ -1521,7 +1521,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo<Double> series) {
-        try (Profiler ignored = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::perf)) {
+        try (Profiler ignored = Profiler.start("Building XYChart.Series data for " + series.getDisplayName(), logger::perf)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.setName(series.getDisplayName());
             var r = new Region();
