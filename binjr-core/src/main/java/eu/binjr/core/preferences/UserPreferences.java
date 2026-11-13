@@ -192,12 +192,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The maximum number of thread to allocate to the asynchronous tasks thread pool.
      */
-    public final ObservablePreference<Number> maxAsyncTasksParallelism = integerPreference("maxAsyncTasksParallelism", 0);
+    public final ObservablePreference<Number> maxAsyncTasksParallelism = integerPreference("maxAsyncTasksParallelism_2", 0);
 
     /**
      * The maximum number of thread to allocate to the sub-tasks thread pool.
      */
-    public final ObservablePreference<Number> maxSubTasksParallelism = integerPreference("maxSubTasksParallelism", 0);
+    public final ObservablePreference<Number> maxSubTasksParallelism = integerPreference("maxSubTasksParallelism_2", 0);
 
     /**
      * The threading policy used by the async main thread pool.
