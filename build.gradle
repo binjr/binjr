@@ -61,9 +61,9 @@ ext.OS_ARCH = convertArchName(System.getProperty("os.arch"), "${OS_FAMILY}")
 ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
 ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "27.0.1"
+ext.OPENJFX_VERSION = "27.0.1.1"
 ext.USE_BUILD_JDK_IN_BUNDLE = System.getenv('USE_BUILD_JDK_IN_BUNDLE') != null ? System.getenv('USE_BUILD_JDK_IN_BUNDLE') == "true" : false
-ext.BUNDLE_JDK_VERSION = "jdk-25.0.5+8"
+ext.BUNDLE_JDK_VERSION = "jdk-25.0.5.1+2"
 ext.BUNDLE_JDK_PATH = null
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
